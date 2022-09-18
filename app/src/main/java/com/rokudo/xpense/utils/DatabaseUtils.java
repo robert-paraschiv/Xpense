@@ -9,6 +9,8 @@ import com.rokudo.xpense.models.User;
 public class DatabaseUtils {
     private static User currentUser;
     public static CollectionReference usersRef = FirebaseFirestore.getInstance().collection("Users");
+    public static CollectionReference walletsRef = FirebaseFirestore.getInstance().collection("Wallets");
+    public static CollectionReference transactionsRef = FirebaseFirestore.getInstance().collection("Transactions");
     public static StorageReference userPicturesRef = FirebaseStorage.getInstance().getReference("UserPictures");
 
 

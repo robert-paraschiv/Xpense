@@ -8,9 +8,10 @@
     tools:context=".fragments.HomeFragment">
 
     <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/chat_toolbar"
+        android:id="@+id/home_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?android:attr/actionBarSize"
+        android:layout_marginTop="18dp"
         app:contentInsetStart="0dp">
 
         <RelativeLayout
@@ -23,7 +24,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_centerVertical="true"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="18dp"
                 tools:src="@color/black" />
 
             <TextView
@@ -40,6 +41,36 @@
 
 
     </com.google.android.material.appbar.MaterialToolbar>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/walletsCard"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_below="@id/home_toolbar"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="18dp"
+        android:layout_marginBottom="18dp"
+        app:cardCornerRadius="18dp"
+        app:strokeWidth="0dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/walletsCard"
+        android:layout_margin="18dp" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/add_conversation_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="18dp"
+        android:layout_marginBottom="22dp"
+        android:contentDescription="@string/add_conversation_button"
+        android:src="@drawable/ic_round_add_24"
+        app:fabSize="normal" />
 
 
 </RelativeLayout>
