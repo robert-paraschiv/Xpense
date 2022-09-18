@@ -7,7 +7,16 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.rokudo.xpense.fragments.LoginFragment"
+        android:name="com.rokudo.xpense.fragments.login.LoginFragment"
         android:label="fragment_login"
-        tools:layout="@layout/fragment_login" />
+        tools:layout="@layout/fragment_login" >
+        <action
+            android:id="@+id/action_loginFragment_to_userDetailsFragment"
+            app:destination="@id/userDetailsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/userDetailsFragment"
+        android:name="com.rokudo.xpense.fragments.login.UserDetailsFragment"
+        android:label="fragment_user_details"
+        tools:layout="@layout/fragment_user_details" />
 </navigation>

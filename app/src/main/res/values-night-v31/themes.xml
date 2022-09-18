@@ -1,19 +1,20 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
     <style name="Theme.Xpense" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">#00b0ff</item>
-        <item name="colorPrimaryVariant">#0081cb</item>
-        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorPrimary">@android:color/system_accent1_500</item>
+        <item name="colorPrimaryVariant">@android:color/system_accent2_600</item>
+        <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">#0091ea</item>
-        <item name="colorSecondaryVariant">#0091ea</item>
+        <item name="colorSecondary">@android:color/system_accent3_500</item>
+        <item name="colorSecondaryVariant">@android:color/system_accent3_600</item>
         <item name="colorOnSecondary">@color/black</item>
 
-        <item name="colorPrimaryContainer">#043C5E</item>
-        <item name="colorOnPrimaryContainer">#FFFFFF</item>
+        <item name="colorPrimaryContainer">@android:color/system_accent1_400</item>
+        <item name="colorOnPrimaryContainer">@android:color/system_accent1_10</item>
 
-        <item name="colorSurface">#374B59</item>
+        <item name="colorSurface">@android:color/system_neutral2_800</item>
 
         <!-- change navigation bar color -->
         <item name="android:navigationBarColor">

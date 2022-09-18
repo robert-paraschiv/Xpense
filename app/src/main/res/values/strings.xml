@@ -1,5 +1,9 @@
 <resources>
-    <string name="app_name">Xpense</string>
-    <!-- TODO: Remove or change this placeholder text -->
+    <string name="app_name">Chatr</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="add_conversation_button">Add Conversation Button</string>
+    <string name="message_read_status">Message Read Status</string>
+    <string name="default_notification_channel_id">Channel_Message_Notification</string>
+    <string name="other_notification_channel_id">Other_Message_Notification</string>
+    <integer name="transition_duration_millis">400</integer>
 </resources>
