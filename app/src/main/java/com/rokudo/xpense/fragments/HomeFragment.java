@@ -105,6 +105,7 @@ public class HomeFragment extends Fragment {
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .apply(RequestOptions.circleCropTransform())
                     .placeholder(circularProgressDrawable)
+                    .fallback(R.drawable.ic_baseline_person_24)
                     .transition(withCrossFade())
                     .into(binding.profileImage);
         }
