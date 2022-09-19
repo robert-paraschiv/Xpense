@@ -21,8 +21,8 @@
 
             <ImageView
                 android:id="@+id/profileImage"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="18dp"
                 tools:src="@color/black" />
@@ -35,8 +35,10 @@
                 android:layout_marginStart="18dp"
                 android:layout_marginEnd="18dp"
                 android:layout_toEndOf="@id/profileImage"
-                android:textSize="16sp"
+                android:textSize="20sp"
                 tools:text="Welcome, Robert" />
+
+
         </RelativeLayout>
 
 
@@ -48,11 +50,155 @@
         android:layout_height="250dp"
         android:layout_below="@id/home_toolbar"
         android:layout_marginStart="18dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="48dp"
         android:layout_marginEnd="18dp"
         android:layout_marginBottom="18dp"
         app:cardCornerRadius="18dp"
-        app:strokeWidth="0dp" />
+        app:strokeWidth="0dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="24dp">
+
+            <LinearLayout
+                android:id="@+id/titleLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/walletTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxWidth="210dp"
+                    android:maxLines="1"
+                    android:text="Long Wallet Title"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="8dp"
+                    android:insetLeft="0dp"
+                    android:insetTop="0dp"
+                    android:insetRight="0dp"
+                    android:insetBottom="0dp"
+                    app:icon="@drawable/ic_round_keyboard_arrow_down_24"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
+                    app:iconSize="22dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/walletDetailsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/titleLayout"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/walletCurrency"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:text="lei"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/walletAmount"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:maxLines="1"
+                    android:text="0000.00000"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+            <RelativeLayout
+                android:id="@+id/lastTransactionLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/walletDetailsLayout"
+                android:layout_marginTop="20dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/transactionsHeaderLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Latest Transaction" />
+
+                    <com.google.android.material.button.MaterialButton
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="70dp"
+                        android:layout_height="40dp"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        android:text="See All" />
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/latestTransactionDetailsLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/transactionsHeaderLayout"
+                    android:layout_marginTop="16dp"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/transactionImage"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_baseline_person_24" />
+
+                    <TextView
+                        android:id="@+id/transactionAmount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_toEndOf="@id/transactionImage"
+                        android:text="- 90.0 lei"
+                        android:textColor="#D50000"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/transactionDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/transactionAmount"
+                        android:layout_marginStart="8dp"
+                        android:layout_toEndOf="@id/transactionImage"
+                        android:text="Fri, Aug 12, 15:48" />
+
+                    <TextView
+                        android:id="@+id/transactionCategory"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/transactionDate"
+                        android:layout_marginStart="8dp"
+                        android:layout_toEndOf="@id/transactionImage"
+                        android:text="Transportation"
+                        android:textSize="12sp" />
+                </RelativeLayout>
+
+
+            </RelativeLayout>
+
+
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
