@@ -5,12 +5,17 @@ import static com.rokudo.xpense.utils.DatabaseUtils.usersRef;
 import static com.rokudo.xpense.utils.UserUtils.checkIfUserPicIsDifferent;
 import static com.rokudo.xpense.utils.dialogs.DialogUtils.getCircularProgressDrawable;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.FragmentNavigator;
@@ -18,17 +23,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
-import com.github.mikephil.charting.components.Description;
-import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
@@ -37,8 +34,8 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
-import com.google.android.material.transition.MaterialElevationScale;
 import com.google.android.material.transition.MaterialFadeThrough;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -59,7 +56,7 @@ public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
 
     private FragmentHomeBinding binding;
-    private List<Transaction> transactionList = new ArrayList<>();
+    private final List<Transaction> transactionList = new ArrayList<>();
 
     private TransactionsAdapter adapter;
 
@@ -70,9 +67,7 @@ public class HomeFragment extends Fragment {
 
         if (binding == null) {
             binding = FragmentHomeBinding.inflate(inflater, container, false);
-            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-//                convViewModel = new ViewModelProvider(this).get(ConvViewModel.class);
-            }
+
             initOnClicks();
             buildRecyclerView();
             initializeDummyRv();
@@ -113,10 +108,6 @@ public class HomeFragment extends Fragment {
         for (int color : ColorTemplate.VORDIPLOM_COLORS) {
             colors.add(color);
         }
-//
-//        for (int color : ColorTemplate.VORDIPLOM_COLORS) {
-//            colors.add(color);
-//        }
 
         PieDataSet dataSet = new PieDataSet(entries, "Expense Category");
         dataSet.setColors(colors);
@@ -155,20 +146,16 @@ public class HomeFragment extends Fragment {
         binding.barChart.getDescription().setEnabled(false);
     }
 
-    private ArrayList getDataSet() {
-        ArrayList dataSets = null;
+    private ArrayList<IBarDataSet> getDataSet() {
+        ArrayList<IBarDataSet> dataSets;
 
-        ArrayList valueSet1 = new ArrayList();
+        ArrayList<BarEntry> valueSet1 = new ArrayList<>();
         BarEntry v1e1 = new BarEntry(18, 2); // Jan
         valueSet1.add(v1e1);
         BarEntry v1e2 = new BarEntry(19, 1); // Feb
         valueSet1.add(v1e2);
-//        BarEntry v1e3 = new BarEntry(20, 3); // Mar
-//        valueSet1.add(v1e3);
-//        BarEntry v1e4 = new BarEntry(21, 4); // Mar
-//        valueSet1.add(v1e4);
 
-        ArrayList valueSet2 = new ArrayList();
+        ArrayList<BarEntry> valueSet2 = new ArrayList<>();
         BarEntry v2e1 = new BarEntry(20, 3); // Jan
         valueSet2.add(v2e1);
         BarEntry v2e2 = new BarEntry(21, 1); // Jan
@@ -184,13 +171,14 @@ public class HomeFragment extends Fragment {
         barDataSet1.setColor(Color.rgb(0, 155, 155));
         barDataSet1.setDrawValues(false);
 
-        dataSets = new ArrayList();
+        dataSets = new ArrayList<>();
         dataSets.add(barDataSet1);
         dataSets.add(barDataSet2);
         return dataSets;
     }
 
 
+    @SuppressLint("NotifyDataSetChanged")
     private void initializeDummyRv() {
         transactionList.add(new Transaction("Transport", 70.23, new Date(), "https://images.pexels.com/photos/1704488/pexels-photo-1704488.jpeg?cs=srgb&dl=pexels-suliman-sallehi-1704488.jpg&fm=jpg"));
         transactionList.add(new Transaction("Transport", 23.25, new Date(), "https://shotkit.com/wp-content/uploads/2021/06/cool-profile-pic-matheus-ferrero.jpeg"));
@@ -282,21 +270,13 @@ public class HomeFragment extends Fragment {
             Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
         });
 
-        binding.addTransactionBtn.setOnClickListener(view -> {
-            Toast.makeText(requireContext(), "Not yet bruh", Toast.LENGTH_SHORT).show();
-        });
+        binding.addTransactionBtn.setOnClickListener(view -> Toast.makeText(requireContext(), "Not yet bruh", Toast.LENGTH_SHORT).show());
 
-        binding.walletDropDownBtn.setOnClickListener(view -> {
-            Toast.makeText(requireContext(), "Yo calm down", Toast.LENGTH_SHORT).show();
-        });
+        binding.walletDropDownBtn.setOnClickListener(view -> Toast.makeText(requireContext(), "Yo calm down", Toast.LENGTH_SHORT).show());
 
-        binding.seeAllTransactionsBtn.setOnClickListener(view -> {
-            Toast.makeText(requireContext(), "GET OUT RN", Toast.LENGTH_SHORT).show();
-        });
+        binding.seeAllTransactionsBtn.setOnClickListener(view -> Toast.makeText(requireContext(), "GET OUT RN", Toast.LENGTH_SHORT).show());
 
-        binding.adjustBallanceBtn.setOnClickListener(view -> {
-            Toast.makeText(requireContext(), "Imma adjust it later sure", Toast.LENGTH_SHORT).show();
-        });
+        binding.adjustBallanceBtn.setOnClickListener(view -> Toast.makeText(requireContext(), "Imma adjust it later sure", Toast.LENGTH_SHORT).show());
     }
 
 }
