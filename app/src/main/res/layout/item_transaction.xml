@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/transactionImage"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerVertical="true"
+        android:src="@drawable/ic_baseline_person_24" />
+
+    <TextView
+        android:id="@+id/transactionAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@id/transactionImage"
+        android:text="- 90.0 lei"
+        android:textColor="#D50000"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/transactionDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/transactionAmount"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@id/transactionImage"
+        android:text="Fri, Aug 12, 15:48" />
+
+    <TextView
+        android:id="@+id/transactionCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/transactionDate"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@id/transactionImage"
+        android:text="Transportation"
+        android:textSize="12sp" />
+
+</RelativeLayout>

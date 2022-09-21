@@ -140,7 +140,7 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/adjustBallanceBtn"
-                    android:layout_width="120dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="34dp"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
@@ -148,7 +148,7 @@
                     android:insetTop="0dp"
                     android:insetRight="0dp"
                     android:insetBottom="0dp"
-                    android:padding="0dp"
+                    android:padding="8dp"
                     android:text="Adjust Ballance"
                     android:textSize="12sp"
                     app:cornerRadius="10dp"
@@ -166,15 +166,17 @@
                 android:layout_marginTop="16dp"
                 android:orientation="vertical">
 
-                <LinearLayout
+                <RelativeLayout
                     android:id="@+id/transactionsHeaderLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_height="wrap_content">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="8dp"
                         android:text="Latest Transaction" />
 
                     <com.google.android.material.button.MaterialButton
@@ -182,62 +184,24 @@
                         style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="70dp"
                         android:layout_height="40dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
                         android:layout_marginStart="8dp"
                         android:insetLeft="0dp"
                         android:insetTop="0dp"
                         android:insetRight="0dp"
                         android:insetBottom="0dp"
                         android:text="See All" />
-                </LinearLayout>
+                </RelativeLayout>
 
-                <RelativeLayout
-                    android:id="@+id/latestTransactionDetailsLayout"
+                <include
+                    layout="@layout/item_transaction"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/transactionsHeaderLayout"
-                    android:layout_marginTop="8dp"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:id="@+id/transactionImage"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/ic_baseline_person_24" />
-
-                    <TextView
-                        android:id="@+id/transactionAmount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_toEndOf="@id/transactionImage"
-                        android:text="- 90.0 lei"
-                        android:textColor="#D50000"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/transactionDate"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/transactionAmount"
-                        android:layout_marginStart="8dp"
-                        android:layout_toEndOf="@id/transactionImage"
-                        android:text="Fri, Aug 12, 15:48" />
-
-                    <TextView
-                        android:id="@+id/transactionCategory"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/transactionDate"
-                        android:layout_marginStart="8dp"
-                        android:layout_toEndOf="@id/transactionImage"
-                        android:text="Transportation"
-                        android:textSize="12sp" />
-                </RelativeLayout>
-
+                    android:layout_marginTop="8dp" />
 
             </RelativeLayout>
-
 
         </RelativeLayout>
     </com.google.android.material.card.MaterialCardView>
@@ -246,7 +210,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/walletsCard"
-        android:layout_margin="18dp" />
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="18dp"
+        android:layout_marginBottom="18dp"
+        tools:itemCount="8"
+        tools:listitem="@layout/item_transaction" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addTransactionBtn"
