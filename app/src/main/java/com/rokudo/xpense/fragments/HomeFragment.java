@@ -28,11 +28,15 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.material.transition.MaterialElevationScale;
 import com.google.android.material.transition.MaterialFadeThrough;
@@ -73,33 +77,82 @@ public class HomeFragment extends Fragment {
             buildRecyclerView();
             initializeDummyRv();
 
-            BarData data = new BarData(getDataSet());
-            binding.barChart.setData(data);
-            binding.barChart.setMaxVisibleValueCount(60);
-            binding.barChart.setPinchZoom(false);
-            binding.barChart.setDrawBarShadow(false);
-            binding.barChart.setDrawGridBackground(false);
-            binding.barChart.getLegend().setEnabled(false);
-            binding.barChart.setFitBars(true);
+            setupBarChart();
 
-            XAxis xAxis = binding.barChart.getXAxis();
-            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-            xAxis.setDrawGridLines(false);
-//            xAxis.setEnabled(false);
-            binding.barChart.getAxisLeft().setEnabled(false);
-            binding.barChart.getAxisRight().setEnabled(false);
-
-            binding.barChart.animateY(2000);
-            binding.barChart.invalidate();
-
-            binding.barChart.getDescription().setEnabled(false);
-
-//            PieData pieData = new PieData();
-//            binding.pieChart.setData(pieData);
+            setupPieChart();
+            loadPieChartData();
 
 
         }
         return binding.getRoot();
+    }
+
+    private void setupPieChart() {
+        binding.pieChart.setDrawHoleEnabled(true);
+        binding.pieChart.setUsePercentValues(false);
+        binding.pieChart.setEntryLabelTextSize(8);
+        binding.pieChart.setEntryLabelColor(Color.BLACK);
+        binding.pieChart.setCenterText("45123 Lei");
+        binding.pieChart.setCenterTextSize(12f);
+        binding.pieChart.setHoleRadius(48);
+        binding.pieChart.setCenterTextColor(Color.BLACK);
+        binding.pieChart.setHoleColor(Color.TRANSPARENT);
+        binding.pieChart.getDescription().setEnabled(false);
+        binding.pieChart.getLegend().setEnabled(false);
+    }
+
+    private void loadPieChartData() {
+        ArrayList<PieEntry> entries = new ArrayList<>();
+        entries.add(new PieEntry(0.2f, "Groceries"));
+        entries.add(new PieEntry(0.15f, "Transport"));
+        entries.add(new PieEntry(0.10f, "Bills"));
+        entries.add(new PieEntry(0.3f, "Housing"));
+        entries.add(new PieEntry(0.25f, "Other"));
+
+        ArrayList<Integer> colors = new ArrayList<>();
+        for (int color : ColorTemplate.VORDIPLOM_COLORS) {
+            colors.add(color);
+        }
+//
+//        for (int color : ColorTemplate.VORDIPLOM_COLORS) {
+//            colors.add(color);
+//        }
+
+        PieDataSet dataSet = new PieDataSet(entries, "Expense Category");
+        dataSet.setColors(colors);
+
+        PieData data = new PieData(dataSet);
+        data.setDrawValues(true);
+        data.setValueFormatter(new PercentFormatter());
+        data.setValueTextSize(6f);
+        data.setValueTextColor(Color.BLACK);
+
+        binding.pieChart.setData(data);
+        binding.pieChart.invalidate();
+
+        binding.pieChart.animateY(1400);
+    }
+
+    private void setupBarChart() {
+        BarData data = new BarData(getDataSet());
+        binding.barChart.setData(data);
+        binding.barChart.setMaxVisibleValueCount(60);
+        binding.barChart.setPinchZoom(false);
+        binding.barChart.setDrawBarShadow(false);
+        binding.barChart.setDrawGridBackground(false);
+        binding.barChart.getLegend().setEnabled(false);
+        binding.barChart.setFitBars(true);
+
+        XAxis xAxis = binding.barChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setDrawGridLines(false);
+        binding.barChart.getAxisLeft().setEnabled(false);
+        binding.barChart.getAxisRight().setEnabled(false);
+
+        binding.barChart.animateY(2000);
+        binding.barChart.invalidate();
+
+        binding.barChart.getDescription().setEnabled(false);
     }
 
     private ArrayList getDataSet() {
