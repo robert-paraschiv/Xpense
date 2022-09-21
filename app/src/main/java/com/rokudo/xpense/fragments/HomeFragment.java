@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -112,7 +113,6 @@ public class HomeFragment extends Fragment {
     }
 
     private void initOnClicks() {
-
         binding.profileImage.setOnClickListener(view -> {
             binding.profileImage.setTransitionName("settingsTransition");
 
@@ -129,6 +129,22 @@ public class HomeFragment extends Fragment {
             setReenterTransition(hold);
 
             Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
+        });
+
+        binding.addTransactionBtn.setOnClickListener(view -> {
+            Toast.makeText(requireContext(), "Not yet bruh", Toast.LENGTH_SHORT).show();
+        });
+
+        binding.walletDropDownBtn.setOnClickListener(view -> {
+            Toast.makeText(requireContext(), "Yo calm down", Toast.LENGTH_SHORT).show();
+        });
+
+        binding.seeAllTransactionsBtn.setOnClickListener(view -> {
+            Toast.makeText(requireContext(), "GET OUT RN", Toast.LENGTH_SHORT).show();
+        });
+
+        binding.adjustBallanceBtn.setOnClickListener(view -> {
+            Toast.makeText(requireContext(), "Imma adjust it later sure", Toast.LENGTH_SHORT).show();
         });
     }
 
