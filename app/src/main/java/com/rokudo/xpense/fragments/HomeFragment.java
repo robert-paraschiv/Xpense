@@ -13,6 +13,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.FragmentNavigator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import android.util.Log;
@@ -31,17 +33,23 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.rokudo.xpense.R;
+import com.rokudo.xpense.adapters.TransactionsAdapter;
 import com.rokudo.xpense.databinding.FragmentHomeBinding;
+import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.models.User;
 import com.rokudo.xpense.utils.DatabaseUtils;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
 
     private FragmentHomeBinding binding;
+    private List<Transaction> transactionList = new ArrayList<>();
+
+    private TransactionsAdapter adapter;
 
     private ListenerRegistration userDetailsListenerRegistration;
 
@@ -54,8 +62,28 @@ public class HomeFragment extends Fragment {
 //                convViewModel = new ViewModelProvider(this).get(ConvViewModel.class);
             }
             initOnClicks();
+            buildRecyclerView();
+            initializeDummyRv();
         }
         return binding.getRoot();
+    }
+
+    private void initializeDummyRv() {
+        transactionList.add(new Transaction("Transportation", 0.235, new Date(), ""));
+        transactionList.add(new Transaction("Transportation", 0.235, new Date(), ""));
+        transactionList.add(new Transaction("Transportation", 0.235, new Date(), ""));
+        transactionList.add(new Transaction("Transportation", 0.235, new Date(), ""));
+        transactionList.add(new Transaction("Transportation", 0.235, new Date(), ""));
+        transactionList.add(new Transaction("Transportation", 0.235, new Date(), ""));
+        transactionList.add(new Transaction("Transportation", 0.235, new Date(), ""));
+        adapter.notifyDataSetChanged();
+    }
+
+    private void buildRecyclerView() {
+        adapter = new TransactionsAdapter(transactionList);
+        binding.recentTransactionsRv.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false));
+        binding.recentTransactionsRv.setAdapter(adapter);
+//        adapter.setOnItemClickListener();
     }
 
     @Override

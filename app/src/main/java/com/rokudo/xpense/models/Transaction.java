@@ -17,6 +17,13 @@ public class Transaction {
     public Transaction() {
     }
 
+    public Transaction(String category, Double amount, Date date, String picUrl) {
+        this.category = category;
+        this.amount = amount;
+        this.date = date;
+        this.picUrl = picUrl;
+    }
+
     public String getId() {
         return id;
     }
