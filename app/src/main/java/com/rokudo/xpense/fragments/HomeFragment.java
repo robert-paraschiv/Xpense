@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -77,7 +78,6 @@ public class HomeFragment extends Fragment {
             setupPieChart();
             loadPieChartData();
 
-
         }
         return binding.getRoot();
     }
@@ -85,12 +85,13 @@ public class HomeFragment extends Fragment {
     private void setupPieChart() {
         binding.pieChart.setDrawHoleEnabled(true);
         binding.pieChart.setUsePercentValues(false);
+        binding.pieChart.setHighlightPerTapEnabled(true);
         binding.pieChart.setEntryLabelTextSize(8);
         binding.pieChart.setEntryLabelColor(Color.BLACK);
         binding.pieChart.setCenterText("45123 Lei");
         binding.pieChart.setCenterTextSize(12f);
         binding.pieChart.setHoleRadius(48);
-        binding.pieChart.setCenterTextColor(Color.BLACK);
+        binding.pieChart.setCenterTextColor(new TextView(requireContext()).getCurrentTextColor());
         binding.pieChart.setHoleColor(Color.TRANSPARENT);
         binding.pieChart.getDescription().setEnabled(false);
         binding.pieChart.getLegend().setEnabled(false);
@@ -129,6 +130,7 @@ public class HomeFragment extends Fragment {
         binding.barChart.setData(data);
         binding.barChart.setMaxVisibleValueCount(60);
         binding.barChart.setPinchZoom(false);
+        binding.barChart.setDoubleTapToZoomEnabled(false);
         binding.barChart.setDrawBarShadow(false);
         binding.barChart.setDrawGridBackground(false);
         binding.barChart.getLegend().setEnabled(false);
@@ -137,6 +139,8 @@ public class HomeFragment extends Fragment {
         XAxis xAxis = binding.barChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setDrawGridLines(false);
+        xAxis.setTextColor(new TextView(requireContext()).getCurrentTextColor());
+
         binding.barChart.getAxisLeft().setEnabled(false);
         binding.barChart.getAxisRight().setEnabled(false);
 
@@ -150,26 +154,29 @@ public class HomeFragment extends Fragment {
         ArrayList<IBarDataSet> dataSets;
 
         ArrayList<BarEntry> valueSet1 = new ArrayList<>();
-        BarEntry v1e1 = new BarEntry(18, 2); // Jan
+        BarEntry v1e1 = new BarEntry(18, 821); // Jan
         valueSet1.add(v1e1);
-        BarEntry v1e2 = new BarEntry(19, 1); // Feb
+        BarEntry v1e2 = new BarEntry(19, 334); // Feb
         valueSet1.add(v1e2);
 
         ArrayList<BarEntry> valueSet2 = new ArrayList<>();
-        BarEntry v2e1 = new BarEntry(20, 3); // Jan
+        BarEntry v2e1 = new BarEntry(20, 1179); // Jan
         valueSet2.add(v2e1);
-        BarEntry v2e2 = new BarEntry(21, 1); // Jan
+        BarEntry v2e2 = new BarEntry(21, 714); // Jan
         valueSet2.add(v2e2);
-        BarEntry v2e3 = new BarEntry(22, 4); // Jan
+        BarEntry v2e3 = new BarEntry(22, 245); // Jan
         valueSet2.add(v2e3);
 
         BarDataSet barDataSet1 = new BarDataSet(valueSet1, "Transport");
-        barDataSet1.setColor(Color.rgb(0, 155, 0));
-        barDataSet1.setDrawValues(false);
+//        barDataSet1.setColor(Color.rgb(0, 155, 0));
+        barDataSet1.setDrawValues(true);
+        barDataSet1.setValueTextColor(new TextView(requireContext()).getCurrentTextColor());
 
         BarDataSet barDataSet2 = new BarDataSet(valueSet2, "Myeah");
-        barDataSet1.setColor(Color.rgb(0, 155, 155));
-        barDataSet1.setDrawValues(false);
+//        barDataSet2.setColor(Color.rgb(0, 155, 155));
+        barDataSet2.setDrawValues(true);
+        barDataSet2.setValueTextSize(7);
+        barDataSet2.setValueTextColor(new TextView(requireContext()).getCurrentTextColor());
 
         dataSets = new ArrayList<>();
         dataSets.add(barDataSet1);
