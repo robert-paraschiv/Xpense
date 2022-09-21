@@ -47,7 +47,9 @@ import com.rokudo.xpense.adapters.TransactionsAdapter;
 import com.rokudo.xpense.databinding.FragmentHomeBinding;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.models.User;
+import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.DatabaseUtils;
+import com.rokudo.xpense.utils.dialogs.WalletListDialog;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -99,11 +101,11 @@ public class HomeFragment extends Fragment {
 
     private void loadPieChartData() {
         ArrayList<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry(0.2f, "Groceries"));
-        entries.add(new PieEntry(0.15f, "Transport"));
-        entries.add(new PieEntry(0.10f, "Bills"));
-        entries.add(new PieEntry(0.3f, "Housing"));
-        entries.add(new PieEntry(0.25f, "Other"));
+        entries.add(new PieEntry(20f, "Groceries"));
+        entries.add(new PieEntry(15f, "Transport"));
+        entries.add(new PieEntry(10f, "Bills"));
+        entries.add(new PieEntry(30f, "Housing"));
+        entries.add(new PieEntry(25f, "Other"));
 
         ArrayList<Integer> colors = new ArrayList<>();
         for (int color : ColorTemplate.VORDIPLOM_COLORS) {
@@ -279,11 +281,17 @@ public class HomeFragment extends Fragment {
 
         binding.addTransactionBtn.setOnClickListener(view -> Toast.makeText(requireContext(), "Not yet bruh", Toast.LENGTH_SHORT).show());
 
-        binding.walletDropDownBtn.setOnClickListener(view -> Toast.makeText(requireContext(), "Yo calm down", Toast.LENGTH_SHORT).show());
+        binding.walletDropDownBtn.setOnClickListener(view -> showWalletList());
+        binding.walletTitle.setOnClickListener(view -> showWalletList());
 
         binding.seeAllTransactionsBtn.setOnClickListener(view -> Toast.makeText(requireContext(), "GET OUT RN", Toast.LENGTH_SHORT).show());
 
         binding.adjustBallanceBtn.setOnClickListener(view -> Toast.makeText(requireContext(), "Imma adjust it later sure", Toast.LENGTH_SHORT).show());
+    }
+
+    private void showWalletList() {
+        WalletListDialog walletListDialog = new WalletListDialog(new ArrayList<>());
+        walletListDialog.show(getParentFragmentManager(), "walletListDialog");
     }
 
 }
