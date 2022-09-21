@@ -18,12 +18,13 @@ import com.rokudo.xpense.R;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapter.ViewHolder> {
     private static final String TAG = "TransactionsAdapter";
-
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("E, MMM d, HH:mm");
     List<Transaction> transactionList = new ArrayList<>();
 
     public TransactionsAdapter(List<Transaction> transactionList) {
@@ -42,7 +43,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
         Transaction transaction = transactionList.get(position);
         if (transaction != null) {
             holder.transactionAmount.setText(transaction.getAmount().toString());
-            holder.transactionDate.setText(transaction.getDate().toString());
+            holder.transactionDate.setText(simpleDateFormat.format(transaction.getDate()));
             holder.transactionCategory.setText(transaction.getCategory());
 
             Glide.with(holder.transactionImage)
@@ -51,6 +52,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
                     .apply(RequestOptions.circleCropTransform())
                     .placeholder(DialogUtils.getCircularProgressDrawable(holder.transactionImage.getContext()))
                     .fallback(R.drawable.ic_baseline_person_24)
+                    .error(R.drawable.ic_baseline_person_24)
                     .transition(withCrossFade())
                     .into(holder.transactionImage);
         }

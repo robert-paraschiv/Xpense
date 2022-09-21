@@ -5,6 +5,7 @@ import static com.rokudo.xpense.utils.DatabaseUtils.usersRef;
 import static com.rokudo.xpense.utils.UserUtils.checkIfUserPicIsDifferent;
 import static com.rokudo.xpense.utils.dialogs.DialogUtils.getCircularProgressDrawable;
 
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -26,6 +27,13 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.material.transition.MaterialElevationScale;
 import com.google.android.material.transition.MaterialFadeThrough;
 import com.google.firebase.auth.FirebaseAuth;
@@ -64,18 +72,80 @@ public class HomeFragment extends Fragment {
             initOnClicks();
             buildRecyclerView();
             initializeDummyRv();
+
+            BarData data = new BarData(getDataSet());
+            binding.barChart.setData(data);
+            binding.barChart.setMaxVisibleValueCount(60);
+            binding.barChart.setPinchZoom(false);
+            binding.barChart.setDrawBarShadow(false);
+            binding.barChart.setDrawGridBackground(false);
+            binding.barChart.getLegend().setEnabled(false);
+            binding.barChart.setFitBars(true);
+
+            XAxis xAxis = binding.barChart.getXAxis();
+            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+            xAxis.setDrawGridLines(false);
+//            xAxis.setEnabled(false);
+            binding.barChart.getAxisLeft().setEnabled(false);
+            binding.barChart.getAxisRight().setEnabled(false);
+
+            binding.barChart.animateY(2000);
+            binding.barChart.invalidate();
+
+            binding.barChart.getDescription().setEnabled(false);
+
+//            PieData pieData = new PieData();
+//            binding.pieChart.setData(pieData);
+
+
         }
         return binding.getRoot();
     }
 
+    private ArrayList getDataSet() {
+        ArrayList dataSets = null;
+
+        ArrayList valueSet1 = new ArrayList();
+        BarEntry v1e1 = new BarEntry(18, 2); // Jan
+        valueSet1.add(v1e1);
+        BarEntry v1e2 = new BarEntry(19, 1); // Feb
+        valueSet1.add(v1e2);
+//        BarEntry v1e3 = new BarEntry(20, 3); // Mar
+//        valueSet1.add(v1e3);
+//        BarEntry v1e4 = new BarEntry(21, 4); // Mar
+//        valueSet1.add(v1e4);
+
+        ArrayList valueSet2 = new ArrayList();
+        BarEntry v2e1 = new BarEntry(20, 3); // Jan
+        valueSet2.add(v2e1);
+        BarEntry v2e2 = new BarEntry(21, 1); // Jan
+        valueSet2.add(v2e2);
+        BarEntry v2e3 = new BarEntry(22, 4); // Jan
+        valueSet2.add(v2e3);
+
+        BarDataSet barDataSet1 = new BarDataSet(valueSet1, "Transport");
+        barDataSet1.setColor(Color.rgb(0, 155, 0));
+        barDataSet1.setDrawValues(false);
+
+        BarDataSet barDataSet2 = new BarDataSet(valueSet2, "Myeah");
+        barDataSet1.setColor(Color.rgb(0, 155, 155));
+        barDataSet1.setDrawValues(false);
+
+        dataSets = new ArrayList();
+        dataSets.add(barDataSet1);
+        dataSets.add(barDataSet2);
+        return dataSets;
+    }
+
+
     private void initializeDummyRv() {
-        transactionList.add(new Transaction("Transportation", 0.235, new Date(), ""));
-        transactionList.add(new Transaction("Transportation", 0.235, new Date(), ""));
-        transactionList.add(new Transaction("Transportation", 0.235, new Date(), ""));
-        transactionList.add(new Transaction("Transportation", 0.235, new Date(), ""));
-        transactionList.add(new Transaction("Transportation", 0.235, new Date(), ""));
-        transactionList.add(new Transaction("Transportation", 0.235, new Date(), ""));
-        transactionList.add(new Transaction("Transportation", 0.235, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 70.23, new Date(), "https://images.pexels.com/photos/1704488/pexels-photo-1704488.jpeg?cs=srgb&dl=pexels-suliman-sallehi-1704488.jpg&fm=jpg"));
+        transactionList.add(new Transaction("Transport", 23.25, new Date(), "https://shotkit.com/wp-content/uploads/2021/06/cool-profile-pic-matheus-ferrero.jpeg"));
+        transactionList.add(new Transaction("Transport", 10.35, new Date(), "https://learn.microsoft.com/answers/storage/attachments/209536-360-f-364211147-1qglvxv1tcq0ohz3fawufrtonzz8nq3e.jpg"));
+        transactionList.add(new Transaction("Transport", 50.25, new Date(), "https://i.etsystatic.com/36532523/r/il/97ae46/4078306713/il_340x270.4078306713_n74s.jpg"));
+        transactionList.add(new Transaction("Transport", 80.25, new Date(), "https://upload.wikimedia.org/wikipedia/commons/5/5f/Alberto_conversi_profile_pic.jpg"));
+        transactionList.add(new Transaction("Transport", 30.35, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
         adapter.notifyDataSetChanged();
     }
 
