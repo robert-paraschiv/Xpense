@@ -45,6 +45,9 @@ public class WalletsAdapter extends RecyclerView.Adapter<WalletsAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull WalletsAdapter.ViewHolder holder, int position) {
+        Wallet wallet = walletList.get(position);
+        holder.walletItemTitle.setText(wallet.getTitle());
+        holder.walletItemAmount.setText(String.format("%s %s", wallet.getCurrency(), wallet.getAmount().toString()));
 
     }
 

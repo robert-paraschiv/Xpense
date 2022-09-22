@@ -13,9 +13,14 @@ public class Wallet {
     private Date creation_date;
     private List<String> users;
 
-    public Wallet() {
-    }
+//    public Wallet() {
+//    }
 
+    public Wallet(String title, Double amount, String currency) {
+        this.title = title;
+        this.amount = amount;
+        this.currency = currency;
+    }
 
     public String getId() {
         return id;

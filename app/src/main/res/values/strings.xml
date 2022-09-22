@@ -5,5 +5,6 @@
     <string name="message_read_status">Message Read Status</string>
     <string name="default_notification_channel_id">Channel_Message_Notification</string>
     <string name="other_notification_channel_id">Other_Message_Notification</string>
+    <string name="dialog_handle">Dialog handle</string>
     <integer name="transition_duration_millis">400</integer>
 </resources>

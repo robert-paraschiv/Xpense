@@ -7,10 +7,21 @@
     android:background="@drawable/dialog_person_info_background"
     app:layout_behavior="@string/bottom_sheet_behavior">
 
+    <ImageView
+        android:id="@+id/dialogHandle"
+        android:layout_width="48dp"
+        android:layout_height="8dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:contentDescription="@string/dialog_handle"
+        android:src="@drawable/dialog_handle" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/walletListDialogRv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/dialogHandle"
         android:layout_marginStart="18dp"
         android:layout_marginTop="42dp"
         android:layout_marginEnd="18dp"

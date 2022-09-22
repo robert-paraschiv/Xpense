@@ -43,12 +43,10 @@ public class WalletListDialog extends BottomSheetDialogFragment {
 
     private List<Wallet> buildFakeWalletList() {
         List<Wallet> walletList = new ArrayList<>();
-        walletList.add(new Wallet());
-        walletList.add(new Wallet());
-        walletList.add(new Wallet());
-        walletList.add(new Wallet());
-        walletList.add(new Wallet());
-        walletList.add(new Wallet());
+        walletList.add(new Wallet("My wallet", 4141.0, "$"));
+        walletList.add(new Wallet("Savings", 311.0, "Lei"));
+        walletList.add(new Wallet("Car account", 671.0, "Euro"));
+        walletList.add(new Wallet("Shared wallet", 901.0, "$"));
         return walletList;
     }
 }

@@ -196,6 +196,28 @@ public class HomeFragment extends Fragment {
         transactionList.add(new Transaction("Transport", 80.25, new Date(), "https://upload.wikimedia.org/wikipedia/commons/5/5f/Alberto_conversi_profile_pic.jpg"));
         transactionList.add(new Transaction("Transport", 30.35, new Date(), ""));
         transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
+        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
         adapter.notifyDataSetChanged();
     }
 
