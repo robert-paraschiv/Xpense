@@ -16,6 +16,7 @@ public class Wallet {
     public Wallet() {
     }
 
+
     public String getId() {
         return id;
     }

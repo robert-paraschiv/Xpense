@@ -7,39 +7,15 @@
     android:background="@drawable/dialog_person_info_background"
     app:layout_behavior="@string/bottom_sheet_behavior">
 
-    <ImageView
-        android:id="@+id/profilePicture"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="20dp"
-        tools:src="@color/teal_200" />
-
-
-    <TextView
-        android:id="@+id/name"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/walletListDialogRv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/profilePicture"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="20dp"
-        android:gravity="center"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        tools:text="Really Really Really Really Long Name" />
-
-
-    <TextView
-        android:id="@+id/phoneNumber"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/name"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="60dp"
-        android:gravity="center"
-        android:textSize="12sp"
-        tools:text="+40767031267" />
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="42dp"
+        android:layout_marginEnd="18dp"
+        android:layout_marginBottom="24dp"
+        tools:itemCount="4"
+        tools:listitem="@layout/item_wallet" />
 
 </RelativeLayout>
