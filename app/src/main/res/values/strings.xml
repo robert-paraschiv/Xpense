@@ -6,5 +6,7 @@
     <string name="default_notification_channel_id">Channel_Message_Notification</string>
     <string name="other_notification_channel_id">Other_Message_Notification</string>
     <string name="dialog_handle">Dialog handle</string>
+    <string name="user_profile_picture">User profile picture</string>
+    <string name="transition_name_add_transaction">addTransaction</string>
     <integer name="transition_duration_millis">400</integer>
 </resources>

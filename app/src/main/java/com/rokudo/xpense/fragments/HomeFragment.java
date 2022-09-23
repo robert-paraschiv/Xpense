@@ -37,6 +37,7 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.material.transition.MaterialElevationScale;
 import com.google.android.material.transition.MaterialFadeThrough;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -47,8 +48,8 @@ import com.rokudo.xpense.adapters.TransactionsAdapter;
 import com.rokudo.xpense.databinding.FragmentHomeBinding;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.models.User;
-import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.DatabaseUtils;
+import com.rokudo.xpense.utils.dialogs.AdjustBalanceDialog;
 import com.rokudo.xpense.utils.dialogs.WalletListDialog;
 
 import java.util.ArrayList;
@@ -86,6 +87,7 @@ public class HomeFragment extends Fragment {
 
     private void setupPieChart() {
         binding.pieChart.setDrawHoleEnabled(true);
+        binding.pieChart.setTouchEnabled(false);
         binding.pieChart.setUsePercentValues(false);
         binding.pieChart.setHighlightPerTapEnabled(true);
         binding.pieChart.setEntryLabelTextSize(8);
@@ -133,6 +135,8 @@ public class HomeFragment extends Fragment {
         binding.barChart.setMaxVisibleValueCount(60);
         binding.barChart.setPinchZoom(false);
         binding.barChart.setDoubleTapToZoomEnabled(false);
+        binding.barChart.setScaleEnabled(false);
+//        binding.barChart.setTouchEnabled(false);
         binding.barChart.setDrawBarShadow(false);
         binding.barChart.setDrawGridBackground(false);
         binding.barChart.getLegend().setEnabled(false);
@@ -283,32 +287,73 @@ public class HomeFragment extends Fragment {
     }
 
     private void initOnClicks() {
-        binding.profileImage.setOnClickListener(view -> {
-            binding.profileImage.setTransitionName("settingsTransition");
+        binding.profileImage.setOnClickListener(view -> navigateToSettings());
 
-            FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
-                    .addSharedElement(binding.profileImage, "settingsTransition")
-                    .build();
-
-            NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToSettingsFragment();
-
-            MaterialFadeThrough hold = new MaterialFadeThrough();
-            hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
-
-            setExitTransition(hold);
-            setReenterTransition(hold);
-
-            Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
-        });
-
-        binding.addTransactionBtn.setOnClickListener(view -> Toast.makeText(requireContext(), "Not yet bruh", Toast.LENGTH_SHORT).show());
+        binding.addTransactionBtn.setOnClickListener(view -> navigateToAddTransaction());
 
         binding.walletDropDownBtn.setOnClickListener(view -> showWalletList());
+
         binding.walletTitle.setOnClickListener(view -> showWalletList());
 
         binding.seeAllTransactionsBtn.setOnClickListener(view -> Toast.makeText(requireContext(), "GET OUT RN", Toast.LENGTH_SHORT).show());
 
-        binding.adjustBallanceBtn.setOnClickListener(view -> Toast.makeText(requireContext(), "Imma adjust it later sure", Toast.LENGTH_SHORT).show());
+        binding.adjustBalanceBtn.setOnClickListener(view -> {
+            AdjustBalanceDialog adjustBalanceDialog = new AdjustBalanceDialog("1400.00");
+            adjustBalanceDialog.setOnDialogClicks(new AdjustBalanceDialog.OnAdjustBalanceDialogClickListener() {
+                @Override
+                public void onApplyClick(String amount) {
+                    Toast.makeText(requireContext(), "applied", Toast.LENGTH_SHORT).show();
+                    binding.walletAmount.setText(amount);
+                    adjustBalanceDialog.dismiss();
+                }
+
+                @Override
+                public void onCancelClick() {
+                    adjustBalanceDialog.dismiss();
+                }
+            });
+            adjustBalanceDialog.show(getParentFragmentManager(), "adjustBalanceDialog");
+        });
+
+        binding.barChart.setOnClickListener(view -> Toast.makeText(requireContext(), "bar chart", Toast.LENGTH_SHORT).show());
+
+        binding.pieChart.setOnClickListener(view -> Toast.makeText(requireContext(), "pie pie", Toast.LENGTH_SHORT).show());
+    }
+
+    private void navigateToSettings() {
+        binding.profileImage.setTransitionName("settingsTransition");
+
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+                .addSharedElement(binding.profileImage, "settingsTransition")
+                .build();
+
+        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToSettingsFragment();
+
+        MaterialFadeThrough hold = new MaterialFadeThrough();
+        hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+
+        setExitTransition(hold);
+        setReenterTransition(hold);
+
+        Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
+    }
+
+    private void navigateToAddTransaction() {
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+                .addSharedElement(binding.addTransactionBtn, getString(R.string.transition_name_add_transaction))
+                .build();
+
+        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToAddTransactionLayout("asd");
+
+        MaterialElevationScale exit = new MaterialElevationScale(false);
+        exit.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+        MaterialElevationScale reenter = new MaterialElevationScale(true);
+        reenter.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+
+        setExitTransition(exit);
+        setReenterTransition(reenter);
+
+        Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
     }
 
     private void showWalletList() {

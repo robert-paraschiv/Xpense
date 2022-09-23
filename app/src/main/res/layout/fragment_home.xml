@@ -153,7 +153,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:maxLines="1"
-                            android:text="0000.00000"
+                            android:text="13020.00"
                             android:textSize="20sp" />
                     </LinearLayout>
 
@@ -166,7 +166,7 @@
                         android:orientation="horizontal">
 
                         <com.google.android.material.button.MaterialButton
-                            android:id="@+id/adjustBallanceBtn"
+                            android:id="@+id/adjustBalanceBtn"
                             android:layout_width="wrap_content"
                             android:layout_height="34dp"
                             android:layout_alignParentStart="true"
@@ -303,6 +303,7 @@
         android:layout_marginBottom="22dp"
         android:contentDescription="@string/add_conversation_button"
         android:src="@drawable/ic_round_add_24"
+        android:transitionName="@string/transition_name_add_transaction"
         app:fabSize="normal"
         app:layout_anchorGravity="bottom|end"
         app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
