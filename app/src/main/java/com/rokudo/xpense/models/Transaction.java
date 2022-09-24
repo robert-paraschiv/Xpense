@@ -5,6 +5,7 @@ import java.util.Objects;
 
 public class Transaction {
     private String id;
+    private String walletId;
     private String type;
     private String category;
     private String user_id;
@@ -30,6 +31,14 @@ public class Transaction {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getWalletId() {
+        return walletId;
+    }
+
+    public void setWalletId(String walletId) {
+        this.walletId = walletId;
     }
 
     public String getType() {
@@ -100,6 +109,7 @@ public class Transaction {
     public String toString() {
         return "Transaction{" +
                 "id='" + id + '\'' +
+                "walletId='" + walletId + '\'' +
                 ", type='" + type + '\'' +
                 ", category='" + category + '\'' +
                 ", user_id='" + user_id + '\'' +

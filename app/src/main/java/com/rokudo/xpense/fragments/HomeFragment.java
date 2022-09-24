@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.FragmentNavigator;
@@ -37,6 +38,7 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.gms.common.util.CollectionUtils;
 import com.google.android.material.transition.MaterialElevationScale;
 import com.google.android.material.transition.MaterialFadeThrough;
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,6 +47,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.TransactionsAdapter;
+import com.rokudo.xpense.data.viewmodels.WalletsViewModel;
 import com.rokudo.xpense.databinding.FragmentHomeBinding;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.models.User;
@@ -60,11 +63,11 @@ public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
 
     private FragmentHomeBinding binding;
-    private final List<Transaction> transactionList = new ArrayList<>();
-
     private TransactionsAdapter adapter;
 
     private ListenerRegistration userDetailsListenerRegistration;
+    private final List<Transaction> transactionList = new ArrayList<>();
+    private WalletsViewModel walletsViewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -72,6 +75,7 @@ public class HomeFragment extends Fragment {
         if (binding == null) {
             binding = FragmentHomeBinding.inflate(inflater, container, false);
 
+            loadWalletDetails();
             initOnClicks();
             buildRecyclerView();
             initializeDummyRv();
@@ -83,6 +87,20 @@ public class HomeFragment extends Fragment {
 
         }
         return binding.getRoot();
+    }
+
+    private void loadWalletDetails() {
+        walletsViewModel = new ViewModelProvider(requireActivity()).get(WalletsViewModel.class);
+        walletsViewModel.loadWallets().observe(getViewLifecycleOwner(), wallets -> {
+            if (CollectionUtils.isEmpty(wallets)) {
+                Log.e(TAG, "loadWalletsDetails: wallets null");
+                binding.walletLayout.setVisibility(View.GONE);
+                binding.addWalletLayout.setVisibility(View.VISIBLE);
+            } else {
+                binding.walletLayout.setVisibility(View.VISIBLE);
+                binding.addWalletLayout.setVisibility(View.GONE);
+            }
+        });
     }
 
     private void setupPieChart() {
@@ -288,36 +306,36 @@ public class HomeFragment extends Fragment {
 
     private void initOnClicks() {
         binding.profileImage.setOnClickListener(view -> navigateToSettings());
-
-        binding.addTransactionBtn.setOnClickListener(view -> navigateToAddTransaction());
-
+        binding.addWalletBtn.setOnClickListener(view -> handleAddWalletBtnClick());
         binding.walletDropDownBtn.setOnClickListener(view -> showWalletList());
-
         binding.walletTitle.setOnClickListener(view -> showWalletList());
-
+        binding.addTransactionBtn.setOnClickListener(view -> navigateToAddTransaction());
         binding.seeAllTransactionsBtn.setOnClickListener(view -> Toast.makeText(requireContext(), "GET OUT RN", Toast.LENGTH_SHORT).show());
-
-        binding.adjustBalanceBtn.setOnClickListener(view -> {
-            AdjustBalanceDialog adjustBalanceDialog = new AdjustBalanceDialog("1400.00");
-            adjustBalanceDialog.setOnDialogClicks(new AdjustBalanceDialog.OnAdjustBalanceDialogClickListener() {
-                @Override
-                public void onApplyClick(String amount) {
-                    Toast.makeText(requireContext(), "applied", Toast.LENGTH_SHORT).show();
-                    binding.walletAmount.setText(amount);
-                    adjustBalanceDialog.dismiss();
-                }
-
-                @Override
-                public void onCancelClick() {
-                    adjustBalanceDialog.dismiss();
-                }
-            });
-            adjustBalanceDialog.show(getParentFragmentManager(), "adjustBalanceDialog");
-        });
-
+        binding.adjustBalanceBtn.setOnClickListener(view -> handleAdjustBalanceBtnClick());
         binding.barChart.setOnClickListener(view -> Toast.makeText(requireContext(), "bar chart", Toast.LENGTH_SHORT).show());
-
         binding.pieChart.setOnClickListener(view -> Toast.makeText(requireContext(), "pie pie", Toast.LENGTH_SHORT).show());
+    }
+
+    private void handleAddWalletBtnClick() {
+
+    }
+
+    private void handleAdjustBalanceBtnClick() {
+        AdjustBalanceDialog adjustBalanceDialog = new AdjustBalanceDialog("1400.00");
+        adjustBalanceDialog.setOnDialogClicks(new AdjustBalanceDialog.OnAdjustBalanceDialogClickListener() {
+            @Override
+            public void onApplyClick(String amount) {
+                Toast.makeText(requireContext(), "applied", Toast.LENGTH_SHORT).show();
+                binding.walletAmount.setText(amount);
+                adjustBalanceDialog.dismiss();
+            }
+
+            @Override
+            public void onCancelClick() {
+                adjustBalanceDialog.dismiss();
+            }
+        });
+        adjustBalanceDialog.show(getParentFragmentManager(), "adjustBalanceDialog");
     }
 
     private void navigateToSettings() {
