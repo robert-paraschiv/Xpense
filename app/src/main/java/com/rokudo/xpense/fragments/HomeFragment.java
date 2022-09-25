@@ -70,7 +70,7 @@ public class HomeFragment extends Fragment {
 
     private ListenerRegistration userDetailsListenerRegistration;
     private final List<Transaction> transactionList = new ArrayList<>();
-    private final List<Wallet> walletList = new ArrayList<>();
+    private Wallet wallet;
     private WalletsViewModel walletsViewModel;
 
     @Override
@@ -110,6 +110,7 @@ public class HomeFragment extends Fragment {
                 binding.walletLayout.setVisibility(View.VISIBLE);
                 binding.addWalletLayout.setVisibility(View.GONE);
                 handleWalletsUpdate(wallet);
+                this.wallet = wallet;
             }
         });
     }
@@ -397,7 +398,8 @@ public class HomeFragment extends Fragment {
                 .addSharedElement(binding.addTransactionBtn, getString(R.string.transition_name_add_transaction))
                 .build();
 
-        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToAddTransactionLayout("asd");
+        NavDirections navDirections = HomeFragmentDirections
+                .actionHomeFragmentToAddTransactionLayout(wallet.getId(), wallet.getCurrency());
 
         MaterialElevationScale exit = new MaterialElevationScale(false);
         exit.setDuration(getResources().getInteger(R.integer.transition_duration_millis));

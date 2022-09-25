@@ -33,6 +33,9 @@
         <argument
             android:name="walletId"
             app:argType="string" />
+        <argument
+            android:name="currency"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/addWalletFragment"
