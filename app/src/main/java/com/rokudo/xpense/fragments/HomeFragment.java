@@ -7,10 +7,8 @@ import static com.rokudo.xpense.utils.dialogs.DialogUtils.getCircularProgressDra
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,7 +39,6 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
-import com.google.android.gms.common.util.CollectionUtils;
 import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialElevationScale;
 import com.google.android.material.transition.MaterialFadeThrough;
@@ -57,6 +54,7 @@ import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.models.User;
 import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.DatabaseUtils;
+import com.rokudo.xpense.utils.PrefsUtils;
 import com.rokudo.xpense.utils.dialogs.AdjustBalanceDialog;
 import com.rokudo.xpense.utils.dialogs.WalletListDialog;
 
@@ -98,41 +96,26 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadWalletDetails() {
-        walletsViewModel.loadWallets().observe(getViewLifecycleOwner(), wallets -> {
-            if (CollectionUtils.isEmpty(wallets)) {
+        String selectedWalletId = requireContext()
+                .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE)
+                .getString("selectedWalletId", "");
+
+        walletsViewModel.loadWallet(selectedWalletId).observe(getViewLifecycleOwner(), wallet -> {
+            if (wallet == null) {
                 Log.e(TAG, "loadWalletsDetails: wallets null");
                 binding.walletLayout.setVisibility(View.GONE);
                 binding.addWalletLayout.setVisibility(View.VISIBLE);
             } else {
+                PrefsUtils.setSelectedWalletId(requireContext(), wallet.getId());
                 binding.walletLayout.setVisibility(View.VISIBLE);
                 binding.addWalletLayout.setVisibility(View.GONE);
-                handleWalletsUpdate(wallets);
+                handleWalletsUpdate(wallet);
             }
         });
     }
 
-    private void handleWalletsUpdate(List<Wallet> wallets) {
-        for (Wallet wallet : wallets) {
-            if (walletList.contains(wallet)) {
-                walletList.set(walletList.indexOf(wallet), wallet);
-            } else {
-                walletList.add(wallet);
-            }
-        }
-        if (walletList.size() == 1) {
-            updateWalletUI(walletList.get(0));
-        } else {
-            String selectedWalletId = requireContext().getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE).getString("selectedWalletId", "");
-            if (selectedWalletId.isEmpty()) {
-                updateWalletUI(walletList.get(0));
-                SharedPreferences settings = requireContext().getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putString("selectedWalletId", walletList.get(0).getId());
-                editor.apply();
-            } else {
-                updateWalletUI(walletList.get(walletList.indexOf(new Wallet(selectedWalletId))));
-            }
-        }
+    private void handleWalletsUpdate(Wallet wallet) {
+        updateWalletUI(wallet);
     }
 
     @SuppressLint("SetTextI18n")

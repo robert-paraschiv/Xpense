@@ -40,6 +40,7 @@
                         android:layout_height="50dp"
                         android:layout_centerVertical="true"
                         android:layout_marginStart="18dp"
+                        android:contentDescription="@string/user_profile_picture"
                         tools:src="@color/black" />
 
                     <TextView
@@ -89,7 +90,7 @@
                     android:layout_height="wrap_content"
                     android:padding="24dp"
                     android:visibility="gone"
-                    tools:visibility="visible">
+                    tools:visibility="gone">
 
                     <TextView
                         android:id="@+id/addWalletText"
@@ -125,7 +126,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:padding="24dp"
-                    tools:visibility="gone">
+                    tools:visibility="visible">
 
                     <LinearLayout
                         android:id="@+id/titleLayout"
@@ -141,9 +142,9 @@
                             android:layout_height="wrap_content"
                             android:maxWidth="210dp"
                             android:maxLines="1"
-                            android:text="Long Wallet Title"
                             android:textSize="24sp"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            tools:text="Long Wallet Title" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/walletDropDownBtn"
@@ -183,8 +184,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:maxLines="1"
-                            android:text="lei"
-                            android:textSize="20sp" />
+                            android:textSize="20sp"
+                            tools:text="lei" />
 
                         <TextView
                             android:id="@+id/walletAmount"
@@ -192,8 +193,8 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:maxLines="1"
-                            android:text="13020.00"
-                            android:textSize="20sp" />
+                            android:textSize="20sp"
+                            tools:text="13020.00" />
                     </LinearLayout>
 
                     <RelativeLayout

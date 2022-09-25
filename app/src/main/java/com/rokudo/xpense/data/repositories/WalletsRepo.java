@@ -4,15 +4,14 @@ import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
 
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.DatabaseUtils;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class WalletsRepo {
     private static final String TAG = "WalletsRepo";
@@ -20,9 +19,11 @@ public class WalletsRepo {
     private static WalletsRepo instance;
 
     private ListenerRegistration walletsListener;
+    private ListenerRegistration walletListener;
 
     private final MutableLiveData<ArrayList<Wallet>> allWallets;
     private final ArrayList<Wallet> walletList;
+    private final MutableLiveData<Wallet> walletMutableLiveData;
 
     public static WalletsRepo getInstance() {
         if (instance == null) {
@@ -34,6 +35,7 @@ public class WalletsRepo {
     public WalletsRepo() {
         this.allWallets = new MutableLiveData<>();
         this.walletList = new ArrayList<>();
+        this.walletMutableLiveData = new MutableLiveData<>();
     }
 
     public MutableLiveData<String> addWallet(Wallet wallet) {
@@ -44,6 +46,40 @@ public class WalletsRepo {
             mutableLiveData.setValue("Success");
         }
         return mutableLiveData;
+    }
+
+    public MutableLiveData<Wallet> loadWallet(String walletId) {
+        if (walletListener != null) {
+            walletListener.remove();
+        }
+        if (walletId.isEmpty()) {
+            // TODO: 25-Sep-22 Load latest wallet
+            DatabaseUtils.walletsRef.
+                    whereArrayContains("users",
+                            Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
+                    .limit(1)
+                    .get().addOnSuccessListener(queryDocumentSnapshots -> {
+                        Wallet wallet = queryDocumentSnapshots
+                                .getDocuments().get(0).toObject(Wallet.class);
+                        if (wallet != null) {
+                            walletMutableLiveData.setValue(wallet);
+                        }
+                    });
+        } else {
+            walletListener = DatabaseUtils.walletsRef.document(walletId)
+                    .addSnapshotListener((value, error) -> {
+                        if (error != null || value == null) {
+                            Log.e(TAG, "getWallet: empty or: ", error);
+                        } else {
+                            Wallet wallet = value.toObject(Wallet.class);
+                            if (wallet != null) {
+                                wallet.setId(value.getId());
+                                walletMutableLiveData.setValue(wallet);
+                            }
+                        }
+                    });
+        }
+        return walletMutableLiveData;
     }
 
     public MutableLiveData<ArrayList<Wallet>> getWallets() {

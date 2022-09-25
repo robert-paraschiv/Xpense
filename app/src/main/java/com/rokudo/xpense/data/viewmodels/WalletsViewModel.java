@@ -23,6 +23,10 @@ public class WalletsViewModel extends AndroidViewModel {
         return repo.getWallets();
     }
 
+    public MutableLiveData<Wallet> loadWallet(String walletId) {
+        return repo.loadWallet(walletId);
+    }
+
     public MutableLiveData<String> addWallet(Wallet wallet) {
         return repo.addWallet(wallet);
     }
