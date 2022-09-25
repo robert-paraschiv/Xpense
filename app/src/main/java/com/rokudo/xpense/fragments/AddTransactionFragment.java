@@ -52,9 +52,7 @@ public class AddTransactionFragment extends Fragment {
     private void initOnClicks() {
         binding.backBtn.setOnClickListener(view ->
                 Navigation.findNavController(binding.getRoot()).popBackStack());
-        binding.saveTransactionBtn.setOnClickListener(v -> {
-            addTransactionToDb();
-        });
+        binding.saveTransactionBtn.setOnClickListener(v -> addTransactionToDb());
     }
 
     private void addTransactionToDb() {

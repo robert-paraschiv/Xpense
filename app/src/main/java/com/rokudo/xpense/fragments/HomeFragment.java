@@ -48,6 +48,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.TransactionsAdapter;
+import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.data.viewmodels.WalletsViewModel;
 import com.rokudo.xpense.databinding.FragmentHomeBinding;
 import com.rokudo.xpense.models.Transaction;
@@ -69,7 +70,7 @@ public class HomeFragment extends Fragment {
     private TransactionsAdapter adapter;
 
     private ListenerRegistration userDetailsListenerRegistration;
-    private final List<Transaction> transactionList = new ArrayList<>();
+    private List<Transaction> transactionList = new ArrayList<>();
     private Wallet wallet;
     private WalletsViewModel walletsViewModel;
 
@@ -81,7 +82,6 @@ public class HomeFragment extends Fragment {
             walletsViewModel = new ViewModelProvider(requireActivity()).get(WalletsViewModel.class);
             initOnClicks();
             buildRecyclerView();
-            initializeDummyRv();
 
             setupBarChart();
 
@@ -110,9 +110,28 @@ public class HomeFragment extends Fragment {
                 binding.walletLayout.setVisibility(View.VISIBLE);
                 binding.addWalletLayout.setVisibility(View.GONE);
                 handleWalletsUpdate(wallet);
+                loadTransactions(wallet.getId());
                 this.wallet = wallet;
             }
         });
+    }
+
+    private void loadTransactions(String id) {
+        TransactionViewModel transactionViewModel = new ViewModelProvider(requireActivity())
+                .get(TransactionViewModel.class);
+
+        transactionViewModel.loadTransactions(id)
+                .observe(getViewLifecycleOwner(), values -> {
+                    for (Transaction transaction : values) {
+                        if (transactionList.contains(transaction)) {
+                            transactionList.set(transactionList.indexOf(transaction), transaction);
+                            adapter.notifyItemChanged(transactionList.indexOf(transaction));
+                        } else {
+                            transactionList.add(transaction);
+                            adapter.notifyItemInserted(transactionList.size() - 1);
+                        }
+                    }
+                });
     }
 
     private void handleWalletsUpdate(Wallet wallet) {
@@ -229,41 +248,6 @@ public class HomeFragment extends Fragment {
         dataSets.add(barDataSet1);
         dataSets.add(barDataSet2);
         return dataSets;
-    }
-
-
-    @SuppressLint("NotifyDataSetChanged")
-    private void initializeDummyRv() {
-        transactionList.add(new Transaction("Transport", 70.23, new Date(), "https://images.pexels.com/photos/1704488/pexels-photo-1704488.jpeg?cs=srgb&dl=pexels-suliman-sallehi-1704488.jpg&fm=jpg"));
-        transactionList.add(new Transaction("Transport", 23.25, new Date(), "https://shotkit.com/wp-content/uploads/2021/06/cool-profile-pic-matheus-ferrero.jpeg"));
-        transactionList.add(new Transaction("Transport", 10.35, new Date(), "https://learn.microsoft.com/answers/storage/attachments/209536-360-f-364211147-1qglvxv1tcq0ohz3fawufrtonzz8nq3e.jpg"));
-        transactionList.add(new Transaction("Transport", 50.25, new Date(), "https://i.etsystatic.com/36532523/r/il/97ae46/4078306713/il_340x270.4078306713_n74s.jpg"));
-        transactionList.add(new Transaction("Transport", 80.25, new Date(), "https://upload.wikimedia.org/wikipedia/commons/5/5f/Alberto_conversi_profile_pic.jpg"));
-        transactionList.add(new Transaction("Transport", 30.35, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        transactionList.add(new Transaction("Transport", 6.23, new Date(), ""));
-        adapter.notifyDataSetChanged();
     }
 
     private void buildRecyclerView() {
