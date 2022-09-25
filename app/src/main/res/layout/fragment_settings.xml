@@ -34,9 +34,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
+                android:layout_marginStart="16dp"
                 android:layout_toEndOf="@id/backBtn"
                 android:text="Settings"
-                android:textSize="16sp" />
+                android:textSize="18sp"
+                android:textStyle="bold" />
         </RelativeLayout>
 
     </com.google.android.material.appbar.MaterialToolbar>

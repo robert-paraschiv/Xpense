@@ -6,8 +6,11 @@ import static com.rokudo.xpense.utils.UserUtils.checkIfUserPicIsDifferent;
 import static com.rokudo.xpense.utils.dialogs.DialogUtils.getCircularProgressDrawable;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +42,7 @@ import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.android.gms.common.util.CollectionUtils;
+import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialElevationScale;
 import com.google.android.material.transition.MaterialFadeThrough;
 import com.google.firebase.auth.FirebaseAuth;
@@ -51,6 +55,7 @@ import com.rokudo.xpense.data.viewmodels.WalletsViewModel;
 import com.rokudo.xpense.databinding.FragmentHomeBinding;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.models.User;
+import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.DatabaseUtils;
 import com.rokudo.xpense.utils.dialogs.AdjustBalanceDialog;
 import com.rokudo.xpense.utils.dialogs.WalletListDialog;
@@ -67,6 +72,7 @@ public class HomeFragment extends Fragment {
 
     private ListenerRegistration userDetailsListenerRegistration;
     private final List<Transaction> transactionList = new ArrayList<>();
+    private final List<Wallet> walletList = new ArrayList<>();
     private WalletsViewModel walletsViewModel;
 
     @Override
@@ -74,8 +80,7 @@ public class HomeFragment extends Fragment {
 
         if (binding == null) {
             binding = FragmentHomeBinding.inflate(inflater, container, false);
-
-            loadWalletDetails();
+            walletsViewModel = new ViewModelProvider(requireActivity()).get(WalletsViewModel.class);
             initOnClicks();
             buildRecyclerView();
             initializeDummyRv();
@@ -86,11 +91,13 @@ public class HomeFragment extends Fragment {
             loadPieChartData();
 
         }
+
+        loadWalletDetails();
+
         return binding.getRoot();
     }
 
     private void loadWalletDetails() {
-        walletsViewModel = new ViewModelProvider(requireActivity()).get(WalletsViewModel.class);
         walletsViewModel.loadWallets().observe(getViewLifecycleOwner(), wallets -> {
             if (CollectionUtils.isEmpty(wallets)) {
                 Log.e(TAG, "loadWalletsDetails: wallets null");
@@ -99,8 +106,40 @@ public class HomeFragment extends Fragment {
             } else {
                 binding.walletLayout.setVisibility(View.VISIBLE);
                 binding.addWalletLayout.setVisibility(View.GONE);
+                handleWalletsUpdate(wallets);
             }
         });
+    }
+
+    private void handleWalletsUpdate(List<Wallet> wallets) {
+        for (Wallet wallet : wallets) {
+            if (walletList.contains(wallet)) {
+                walletList.set(walletList.indexOf(wallet), wallet);
+            } else {
+                walletList.add(wallet);
+            }
+        }
+        if (walletList.size() == 1) {
+            updateWalletUI(walletList.get(0));
+        } else {
+            String selectedWalletId = requireContext().getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE).getString("selectedWalletId", "");
+            if (selectedWalletId.isEmpty()) {
+                updateWalletUI(walletList.get(0));
+                SharedPreferences settings = requireContext().getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putString("selectedWalletId", walletList.get(0).getId());
+                editor.apply();
+            } else {
+                updateWalletUI(walletList.get(walletList.indexOf(new Wallet(selectedWalletId))));
+            }
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateWalletUI(Wallet wallet) {
+        binding.walletTitle.setText(wallet.getTitle());
+        binding.walletAmount.setText(wallet.getAmount().toString());
+        binding.walletCurrency.setText(wallet.getCurrency());
     }
 
     private void setupPieChart() {
@@ -317,7 +356,21 @@ public class HomeFragment extends Fragment {
     }
 
     private void handleAddWalletBtnClick() {
+        binding.addWalletBtn.setTransitionName("addWalletTransition");
 
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+                .addSharedElement(binding.addWalletBtn, "addWalletTransition")
+                .build();
+
+        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToAddWalletFragment();
+
+        Hold hold = new Hold();
+        hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+
+        setExitTransition(hold);
+        setReenterTransition(hold);
+
+        Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
     }
 
     private void handleAdjustBalanceBtnClick() {

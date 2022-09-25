@@ -22,4 +22,8 @@ public class WalletsViewModel extends AndroidViewModel {
     public MutableLiveData<ArrayList<Wallet>> loadWallets() {
         return repo.getWallets();
     }
+
+    public MutableLiveData<String> addWallet(Wallet wallet) {
+        return repo.addWallet(wallet);
+    }
 }

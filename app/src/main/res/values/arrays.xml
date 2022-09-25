@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="simple_items">
+        <item>RON</item>
+        <item>€</item>
+        <item>$</item>
+        <item>£</item>
+    </string-array>
+    <string-array name="category_items">
+        <item>Groceries</item>
+        <item>Transport</item>
+        <item>Bills</item>
+        <item>Others</item>
+    </string-array>
+</resources>

@@ -13,8 +13,12 @@ public class Wallet {
     private Date creation_date;
     private List<String> users;
 
-//    public Wallet() {
-//    }
+    public Wallet() {
+    }
+
+    public Wallet(String id) {
+        this.id = id;
+    }
 
     public Wallet(String title, Double amount, String currency) {
         this.title = title;

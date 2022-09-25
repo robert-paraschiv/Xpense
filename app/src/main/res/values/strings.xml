@@ -8,5 +8,5 @@
     <string name="dialog_handle">Dialog handle</string>
     <string name="user_profile_picture">User profile picture</string>
     <string name="transition_name_add_transaction">addTransaction</string>
-    <integer name="transition_duration_millis">400</integer>
+    <integer name="transition_duration_millis">600</integer>
 </resources>

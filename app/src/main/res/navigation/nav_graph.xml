@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_homeFragment_to_addTransactionLayout"
             app:destination="@id/addTransactionLayout" />
+        <action
+            android:id="@+id/action_homeFragment_to_addWalletFragment"
+            app:destination="@id/addWalletFragment" />
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
@@ -31,4 +34,9 @@
             android:name="walletId"
             app:argType="string" />
     </fragment>
+    <fragment
+        android:id="@+id/addWalletFragment"
+        android:name="com.rokudo.xpense.fragments.AddWalletFragment"
+        android:label="fragment_add_wallet"
+        tools:layout="@layout/fragment_add_wallet" />
 </navigation>

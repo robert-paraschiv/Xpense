@@ -4,7 +4,9 @@ import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.rokudo.xpense.models.Wallet;
@@ -32,6 +34,16 @@ public class WalletsRepo {
     public WalletsRepo() {
         this.allWallets = new MutableLiveData<>();
         this.walletList = new ArrayList<>();
+    }
+
+    public MutableLiveData<String> addWallet(Wallet wallet) {
+        MutableLiveData<String> mutableLiveData = new MutableLiveData<>();
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            DatabaseUtils.walletsRef.document(wallet.getId()).set(wallet).addOnSuccessListener(documentReference ->
+                    Log.d(TAG, "onSuccess: added wallet " + wallet));
+            mutableLiveData.setValue("Success");
+        }
+        return mutableLiveData;
     }
 
     public MutableLiveData<ArrayList<Wallet>> getWallets() {

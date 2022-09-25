@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/fragments_background"
-    android:transitionName="@string/transition_name_add_transaction"
-    tools:context=".fragments.AddTransactionFragment">
+    android:transitionName="addWalletTransition"
+    tools:context=".fragments.AddWalletFragment">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
@@ -36,60 +36,24 @@
                 android:layout_centerVertical="true"
                 android:layout_marginStart="16dp"
                 android:layout_toEndOf="@id/backBtn"
-                android:text="Add Transaction"
+                android:text="Add Wallet"
                 android:textSize="18sp"
                 android:textStyle="bold" />
         </RelativeLayout>
 
     </com.google.android.material.appbar.MaterialToolbar>
 
-
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/chipLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/toolbar"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="48dp"
-        android:layout_marginBottom="18dp"
-        app:chipSpacingHorizontal="18dp"
-        app:selectionRequired="true"
-        app:singleSelection="true">
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/incomeChip"
-            style="@style/Widget.Material3.Chip.Filter.Elevated"
-            android:layout_width="wrap_content"
-            android:layout_height="60dp"
-            android:text="Income"
-            android:textSize="18sp"
-            app:textEndPadding="18dp"
-            app:textStartPadding="18dp" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/ExpenseChip"
-            style="@style/Widget.Material3.Chip.Filter.Elevated"
-            android:layout_width="wrap_content"
-            android:layout_height="60dp"
-            android:checked="true"
-            android:text="Expense"
-            android:textSize="18sp"
-            app:textEndPadding="18dp"
-            app:textStartPadding="18dp" />
-    </com.google.android.material.chip.ChipGroup>
-
-
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/titleLayout"
+        android:id="@+id/textField"
         style="@style/Widget.Material3.TextInputLayout.FilledBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/chipLayout"
+        android:layout_below="@id/toolbar"
         android:layout_marginStart="18dp"
-        android:layout_marginTop="18dp"
+        android:layout_marginTop="68dp"
         android:layout_marginEnd="18dp"
         android:layout_marginBottom="18dp"
-        android:hint="Transaction Title"
+        android:hint="Wallet Title"
         app:boxCornerRadiusBottomEnd="18dp"
         app:boxCornerRadiusBottomStart="18dp"
         app:boxCornerRadiusTopEnd="18dp"
@@ -98,12 +62,10 @@
         app:boxStrokeWidthFocused="0dp">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/transactionTitle"
+            android:id="@+id/walletTitleInput"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:focusedByDefault="true"
-            android:imeOptions="actionNext"
-            android:singleLine="true" />
+            android:layout_height="wrap_content"
+            android:imeOptions="flagNoEnterAction" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -112,7 +74,7 @@
         style="@style/Widget.Material3.TextInputLayout.FilledBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/titleLayout"
+        android:layout_below="@id/textField"
         android:layout_margin="18dp"
         android:hint="Amount"
         app:boxCornerRadiusBottomEnd="18dp"
@@ -124,25 +86,24 @@
         app:placeholderText="0.00">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/transactionAmount"
+            android:id="@+id/walletAmountInput"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:imeOptions="actionNext"
+            android:layout_height="wrap_content"
+            android:clipToOutline="true"
             android:inputType="numberDecimal"
-            android:maxLines="1"
-            android:singleLine="true"
-            android:textSize="22sp" />
+            android:textSize="18sp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
+
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/transactionCategoryLayout"
+        android:id="@+id/currencyTextInputLayout"
         style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/amountInputLayout"
         android:layout_margin="18dp"
-        android:hint="Category"
+        android:hint="Currency"
         app:boxCornerRadiusBottomEnd="18dp"
         app:boxCornerRadiusBottomStart="18dp"
         app:boxCornerRadiusTopEnd="18dp"
@@ -151,23 +112,21 @@
         app:boxStrokeWidthFocused="0dp">
 
         <AutoCompleteTextView
-            android:id="@+id/transactionCategoryDropDown"
+            android:id="@+id/currencyDropBox"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:imeOptions="actionDone"
+            android:layout_height="wrap_content"
             android:inputType="none"
-            android:singleLine="true"
-            app:simpleItems="@array/category_items" />
+            app:simpleItems="@array/simple_items" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/saveTransactionBtn"
+        android:id="@+id/saveWalletBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/transactionCategoryLayout"
+        android:layout_below="@id/currencyTextInputLayout"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="18dp"
-        android:text="Save Transaction" />
+        android:text="Save Wallet" />
 
 </RelativeLayout>

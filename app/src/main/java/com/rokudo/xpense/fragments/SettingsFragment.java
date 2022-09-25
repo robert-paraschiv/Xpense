@@ -140,7 +140,7 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         MaterialFadeThrough materialContainerTransform = new MaterialFadeThrough();
-        materialContainerTransform.setDuration(500);
+        materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
         setSharedElementEnterTransition(materialContainerTransform);
 
         super.onCreate(savedInstanceState);
