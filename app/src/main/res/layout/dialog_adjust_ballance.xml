@@ -13,14 +13,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Input your balance"
-        android:textColor="@color/black" />
+        android:text="Input your balance" />
 
     <EditText
         android:id="@+id/balance_editText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginTop="18dp"
         android:hint="Balance"
         android:inputType="numberDecimal"
         android:padding="8dp" />

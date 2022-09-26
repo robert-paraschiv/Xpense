@@ -2,6 +2,7 @@ package com.rokudo.xpense.adapters;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,11 +39,18 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
         return new ViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Transaction transaction = transactionList.get(position);
         if (transaction != null) {
             holder.transactionAmount.setText(transaction.getAmount().toString());
+            holder.transactionPersonName.setText(transaction.getUserName());
+            if (transaction.getType().equals("Income")) {
+                holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_green_dark));
+            } else {
+                holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_red_dark));
+            }
             holder.transactionDate.setText(simpleDateFormat.format(transaction.getDate()));
             holder.transactionCategory.setText(transaction.getCategory());
 
@@ -65,6 +73,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         final ImageView transactionImage;
+        final TextView transactionPersonName;
         final TextView transactionAmount;
         final TextView transactionDate;
         final TextView transactionCategory;
@@ -73,6 +82,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             transactionImage = itemView.findViewById(R.id.transactionImage);
+            transactionPersonName = itemView.findViewById(R.id.transactionPerson);
             transactionAmount = itemView.findViewById(R.id.transactionAmount);
             transactionDate = itemView.findViewById(R.id.transactionDate);
             transactionCategory = itemView.findViewById(R.id.transactionCategory);

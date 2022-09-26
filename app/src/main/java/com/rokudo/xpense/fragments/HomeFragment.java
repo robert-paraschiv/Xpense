@@ -59,11 +59,14 @@ import com.rokudo.xpense.utils.PrefsUtils;
 import com.rokudo.xpense.utils.dialogs.AdjustBalanceDialog;
 import com.rokudo.xpense.utils.dialogs.WalletListDialog;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
+
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("E, MMM d, HH:mm");
 
     private FragmentHomeBinding binding;
     private TransactionsAdapter adapter;
@@ -72,6 +75,7 @@ public class HomeFragment extends Fragment {
     private final List<Transaction> transactionList = new ArrayList<>();
     private Wallet wallet;
     private WalletsViewModel walletsViewModel;
+    private Boolean gotTransactionsOnce = false;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -126,11 +130,46 @@ public class HomeFragment extends Fragment {
                             transactionList.set(transactionList.indexOf(transaction), transaction);
                             adapter.notifyItemChanged(transactionList.indexOf(transaction));
                         } else {
-                            transactionList.add(0,transaction);
-                            adapter.notifyItemInserted(0);
+                            if (gotTransactionsOnce) {
+                                transactionList.add(0, transaction);
+                                adapter.notifyItemInserted(0);
+                            } else {
+                                transactionList.add(transaction);
+                                adapter.notifyItemInserted(transactionList.size() - 1);
+                            }
                         }
                     }
+                    updateLatestTransactionUI();
+                    gotTransactionsOnce = true;
                 });
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateLatestTransactionUI() {
+        if (transactionList.isEmpty()) {
+            binding.lastTransactionLayout.setVisibility(View.GONE);
+        } else {
+            binding.lastTransactionLayout.setVisibility(View.VISIBLE);
+            Transaction transaction = transactionList.get(0);
+            binding.latestTransactionItem.transactionAmount.setText(transaction.getAmount().toString());
+            if (transaction.getType().equals("Income")) {
+                binding.latestTransactionItem.transactionAmount.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+            } else {
+                binding.latestTransactionItem.transactionAmount.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+            }
+            binding.latestTransactionItem.transactionCategory.setText(transaction.getCategory());
+            binding.latestTransactionItem.transactionDate.setText(simpleDateFormat.format(transaction.getDate()));
+            binding.latestTransactionItem.transactionPerson.setText(transaction.getUserName());
+            CircularProgressDrawable circularProgressDrawable = getCircularProgressDrawable(requireContext());
+            Glide.with(requireContext())
+                    .load(transaction.getPicUrl())
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .apply(RequestOptions.circleCropTransform())
+                    .placeholder(circularProgressDrawable)
+                    .fallback(R.drawable.ic_baseline_person_24)
+                    .transition(withCrossFade())
+                    .into(binding.latestTransactionItem.transactionImage);
+        }
     }
 
     private void handleWalletsUpdate(Wallet wallet) {

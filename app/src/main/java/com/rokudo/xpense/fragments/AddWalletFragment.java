@@ -1,9 +1,11 @@
 package com.rokudo.xpense.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -42,6 +44,12 @@ public class AddWalletFragment extends Fragment {
         binding = FragmentAddWalletBinding.inflate(inflater, container, false);
 
         walletsViewModel = new ViewModelProvider(requireActivity()).get(WalletsViewModel.class);
+
+        binding.walletTitleInput.requestFocus();
+        binding.walletTitleInput.postDelayed(() -> {
+            InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        }, 250);
 
         binding.currencyDropBox.setText("RON", false);
 

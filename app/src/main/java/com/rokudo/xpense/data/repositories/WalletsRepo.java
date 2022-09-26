@@ -2,11 +2,15 @@ package com.rokudo.xpense.data.repositories;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.DatabaseUtils;
 
@@ -54,33 +58,41 @@ public class WalletsRepo {
         }
         if (walletId.isEmpty()) {
             if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-                DatabaseUtils.walletsRef.
-                        whereArrayContains("users",
+                FirebaseFirestore.getInstance().collection("Wallets")
+                        .whereArrayContains("users",
                                 FirebaseAuth.getInstance().getCurrentUser().getUid())
+                        .orderBy("creation_date", Query.Direction.DESCENDING)
                         .limit(1)
                         .get().addOnSuccessListener(queryDocumentSnapshots -> {
+                            Log.d(TAG, "loadWallet: got wallet");
                             Wallet wallet = queryDocumentSnapshots
                                     .getDocuments().get(0).toObject(Wallet.class);
                             if (wallet != null) {
                                 walletMutableLiveData.setValue(wallet);
+                                setListenerForWallet(wallet.getId());
                             }
-                        });
+                        })
+                        .addOnFailureListener(e -> Log.e(TAG, "onFailure: ", e));
             }
         } else {
-            walletListener = DatabaseUtils.walletsRef.document(walletId)
-                    .addSnapshotListener((value, error) -> {
-                        if (error != null || value == null) {
-                            Log.e(TAG, "getWallet: empty or: ", error);
-                        } else {
-                            Wallet wallet = value.toObject(Wallet.class);
-                            if (wallet != null) {
-                                wallet.setId(value.getId());
-                                walletMutableLiveData.setValue(wallet);
-                            }
-                        }
-                    });
+            setListenerForWallet(walletId);
         }
         return walletMutableLiveData;
+    }
+
+    private void setListenerForWallet(String walletId) {
+        walletListener = DatabaseUtils.walletsRef.document(walletId)
+                .addSnapshotListener((value, error) -> {
+                    if (error != null || value == null) {
+                        Log.e(TAG, "getWallet: empty or: ", error);
+                    } else {
+                        Wallet wallet = value.toObject(Wallet.class);
+                        if (wallet != null) {
+                            wallet.setId(value.getId());
+                            walletMutableLiveData.setValue(wallet);
+                        }
+                    }
+                });
     }
 
     public MutableLiveData<ArrayList<Wallet>> getWallets() {

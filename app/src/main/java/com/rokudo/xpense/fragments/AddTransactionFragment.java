@@ -1,10 +1,12 @@
 package com.rokudo.xpense.fragments;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,6 +27,8 @@ import java.util.Objects;
 
 public class AddTransactionFragment extends Fragment {
     private static final String TAG = "AddTransactionFragment";
+    public static final String INCOME_TYPE = "Income";
+    public static final String EXPENSE_TYPE = "Expense";
 
     FragmentAddTransactionBinding binding;
     private String walletId;
@@ -36,7 +40,13 @@ public class AddTransactionFragment extends Fragment {
         // Inflate the layout for this fragment
         binding = FragmentAddTransactionBinding.inflate(inflater, container, false);
 
-        binding.transactionCategoryDropDown.setText("Groceries");
+        binding.transactionCategoryDropDown.setText("Groceries", false);
+        binding.transactionTitle.requestFocus();
+        binding.transactionTitle.postDelayed(() -> {
+            InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+        }, 250);
+
         getWalletId();
         initOnClicks();
 
@@ -65,9 +75,10 @@ public class AddTransactionFragment extends Fragment {
         transaction.setDate(new Date());
         transaction.setPicUrl(DatabaseUtils.getCurrentUser().getPictureUrl());
         transaction.setUser_id(DatabaseUtils.getCurrentUser().getUid());
+        transaction.setUserName(DatabaseUtils.getCurrentUser().getName());
         transaction.setCategory(binding.transactionCategoryDropDown.getText().toString());
         transaction.setTitle(Objects.requireNonNull(binding.transactionTitle.getText()).toString());
-        transaction.setType(binding.chipLayout.getCheckedChipId() == 0 ? "Income" : "Expense");
+        transaction.setType(binding.incomeChip.isChecked() ? INCOME_TYPE : EXPENSE_TYPE);
         TransactionViewModel viewModel =
                 new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
         viewModel.addTransaction(walletId, transaction).observe(getViewLifecycleOwner(), result -> {

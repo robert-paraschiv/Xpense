@@ -98,6 +98,7 @@
         app:boxStrokeWidthFocused="0dp">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:inputType="textCapWords"
             android:id="@+id/transactionTitle"
             android:layout_width="match_parent"
             android:layout_height="70dp"

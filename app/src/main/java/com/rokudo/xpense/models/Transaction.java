@@ -9,6 +9,7 @@ public class Transaction {
     private String type;
     private String category;
     private String user_id;
+    private String userName;
     private String title;
     private Double amount;
     private String currency;
@@ -16,13 +17,6 @@ public class Transaction {
     private String picUrl;
 
     public Transaction() {
-    }
-
-    public Transaction(String category, Double amount, Date date, String picUrl) {
-        this.category = category;
-        this.amount = amount;
-        this.date = date;
-        this.picUrl = picUrl;
     }
 
     public String getId() {
@@ -63,6 +57,14 @@ public class Transaction {
 
     public void setUser_id(String user_id) {
         this.user_id = user_id;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getTitle() {
@@ -113,6 +115,7 @@ public class Transaction {
                 ", type='" + type + '\'' +
                 ", category='" + category + '\'' +
                 ", user_id='" + user_id + '\'' +
+                ", userName='" + userName + '\'' +
                 ", title='" + title + '\'' +
                 ", amount=" + amount +
                 ", currency='" + currency + '\'' +

@@ -62,6 +62,7 @@
         app:boxStrokeWidthFocused="0dp">
 
         <com.google.android.material.textfield.TextInputEditText
+            android:inputType="textCapWords"
             android:id="@+id/walletTitleInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
