@@ -53,18 +53,19 @@ public class WalletsRepo {
             walletListener.remove();
         }
         if (walletId.isEmpty()) {
-            // TODO: 25-Sep-22 Load latest wallet
-            DatabaseUtils.walletsRef.
-                    whereArrayContains("users",
-                            Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())
-                    .limit(1)
-                    .get().addOnSuccessListener(queryDocumentSnapshots -> {
-                        Wallet wallet = queryDocumentSnapshots
-                                .getDocuments().get(0).toObject(Wallet.class);
-                        if (wallet != null) {
-                            walletMutableLiveData.setValue(wallet);
-                        }
-                    });
+            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+                DatabaseUtils.walletsRef.
+                        whereArrayContains("users",
+                                FirebaseAuth.getInstance().getCurrentUser().getUid())
+                        .limit(1)
+                        .get().addOnSuccessListener(queryDocumentSnapshots -> {
+                            Wallet wallet = queryDocumentSnapshots
+                                    .getDocuments().get(0).toObject(Wallet.class);
+                            if (wallet != null) {
+                                walletMutableLiveData.setValue(wallet);
+                            }
+                        });
+            }
         } else {
             walletListener = DatabaseUtils.walletsRef.document(walletId)
                     .addSnapshotListener((value, error) -> {

@@ -60,7 +60,6 @@ import com.rokudo.xpense.utils.dialogs.AdjustBalanceDialog;
 import com.rokudo.xpense.utils.dialogs.WalletListDialog;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
@@ -70,7 +69,7 @@ public class HomeFragment extends Fragment {
     private TransactionsAdapter adapter;
 
     private ListenerRegistration userDetailsListenerRegistration;
-    private List<Transaction> transactionList = new ArrayList<>();
+    private final List<Transaction> transactionList = new ArrayList<>();
     private Wallet wallet;
     private WalletsViewModel walletsViewModel;
 
@@ -127,8 +126,8 @@ public class HomeFragment extends Fragment {
                             transactionList.set(transactionList.indexOf(transaction), transaction);
                             adapter.notifyItemChanged(transactionList.indexOf(transaction));
                         } else {
-                            transactionList.add(transaction);
-                            adapter.notifyItemInserted(transactionList.size() - 1);
+                            transactionList.add(0,transaction);
+                            adapter.notifyItemInserted(0);
                         }
                     }
                 });
