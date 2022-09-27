@@ -1,6 +1,7 @@
 package com.rokudo.xpense.adapters;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+import static com.rokudo.xpense.utils.TransactionUtils.getTransactionDateString;
 
 import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
@@ -19,14 +20,11 @@ import com.rokudo.xpense.R;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapter.ViewHolder> {
     private static final String TAG = "TransactionsAdapter";
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("E, MMM d, HH:mm");
-    List<Transaction> transactionList = new ArrayList<>();
+    List<Transaction> transactionList;
 
     public TransactionsAdapter(List<Transaction> transactionList) {
         this.transactionList = transactionList;
@@ -44,14 +42,18 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Transaction transaction = transactionList.get(position);
         if (transaction != null) {
-            holder.transactionAmount.setText(transaction.getAmount().toString());
             holder.transactionPersonName.setText(transaction.getUserName());
+            String transAmountPrefix = "";
             if (transaction.getType().equals("Income")) {
+                transAmountPrefix = "+ ";
                 holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_green_dark));
             } else {
+                transAmountPrefix = "- ";
                 holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_red_dark));
             }
-            holder.transactionDate.setText(simpleDateFormat.format(transaction.getDate()));
+            holder.transactionAmount.setText(transAmountPrefix + transaction.getAmount().toString());
+
+            holder.transactionDate.setText(getTransactionDateString(transaction));
             holder.transactionCategory.setText(transaction.getCategory());
 
             Glide.with(holder.transactionImage)
@@ -65,6 +67,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
                     .into(holder.transactionImage);
         }
     }
+
 
     @Override
     public int getItemCount() {

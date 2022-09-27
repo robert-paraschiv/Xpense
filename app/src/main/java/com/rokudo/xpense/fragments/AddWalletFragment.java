@@ -10,13 +10,11 @@ import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.google.android.material.shape.ShapeAppearanceModel;
 import com.google.android.material.transition.MaterialContainerTransform;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.data.viewmodels.WalletsViewModel;
@@ -24,8 +22,6 @@ import com.rokudo.xpense.databinding.FragmentAddWalletBinding;
 import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.DatabaseUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Objects;
@@ -52,6 +48,10 @@ public class AddWalletFragment extends Fragment {
         }, 250);
 
         binding.currencyDropBox.setText("RON", false);
+        binding.currencyDropBox.setOnFocusChangeListener((view, b) -> {
+            InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        });
 
         initOnClicks();
 

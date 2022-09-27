@@ -56,17 +56,15 @@ import com.rokudo.xpense.models.User;
 import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.DatabaseUtils;
 import com.rokudo.xpense.utils.PrefsUtils;
+import com.rokudo.xpense.utils.TransactionUtils;
 import com.rokudo.xpense.utils.dialogs.AdjustBalanceDialog;
 import com.rokudo.xpense.utils.dialogs.WalletListDialog;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
-
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("E, MMM d, HH:mm");
 
     private FragmentHomeBinding binding;
     private TransactionsAdapter adapter;
@@ -151,14 +149,17 @@ public class HomeFragment extends Fragment {
         } else {
             binding.lastTransactionLayout.setVisibility(View.VISIBLE);
             Transaction transaction = transactionList.get(0);
-            binding.latestTransactionItem.transactionAmount.setText(transaction.getAmount().toString());
+            String transAmountPrefix = "";
             if (transaction.getType().equals("Income")) {
                 binding.latestTransactionItem.transactionAmount.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+                transAmountPrefix = "+ ";
             } else {
+                transAmountPrefix = "- ";
                 binding.latestTransactionItem.transactionAmount.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
             }
+            binding.latestTransactionItem.transactionAmount.setText(transAmountPrefix + transaction.getAmount().toString());
             binding.latestTransactionItem.transactionCategory.setText(transaction.getCategory());
-            binding.latestTransactionItem.transactionDate.setText(simpleDateFormat.format(transaction.getDate()));
+            binding.latestTransactionItem.transactionDate.setText(TransactionUtils.getTransactionDateString(transaction));
             binding.latestTransactionItem.transactionPerson.setText(transaction.getUserName());
             CircularProgressDrawable circularProgressDrawable = getCircularProgressDrawable(requireContext());
             Glide.with(requireContext())

@@ -1,5 +1,6 @@
 package com.rokudo.xpense.fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -26,14 +27,14 @@ import java.util.Date;
 import java.util.Objects;
 
 public class AddTransactionFragment extends Fragment {
-    private static final String TAG = "AddTransactionFragment";
     public static final String INCOME_TYPE = "Income";
     public static final String EXPENSE_TYPE = "Expense";
 
-    FragmentAddTransactionBinding binding;
+    private FragmentAddTransactionBinding binding;
     private String walletId;
     private String currency;
 
+    @SuppressLint("SetTextI18n")
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -46,6 +47,11 @@ public class AddTransactionFragment extends Fragment {
             InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
         }, 250);
+        binding.transactionCategoryDropDown.setOnFocusChangeListener((view, b) -> {
+            InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            binding.transactionCategoryDropDown.showDropDown();
+        });
 
         getWalletId();
         initOnClicks();
