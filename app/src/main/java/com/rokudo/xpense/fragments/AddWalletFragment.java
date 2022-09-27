@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.Objects;
 
 public class AddWalletFragment extends Fragment {
-    private static final String TAG = "AddWalletFragment";
 
     private FragmentAddWalletBinding binding;
 

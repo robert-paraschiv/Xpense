@@ -23,7 +23,6 @@ import com.rokudo.xpense.utils.dialogs.DialogUtils;
 import java.util.List;
 
 public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapter.ViewHolder> {
-    private static final String TAG = "TransactionsAdapter";
     List<Transaction> transactionList;
 
     public TransactionsAdapter(List<Transaction> transactionList) {
@@ -43,13 +42,15 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
         Transaction transaction = transactionList.get(position);
         if (transaction != null) {
             holder.transactionPersonName.setText(transaction.getUserName());
-            String transAmountPrefix = "";
+            String transAmountPrefix;
             if (transaction.getType().equals("Income")) {
                 transAmountPrefix = "+ ";
-                holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_green_dark));
+                holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_green_dark
+                        , holder.transactionAmount.getContext().getTheme()));
             } else {
                 transAmountPrefix = "- ";
-                holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_red_dark));
+                holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_red_dark
+                        , holder.transactionAmount.getContext().getTheme()));
             }
             holder.transactionAmount.setText(transAmountPrefix + transaction.getAmount().toString());
 

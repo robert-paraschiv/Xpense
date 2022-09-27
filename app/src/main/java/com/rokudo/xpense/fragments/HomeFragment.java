@@ -149,13 +149,13 @@ public class HomeFragment extends Fragment {
         } else {
             binding.lastTransactionLayout.setVisibility(View.VISIBLE);
             Transaction transaction = transactionList.get(0);
-            String transAmountPrefix = "";
+            String transAmountPrefix;
             if (transaction.getType().equals("Income")) {
-                binding.latestTransactionItem.transactionAmount.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+                binding.latestTransactionItem.transactionAmount.setTextColor(getResources().getColor(android.R.color.holo_green_dark, requireActivity().getTheme()));
                 transAmountPrefix = "+ ";
             } else {
                 transAmountPrefix = "- ";
-                binding.latestTransactionItem.transactionAmount.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                binding.latestTransactionItem.transactionAmount.setTextColor(getResources().getColor(android.R.color.holo_red_dark, requireActivity().getTheme()));
             }
             binding.latestTransactionItem.transactionAmount.setText(transAmountPrefix + transaction.getAmount().toString());
             binding.latestTransactionItem.transactionCategory.setText(transaction.getCategory());
