@@ -16,6 +16,11 @@ public class Transaction {
     private Date date;
     private String picUrl;
 
+
+    public static final String INCOME_TYPE = "Income";
+    public static final String EXPENSE_TYPE = "Expense";
+
+
     public Transaction() {
     }
 

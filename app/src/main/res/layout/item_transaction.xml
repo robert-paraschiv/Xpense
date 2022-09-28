@@ -6,7 +6,6 @@
     android:layout_marginTop="18dp">
 
     <ImageView
-
         android:id="@+id/transactionImage"
         android:layout_width="50dp"
         android:layout_height="50dp"

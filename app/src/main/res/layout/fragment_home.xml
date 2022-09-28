@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,331 +7,326 @@
     android:background="@color/fragments_background"
     tools:context=".fragments.HomeFragment">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appbar"
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/home_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true">
-
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fitsSystemWindows="true"
-            app:layout_scrollFlags="scroll|enterAlways|snap">
-
-            <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/home_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/fragments_background"
-                app:contentInsetStart="0dp"
-                app:layout_collapseMode="pin">
-
-                <RelativeLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="18dp"
-                    android:layout_marginBottom="36dp"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:id="@+id/profileImage"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="18dp"
-                        android:contentDescription="@string/user_profile_picture"
-                        tools:src="@color/black" />
-
-                    <TextView
-                        android:id="@+id/welcomeTv"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="18dp"
-                        android:layout_marginEnd="18dp"
-                        android:layout_toEndOf="@id/profileImage"
-                        android:textSize="20sp"
-                        tools:text="Welcome, Robert" />
-
-                </RelativeLayout>
-
-            </com.google.android.material.appbar.MaterialToolbar>
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/home_toolbar"
-        android:fillViewport="true"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:layout_constraintTop_toBottomOf="@+id/appbar">
+        android:background="@color/fragments_background"
+        app:contentInsetStart="0dp">
 
         <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:layout_marginBottom="42dp"
+            android:orientation="horizontal">
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/walletsCard"
+            <ImageView
+                android:id="@+id/profileImage"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="18dp"
+                android:contentDescription="@string/user_profile_picture"
+                tools:src="@color/black" />
+
+            <TextView
+                android:id="@+id/welcomeTv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
                 android:layout_marginStart="18dp"
                 android:layout_marginEnd="18dp"
-                android:layout_marginBottom="18dp"
-                app:cardCornerRadius="18dp"
-                app:strokeWidth="0dp">
+                android:layout_toEndOf="@id/profileImage"
+                android:textSize="20sp"
+                tools:text="Welcome, Robert" />
 
-                <RelativeLayout
-                    android:id="@+id/addWalletLayout"
+        </RelativeLayout>
+    </com.google.android.material.appbar.MaterialToolbar>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/home_toolbar">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/walletsCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="18dp"
+            android:layout_marginEnd="18dp"
+            android:layout_marginBottom="18dp"
+            app:cardCornerRadius="18dp"
+            app:strokeWidth="0dp">
+
+            <RelativeLayout
+                android:id="@+id/addWalletLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="24dp"
+                android:visibility="gone"
+                tools:visibility="gone">
+
+                <TextView
+                    android:id="@+id/addWalletText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="24dp"
-                    android:visibility="gone"
-                    tools:visibility="gone">
+                    android:text="Add a wallet to start tracking"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/addWalletBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:layout_below="@id/addWalletText"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginTop="18dp"
+                    android:insetLeft="0dp"
+                    android:insetTop="0dp"
+                    android:insetRight="0dp"
+                    android:insetBottom="0dp"
+                    android:padding="8dp"
+                    android:text="Add Wallet"
+                    android:textSize="12sp"
+                    app:cornerRadius="10dp"
+                    app:icon="@drawable/ic_round_add_24"
+                    app:iconGravity="textStart"
+                    app:iconPadding="4dp" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/walletLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="24dp"
+                tools:visibility="visible">
+
+                <LinearLayout
+                    android:id="@+id/titleLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_toStartOf="@id/sharedWithIcon"
+                    android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/addWalletText"
-                        android:layout_width="match_parent"
+                        android:id="@+id/walletTitle"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Add a wallet to start tracking"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
+                        android:maxWidth="210dp"
+                        android:maxLines="1"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        tools:text="Long Wallet Title" />
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/addWalletBtn"
+                        android:id="@+id/walletDropDownBtn"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginStart="8dp"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        app:icon="@drawable/ic_round_keyboard_arrow_down_24"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconSize="22dp" />
+
+                </LinearLayout>
+
+
+                <ImageView
+                    android:id="@+id/sharedWithIcon"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/ic_baseline_person_24" />
+
+                <LinearLayout
+                    android:id="@+id/walletDetailsLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/titleLayout"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/walletCurrency"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:textSize="20sp"
+                        tools:text="lei" />
+
+                    <TextView
+                        android:id="@+id/walletAmount"
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:maxLines="1"
+                        android:textSize="20sp"
+                        tools:text="13020.00" />
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/editWalletLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/walletDetailsLayout"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/adjustBalanceBtn"
                         android:layout_width="wrap_content"
                         android:layout_height="34dp"
-                        android:layout_below="@id/addWalletText"
                         android:layout_alignParentStart="true"
-                        android:layout_marginTop="18dp"
+                        android:layout_centerVertical="true"
                         android:insetLeft="0dp"
                         android:insetTop="0dp"
                         android:insetRight="0dp"
                         android:insetBottom="0dp"
                         android:padding="8dp"
-                        android:text="Add Wallet"
+                        android:text="Adjust Ballance"
                         android:textSize="12sp"
                         app:cornerRadius="10dp"
-                        app:icon="@drawable/ic_round_add_24"
+                        app:icon="@drawable/ic_round_edit_24"
                         app:iconGravity="textStart"
                         app:iconPadding="4dp" />
 
                 </RelativeLayout>
 
                 <RelativeLayout
-                    android:id="@+id/walletLayout"
+                    android:id="@+id/lastTransactionLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="24dp"
-                    tools:visibility="visible">
-
-                    <LinearLayout
-                        android:id="@+id/titleLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:layout_toStartOf="@id/sharedWithIcon"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/walletTitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:maxWidth="210dp"
-                            android:maxLines="1"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            tools:text="Long Wallet Title" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/walletDropDownBtn"
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginStart="8dp"
-                            android:insetLeft="0dp"
-                            android:insetTop="0dp"
-                            android:insetRight="0dp"
-                            android:insetBottom="0dp"
-                            app:icon="@drawable/ic_round_keyboard_arrow_down_24"
-                            app:iconGravity="textStart"
-                            app:iconPadding="0dp"
-                            app:iconSize="22dp" />
-
-                    </LinearLayout>
-
-
-                    <ImageView
-                        android:id="@+id/sharedWithIcon"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_marginEnd="8dp"
-                        android:src="@drawable/ic_baseline_person_24" />
-
-                    <LinearLayout
-                        android:id="@+id/walletDetailsLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/titleLayout"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/walletCurrency"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:maxLines="1"
-                            android:textSize="20sp"
-                            tools:text="lei" />
-
-                        <TextView
-                            android:id="@+id/walletAmount"
-                            android:layout_width="100dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:maxLines="1"
-                            android:textSize="20sp"
-                            tools:text="13020.00" />
-                    </LinearLayout>
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/editWalletLayout"
+                    android:layout_marginTop="16dp"
+                    android:orientation="vertical">
 
                     <RelativeLayout
-                        android:id="@+id/editWalletLayout"
+                        android:id="@+id/transactionsHeaderLayout"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/walletDetailsLayout"
-                        android:layout_marginTop="16dp"
-                        android:orientation="horizontal">
+                        android:layout_height="wrap_content">
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/adjustBalanceBtn"
+                        <TextView
                             android:layout_width="wrap_content"
-                            android:layout_height="34dp"
+                            android:layout_height="wrap_content"
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
+                            android:layout_marginEnd="8dp"
+                            android:text="Latest Transaction" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/seeAllTransactionsBtn"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="70dp"
+                            android:layout_height="40dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="8dp"
                             android:insetLeft="0dp"
                             android:insetTop="0dp"
                             android:insetRight="0dp"
                             android:insetBottom="0dp"
-                            android:padding="8dp"
-                            android:text="Adjust Ballance"
-                            android:textSize="12sp"
-                            app:cornerRadius="10dp"
-                            app:icon="@drawable/ic_round_edit_24"
-                            app:iconGravity="textStart"
-                            app:iconPadding="4dp" />
-
+                            android:text="See All" />
                     </RelativeLayout>
 
-                    <RelativeLayout
-                        android:id="@+id/lastTransactionLayout"
+                    <include
+                        android:id="@+id/latestTransactionItem"
+                        layout="@layout/item_transaction"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_below="@id/editWalletLayout"
-                        android:layout_marginTop="16dp"
-                        android:orientation="vertical">
-
-                        <RelativeLayout
-                            android:id="@+id/transactionsHeaderLayout"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentStart="true"
-                                android:layout_centerVertical="true"
-                                android:layout_marginEnd="8dp"
-                                android:text="Latest Transaction" />
-
-                            <com.google.android.material.button.MaterialButton
-                                android:id="@+id/seeAllTransactionsBtn"
-                                style="@style/Widget.Material3.Button.TextButton"
-                                android:layout_width="70dp"
-                                android:layout_height="40dp"
-                                android:layout_alignParentEnd="true"
-                                android:layout_centerVertical="true"
-                                android:layout_marginStart="8dp"
-                                android:insetLeft="0dp"
-                                android:insetTop="0dp"
-                                android:insetRight="0dp"
-                                android:insetBottom="0dp"
-                                android:text="See All" />
-                        </RelativeLayout>
-
-                        <include
-                            android:id="@+id/latestTransactionItem"
-                            layout="@layout/item_transaction"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@id/transactionsHeaderLayout" />
-
-                    </RelativeLayout>
+                        android:layout_below="@id/transactionsHeaderLayout"
+                        android:visibility="visible" />
 
                 </RelativeLayout>
-            </com.google.android.material.card.MaterialCardView>
 
-            <LinearLayout
-                android:id="@+id/chartsLayout"
-                android:layout_width="match_parent"
+            </RelativeLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:id="@+id/chartsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/walletsCard"
+            android:layout_marginStart="18dp"
+            android:layout_marginEnd="18dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="1">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/barChartCard"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/walletsCard"
-                android:layout_marginStart="18dp"
-                android:layout_marginEnd="18dp"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:weightSum="1">
+                android:layout_weight="0.5"
+                app:cardCornerRadius="18dp"
+                app:strokeWidth="0dp">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/barChartCard"
-                    android:layout_width="0dp"
-                    android:layout_height="160dp"
-                    android:layout_weight="0.5"
-                    app:cardCornerRadius="18dp"
-                    app:strokeWidth="0dp">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
                     <com.github.mikephil.charting.charts.BarChart
                         android:id="@+id/barChart"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_margin="12dp" />
+                        android:layout_height="220dp"
+                        android:layout_below="@id/monthspendingtext2"
+                        android:layout_margin="8dp" />
 
-                </com.google.android.material.card.MaterialCardView>
+                    <TextView
+                        android:id="@+id/monthspendingtext2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_margin="12dp"
+                        android:gravity="center_horizontal"
+                        android:text="This week's spending" />
+                </RelativeLayout>
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/pieChartCard"
-                    android:layout_width="0dp"
-                    android:layout_height="160dp"
-                    android:layout_marginStart="18dp"
-                    android:layout_weight="0.5"
-                    app:cardCornerRadius="18dp"
-                    app:strokeWidth="0dp">
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/pieChartCard"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="0.5"
+                app:cardCornerRadius="18dp"
+                app:strokeWidth="0dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
                     <com.github.mikephil.charting.charts.PieChart
                         android:id="@+id/pieChart"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_margin="12dp" />
-                </com.google.android.material.card.MaterialCardView>
+                        android:layout_height="220dp"
+                        android:layout_below="@id/monthspendingtext"
+                        android:layout_margin="8dp" />
 
-            </LinearLayout>
+                    <TextView
+                        android:id="@+id/monthspendingtext"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_margin="12dp"
+                        android:gravity="center_horizontal"
+                        android:text="This month's spending" />
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recentTransactionsRv"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@id/chartsLayout"
-                android:layout_marginStart="18dp"
-                android:layout_marginTop="18dp"
-                android:layout_marginEnd="18dp"
-                android:layout_marginBottom="18dp"
-                tools:itemCount="8"
-                tools:listitem="@layout/item_transaction" />
-        </RelativeLayout>
-    </androidx.core.widget.NestedScrollView>
+        </LinearLayout>
+    </RelativeLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addTransactionBtn"
@@ -350,4 +345,4 @@
         app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
 
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</RelativeLayout>

@@ -1,5 +1,8 @@
 package com.rokudo.xpense.fragments;
 
+import static com.rokudo.xpense.models.Transaction.EXPENSE_TYPE;
+import static com.rokudo.xpense.models.Transaction.INCOME_TYPE;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
@@ -27,9 +30,6 @@ import java.util.Date;
 import java.util.Objects;
 
 public class AddTransactionFragment extends Fragment {
-    public static final String INCOME_TYPE = "Income";
-    public static final String EXPENSE_TYPE = "Expense";
-
     private FragmentAddTransactionBinding binding;
     private String walletId;
     private String currency;

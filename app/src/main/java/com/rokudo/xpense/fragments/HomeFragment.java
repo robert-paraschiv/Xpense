@@ -22,13 +22,12 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.FragmentNavigator;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
@@ -47,7 +46,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.rokudo.xpense.R;
-import com.rokudo.xpense.adapters.TransactionsAdapter;
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.data.viewmodels.WalletsViewModel;
 import com.rokudo.xpense.databinding.FragmentHomeBinding;
@@ -61,13 +59,14 @@ import com.rokudo.xpense.utils.dialogs.AdjustBalanceDialog;
 import com.rokudo.xpense.utils.dialogs.WalletListDialog;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
 
     private FragmentHomeBinding binding;
-    private TransactionsAdapter adapter;
 
     private ListenerRegistration userDetailsListenerRegistration;
     private final List<Transaction> transactionList = new ArrayList<>();
@@ -82,12 +81,11 @@ public class HomeFragment extends Fragment {
             binding = FragmentHomeBinding.inflate(inflater, container, false);
             walletsViewModel = new ViewModelProvider(requireActivity()).get(WalletsViewModel.class);
             initOnClicks();
-            buildRecyclerView();
 
             setupBarChart();
 
             setupPieChart();
-            loadPieChartData();
+//            loadPieChartData();
 
         }
 
@@ -110,7 +108,7 @@ public class HomeFragment extends Fragment {
                 PrefsUtils.setSelectedWalletId(requireContext(), wallet.getId());
                 binding.walletLayout.setVisibility(View.VISIBLE);
                 binding.addWalletLayout.setVisibility(View.GONE);
-                handleWalletsUpdate(wallet);
+                updateWalletUI(wallet);
                 loadTransactions(wallet.getId());
                 this.wallet = wallet;
             }
@@ -126,17 +124,15 @@ public class HomeFragment extends Fragment {
                     for (Transaction transaction : values) {
                         if (transactionList.contains(transaction)) {
                             transactionList.set(transactionList.indexOf(transaction), transaction);
-                            adapter.notifyItemChanged(transactionList.indexOf(transaction));
                         } else {
                             if (gotTransactionsOnce) {
                                 transactionList.add(0, transaction);
-                                adapter.notifyItemInserted(0);
                             } else {
                                 transactionList.add(transaction);
-                                adapter.notifyItemInserted(transactionList.size() - 1);
                             }
                         }
                     }
+                    updatePieChartData(values);
                     updateLatestTransactionUI();
                     gotTransactionsOnce = true;
                 });
@@ -173,10 +169,6 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private void handleWalletsUpdate(Wallet wallet) {
-        updateWalletUI(wallet);
-    }
-
     @SuppressLint("SetTextI18n")
     private void updateWalletUI(Wallet wallet) {
         binding.walletTitle.setText(wallet.getTitle());
@@ -186,46 +178,70 @@ public class HomeFragment extends Fragment {
 
     private void setupPieChart() {
         binding.pieChart.setDrawHoleEnabled(true);
-        binding.pieChart.setTouchEnabled(false);
-        binding.pieChart.setUsePercentValues(false);
+        binding.pieChart.setTouchEnabled(true);
+        binding.pieChart.setUsePercentValues(true);
         binding.pieChart.setHighlightPerTapEnabled(true);
-        binding.pieChart.setEntryLabelTextSize(8);
+        binding.pieChart.setEntryLabelTextSize(10f);
         binding.pieChart.setEntryLabelColor(Color.BLACK);
         binding.pieChart.setCenterText("45123 Lei");
-        binding.pieChart.setCenterTextSize(12f);
-        binding.pieChart.setHoleRadius(48);
+        binding.pieChart.setCenterTextSize(11f);
+        binding.pieChart.setHoleRadius(48f);
         binding.pieChart.setCenterTextColor(new TextView(requireContext()).getCurrentTextColor());
         binding.pieChart.setHoleColor(Color.TRANSPARENT);
         binding.pieChart.getDescription().setEnabled(false);
-        binding.pieChart.getLegend().setEnabled(false);
+        binding.pieChart.setDrawEntryLabels(false);
+        Legend l = binding.pieChart.getLegend();
+        l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
+        l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+        l.setDrawInside(false);
+        l.setXEntrySpace(4f);
+        l.setYEntrySpace(0f);
+        l.setWordWrapEnabled(true);
+        binding.pieChart.setTransparentCircleRadius(52f);
     }
 
-    private void loadPieChartData() {
-        ArrayList<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry(20f, "Groceries"));
-        entries.add(new PieEntry(15f, "Transport"));
-        entries.add(new PieEntry(10f, "Bills"));
-        entries.add(new PieEntry(30f, "Housing"));
-        entries.add(new PieEntry(25f, "Other"));
+    private void updatePieChartData(List<Transaction> transactionList) {
+        Map<String, Double> categories = new HashMap<>();
+        Double sum = 0.0;
+        for (Transaction transaction : transactionList) {
+            if (transaction.getType().equals(Transaction.INCOME_TYPE))
+                continue;
+            if (categories.containsKey(transaction.getCategory())) {
+                Double amount = categories.getOrDefault(transaction.getCategory(), 0.0);
+                categories.put(transaction.getCategory(), amount == null ? 0.0f : amount + transaction.getAmount());
+            } else {
+                categories.put(transaction.getCategory(), transaction.getAmount());
+            }
+            sum += transaction.getAmount();
+        }
 
+        ArrayList<PieEntry> entries = new ArrayList<>();
+        Double finalSum = sum;
+        categories.forEach((key, value) -> entries.add(new PieEntry(getPercentageOfCategory(value, finalSum), key)));
         ArrayList<Integer> colors = new ArrayList<>();
         for (int color : ColorTemplate.VORDIPLOM_COLORS) {
             colors.add(color);
         }
-
-        PieDataSet dataSet = new PieDataSet(entries, "Expense Category");
+        PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setColors(colors);
 
         PieData data = new PieData(dataSet);
         data.setDrawValues(true);
         data.setValueFormatter(new PercentFormatter());
-        data.setValueTextSize(6f);
+        data.setValueTextSize(12f);
         data.setValueTextColor(Color.BLACK);
 
+        binding.pieChart.setCenterText(sum + " " + wallet.getCurrency());
         binding.pieChart.setData(data);
         binding.pieChart.invalidate();
 
         binding.pieChart.animateY(1400);
+        Log.d(TAG, "updatePieChartData: ");
+    }
+
+    private float getPercentageOfCategory(Double value, Double finalSum) {
+        return (float) ((value * 100) / finalSum);
     }
 
     private void setupBarChart() {
@@ -258,42 +274,27 @@ public class HomeFragment extends Fragment {
     private ArrayList<IBarDataSet> getDataSet() {
         ArrayList<IBarDataSet> dataSets;
 
-        ArrayList<BarEntry> valueSet1 = new ArrayList<>();
+        ArrayList<BarEntry> valueSet = new ArrayList<>();
         BarEntry v1e1 = new BarEntry(18, 821); // Jan
-        valueSet1.add(v1e1);
+        valueSet.add(v1e1);
         BarEntry v1e2 = new BarEntry(19, 334); // Feb
-        valueSet1.add(v1e2);
-
-        ArrayList<BarEntry> valueSet2 = new ArrayList<>();
+        valueSet.add(v1e2);
         BarEntry v2e1 = new BarEntry(20, 1179); // Jan
-        valueSet2.add(v2e1);
+        valueSet.add(v2e1);
         BarEntry v2e2 = new BarEntry(21, 714); // Jan
-        valueSet2.add(v2e2);
+        valueSet.add(v2e2);
         BarEntry v2e3 = new BarEntry(22, 245); // Jan
-        valueSet2.add(v2e3);
+        valueSet.add(v2e3);
 
-        BarDataSet barDataSet1 = new BarDataSet(valueSet1, "Transport");
+        BarDataSet barDataSet = new BarDataSet(valueSet, "Transport");
 //        barDataSet1.setColor(Color.rgb(0, 155, 0));
-        barDataSet1.setDrawValues(true);
-        barDataSet1.setValueTextColor(new TextView(requireContext()).getCurrentTextColor());
-
-        BarDataSet barDataSet2 = new BarDataSet(valueSet2, "Myeah");
-//        barDataSet2.setColor(Color.rgb(0, 155, 155));
-        barDataSet2.setDrawValues(true);
-        barDataSet2.setValueTextSize(7);
-        barDataSet2.setValueTextColor(new TextView(requireContext()).getCurrentTextColor());
+        barDataSet.setDrawValues(true);
+        barDataSet.setValueTextSize(10);
+        barDataSet.setValueTextColor(new TextView(requireContext()).getCurrentTextColor());
 
         dataSets = new ArrayList<>();
-        dataSets.add(barDataSet1);
-        dataSets.add(barDataSet2);
+        dataSets.add(barDataSet);
         return dataSets;
-    }
-
-    private void buildRecyclerView() {
-        adapter = new TransactionsAdapter(transactionList);
-        binding.recentTransactionsRv.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false));
-        binding.recentTransactionsRv.setAdapter(adapter);
-//        adapter.setOnItemClickListener();
     }
 
     @Override
