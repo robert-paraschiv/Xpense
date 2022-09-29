@@ -100,13 +100,14 @@
                 android:id="@+id/walletLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="24dp"
                 tools:visibility="visible">
 
                 <LinearLayout
                     android:id="@+id/titleLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="24dp"
                     android:layout_marginEnd="8dp"
                     android:layout_toStartOf="@id/sharedWithIcon"
                     android:orientation="horizontal">
@@ -144,7 +145,8 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_alignParentEnd="true"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginEnd="24dp"
                     android:src="@drawable/ic_baseline_person_24" />
 
                 <LinearLayout
@@ -152,6 +154,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/titleLayout"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginEnd="24dp"
                     android:orientation="horizontal">
 
                     <TextView
@@ -177,7 +181,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/walletDetailsLayout"
+                    android:layout_marginStart="24dp"
                     android:layout_marginTop="16dp"
+                    android:layout_marginEnd="24dp"
                     android:orientation="horizontal">
 
                     <com.google.android.material.button.MaterialButton
@@ -211,7 +217,9 @@
                     <RelativeLayout
                         android:id="@+id/transactionsHeaderLayout"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="24dp"
+                        android:layout_marginEnd="10dp">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -225,24 +233,37 @@
                             android:id="@+id/seeAllTransactionsBtn"
                             style="@style/Widget.Material3.Button.TextButton"
                             android:layout_width="70dp"
-                            android:layout_height="40dp"
+                            android:layout_height="34dp"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:layout_marginStart="8dp"
                             android:insetLeft="0dp"
                             android:insetTop="0dp"
                             android:insetRight="0dp"
                             android:insetBottom="0dp"
-                            android:text="See All" />
+                            android:text="See All"
+                            app:cornerRadius="10dp" />
                     </RelativeLayout>
 
-                    <include
-                        android:id="@+id/latestTransactionItem"
-                        layout="@layout/item_transaction"
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/latestTransactionCard"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/transactionsHeaderLayout"
-                        android:visibility="visible" />
+                        android:layout_marginStart="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginTop="8dp"
+                        android:clickable="true"
+                        app:strokeWidth="0dp">
+
+                        <include
+                            android:id="@+id/latestTransactionItem"
+                            layout="@layout/item_transaction"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="8dp"
+                            android:visibility="visible" />
+                    </com.google.android.material.card.MaterialCardView>
 
                 </RelativeLayout>
 

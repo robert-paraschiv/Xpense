@@ -198,6 +198,7 @@ public class HomeFragment extends Fragment {
         l.setXEntrySpace(4f);
         l.setYEntrySpace(0f);
         l.setWordWrapEnabled(true);
+        l.setTextColor(new TextView(requireContext()).getCurrentTextColor());
         binding.pieChart.setTransparentCircleRadius(52f);
     }
 
