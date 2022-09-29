@@ -33,6 +33,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialElevationScale;
 import com.google.android.material.transition.MaterialFadeThrough;
+import com.google.android.material.transition.MaterialSharedAxis;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -229,7 +230,7 @@ public class HomeFragment extends Fragment {
         binding.walletDropDownBtn.setOnClickListener(view -> showWalletList());
         binding.walletTitle.setOnClickListener(view -> showWalletList());
         binding.addTransactionBtn.setOnClickListener(view -> navigateToAddTransaction());
-        binding.seeAllTransactionsBtn.setOnClickListener(view -> Toast.makeText(requireContext(), "GET OUT RN", Toast.LENGTH_SHORT).show());
+        binding.seeAllTransactionsBtn.setOnClickListener(view -> navigateToTransactionsListFragment());
         binding.adjustBalanceBtn.setOnClickListener(view -> handleAdjustBalanceBtnClick());
         binding.barChart.setOnClickListener(view -> Toast.makeText(requireContext(), "bar chart", Toast.LENGTH_SHORT).show());
         binding.pieChart.setOnClickListener(view -> Toast.makeText(requireContext(), "pie pie", Toast.LENGTH_SHORT).show());
@@ -306,6 +307,20 @@ public class HomeFragment extends Fragment {
         setReenterTransition(reenter);
 
         Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
+    }
+
+    private void navigateToTransactionsListFragment() {
+
+        MaterialSharedAxis exit = new MaterialSharedAxis(MaterialSharedAxis.X, true);
+        exit.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+        MaterialSharedAxis reenter = new MaterialSharedAxis(MaterialSharedAxis.X, false);
+        reenter.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+
+        setExitTransition(exit);
+        setReenterTransition(reenter);
+
+        Navigation.findNavController(binding.getRoot()).navigate(HomeFragmentDirections
+                .actionHomeFragmentToListTransactionsFragment(wallet.getId(), wallet.getCurrency()));
     }
 
     private void showWalletList() {

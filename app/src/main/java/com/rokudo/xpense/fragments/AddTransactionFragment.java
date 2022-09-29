@@ -27,7 +27,6 @@ import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.utils.DatabaseUtils;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Objects;
 
 public class AddTransactionFragment extends Fragment {
