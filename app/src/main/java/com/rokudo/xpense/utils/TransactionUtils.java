@@ -1,5 +1,7 @@
 package com.rokudo.xpense.utils;
 
+import android.annotation.SuppressLint;
+
 import androidx.annotation.NonNull;
 
 import com.rokudo.xpense.models.Transaction;
@@ -7,6 +9,7 @@ import com.rokudo.xpense.models.Transaction;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+@SuppressLint("SimpleDateFormat")
 public class TransactionUtils {
     static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("E, MMM d, HH:mm");
     static SimpleDateFormat todayDateFormat = new SimpleDateFormat("HH:mm");
@@ -22,5 +25,4 @@ public class TransactionUtils {
     private static boolean isTransactionDoneToday(Transaction transaction) {
         return checkDateFormat.format(new Date()).equals(checkDateFormat.format(transaction.getDate()));
     }
-
 }

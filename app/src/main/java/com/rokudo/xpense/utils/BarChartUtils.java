@@ -1,6 +1,6 @@
 package com.rokudo.xpense.utils;
 
-import android.widget.TextView;
+import android.annotation.SuppressLint;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -8,13 +8,19 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.rokudo.xpense.models.TransEntry;
+import com.rokudo.xpense.models.Transaction;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 public class BarChartUtils {
+
+    @SuppressLint("SimpleDateFormat")
+    static SimpleDateFormat checkDateFormat = new SimpleDateFormat("dd");
+
     public static void setupBarChart(BarChart barChart, int textColor) {
-        BarData data = new BarData(getDataSet(textColor));
-        barChart.setData(data);
         barChart.setMaxVisibleValueCount(60);
         barChart.setPinchZoom(false);
         barChart.setDoubleTapToZoomEnabled(false);
@@ -39,32 +45,39 @@ public class BarChartUtils {
         barChart.getDescription().setEnabled(false);
     }
 
-    private static ArrayList<IBarDataSet> getDataSet(int textColor) {
-        ArrayList<IBarDataSet> dataSets;
+    public static void updateBarchartData(BarChart barChart, List<Transaction> transactionList, int textColor) {
+        barChart.invalidate();
 
+        ArrayList<IBarDataSet> dataSets = new ArrayList<>();
         ArrayList<BarEntry> valueSet = new ArrayList<>();
-        BarEntry v1e1 = new BarEntry(18, 821); // Jan
-        valueSet.add(v1e1);
-        BarEntry v1e2 = new BarEntry(19, 334); // Feb
-        valueSet.add(v1e2);
-        BarEntry v2e1 = new BarEntry(20, 1179); // Jan
-        valueSet.add(v2e1);
-        BarEntry v2e2 = new BarEntry(21, 714); // Jan
-        valueSet.add(v2e2);
-        BarEntry v2e3 = new BarEntry(22, 245); // Jan
-        valueSet.add(v2e3);
-        BarEntry v2e4 = new BarEntry(23, 332); // Jan
-        valueSet.add(v2e4);
-        BarEntry v2e5 = new BarEntry(24, 41); // Jan
-        valueSet.add(v2e5);
-        BarDataSet barDataSet = new BarDataSet(valueSet, "Transport");
-//        barDataSet1.setColor(Color.rgb(0, 155, 0));
+
+        List<TransEntry> transEntryArrayList = new ArrayList<>();
+        for (Transaction transaction : transactionList) {
+            TransEntry transEntry = new TransEntry(checkDateFormat.format(transaction.getDate()), Float.parseFloat(transaction.getAmount().toString()));
+            if (transEntryArrayList.contains(transEntry)) {
+                int index = transEntryArrayList.indexOf(transEntry);
+                transEntryArrayList.get(index).setAmount((float) (transEntryArrayList.get(index).getAmount() + transaction.getAmount()));
+            } else {
+                transEntryArrayList.add(transEntry);
+            }
+        }
+
+        for (TransEntry transEntry : transEntryArrayList) {
+            BarEntry barEntry = new BarEntry((float) Double.parseDouble(transEntry.getDate()), transEntry.getAmount());
+            valueSet.add(barEntry);
+        }
+        barChart.getXAxis().setGranularity(1f);
+
+
+        BarDataSet barDataSet = new BarDataSet(valueSet, "");
         barDataSet.setDrawValues(true);
         barDataSet.setValueTextSize(10);
         barDataSet.setValueTextColor(textColor);
+        barDataSet.setValueTextColor(textColor);
 
-        dataSets = new ArrayList<>();
         dataSets.add(barDataSet);
-        return dataSets;
+        barChart.setData(new BarData(dataSets));
+        barChart.animate();
     }
+
 }

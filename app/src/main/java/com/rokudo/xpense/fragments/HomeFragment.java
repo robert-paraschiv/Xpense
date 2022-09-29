@@ -2,6 +2,7 @@ package com.rokudo.xpense.fragments;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 import static com.rokudo.xpense.utils.BarChartUtils.setupBarChart;
+import static com.rokudo.xpense.utils.BarChartUtils.updateBarchartData;
 import static com.rokudo.xpense.utils.DatabaseUtils.usersRef;
 import static com.rokudo.xpense.utils.PieChartUtils.setupPieChart;
 import static com.rokudo.xpense.utils.PieChartUtils.updatePieChartData;
@@ -119,6 +120,7 @@ public class HomeFragment extends Fragment {
                         }
                     }
                     updatePieChartData(binding.pieChart, wallet, values);
+                    updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor());
                     gotTransactionsOnce = true;
                 });
         transactionViewModel.loadLatestTransaction().observe(getViewLifecycleOwner(), value -> {
