@@ -9,6 +9,7 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="fragments_background">#202020</color>
+    <color name="dialog_background_color">#202020</color>
     <color name="status_bar_color">#202020</color>
 
     <color name="input_card_color">#171717</color>

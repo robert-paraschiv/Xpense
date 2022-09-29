@@ -45,6 +45,9 @@ public class PieChartUtils {
 
 
     public static void updatePieChartData(PieChart pieChart, Wallet wallet, List<Transaction> transactionList) {
+        if (wallet == null || transactionList == null) {
+            return;
+        }
         Map<String, Double> categories = new HashMap<>();
         Double sum = 0.0;
         for (Transaction transaction : transactionList) {
@@ -59,7 +62,7 @@ public class PieChartUtils {
             sum += transaction.getAmount();
         }
 
-        pieChart.setCenterText(sum + " " + wallet.getCurrency());
+        pieChart.setCenterText(wallet.getCurrency());
 
         ArrayList<PieEntry> entries = new ArrayList<>();
         Double finalSum = sum;

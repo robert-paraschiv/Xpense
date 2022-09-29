@@ -31,7 +31,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.transition.Hold;
-import com.google.android.material.transition.MaterialElevationScale;
 import com.google.android.material.transition.MaterialFadeThrough;
 import com.google.android.material.transition.MaterialSharedAxis;
 import com.google.firebase.auth.FirebaseAuth;
@@ -281,11 +280,11 @@ public class HomeFragment extends Fragment {
 
         NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToSettingsFragment();
 
-        MaterialFadeThrough hold = new MaterialFadeThrough();
-        hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+        MaterialFadeThrough materialFadeThrough = new MaterialFadeThrough();
+        materialFadeThrough.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
 
-        setExitTransition(hold);
-        setReenterTransition(hold);
+        setExitTransition(materialFadeThrough);
+        setReenterTransition(materialFadeThrough);
 
         Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
     }
@@ -298,13 +297,11 @@ public class HomeFragment extends Fragment {
         NavDirections navDirections = HomeFragmentDirections
                 .actionHomeFragmentToAddTransactionLayout(wallet.getId(), wallet.getCurrency());
 
-        MaterialElevationScale exit = new MaterialElevationScale(false);
-        exit.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
-        MaterialElevationScale reenter = new MaterialElevationScale(true);
-        reenter.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+        Hold hold = new Hold();
+        hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
 
-        setExitTransition(exit);
-        setReenterTransition(reenter);
+        setExitTransition(hold);
+        setReenterTransition(hold);
 
         Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
     }
