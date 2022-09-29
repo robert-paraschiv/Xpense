@@ -87,7 +87,7 @@ public class AddTransactionFragment extends Fragment {
         transaction.setType(binding.incomeChip.isChecked() ? INCOME_TYPE : EXPENSE_TYPE);
         TransactionViewModel viewModel =
                 new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
-        viewModel.addTransaction(walletId, transaction).observe(getViewLifecycleOwner(), result -> {
+        viewModel.addTransaction(transaction).observe(getViewLifecycleOwner(), result -> {
             if (result.equals("Success")) {
                 Navigation.findNavController(binding.getRoot()).popBackStack();
             }

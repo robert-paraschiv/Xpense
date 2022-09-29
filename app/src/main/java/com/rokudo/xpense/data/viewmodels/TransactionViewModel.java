@@ -8,7 +8,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.rokudo.xpense.data.repositories.TransactionRepo;
 import com.rokudo.xpense.models.Transaction;
-import com.rokudo.xpense.models.Wallet;
 
 import java.util.List;
 
@@ -24,8 +23,13 @@ public class TransactionViewModel extends AndroidViewModel {
         return repo.loadTransactions(walletId);
     }
 
-    public MutableLiveData<String> addTransaction(String walletId, Transaction transaction) {
-        return repo.addTransaction(walletId, transaction);
+    public MutableLiveData<String> addTransaction(Transaction transaction) {
+        return repo.addTransaction(transaction);
     }
+
+    public MutableLiveData<Transaction> loadLatestTransaction() {
+        return repo.loadLatestTransaction();
+    }
+
 
 }

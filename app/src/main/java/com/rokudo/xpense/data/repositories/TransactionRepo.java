@@ -2,17 +2,12 @@ package com.rokudo.xpense.data.repositories;
 
 import android.util.Log;
 
-import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.rokudo.xpense.models.Transaction;
-import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.DatabaseUtils;
 
 import java.util.ArrayList;
@@ -25,8 +20,9 @@ public class TransactionRepo {
 
     private ListenerRegistration transactionListener;
 
-    private MutableLiveData<List<Transaction>> allTransactionList;
-    private MutableLiveData<String> addTransactionStatus;
+    private final MutableLiveData<List<Transaction>> allTransactionList;
+    private final MutableLiveData<Transaction> latestTransaction;
+    private final MutableLiveData<String> addTransactionStatus;
 
     public static TransactionRepo getInstance() {
         if (instance == null) {
@@ -38,6 +34,7 @@ public class TransactionRepo {
     public TransactionRepo() {
         this.allTransactionList = new MutableLiveData<>();
         this.addTransactionStatus = new MutableLiveData<>();
+        this.latestTransaction = new MutableLiveData<>();
     }
 
     public MutableLiveData<List<Transaction>> loadTransactions(String walletId) {
@@ -59,6 +56,7 @@ public class TransactionRepo {
                                 transactionList.add(transaction);
                             }
                         }
+                        latestTransaction.setValue(transactionList.get(0));
                         allTransactionList.setValue(transactionList);
                     }
                 });
@@ -66,7 +64,7 @@ public class TransactionRepo {
         return allTransactionList;
     }
 
-    public MutableLiveData<String> addTransaction(String walletId, Transaction transaction) {
+    public MutableLiveData<String> addTransaction(Transaction transaction) {
 
         DatabaseUtils.transactionsRef.document(transaction.getId())
                 .set(transaction)
@@ -75,5 +73,9 @@ public class TransactionRepo {
                 });
 
         return addTransactionStatus;
+    }
+
+    public MutableLiveData<Transaction> loadLatestTransaction() {
+        return latestTransaction;
     }
 }
