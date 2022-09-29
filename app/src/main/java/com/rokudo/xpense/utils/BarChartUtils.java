@@ -13,6 +13,7 @@ import com.rokudo.xpense.models.Transaction;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class BarChartUtils {
@@ -52,7 +53,12 @@ public class BarChartUtils {
         ArrayList<BarEntry> valueSet = new ArrayList<>();
 
         List<TransEntry> transEntryArrayList = new ArrayList<>();
+
+        int todayDayOfMonth = Integer.parseInt(checkDateFormat.format(new Date()));
         for (Transaction transaction : transactionList) {
+            if (todayDayOfMonth - Integer.parseInt(checkDateFormat.format(transaction.getDate())) > 5) {
+                continue;
+            }
             TransEntry transEntry = new TransEntry(checkDateFormat.format(transaction.getDate()), Float.parseFloat(transaction.getAmount().toString()));
             if (transEntryArrayList.contains(transEntry)) {
                 int index = transEntryArrayList.indexOf(transEntry);

@@ -26,6 +26,7 @@ import com.rokudo.xpense.databinding.FragmentAddTransactionBinding;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.utils.DatabaseUtils;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 
@@ -48,8 +49,7 @@ public class AddTransactionFragment extends Fragment {
             imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
         }, 250);
         binding.transactionCategoryDropDown.setOnFocusChangeListener((view, b) -> {
-            InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            hideKeyboard(view);
             binding.transactionCategoryDropDown.showDropDown();
         });
 
@@ -59,6 +59,11 @@ public class AddTransactionFragment extends Fragment {
         return binding.getRoot();
     }
 
+    private void hideKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
     private void getWalletId() {
         AddTransactionFragmentArgs args = AddTransactionFragmentArgs.fromBundle(requireArguments());
         walletId = args.getWalletId();
@@ -66,8 +71,10 @@ public class AddTransactionFragment extends Fragment {
     }
 
     private void initOnClicks() {
-        binding.backBtn.setOnClickListener(view ->
-                Navigation.findNavController(binding.getRoot()).popBackStack());
+        binding.backBtn.setOnClickListener(view -> {
+            hideKeyboard(view);
+            Navigation.findNavController(binding.getRoot()).popBackStack();
+        });
         binding.saveTransactionBtn.setOnClickListener(v -> addTransactionToDb());
     }
 
@@ -78,7 +85,11 @@ public class AddTransactionFragment extends Fragment {
         transaction.setWalletId(walletId);
         transaction.setAmount(Double.valueOf(Objects.requireNonNull(binding.transactionAmount.getText()).toString()));
         transaction.setCurrency(currency);
-        transaction.setDate(new Date());
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(binding.simpleDatePicker.getYear(),
+                binding.simpleDatePicker.getMonth(),
+                binding.simpleDatePicker.getDayOfMonth());
+        transaction.setDate(calendar.getTime());
         transaction.setPicUrl(DatabaseUtils.getCurrentUser().getPictureUrl());
         transaction.setUser_id(DatabaseUtils.getCurrentUser().getUid());
         transaction.setUserName(DatabaseUtils.getCurrentUser().getName());
