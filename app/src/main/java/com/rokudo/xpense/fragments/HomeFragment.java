@@ -30,6 +30,7 @@ import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialFadeThrough;
 import com.google.android.material.transition.MaterialSharedAxis;
@@ -37,6 +38,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.data.viewmodels.WalletsViewModel;
@@ -60,8 +62,10 @@ public class HomeFragment extends Fragment {
 
     private ListenerRegistration userDetailsListenerRegistration;
     private final List<Transaction> transactionList = new ArrayList<>();
-    private Wallet wallet;
+    private Wallet mWallet;
     private WalletsViewModel walletsViewModel;
+    private TransactionViewModel transactionViewModel;
+
     private Boolean gotTransactionsOnce = false;
 
     @Override
@@ -97,30 +101,37 @@ public class HomeFragment extends Fragment {
                 binding.addWalletLayout.setVisibility(View.GONE);
                 updateWalletUI(wallet);
                 loadTransactions(wallet.getId());
-                this.wallet = wallet;
+                mWallet = wallet;
             }
         });
     }
 
     private void loadTransactions(String id) {
-        TransactionViewModel transactionViewModel = new ViewModelProvider(requireActivity())
+        transactionViewModel = new ViewModelProvider(requireActivity())
                 .get(TransactionViewModel.class);
 
         transactionViewModel.loadTransactions(id)
                 .observe(getViewLifecycleOwner(), values -> {
+                    boolean needUpdate = false;
                     for (Transaction transaction : values) {
                         if (transactionList.contains(transaction)) {
-                            transactionList.set(transactionList.indexOf(transaction), transaction);
+                            if (isTransactionDifferent(transaction, transactionList.get(transactionList.indexOf(transaction)))) {
+                                needUpdate = true;
+                                transactionList.set(transactionList.indexOf(transaction), transaction);
+                            }
                         } else {
                             if (gotTransactionsOnce) {
                                 transactionList.add(0, transaction);
                             } else {
                                 transactionList.add(transaction);
                             }
+                            needUpdate = true;
                         }
                     }
-                    updatePieChartData(binding.pieChart, wallet, values);
-                    updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor());
+                    if (needUpdate) {
+                        updatePieChartData(binding.pieChart, mWallet, values);
+                        updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor());
+                    }
                     gotTransactionsOnce = true;
                 });
         transactionViewModel.loadLatestTransaction().observe(getViewLifecycleOwner(), value -> {
@@ -128,6 +139,17 @@ public class HomeFragment extends Fragment {
                 updateLatestTransactionUI(value);
             }
         });
+    }
+
+    private boolean isTransactionDifferent(Transaction newTransaction, Transaction oldTransaction) {
+        if (!newTransaction.getAmount().equals(oldTransaction.getAmount()))
+            return true;
+        if (!newTransaction.getCategory().equals(oldTransaction.getCategory()))
+            return true;
+        if (!newTransaction.getType().equals(oldTransaction.getType()))
+            return true;
+
+        return false;
     }
 
     @SuppressLint("SetTextI18n")
@@ -233,6 +255,15 @@ public class HomeFragment extends Fragment {
         binding.adjustBalanceBtn.setOnClickListener(view -> handleAdjustBalanceBtnClick());
         binding.barChart.setOnClickListener(view -> Toast.makeText(requireContext(), "bar chart", Toast.LENGTH_SHORT).show());
         binding.pieChart.setOnClickListener(view -> Toast.makeText(requireContext(), "pie pie", Toast.LENGTH_SHORT).show());
+        binding.emptyTransactions.setOnClickListener(v -> deleteTransactions());
+    }
+
+    private void deleteTransactions() {
+        DatabaseUtils.transactionsRef.get().addOnSuccessListener(queryDocumentSnapshots -> {
+            for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                documentSnapshot.getReference().delete();
+            }
+        });
     }
 
     private void handleAddWalletBtnClick() {
@@ -295,7 +326,7 @@ public class HomeFragment extends Fragment {
                 .build();
 
         NavDirections navDirections = HomeFragmentDirections
-                .actionHomeFragmentToAddTransactionLayout(wallet.getId(), wallet.getCurrency());
+                .actionHomeFragmentToAddTransactionLayout(mWallet.getId(), mWallet.getCurrency());
 
         Hold hold = new Hold();
         hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
@@ -317,7 +348,7 @@ public class HomeFragment extends Fragment {
         setReenterTransition(reenter);
 
         Navigation.findNavController(binding.getRoot()).navigate(HomeFragmentDirections
-                .actionHomeFragmentToListTransactionsFragment(wallet.getId(), wallet.getCurrency()));
+                .actionHomeFragmentToListTransactionsFragment(mWallet.getId(), mWallet.getCurrency()));
     }
 
     private void showWalletList() {

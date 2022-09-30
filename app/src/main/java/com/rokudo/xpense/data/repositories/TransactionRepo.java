@@ -56,7 +56,7 @@ public class TransactionRepo {
                                 transactionList.add(transaction);
                             }
                         }
-                        latestTransaction.setValue(transactionList.get(0));
+                        latestTransaction.setValue(transactionList.size() == 0 ? new Transaction() : transactionList.get(0));
                         allTransactionList.setValue(transactionList);
                     }
                 });
@@ -68,9 +68,7 @@ public class TransactionRepo {
 
         DatabaseUtils.transactionsRef.document(transaction.getId())
                 .set(transaction)
-                .addOnSuccessListener(result -> {
-                    addTransactionStatus.setValue("Success");
-                });
+                .addOnSuccessListener(result -> addTransactionStatus.setValue("Success"));
 
         return addTransactionStatus;
     }

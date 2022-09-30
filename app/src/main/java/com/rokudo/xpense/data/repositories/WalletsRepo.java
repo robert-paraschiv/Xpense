@@ -65,6 +65,9 @@ public class WalletsRepo {
                         .limit(1)
                         .get().addOnSuccessListener(queryDocumentSnapshots -> {
                             Log.d(TAG, "loadWallet: got wallet");
+                            if (queryDocumentSnapshots.getDocuments().size() == 0) {
+                                return;
+                            }
                             Wallet wallet = queryDocumentSnapshots
                                     .getDocuments().get(0).toObject(Wallet.class);
                             if (wallet != null) {
