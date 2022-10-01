@@ -18,17 +18,20 @@ import com.bumptech.glide.request.RequestOptions;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
+import com.rokudo.xpense.utils.dialogs.WalletListDialog;
 
 import java.util.List;
 
 public class WalletsAdapter extends RecyclerView.Adapter<WalletsAdapter.ViewHolder> {
-    List<Wallet> walletList;
+    private final List<Wallet> walletList;
+    private final WalletListDialog.OnClickListener onItemClickListener;
 
-    public WalletsAdapter(List<Wallet> walletList) {
+    public WalletsAdapter(List<Wallet> walletList, WalletListDialog.OnClickListener onClickListener) {
         this.walletList = walletList;
+        this.onItemClickListener = onClickListener;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final TextView walletItemTitle;
         final TextView walletItemAmount;
         final ImageView walletItemPersonImage;
@@ -39,6 +42,17 @@ public class WalletsAdapter extends RecyclerView.Adapter<WalletsAdapter.ViewHold
             walletItemTitle = itemView.findViewById(R.id.walletItemTitle);
             walletItemAmount = itemView.findViewById(R.id.walletItemAmount);
             walletItemPersonImage = itemView.findViewById(R.id.walletItemPersonImage);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            if (onItemClickListener != null) {
+                int position = getBindingAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    onItemClickListener.onWalletClick(walletList.get(position));
+                }
+            }
         }
     }
 
@@ -54,15 +68,20 @@ public class WalletsAdapter extends RecyclerView.Adapter<WalletsAdapter.ViewHold
         Wallet wallet = walletList.get(position);
         holder.walletItemTitle.setText(wallet.getTitle());
         holder.walletItemAmount.setText(String.format("%s %s", wallet.getCurrency(), wallet.getAmount().toString()));
-        Glide.with(holder.walletItemPersonImage)
-                .load(getOtherUserProfilePic(wallet.getWalletUsers()))
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .apply(RequestOptions.circleCropTransform())
-                .placeholder(DialogUtils.getCircularProgressDrawable(holder.walletItemPersonImage.getContext()))
-                .fallback(R.drawable.ic_baseline_person_24)
-                .error(R.drawable.ic_baseline_person_24)
-                .transition(withCrossFade())
-                .into(holder.walletItemPersonImage);
+
+        if (wallet.getWalletUsers() == null || wallet.getWalletUsers().isEmpty() || wallet.getWalletUsers().size() < 2) {
+            holder.walletItemPersonImage.setVisibility(View.GONE);
+        } else {
+            Glide.with(holder.walletItemPersonImage)
+                    .load(getOtherUserProfilePic(wallet.getWalletUsers()))
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .apply(RequestOptions.circleCropTransform())
+                    .placeholder(DialogUtils.getCircularProgressDrawable(holder.walletItemPersonImage.getContext()))
+                    .fallback(R.drawable.ic_baseline_person_24)
+                    .error(R.drawable.ic_baseline_person_24)
+                    .transition(withCrossFade())
+                    .into(holder.walletItemPersonImage);
+        }
 
     }
 

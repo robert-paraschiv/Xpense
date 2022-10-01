@@ -153,16 +153,19 @@ public class HomeFragment extends Fragment {
         binding.walletTitle.setText(wallet.getTitle());
         binding.walletAmount.setText(wallet.getAmount().toString());
         binding.walletCurrency.setText(wallet.getCurrency());
-
-        Glide.with(binding.sharedWithIcon)
-                .load(getOtherUserProfilePic(wallet.getWalletUsers()))
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .apply(RequestOptions.circleCropTransform())
-                .placeholder(DialogUtils.getCircularProgressDrawable(requireContext()))
-                .fallback(R.drawable.ic_baseline_person_24)
-                .error(R.drawable.ic_baseline_person_24)
-                .transition(withCrossFade())
-                .into(binding.sharedWithIcon);
+        if (wallet.getWalletUsers() == null || wallet.getWalletUsers().isEmpty() || wallet.getWalletUsers().size() < 2) {
+            binding.sharedWithIcon.setVisibility(View.GONE);
+        } else {
+            Glide.with(binding.sharedWithIcon)
+                    .load(getOtherUserProfilePic(wallet.getWalletUsers()))
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .apply(RequestOptions.circleCropTransform())
+                    .placeholder(DialogUtils.getCircularProgressDrawable(requireContext()))
+                    .fallback(R.drawable.ic_baseline_person_24)
+                    .error(R.drawable.ic_baseline_person_24)
+                    .transition(withCrossFade())
+                    .into(binding.sharedWithIcon);
+        }
 
     }
 
@@ -330,10 +333,35 @@ public class HomeFragment extends Fragment {
             @Override
             public void onChanged(ArrayList<Wallet> wallets) {
                 WalletListDialog walletListDialog = new WalletListDialog(wallets);
+                walletListDialog.setClickListener(new WalletListDialog.OnClickListener() {
+                    @Override
+                    public void onWalletClick(Wallet wallet) {
+                        walletListDialog.dismiss();
+                        mWallet = wallet;
+                        PrefsUtils.setSelectedWalletId(requireContext(), wallet.getId());
+//                        if (!binding.barChart.isEmpty()) {
+                        binding.barChart.clear();
+//                            binding.barChart.notifyDataSetChanged();
+//                        }
+//                        if (!binding.pieChart.isEmpty()) {
+                        binding.pieChart.clear();
+//                            binding.pieChart.invalidate();
+//                        }
+                        transactionList.clear();
+                        updateBarchartData(binding.barChart, transactionList, new TextView(requireContext()).getCurrentTextColor());
+                        updatePieChartData(binding.pieChart, wallet, transactionList);
+                        loadWalletDetails();
+                        loadTransactions(wallet.getId());
+                    }
+
+                    @Override
+                    public void onAddClick() {
+                        handleAddWalletBtnClick();
+                    }
+                });
                 walletListDialog.show(getParentFragmentManager(), "walletListDialog");
                 walletsViewModel.loadWallets().removeObserver(this);
             }
         });
     }
-
 }

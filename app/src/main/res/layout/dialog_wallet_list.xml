@@ -30,6 +30,7 @@
         tools:listitem="@layout/item_wallet" />
 
     <com.google.android.material.button.MaterialButton
+        android:id="@+id/addWalletBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/walletListDialogRv"
