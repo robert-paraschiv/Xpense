@@ -1,5 +1,7 @@
 package com.rokudo.xpense.models;
 
+import androidx.annotation.NonNull;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -12,18 +14,9 @@ public class Wallet {
     private String currency;
     private Date creation_date;
     private List<String> users;
+    private List<WalletUser> walletUsers;
 
     public Wallet() {
-    }
-
-    public Wallet(String id) {
-        this.id = id;
-    }
-
-    public Wallet(String title, Double amount, String currency) {
-        this.title = title;
-        this.amount = amount;
-        this.currency = currency;
     }
 
     public String getId() {
@@ -82,6 +75,15 @@ public class Wallet {
         this.users = users;
     }
 
+    public List<WalletUser> getWalletUsers() {
+        return walletUsers;
+    }
+
+    public void setWalletUsers(List<WalletUser> walletUsers) {
+        this.walletUsers = walletUsers;
+    }
+
+    @NonNull
     @Override
     public String toString() {
         return "Wallet{" +

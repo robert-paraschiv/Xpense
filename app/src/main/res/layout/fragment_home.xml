@@ -380,6 +380,7 @@
         android:layout_marginBottom="22dp"
         android:contentDescription="@string/add_conversation_button"
         android:src="@drawable/ic_round_delete_24"
+        android:visibility="gone"
         app:fabSize="normal"
         app:layout_anchorGravity="bottom|start"
         app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />

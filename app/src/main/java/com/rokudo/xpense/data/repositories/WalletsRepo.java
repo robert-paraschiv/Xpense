@@ -2,10 +2,8 @@ package com.rokudo.xpense.data.repositories;
 
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -15,7 +13,6 @@ import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.DatabaseUtils;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class WalletsRepo {
     private static final String TAG = "WalletsRepo";

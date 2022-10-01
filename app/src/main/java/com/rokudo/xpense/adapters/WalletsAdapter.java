@@ -1,5 +1,8 @@
 package com.rokudo.xpense.adapters;
 
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+import static com.rokudo.xpense.models.WalletUser.getOtherUserProfilePic;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,14 +12,17 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.models.Wallet;
+import com.rokudo.xpense.utils.dialogs.DialogUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class WalletsAdapter extends RecyclerView.Adapter<WalletsAdapter.ViewHolder> {
-    List<Wallet> walletList = new ArrayList<>();
+    List<Wallet> walletList;
 
     public WalletsAdapter(List<Wallet> walletList) {
         this.walletList = walletList;
@@ -48,6 +54,15 @@ public class WalletsAdapter extends RecyclerView.Adapter<WalletsAdapter.ViewHold
         Wallet wallet = walletList.get(position);
         holder.walletItemTitle.setText(wallet.getTitle());
         holder.walletItemAmount.setText(String.format("%s %s", wallet.getCurrency(), wallet.getAmount().toString()));
+        Glide.with(holder.walletItemPersonImage)
+                .load(getOtherUserProfilePic(wallet.getWalletUsers()))
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .apply(RequestOptions.circleCropTransform())
+                .placeholder(DialogUtils.getCircularProgressDrawable(holder.walletItemPersonImage.getContext()))
+                .fallback(R.drawable.ic_baseline_person_24)
+                .error(R.drawable.ic_baseline_person_24)
+                .transition(withCrossFade())
+                .into(holder.walletItemPersonImage);
 
     }
 

@@ -1,11 +1,13 @@
 package com.rokudo.xpense.fragments;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+import static com.rokudo.xpense.models.WalletUser.getOtherUserProfilePic;
 import static com.rokudo.xpense.utils.BarChartUtils.setupBarChart;
 import static com.rokudo.xpense.utils.BarChartUtils.updateBarchartData;
 import static com.rokudo.xpense.utils.DatabaseUtils.usersRef;
 import static com.rokudo.xpense.utils.PieChartUtils.setupPieChart;
 import static com.rokudo.xpense.utils.PieChartUtils.updatePieChartData;
+import static com.rokudo.xpense.utils.TransactionUtils.updateLatestTransactionUI;
 import static com.rokudo.xpense.utils.UserUtils.checkIfUserPicIsDifferent;
 import static com.rokudo.xpense.utils.dialogs.DialogUtils.getCircularProgressDrawable;
 
@@ -21,6 +23,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
@@ -30,7 +33,6 @@ import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialFadeThrough;
 import com.google.android.material.transition.MaterialSharedAxis;
@@ -38,7 +40,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.data.viewmodels.WalletsViewModel;
@@ -48,8 +49,8 @@ import com.rokudo.xpense.models.User;
 import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.DatabaseUtils;
 import com.rokudo.xpense.utils.PrefsUtils;
-import com.rokudo.xpense.utils.TransactionUtils;
 import com.rokudo.xpense.utils.dialogs.AdjustBalanceDialog;
+import com.rokudo.xpense.utils.dialogs.DialogUtils;
 import com.rokudo.xpense.utils.dialogs.WalletListDialog;
 
 import java.util.ArrayList;
@@ -74,6 +75,7 @@ public class HomeFragment extends Fragment {
         if (binding == null) {
             binding = FragmentHomeBinding.inflate(inflater, container, false);
             walletsViewModel = new ViewModelProvider(requireActivity()).get(WalletsViewModel.class);
+            transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
             initOnClicks();
 
             setupBarChart(binding.barChart, new TextView(requireContext()).getCurrentTextColor());
@@ -107,9 +109,6 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadTransactions(String id) {
-        transactionViewModel = new ViewModelProvider(requireActivity())
-                .get(TransactionViewModel.class);
-
         transactionViewModel.loadTransactions(id)
                 .observe(getViewLifecycleOwner(), values -> {
                     boolean needUpdate = false;
@@ -136,7 +135,7 @@ public class HomeFragment extends Fragment {
                 });
         transactionViewModel.loadLatestTransaction().observe(getViewLifecycleOwner(), value -> {
             if (value != null) {
-                updateLatestTransactionUI(value);
+                updateLatestTransactionUI(value, binding, requireContext());
             }
         });
     }
@@ -146,42 +145,7 @@ public class HomeFragment extends Fragment {
             return true;
         if (!newTransaction.getCategory().equals(oldTransaction.getCategory()))
             return true;
-        if (!newTransaction.getType().equals(oldTransaction.getType()))
-            return true;
-
-        return false;
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void updateLatestTransactionUI(Transaction transaction) {
-        if (transaction.getId() == null) {
-            binding.lastTransactionLayout.setVisibility(View.GONE);
-        } else {
-            binding.lastTransactionLayout.setVisibility(View.VISIBLE);
-            String transAmountPrefix;
-            if (transaction.getType().equals("Income")) {
-                binding.latestTransactionItem.transactionAmount
-                        .setTextColor(getResources().getColor(android.R.color.holo_green_dark, requireActivity().getTheme()));
-                transAmountPrefix = "+ ";
-            } else {
-                transAmountPrefix = "- ";
-                binding.latestTransactionItem.transactionAmount
-                        .setTextColor(getResources().getColor(android.R.color.holo_red_dark, requireActivity().getTheme()));
-            }
-            binding.latestTransactionItem.transactionAmount.setText(transAmountPrefix + transaction.getAmount().toString());
-            binding.latestTransactionItem.transactionCategory.setText(transaction.getCategory());
-            binding.latestTransactionItem.transactionDate.setText(TransactionUtils.getTransactionDateString(transaction));
-            binding.latestTransactionItem.transactionPerson.setText(transaction.getUserName());
-            CircularProgressDrawable circularProgressDrawable = getCircularProgressDrawable(requireContext());
-            Glide.with(requireContext())
-                    .load(transaction.getPicUrl())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .apply(RequestOptions.circleCropTransform())
-                    .placeholder(circularProgressDrawable)
-                    .fallback(R.drawable.ic_baseline_person_24)
-                    .transition(withCrossFade())
-                    .into(binding.latestTransactionItem.transactionImage);
-        }
+        return !newTransaction.getType().equals(oldTransaction.getType());
     }
 
     @SuppressLint("SetTextI18n")
@@ -189,8 +153,18 @@ public class HomeFragment extends Fragment {
         binding.walletTitle.setText(wallet.getTitle());
         binding.walletAmount.setText(wallet.getAmount().toString());
         binding.walletCurrency.setText(wallet.getCurrency());
-    }
 
+        Glide.with(binding.sharedWithIcon)
+                .load(getOtherUserProfilePic(wallet.getWalletUsers()))
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .apply(RequestOptions.circleCropTransform())
+                .placeholder(DialogUtils.getCircularProgressDrawable(requireContext()))
+                .fallback(R.drawable.ic_baseline_person_24)
+                .error(R.drawable.ic_baseline_person_24)
+                .transition(withCrossFade())
+                .into(binding.sharedWithIcon);
+
+    }
 
     @Override
     public void onStart() {
@@ -352,8 +326,14 @@ public class HomeFragment extends Fragment {
     }
 
     private void showWalletList() {
-        WalletListDialog walletListDialog = new WalletListDialog(new ArrayList<>());
-        walletListDialog.show(getParentFragmentManager(), "walletListDialog");
+        walletsViewModel.loadWallets().observe(getViewLifecycleOwner(), new Observer<ArrayList<Wallet>>() {
+            @Override
+            public void onChanged(ArrayList<Wallet> wallets) {
+                WalletListDialog walletListDialog = new WalletListDialog(wallets);
+                walletListDialog.show(getParentFragmentManager(), "walletListDialog");
+                walletsViewModel.loadWallets().removeObserver(this);
+            }
+        });
     }
 
 }

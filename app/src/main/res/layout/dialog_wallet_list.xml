@@ -29,4 +29,14 @@
         tools:itemCount="4"
         tools:listitem="@layout/item_wallet" />
 
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/walletListDialogRv"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="48dp"
+        android:text="Add Wallet"
+        app:cornerRadius="10dp" />
+
+
 </RelativeLayout>
