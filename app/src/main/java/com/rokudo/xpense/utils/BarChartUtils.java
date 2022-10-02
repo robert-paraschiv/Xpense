@@ -19,7 +19,7 @@ import java.util.List;
 public class BarChartUtils {
 
     @SuppressLint("SimpleDateFormat")
-    static SimpleDateFormat checkDateFormat = new SimpleDateFormat("dd");
+    static SimpleDateFormat dayOfMonthFormat = new SimpleDateFormat("dd");
 
     public static void setupBarChart(BarChart barChart, int textColor) {
         barChart.setMaxVisibleValueCount(60);
@@ -54,12 +54,12 @@ public class BarChartUtils {
 
         List<TransEntry> transEntryArrayList = new ArrayList<>();
 
-        int todayDayOfMonth = Integer.parseInt(checkDateFormat.format(new Date()));
+        int todayDayOfMonth = Integer.parseInt(dayOfMonthFormat.format(new Date()));
         for (Transaction transaction : transactionList) {
-            if (todayDayOfMonth - Integer.parseInt(checkDateFormat.format(transaction.getDate())) > 5) {
+            if (todayDayOfMonth - Integer.parseInt(dayOfMonthFormat.format(transaction.getDate())) > 5) {
                 continue;
             }
-            TransEntry transEntry = new TransEntry(checkDateFormat.format(transaction.getDate()), Float.parseFloat(transaction.getAmount().toString()));
+            TransEntry transEntry = new TransEntry(dayOfMonthFormat.format(transaction.getDate()), Float.parseFloat(transaction.getAmount().toString()));
             if (transEntryArrayList.contains(transEntry)) {
                 int index = transEntryArrayList.indexOf(transEntry);
                 transEntryArrayList.get(index).setAmount((float) (transEntryArrayList.get(index).getAmount() + transaction.getAmount()));

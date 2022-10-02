@@ -72,6 +72,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<WalletsAdapter.ViewHold
         if (wallet.getWalletUsers() == null || wallet.getWalletUsers().isEmpty() || wallet.getWalletUsers().size() < 2) {
             holder.walletItemPersonImage.setVisibility(View.GONE);
         } else {
+            holder.walletItemPersonImage.setVisibility(View.VISIBLE);
             Glide.with(holder.walletItemPersonImage)
                     .load(getOtherUserProfilePic(wallet.getWalletUsers()))
                     .diskCacheStrategy(DiskCacheStrategy.ALL)

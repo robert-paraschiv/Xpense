@@ -156,6 +156,8 @@ public class HomeFragment extends Fragment {
         if (wallet.getWalletUsers() == null || wallet.getWalletUsers().isEmpty() || wallet.getWalletUsers().size() < 2) {
             binding.sharedWithIcon.setVisibility(View.GONE);
         } else {
+            binding.sharedWithIcon.setVisibility(View.VISIBLE);
+
             Glide.with(binding.sharedWithIcon)
                     .load(getOtherUserProfilePic(wallet.getWalletUsers()))
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -356,6 +358,7 @@ public class HomeFragment extends Fragment {
 
                     @Override
                     public void onAddClick() {
+                        walletListDialog.dismiss();
                         handleAddWalletBtnClick();
                     }
                 });

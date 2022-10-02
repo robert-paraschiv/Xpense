@@ -262,7 +262,7 @@
 
                         <include
                             android:id="@+id/latestTransactionItem"
-                            layout="@layout/item_transaction"
+                            layout="@layout/item_latest_transaction"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_margin="8dp"

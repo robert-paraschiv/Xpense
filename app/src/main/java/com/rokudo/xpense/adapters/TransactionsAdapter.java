@@ -53,7 +53,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
                         , holder.transactionAmount.getContext().getTheme()));
             }
             holder.transactionAmount.setText(transAmountPrefix + transaction.getAmount().toString());
-
+            holder.transactionTitle.setText(transaction.getTitle());
             holder.transactionDate.setText(getTransactionDateString(transaction));
             holder.transactionCategory.setText(transaction.getCategory());
 
@@ -81,6 +81,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
         final TextView transactionAmount;
         final TextView transactionDate;
         final TextView transactionCategory;
+        final TextView transactionTitle;
 
 
         public ViewHolder(@NonNull View itemView) {
@@ -90,6 +91,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
             transactionAmount = itemView.findViewById(R.id.transactionAmount);
             transactionDate = itemView.findViewById(R.id.transactionDate);
             transactionCategory = itemView.findViewById(R.id.transactionCategory);
+            transactionTitle = itemView.findViewById(R.id.transactionTitle);
         }
     }
 }
