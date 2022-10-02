@@ -3,6 +3,7 @@ package com.rokudo.xpense.models;
 import androidx.annotation.NonNull;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -45,7 +46,8 @@ public class Wallet implements Serializable {
     }
 
     public Double getAmount() {
-        return amount;
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+        return Double.parseDouble(decimalFormat.format(amount));
     }
 
     public void setAmount(Double amount) {

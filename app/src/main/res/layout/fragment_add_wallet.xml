@@ -117,7 +117,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="none"
-            app:simpleItems="@array/simple_items" />
+            app:simpleItems="@array/currency_items" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

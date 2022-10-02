@@ -43,11 +43,11 @@ public class AddWalletFragment extends Fragment {
 
         walletsViewModel = new ViewModelProvider(requireActivity()).get(WalletsViewModel.class);
 
-        binding.walletTitleInput.requestFocus();
-        binding.walletTitleInput.postDelayed(() -> {
-            InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-        }, 250);
+//        binding.walletTitleInput.requestFocus();
+//        binding.walletTitleInput.postDelayed(() -> {
+//            InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+//            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+//        }, 250);
 
         binding.currencyDropBox.setText("RON", false);
         binding.currencyDropBox.setOnFocusChangeListener((view, b) -> {

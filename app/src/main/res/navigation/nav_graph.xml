@@ -42,6 +42,10 @@
         <argument
             android:name="currency"
             app:argType="string" />
+        <argument
+            android:name="transaction"
+            app:argType="com.rokudo.xpense.models.Transaction"
+            app:nullable="true" />
     </fragment>
     <fragment
         android:id="@+id/addWalletFragment"

@@ -1,9 +1,11 @@
 package com.rokudo.xpense.models;
 
+import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.Objects;
 
-public class Transaction {
+public class Transaction implements Serializable {
     private String id;
     private String walletId;
     private String type;
@@ -81,7 +83,8 @@ public class Transaction {
     }
 
     public Double getAmount() {
-        return amount;
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+        return Double.parseDouble(decimalFormat.format(amount));
     }
 
     public void setAmount(Double amount) {

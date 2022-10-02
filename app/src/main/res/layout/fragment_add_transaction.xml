@@ -66,7 +66,7 @@
             app:textStartPadding="18dp" />
 
         <com.google.android.material.chip.Chip
-            android:id="@+id/ExpenseChip"
+            android:id="@+id/expenseChip"
             style="@style/Widget.Material3.Chip.Filter.Elevated"
             android:layout_width="wrap_content"
             android:layout_height="60dp"

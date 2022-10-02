@@ -278,13 +278,13 @@ public class HomeFragment extends Fragment {
     }
 
     private void handleAdjustBalanceBtnClick() {
-        AdjustBalanceDialog adjustBalanceDialog = new AdjustBalanceDialog("1400.00");
+        AdjustBalanceDialog adjustBalanceDialog = new AdjustBalanceDialog(mWallet.getAmount().toString());
         adjustBalanceDialog.setOnDialogClicks(new AdjustBalanceDialog.OnAdjustBalanceDialogClickListener() {
             @Override
             public void onApplyClick(String amount) {
-                Toast.makeText(requireContext(), "applied", Toast.LENGTH_SHORT).show();
-                binding.walletAmount.setText(amount);
                 adjustBalanceDialog.dismiss();
+                if (Double.parseDouble(amount) != mWallet.getAmount())
+                    navigateToAddTransaction(amount);
             }
 
             @Override
@@ -293,6 +293,33 @@ public class HomeFragment extends Fragment {
             }
         });
         adjustBalanceDialog.show(getParentFragmentManager(), "adjustBalanceDialog");
+    }
+
+    private void navigateToAddTransaction(String amount) {
+        binding.adjustBalanceBtn.setTransitionName("adjustBalance");
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+                .addSharedElement(binding.adjustBalanceBtn, "adjustBalance")
+                .build();
+
+        Transaction transaction = new Transaction();
+        if (Double.parseDouble(amount) > mWallet.getAmount()) {
+            transaction.setType("Income");
+            transaction.setAmount(Double.parseDouble(amount) - mWallet.getAmount());
+        } else {
+            transaction.setType("Expense");
+            transaction.setAmount(mWallet.getAmount() - Double.parseDouble(amount));
+        }
+
+        NavDirections navDirections = HomeFragmentDirections
+                .actionHomeFragmentToAddTransactionLayout(mWallet.getId(), mWallet.getCurrency(), transaction);
+
+        Hold hold = new Hold();
+        hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+
+        setExitTransition(hold);
+        setReenterTransition(hold);
+
+        Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
     }
 
     private void navigateToSettings() {
@@ -319,7 +346,7 @@ public class HomeFragment extends Fragment {
                 .build();
 
         NavDirections navDirections = HomeFragmentDirections
-                .actionHomeFragmentToAddTransactionLayout(mWallet.getId(), mWallet.getCurrency());
+                .actionHomeFragmentToAddTransactionLayout(mWallet.getId(), mWallet.getCurrency(), null);
 
         Hold hold = new Hold();
         hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));

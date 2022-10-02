@@ -41,12 +41,14 @@ public class AddTransactionFragment extends Fragment {
         // Inflate the layout for this fragment
         binding = FragmentAddTransactionBinding.inflate(inflater, container, false);
 
-        binding.transactionCategoryDropDown.setText("Groceries", false);
-        binding.transactionTitle.requestFocus();
-        binding.transactionTitle.postDelayed(() -> {
-            InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-        }, 250);
+//        binding.transactionTitle.requestFocus();
+//        binding.transactionTitle.postDelayed(() -> {
+//            InputMethodManager imm = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+//            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+//        }, 250);
+
+        handleArgs();
+
         binding.transactionCategoryDropDown.setOnFocusChangeListener((view, b) -> {
             hideKeyboard(view);
             binding.transactionCategoryDropDown.showDropDown();
@@ -56,6 +58,29 @@ public class AddTransactionFragment extends Fragment {
         initOnClicks();
 
         return binding.getRoot();
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void handleArgs() {
+        AddTransactionFragmentArgs args = AddTransactionFragmentArgs.fromBundle(requireArguments());
+        if (args.getTransaction() == null) {
+            binding.getRoot().setTransitionName(requireContext().getResources().getString(R.string.transition_name_add_transaction));
+            binding.transactionCategoryDropDown.setText("Groceries", false);
+        } else {
+            Transaction transaction = args.getTransaction();
+            binding.getRoot().setTransitionName("adjustBalance");
+            binding.transactionAmount.setText(transaction.getAmount().toString());
+
+            if (transaction.getType().equals("Income")) {
+                binding.expenseChip.setChecked(false);
+                binding.incomeChip.setChecked(true);
+                binding.transactionCategoryDropDown.setText("Others", false);
+            } else {
+                binding.transactionCategoryDropDown.setText("Groceries", false);
+                binding.expenseChip.setChecked(true);
+                binding.incomeChip.setChecked(false);
+            }
+        }
     }
 
     private void hideKeyboard(View view) {
