@@ -9,6 +9,7 @@
     <string-array name="category_items">
         <item>Groceries</item>
         <item>Restaurant</item>
+        <item>Drinks</item>
         <item>Transport</item>
         <item>Bills</item>
         <item>Gifts</item>

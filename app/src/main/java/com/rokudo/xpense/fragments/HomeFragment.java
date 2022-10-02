@@ -128,7 +128,7 @@ public class HomeFragment extends Fragment {
                         }
                     }
                     if (needUpdate) {
-                        updatePieChartData(binding.pieChart, mWallet, values);
+                        updatePieChartData(binding.pieChart, mWallet.getCurrency(), values);
                         updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor());
                     }
                     gotTransactionsOnce = true;
@@ -233,8 +233,25 @@ public class HomeFragment extends Fragment {
         binding.seeAllTransactionsBtn.setOnClickListener(view -> navigateToTransactionsListFragment());
         binding.adjustBalanceBtn.setOnClickListener(view -> handleAdjustBalanceBtnClick());
         binding.barChart.setOnClickListener(view -> Toast.makeText(requireContext(), "bar chart", Toast.LENGTH_SHORT).show());
-        binding.pieChart.setOnClickListener(view -> Toast.makeText(requireContext(), "pie pie", Toast.LENGTH_SHORT).show());
+        binding.pieChartCard.setOnClickListener(view -> navigateToPieDetails());
+        binding.pieDetailsBtn.setOnClickListener(view -> navigateToPieDetails());
         binding.emptyTransactions.setOnClickListener(v -> deleteTransactions());
+    }
+
+    private void navigateToPieDetails() {
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+                .addSharedElement(binding.pieChartCard, "pieChartCard")
+                .build();
+
+        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToPieDetailsFragment(mWallet);
+
+        Hold hold = new Hold();
+        hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+
+        setExitTransition(hold);
+        setReenterTransition(hold);
+
+        Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
     }
 
     private void deleteTransactions() {
@@ -264,7 +281,6 @@ public class HomeFragment extends Fragment {
     }
 
     private void handleEditWalletBtn(Wallet wallet) {
-
         MaterialSharedAxis exit = new MaterialSharedAxis(MaterialSharedAxis.X, false);
         exit.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
         MaterialSharedAxis reenter = new MaterialSharedAxis(MaterialSharedAxis.X, true);
@@ -392,7 +408,7 @@ public class HomeFragment extends Fragment {
 //                        }
                         transactionList.clear();
                         updateBarchartData(binding.barChart, transactionList, new TextView(requireContext()).getCurrentTextColor());
-                        updatePieChartData(binding.pieChart, wallet, transactionList);
+                        updatePieChartData(binding.pieChart, wallet.getCurrency(), transactionList);
                         loadWalletDetails();
                         loadTransactions(wallet.getId());
                     }

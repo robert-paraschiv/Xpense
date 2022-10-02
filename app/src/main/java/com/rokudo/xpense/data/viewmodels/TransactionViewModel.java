@@ -23,6 +23,10 @@ public class TransactionViewModel extends AndroidViewModel {
         return repo.loadTransactions(walletId);
     }
 
+    public MutableLiveData<List<Transaction>> loadTransactions() {
+        return repo.loadTransactions();
+    }
+
     public MutableLiveData<String> addTransaction(Transaction transaction) {
         return repo.addTransaction(transaction);
     }

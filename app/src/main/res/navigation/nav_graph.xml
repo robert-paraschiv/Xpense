@@ -25,6 +25,9 @@
         <action
             android:id="@+id/action_homeFragment_to_editWalletFragment"
             app:destination="@id/editWalletFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_pieDetailsFragment"
+            app:destination="@id/pieDetailsFragment" />
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
@@ -69,6 +72,15 @@
         android:name="com.rokudo.xpense.fragments.EditWalletFragment"
         android:label="fragment_edit_wallet"
         tools:layout="@layout/fragment_edit_wallet" >
+        <argument
+            android:name="wallet"
+            app:argType="com.rokudo.xpense.models.Wallet" />
+    </fragment>
+    <fragment
+        android:id="@+id/pieDetailsFragment"
+        android:name="com.rokudo.xpense.fragments.PieDetailsFragment"
+        android:label="fragment_pie_details"
+        tools:layout="@layout/fragment_pie_details" >
         <argument
             android:name="wallet"
             app:argType="com.rokudo.xpense.models.Wallet" />

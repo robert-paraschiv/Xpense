@@ -36,7 +36,9 @@ public class TransactionRepo {
         this.addTransactionStatus = new MutableLiveData<>();
         this.latestTransaction = new MutableLiveData<>();
     }
-
+    public MutableLiveData<List<Transaction>> loadTransactions(){
+        return allTransactionList;
+    }
     public MutableLiveData<List<Transaction>> loadTransactions(String walletId) {
         if (transactionListener != null) {
             transactionListener.remove();

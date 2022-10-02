@@ -44,8 +44,8 @@ public class PieChartUtils {
     }
 
 
-    public static void updatePieChartData(PieChart pieChart, Wallet wallet, List<Transaction> transactionList) {
-        if (wallet == null || transactionList == null) {
+    public static void updatePieChartData(PieChart pieChart, String currency, List<Transaction> transactionList) {
+        if (transactionList == null) {
             return;
         }
         Map<String, Double> categories = new HashMap<>();
@@ -61,8 +61,6 @@ public class PieChartUtils {
             }
             sum += transaction.getAmount();
         }
-
-        pieChart.setCenterText(wallet.getCurrency());
 
         ArrayList<PieEntry> entries = new ArrayList<>();
         Double finalSum = sum;
@@ -80,7 +78,7 @@ public class PieChartUtils {
         data.setValueTextSize(12f);
         data.setValueTextColor(Color.BLACK);
 
-        pieChart.setCenterText(sum + " " + wallet.getCurrency());
+        pieChart.setCenterText(sum + " " + currency);
         pieChart.setData(data);
         pieChart.invalidate();
 

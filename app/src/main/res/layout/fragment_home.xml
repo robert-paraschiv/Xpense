@@ -313,13 +313,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <com.github.mikephil.charting.charts.BarChart
-                        android:id="@+id/barChart"
-                        android:layout_width="match_parent"
-                        android:layout_height="220dp"
-                        android:layout_below="@id/monthspendingtext2"
-                        android:layout_margin="8dp" />
-
                     <TextView
                         android:id="@+id/monthspendingtext2"
                         android:layout_width="wrap_content"
@@ -329,6 +322,34 @@
                         android:layout_margin="12dp"
                         android:gravity="center_horizontal"
                         android:text="This week's spending" />
+
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:id="@+id/barChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp"
+                        android:layout_below="@id/monthspendingtext2"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginBottom="8dp" />
+
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/barDetailsBtn"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:layout_below="@id/barChart"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        android:text="Show Details"
+                        app:cornerRadius="10dp" />
+
                 </RelativeLayout>
 
 
@@ -340,19 +361,16 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_weight="0.5"
+                android:clickable="true"
+                android:transitionName="pieChartCard"
                 app:cardCornerRadius="18dp"
                 app:strokeWidth="0dp">
 
                 <RelativeLayout
+                    android:id="@+id/pieChartLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <com.github.mikephil.charting.charts.PieChart
-                        android:id="@+id/pieChart"
-                        android:layout_width="match_parent"
-                        android:layout_height="220dp"
-                        android:layout_below="@id/monthspendingtext"
-                        android:layout_margin="8dp" />
+                    android:layout_height="wrap_content"
+                    android:transitionName="pieChartLayout">
 
                     <TextView
                         android:id="@+id/monthspendingtext"
@@ -363,6 +381,32 @@
                         android:layout_margin="12dp"
                         android:gravity="center_horizontal"
                         android:text="This month's spending" />
+
+                    <com.github.mikephil.charting.charts.PieChart
+                        android:id="@+id/pieChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp"
+                        android:layout_below="@id/monthspendingtext"
+                        android:layout_margin="8dp"
+                        android:transitionName="pieChart" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/pieDetailsBtn"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:layout_below="@id/pieChart"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        android:text="Show Details"
+                        app:cornerRadius="10dp" />
+
+
                 </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
 
