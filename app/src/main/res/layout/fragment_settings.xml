@@ -38,7 +38,8 @@
                 android:layout_toEndOf="@id/backBtn"
                 android:text="Settings"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:ignore="HardcodedText" />
         </RelativeLayout>
 
     </com.google.android.material.appbar.MaterialToolbar>
@@ -65,6 +66,17 @@
         android:maxLines="1"
         android:textSize="16sp"
         tools:text="Full Name Possibly very large here" />
+
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/saveBtn"
+        style="@style/Widget.Material3.Button.TextButton.Dialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/name"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="48dp"
+        android:text="Save" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/signOutBtn"

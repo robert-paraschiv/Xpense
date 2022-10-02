@@ -111,7 +111,7 @@
                     android:layout_marginStart="24dp"
                     android:layout_marginTop="24dp"
                     android:layout_marginEnd="8dp"
-                    android:layout_toStartOf="@id/sharedWithIcon"
+                    android:layout_toStartOf="@id/sharedWithLayout"
                     android:orientation="horizontal">
 
                     <TextView
@@ -142,15 +142,31 @@
                 </LinearLayout>
 
 
-                <ImageView
-                    android:id="@+id/sharedWithIcon"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                <LinearLayout
+                    android:id="@+id/sharedWithLayout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="32dp"
                     android:layout_marginEnd="24dp"
-                    android:contentDescription="@string/user_profile_picture"
-                    android:src="@drawable/ic_baseline_person_24" />
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/sharedWithIcon"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:contentDescription="@string/user_profile_picture"
+                        android:src="@drawable/ic_baseline_person_24" />
+
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="4dp"
+                        android:padding="0dp"
+                        android:src="@drawable/ic_round_group_24" />
+
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/walletDetailsLayout"

@@ -1,5 +1,6 @@
 package com.rokudo.xpense.fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -21,6 +22,7 @@ import com.rokudo.xpense.data.viewmodels.WalletsViewModel;
 import com.rokudo.xpense.databinding.FragmentAddWalletBinding;
 import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.DatabaseUtils;
+import com.rokudo.xpense.utils.PrefsUtils;
 
 import java.util.Collections;
 import java.util.Date;
@@ -32,6 +34,7 @@ public class AddWalletFragment extends Fragment {
 
     private WalletsViewModel walletsViewModel;
 
+    @SuppressLint("SetTextI18n")
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -84,6 +87,7 @@ public class AddWalletFragment extends Fragment {
         wallet.setUsers(Collections.singletonList(DatabaseUtils.getCurrentUser().getUid()));
         wallet.setCreator_id(DatabaseUtils.getCurrentUser().getUid());
 
+        PrefsUtils.setSelectedWalletId(requireContext(), wallet.getId());
         walletsViewModel.addWallet(wallet).observe(getViewLifecycleOwner(), s -> {
             if (s.equals("Success")) {
                 Navigation.findNavController(binding.getRoot()).popBackStack();

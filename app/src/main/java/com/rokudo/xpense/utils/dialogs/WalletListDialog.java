@@ -26,6 +26,8 @@ public class WalletListDialog extends BottomSheetDialogFragment {
         void onWalletClick(Wallet wallet);
 
         void onAddClick();
+
+        void onEditClick(Wallet wallet);
     }
 
     public WalletListDialog(List<Wallet> walletList) {

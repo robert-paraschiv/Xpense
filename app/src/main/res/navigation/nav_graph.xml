@@ -22,6 +22,9 @@
         <action
             android:id="@+id/action_homeFragment_to_listTransactionsFragment"
             app:destination="@id/listTransactionsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_editWalletFragment"
+            app:destination="@id/editWalletFragment" />
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
@@ -56,5 +59,14 @@
         <argument
             android:name="walletCurrency"
             app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/editWalletFragment"
+        android:name="com.rokudo.xpense.fragments.EditWalletFragment"
+        android:label="fragment_edit_wallet"
+        tools:layout="@layout/fragment_edit_wallet" >
+        <argument
+            android:name="wallet"
+            app:argType="com.rokudo.xpense.models.Wallet" />
     </fragment>
 </navigation>

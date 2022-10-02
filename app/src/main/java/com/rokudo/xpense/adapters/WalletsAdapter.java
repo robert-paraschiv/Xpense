@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.button.MaterialButton;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
@@ -35,6 +36,7 @@ public class WalletsAdapter extends RecyclerView.Adapter<WalletsAdapter.ViewHold
         final TextView walletItemTitle;
         final TextView walletItemAmount;
         final ImageView walletItemPersonImage;
+        final MaterialButton editWalletBtn;
 
 
         public ViewHolder(@NonNull View itemView) {
@@ -42,7 +44,17 @@ public class WalletsAdapter extends RecyclerView.Adapter<WalletsAdapter.ViewHold
             walletItemTitle = itemView.findViewById(R.id.walletItemTitle);
             walletItemAmount = itemView.findViewById(R.id.walletItemAmount);
             walletItemPersonImage = itemView.findViewById(R.id.walletItemPersonImage);
+            editWalletBtn = itemView.findViewById(R.id.editWalletBtn);
             itemView.setOnClickListener(this);
+
+            this.editWalletBtn.setOnClickListener(view -> {
+                if (onItemClickListener != null) {
+                    int position = getBindingAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        onItemClickListener.onEditClick(walletList.get(position));
+                    }
+                }
+            });
         }
 
         @Override

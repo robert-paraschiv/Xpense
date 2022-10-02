@@ -2,11 +2,12 @@ package com.rokudo.xpense.models;
 
 import androidx.annotation.NonNull;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-public class Wallet {
+public class Wallet implements Serializable {
     private String id;
     private String title;
     private String creator_id;

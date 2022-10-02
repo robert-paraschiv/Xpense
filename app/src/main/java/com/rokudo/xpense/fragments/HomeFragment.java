@@ -154,9 +154,9 @@ public class HomeFragment extends Fragment {
         binding.walletAmount.setText(wallet.getAmount().toString());
         binding.walletCurrency.setText(wallet.getCurrency());
         if (wallet.getWalletUsers() == null || wallet.getWalletUsers().isEmpty() || wallet.getWalletUsers().size() < 2) {
-            binding.sharedWithIcon.setVisibility(View.GONE);
+            binding.sharedWithLayout.setVisibility(View.GONE);
         } else {
-            binding.sharedWithIcon.setVisibility(View.VISIBLE);
+            binding.sharedWithLayout.setVisibility(View.VISIBLE);
 
             Glide.with(binding.sharedWithIcon)
                     .load(getOtherUserProfilePic(wallet.getWalletUsers()))
@@ -263,6 +263,20 @@ public class HomeFragment extends Fragment {
         Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
     }
 
+    private void handleEditWalletBtn(Wallet wallet) {
+
+        MaterialSharedAxis exit = new MaterialSharedAxis(MaterialSharedAxis.X, false);
+        exit.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+        MaterialSharedAxis reenter = new MaterialSharedAxis(MaterialSharedAxis.X, true);
+        reenter.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+
+        setExitTransition(exit);
+        setReenterTransition(reenter);
+
+        Navigation.findNavController(binding.getRoot()).navigate(HomeFragmentDirections
+                .actionHomeFragmentToEditWalletFragment(wallet));
+    }
+
     private void handleAdjustBalanceBtnClick() {
         AdjustBalanceDialog adjustBalanceDialog = new AdjustBalanceDialog("1400.00");
         adjustBalanceDialog.setOnDialogClicks(new AdjustBalanceDialog.OnAdjustBalanceDialogClickListener() {
@@ -360,6 +374,12 @@ public class HomeFragment extends Fragment {
                     public void onAddClick() {
                         walletListDialog.dismiss();
                         handleAddWalletBtnClick();
+                    }
+
+                    @Override
+                    public void onEditClick(Wallet wallet) {
+                        walletListDialog.dismiss();
+                        handleEditWalletBtn(wallet);
                     }
                 });
                 walletListDialog.show(getParentFragmentManager(), "walletListDialog");
