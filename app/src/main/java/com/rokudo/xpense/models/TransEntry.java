@@ -1,22 +1,25 @@
 package com.rokudo.xpense.models;
 
+import java.util.Date;
 import java.util.Objects;
 
 public class TransEntry {
-    String date;
+    String day;
+    Date date;
     Float amount;
 
-    public TransEntry(String date, Float amount) {
+    public TransEntry(String day, Date date, Float amount) {
+        this.day = day;
         this.date = date;
         this.amount = amount;
     }
 
-    public String getDate() {
-        return date;
+    public String getDay() {
+        return day;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setDay(String day) {
+        this.day = day;
     }
 
     public Float getAmount() {
@@ -27,17 +30,25 @@ public class TransEntry {
         this.amount = amount;
     }
 
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TransEntry TransEntry = (TransEntry) o;
-        return date.equals(TransEntry.date);
+        return day.equals(TransEntry.day);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(date);
+        return Objects.hash(day);
     }
 }
 

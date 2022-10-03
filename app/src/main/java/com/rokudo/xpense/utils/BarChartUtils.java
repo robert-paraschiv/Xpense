@@ -1,6 +1,7 @@
 package com.rokudo.xpense.utils;
 
 import android.annotation.SuppressLint;
+import android.util.Log;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -8,15 +9,18 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.google.android.gms.common.util.CollectionUtils;
 import com.rokudo.xpense.models.TransEntry;
 import com.rokudo.xpense.models.Transaction;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 public class BarChartUtils {
+    private static final String TAG = "BarChartUtils";
 
     @SuppressLint("SimpleDateFormat")
     static SimpleDateFormat dayOfMonthFormat = new SimpleDateFormat("dd");
@@ -59,7 +63,7 @@ public class BarChartUtils {
             if (todayDayOfMonth - Integer.parseInt(dayOfMonthFormat.format(transaction.getDate())) > 5) {
                 continue;
             }
-            TransEntry transEntry = new TransEntry(dayOfMonthFormat.format(transaction.getDate()), Float.parseFloat(transaction.getAmount().toString()));
+            TransEntry transEntry = new TransEntry(dayOfMonthFormat.format(transaction.getDate()), transaction.getDate(), Float.parseFloat(transaction.getAmount().toString()));
             if (transEntryArrayList.contains(transEntry)) {
                 int index = transEntryArrayList.indexOf(transEntry);
                 transEntryArrayList.get(index).setAmount((float) (transEntryArrayList.get(index).getAmount() + transaction.getAmount()));
@@ -68,11 +72,24 @@ public class BarChartUtils {
             }
         }
 
-        for (TransEntry transEntry : transEntryArrayList) {
-            BarEntry barEntry = new BarEntry((float) Double.parseDouble(transEntry.getDate()), transEntry.getAmount());
+        for (int i = 0; i < transEntryArrayList.size(); i++) {
+            BarEntry barEntry = new BarEntry(i, transEntryArrayList.get(i).getAmount());
             valueSet.add(barEntry);
         }
+        transEntryArrayList.sort(Comparator.comparingLong(transEntry -> transEntry.getDate().getTime()));
         barChart.getXAxis().setGranularity(1f);
+        try {
+            barChart.getXAxis().setValueFormatter((value, axis) -> {
+                if ((int) value >= transEntryArrayList.size()) {
+                    return "";
+                } else {
+                    return transEntryArrayList.get((int) value).getDay();
+                }
+            });
+        } catch (IndexOutOfBoundsException exception) {
+            Log.e(TAG, "updateBarchartData: ", exception);
+        }
+
 
 
         BarDataSet barDataSet = new BarDataSet(valueSet, "");

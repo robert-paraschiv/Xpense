@@ -127,7 +127,7 @@ public class HomeFragment extends Fragment {
                             needUpdate = true;
                         }
                     }
-                    if (needUpdate) {
+                    if (needUpdate || values.isEmpty()) {
                         updatePieChartData(binding.pieChart, mWallet.getCurrency(), values, true);
                         updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor());
                     }
@@ -401,8 +401,6 @@ public class HomeFragment extends Fragment {
                         transactionList.clear();
                         binding.barChart.clear();
                         binding.pieChart.clear();
-                        updateBarchartData(binding.barChart, transactionList, new TextView(requireContext()).getCurrentTextColor());
-                        updatePieChartData(binding.pieChart, wallet.getCurrency(), transactionList, true);
                         loadWalletDetails();
                         loadTransactions(wallet.getId());
                     }

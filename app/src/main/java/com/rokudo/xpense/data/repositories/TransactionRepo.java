@@ -36,9 +36,11 @@ public class TransactionRepo {
         this.addTransactionStatus = new MutableLiveData<>();
         this.latestTransaction = new MutableLiveData<>();
     }
-    public MutableLiveData<List<Transaction>> loadTransactions(){
+
+    public MutableLiveData<List<Transaction>> loadTransactions() {
         return allTransactionList;
     }
+
     public MutableLiveData<List<Transaction>> loadTransactions(String walletId) {
         if (transactionListener != null) {
             transactionListener.remove();
@@ -47,8 +49,10 @@ public class TransactionRepo {
                 .whereEqualTo("walletId", walletId)
                 .orderBy("date", Query.Direction.DESCENDING)
                 .addSnapshotListener((value, error) -> {
-                    if (error != null || value == null) {
+                    if (error != null || value == null || value.isEmpty()) {
                         Log.e(TAG, "loadTransactions: null or error: ", error);
+                        allTransactionList.setValue(new ArrayList<>());
+                        latestTransaction.setValue(new Transaction());
                     } else {
                         List<Transaction> transactionList = new ArrayList<>();
                         for (DocumentSnapshot documentSnapshot : value) {
