@@ -72,12 +72,15 @@ public class BarChartUtils {
             }
         }
 
+        transEntryArrayList.sort(Comparator.comparingLong(transEntry -> transEntry.getDate().getTime()));
         for (int i = 0; i < transEntryArrayList.size(); i++) {
             BarEntry barEntry = new BarEntry(i, transEntryArrayList.get(i).getAmount());
             valueSet.add(barEntry);
         }
-        transEntryArrayList.sort(Comparator.comparingLong(transEntry -> transEntry.getDate().getTime()));
+
         barChart.getXAxis().setGranularity(1f);
+
+        //Set X Axis Labels from transaction list
         try {
             barChart.getXAxis().setValueFormatter((value, axis) -> {
                 if ((int) value >= transEntryArrayList.size()) {
@@ -89,7 +92,6 @@ public class BarChartUtils {
         } catch (IndexOutOfBoundsException exception) {
             Log.e(TAG, "updateBarchartData: ", exception);
         }
-
 
 
         BarDataSet barDataSet = new BarDataSet(valueSet, "");
