@@ -128,7 +128,7 @@ public class HomeFragment extends Fragment {
                         }
                     }
                     if (needUpdate) {
-                        updatePieChartData(binding.pieChart, mWallet.getCurrency(), values);
+                        updatePieChartData(binding.pieChart, mWallet.getCurrency(), values, true);
                         updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor());
                     }
                     gotTransactionsOnce = true;
@@ -398,17 +398,11 @@ public class HomeFragment extends Fragment {
                         walletListDialog.dismiss();
                         mWallet = wallet;
                         PrefsUtils.setSelectedWalletId(requireContext(), wallet.getId());
-//                        if (!binding.barChart.isEmpty()) {
-                        binding.barChart.clear();
-//                            binding.barChart.notifyDataSetChanged();
-//                        }
-//                        if (!binding.pieChart.isEmpty()) {
-                        binding.pieChart.clear();
-//                            binding.pieChart.invalidate();
-//                        }
                         transactionList.clear();
+                        binding.barChart.clear();
+                        binding.pieChart.clear();
                         updateBarchartData(binding.barChart, transactionList, new TextView(requireContext()).getCurrentTextColor());
-                        updatePieChartData(binding.pieChart, wallet.getCurrency(), transactionList);
+                        updatePieChartData(binding.pieChart, wallet.getCurrency(), transactionList, true);
                         loadWalletDetails();
                         loadTransactions(wallet.getId());
                     }

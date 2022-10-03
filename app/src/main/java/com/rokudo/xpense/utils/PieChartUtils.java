@@ -10,7 +10,6 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.rokudo.xpense.models.Transaction;
-import com.rokudo.xpense.models.Wallet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,7 +43,7 @@ public class PieChartUtils {
     }
 
 
-    public static void updatePieChartData(PieChart pieChart, String currency, List<Transaction> transactionList) {
+    public static void updatePieChartData(PieChart pieChart, String currency, List<Transaction> transactionList, boolean animate) {
         if (transactionList == null) {
             return;
         }
@@ -82,7 +81,8 @@ public class PieChartUtils {
         pieChart.setData(data);
         pieChart.invalidate();
 
-        pieChart.animateY(1400);
+        if (animate)
+            pieChart.animateY(1400);
     }
 
     private static float getPercentageOfCategory(Double value, Double finalSum) {
