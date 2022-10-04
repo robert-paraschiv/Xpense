@@ -232,10 +232,27 @@ public class HomeFragment extends Fragment {
         binding.addTransactionBtn.setOnClickListener(view -> navigateToAddTransaction());
         binding.seeAllTransactionsBtn.setOnClickListener(view -> navigateToTransactionsListFragment());
         binding.adjustBalanceBtn.setOnClickListener(view -> handleAdjustBalanceBtnClick());
-        binding.barChart.setOnClickListener(view -> Toast.makeText(requireContext(), "bar chart", Toast.LENGTH_SHORT).show());
+        binding.barChartCard.setOnClickListener(view -> navigateToBarDetails());
+        binding.barDetailsBtn.setOnClickListener(view -> navigateToBarDetails());
         binding.pieChartCard.setOnClickListener(view -> navigateToPieDetails());
         binding.pieDetailsBtn.setOnClickListener(view -> navigateToPieDetails());
         binding.emptyTransactions.setOnClickListener(v -> deleteTransactions());
+    }
+
+    private void navigateToBarDetails() {
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+                .addSharedElement(binding.barChartCard, "barChartCard")
+                .build();
+
+        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToBarDetailsFragment(mWallet);
+
+        Hold hold = new Hold();
+        hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+
+        setExitTransition(hold);
+        setReenterTransition(hold);
+
+        Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
     }
 
     private void navigateToPieDetails() {

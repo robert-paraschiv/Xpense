@@ -1,7 +1,5 @@
 package com.rokudo.xpense.fragments;
 
-import static com.rokudo.xpense.utils.PieChartUtils.setupPieChart;
-
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,27 +16,29 @@ import com.google.android.material.shape.ShapeAppearanceModel;
 import com.google.android.material.transition.MaterialContainerTransform;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
-import com.rokudo.xpense.databinding.FragmentPieDetailsBinding;
+import com.rokudo.xpense.databinding.FragmentBarDetailsBinding;
 import com.rokudo.xpense.models.Transaction;
+import com.rokudo.xpense.utils.BarChartUtils;
 import com.rokudo.xpense.utils.MapUtil;
-import com.rokudo.xpense.utils.PieChartUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class PieDetailsFragment extends Fragment {
-    private FragmentPieDetailsBinding binding;
+public class BarDetailsFragment extends Fragment {
+
+    private FragmentBarDetailsBinding binding;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        binding = FragmentPieDetailsBinding.inflate(inflater, container, false);
+        binding = FragmentBarDetailsBinding.inflate(inflater, container, false);
 
         binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.backBtn).popBackStack());
 
-        setupPieChart(binding.pieChart, new TextView(requireContext()).getCurrentTextColor());
+        BarChartUtils.setupBarChart(binding.barChart, new TextView(requireContext()).getCurrentTextColor());
         loadTransactions();
+
         return binding.getRoot();
     }
 
@@ -58,7 +58,7 @@ public class PieDetailsFragment extends Fragment {
             }
             categories = MapUtil.sortByValue(categories);
             categories.forEach((key, value) -> binding.transCategoriesText.append(key + " : " + value + "\n"));
-            PieChartUtils.updatePieChartData(binding.pieChart, "", values, false);
+            BarChartUtils.updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor());
         });
     }
 
@@ -71,6 +71,4 @@ public class PieDetailsFragment extends Fragment {
         setSharedElementEnterTransition(materialContainerTransform);
         super.onCreate(savedInstanceState);
     }
-
-
 }

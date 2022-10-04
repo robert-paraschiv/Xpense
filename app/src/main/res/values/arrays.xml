@@ -13,6 +13,7 @@
         <item>Transport</item>
         <item>Bills</item>
         <item>Gifts</item>
+        <item>Medical</item>
         <item>Others</item>
     </string-array>
 </resources>
