@@ -8,6 +8,7 @@ import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.rokudo.xpense.models.TransEntry;
 import com.rokudo.xpense.models.Transaction;
@@ -83,11 +84,14 @@ public class BarChartUtils {
 
         //Set X Axis Labels from transaction list
         try {
-            barChart.getXAxis().setValueFormatter((value, axis) -> {
-                if ((int) value >= transEntryArrayList.size()) {
-                    return "";
-                } else {
-                    return transEntryArrayList.get((int) value).getDay();
+            barChart.getXAxis().setValueFormatter(new ValueFormatter() {
+                @Override
+                public String getFormattedValue(float value) {
+                    if ((int) value >= transEntryArrayList.size()) {
+                        return "";
+                    } else {
+                        return transEntryArrayList.get((int) value).getDay();
+                    }
                 }
             });
         } catch (IndexOutOfBoundsException exception) {

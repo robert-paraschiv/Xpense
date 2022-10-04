@@ -1,6 +1,7 @@
 package com.rokudo.xpense.utils;
 
 import android.graphics.Color;
+import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
@@ -32,6 +33,7 @@ public class PieChartUtils {
         pieChart.setHoleColor(Color.TRANSPARENT);
         pieChart.getDescription().setEnabled(false);
         pieChart.setDrawEntryLabels(false);
+        pieChart.setMinAngleForSlices(20f);
         Legend l = pieChart.getLegend();
         l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
         l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
@@ -81,14 +83,15 @@ public class PieChartUtils {
         dataSet.setColors(colors);
         if (!isCalledFromHome) {
             dataSet.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
-            dataSet.setValueLinePart1OffsetPercentage(90.f);
+            dataSet.setValueLineColor(new TextView(pieChart.getContext()).getCurrentTextColor());
+            dataSet.setValueLinePart1OffsetPercentage(90f);
         }
 
         PieData data = new PieData(dataSet);
         data.setDrawValues(!isCalledFromHome);
         data.setValueFormatter(new PercentFormatter());
         data.setValueTextSize(12f);
-        data.setValueTextColor(Color.BLACK);
+        data.setValueTextColor(new TextView(pieChart.getContext()).getCurrentTextColor());
 
 
         pieChart.setCenterText(getRoundedValue(sum) + " " + currency);
