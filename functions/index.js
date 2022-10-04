@@ -29,36 +29,44 @@ exports.profilePictureChangeListener = functions.firestore.document("Users/{user
     const nameBefore = documentBefore.name;
     const nameAfter = documentAfter.name;
 
-    const userID = snap.before.uid;
+    const userID = documentBefore.uid;
 
     if (picBefore != picAfter || nameBefore != nameAfter) {
+        const batch = admin.firestore().batch();
+        return admin.firestore().collection("Wallets").where("users", "array-contains", userID).get()
+            .then(querySnapshot => {
 
-        return admin.firestore().collection("Conversations").where("participants_phone_number_list", "array-contains", userID).get()
-        .then(querySnapshot => {
+                querySnapshot.forEach(doc => {
+                    let walletUsers = doc.data().walletUsers;
 
-            querySnapshot.forEach(doc => {
-                let participants_users_list = doc.data().participants_users_list;
+                    walletUsers.forEach(element => {
+                        if (element.userId === userID) {
+                            element.userPic = picAfter;
+                        }
+                    });
 
-                participants_users_list.forEach(element => {
-                    if (element.phoneNumber === userID) {
-                        element.name = nameAfter;
-                        element.pictureUrl = picAfter;
-                        element.token = tokenAfter;
-                    }
+                    batch.update(doc.ref, { "walletUsers": walletUsers });
+
                 });
 
-                batch.update(doc.ref, { "participants_users_list": participants_users_list, "updatedByFunctions": true });
+            }).then(() => {
+                return admin.firestore().collection("Transactions").where("user_id", "==", userID).get()
+                    .then(querySnapshot => {
+
+                        querySnapshot.forEach(doc => {
+                            batch.update(doc.ref, { "picUrl": picAfter });
+                        });
+
+                    }).then(() => {
+                        batch.commit();
+                        return console.log("Successfully updated wallets and transactions for user " + userID);
+                    });
 
             });
 
-        }).then(() => {
-            batch.commit();
-            return console.log("Successfully updated conversations for user " + userID);
-        });
 
     } else {
         return console.log("Nothing to change for user");
     }
-
 
 });
