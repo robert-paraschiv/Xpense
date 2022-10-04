@@ -9,7 +9,6 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
-import com.google.android.gms.common.util.CollectionUtils;
 import com.rokudo.xpense.models.TransEntry;
 import com.rokudo.xpense.models.Transaction;
 
@@ -25,7 +24,7 @@ public class BarChartUtils {
     @SuppressLint("SimpleDateFormat")
     static SimpleDateFormat dayOfMonthFormat = new SimpleDateFormat("dd");
 
-    public static void setupBarChart(BarChart barChart, int textColor) {
+    public static void setupBarChart(BarChart barChart, int textColor,boolean isCalledFromHome) {
         barChart.setMaxVisibleValueCount(60);
         barChart.setPinchZoom(false);
         barChart.setDoubleTapToZoomEnabled(false);
@@ -44,13 +43,15 @@ public class BarChartUtils {
         barChart.getAxisLeft().setEnabled(false);
         barChart.getAxisRight().setEnabled(false);
 
-        barChart.animateY(2000);
-        barChart.invalidate();
+        if (isCalledFromHome){
+            barChart.animateY(2000);
+            barChart.invalidate();
+        }
 
         barChart.getDescription().setEnabled(false);
     }
 
-    public static void updateBarchartData(BarChart barChart, List<Transaction> transactionList, int textColor) {
+    public static void updateBarchartData(BarChart barChart, List<Transaction> transactionList, int textColor, boolean isCalledFromHome) {
         barChart.invalidate();
 
         ArrayList<IBarDataSet> dataSets = new ArrayList<>();
@@ -102,7 +103,8 @@ public class BarChartUtils {
 
         dataSets.add(barDataSet);
         barChart.setData(new BarData(dataSets));
-        barChart.animate();
+        if (isCalledFromHome)
+            barChart.animate();
     }
 
 }

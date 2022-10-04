@@ -19,7 +19,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -78,7 +77,7 @@ public class HomeFragment extends Fragment {
             transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
             initOnClicks();
 
-            setupBarChart(binding.barChart, new TextView(requireContext()).getCurrentTextColor());
+            setupBarChart(binding.barChart, new TextView(requireContext()).getCurrentTextColor(), true);
             setupPieChart(binding.pieChart, new TextView(requireContext()).getCurrentTextColor());
         }
 
@@ -129,7 +128,7 @@ public class HomeFragment extends Fragment {
                     }
                     if (needUpdate || values.isEmpty()) {
                         updatePieChartData(binding.pieChart, mWallet.getCurrency(), values, true);
-                        updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor());
+                        updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor(), true);
                     }
                     gotTransactionsOnce = true;
                 });

@@ -11,7 +11,9 @@ import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.rokudo.xpense.models.Transaction;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +45,7 @@ public class PieChartUtils {
     }
 
 
-    public static void updatePieChartData(PieChart pieChart, String currency, List<Transaction> transactionList, boolean animate) {
+    public static void updatePieChartData(PieChart pieChart, String currency, List<Transaction> transactionList, boolean isCalledFromHome) {
         if (transactionList == null) {
             return;
         }
@@ -68,24 +70,41 @@ public class PieChartUtils {
         for (int color : ColorTemplate.VORDIPLOM_COLORS) {
             colors.add(color);
         }
+        for (int color : ColorTemplate.MATERIAL_COLORS) {
+            colors.add(color);
+        }
+        for (int color : ColorTemplate.COLORFUL_COLORS) {
+            colors.add(color);
+        }
+        entries.sort(Comparator.comparingDouble(PieEntry::getValue).reversed());
         PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setColors(colors);
+        if (!isCalledFromHome) {
+            dataSet.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+            dataSet.setValueLinePart1OffsetPercentage(90.f);
+        }
 
         PieData data = new PieData(dataSet);
-        data.setDrawValues(true);
+        data.setDrawValues(!isCalledFromHome);
         data.setValueFormatter(new PercentFormatter());
         data.setValueTextSize(12f);
         data.setValueTextColor(Color.BLACK);
 
-        pieChart.setCenterText(sum + " " + currency);
+
+        pieChart.setCenterText(getRoundedValue(sum) + " " + currency);
         pieChart.setData(data);
         pieChart.invalidate();
 
-        if (animate)
+        if (isCalledFromHome)
             pieChart.animateY(1400);
     }
 
     private static float getPercentageOfCategory(Double value, Double finalSum) {
         return (float) ((value * 100) / finalSum);
+    }
+
+    private static Double getRoundedValue(Double amount) {
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+        return Double.parseDouble(decimalFormat.format(amount));
     }
 }

@@ -36,7 +36,7 @@ public class BarDetailsFragment extends Fragment {
 
         binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.backBtn).popBackStack());
 
-        BarChartUtils.setupBarChart(binding.barChart, new TextView(requireContext()).getCurrentTextColor());
+        BarChartUtils.setupBarChart(binding.barChart, new TextView(requireContext()).getCurrentTextColor(), false);
         loadTransactions();
 
         return binding.getRoot();
@@ -58,7 +58,7 @@ public class BarDetailsFragment extends Fragment {
             }
             categories = MapUtil.sortByValue(categories);
             categories.forEach((key, value) -> binding.transCategoriesText.append(key + " : " + value + "\n"));
-            BarChartUtils.updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor());
+            BarChartUtils.updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor(), false);
         });
     }
 
