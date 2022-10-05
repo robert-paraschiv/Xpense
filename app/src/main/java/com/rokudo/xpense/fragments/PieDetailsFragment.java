@@ -1,5 +1,6 @@
 package com.rokudo.xpense.fragments;
 
+import static androidx.recyclerview.widget.RecyclerView.VERTICAL;
 import static com.rokudo.xpense.utils.PieChartUtils.setupPieChart;
 
 import android.os.Bundle;
@@ -13,21 +14,30 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.shape.ShapeAppearanceModel;
 import com.google.android.material.transition.MaterialContainerTransform;
 import com.rokudo.xpense.R;
+import com.rokudo.xpense.adapters.ExpenseCategoryAdapter;
+import com.rokudo.xpense.adapters.TransactionsAdapter;
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.databinding.FragmentPieDetailsBinding;
+import com.rokudo.xpense.models.ExpenseCategory;
 import com.rokudo.xpense.models.Transaction;
+import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.MapUtil;
 import com.rokudo.xpense.utils.PieChartUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PieDetailsFragment extends Fragment {
     private FragmentPieDetailsBinding binding;
+    private ExpenseCategoryAdapter adapter;
+    private List<ExpenseCategory> categoryList = new ArrayList<>();
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -39,7 +49,15 @@ public class PieDetailsFragment extends Fragment {
 
         setupPieChart(binding.pieChart, new TextView(requireContext()).getCurrentTextColor());
         loadTransactions();
+        setUpExpenseCategoryRv();
         return binding.getRoot();
+    }
+
+    private void setUpExpenseCategoryRv() {
+        PieDetailsFragmentArgs args = PieDetailsFragmentArgs.fromBundle(requireArguments());
+        adapter = new ExpenseCategoryAdapter(categoryList, args.getWallet().getCurrency());
+        binding.categoriesRv.setLayoutManager(new LinearLayoutManager(requireContext(), VERTICAL, false));
+        binding.categoriesRv.setAdapter(adapter);
     }
 
     private void loadTransactions() {
@@ -57,7 +75,16 @@ public class PieDetailsFragment extends Fragment {
                 }
             }
             categories = MapUtil.sortByValue(categories);
-            categories.forEach((key, value) -> binding.transCategoriesText.append(key + " : " + value + "\n"));
+            categories.forEach((key, value) -> {
+                ExpenseCategory expenseCategory = new ExpenseCategory(key, null, value);
+                if (CategoriesUtil.categoryList.contains(expenseCategory)) {
+                    expenseCategory.setResourceId(CategoriesUtil.categoryList.get(CategoriesUtil.categoryList.indexOf(expenseCategory)).getResourceId());
+                    categoryList.add(expenseCategory);
+                    adapter.notifyItemInserted(categoryList.size() - 1);
+                }
+            });
+
+
             PieChartUtils.updatePieChartData(binding.pieChart, "", values, false);
         });
     }
