@@ -52,7 +52,10 @@ import com.rokudo.xpense.utils.dialogs.AdjustBalanceDialog;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
 import com.rokudo.xpense.utils.dialogs.WalletListDialog;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class HomeFragment extends Fragment {
@@ -108,7 +111,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadTransactions(String id) {
-        transactionViewModel.loadTransactions(id)
+        transactionViewModel.loadTransactions(id, getCurrentMonth())
                 .observe(getViewLifecycleOwner(), values -> {
                     boolean needUpdate = false;
                     for (Transaction transaction : values) {
@@ -127,8 +130,13 @@ public class HomeFragment extends Fragment {
                         }
                     }
                     if (needUpdate || values.isEmpty()) {
-                        updatePieChartData(binding.pieChart, mWallet.getCurrency(), values, true);
-                        updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor(), true);
+                        updatePieChartData(binding.pieChart
+                                , mWallet == null ? "" : mWallet.getCurrency(),
+                                values,
+                                true);
+                        updateBarchartData(binding.barChart,
+                                values, new TextView(requireContext()).getCurrentTextColor(),
+                                true);
                     }
                     gotTransactionsOnce = true;
                 });
@@ -137,6 +145,15 @@ public class HomeFragment extends Fragment {
                 updateLatestTransactionUI(value, binding, requireContext());
             }
         });
+    }
+
+    private Date getCurrentMonth() {
+        LocalDateTime localDateTime = LocalDateTime.of(LocalDateTime.now().getYear(),
+                LocalDateTime.now().getMonth(),
+                1,
+                0,
+                0);
+        return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
     }
 
     private boolean isTransactionDifferent(Transaction newTransaction, Transaction oldTransaction) {

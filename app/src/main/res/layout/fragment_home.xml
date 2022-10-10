@@ -159,12 +159,14 @@
                         android:src="@drawable/ic_baseline_person_24" />
 
                     <ImageView
+                        android:id="@+id/sharedIcon"
                         android:layout_width="14dp"
                         android:layout_height="14dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="4dp"
                         android:padding="0dp"
-                        android:src="@drawable/ic_round_group_24" />
+                        android:src="@drawable/ic_round_group_24"
+                        app:tint="@color/sharedIconTintColor" />
 
                 </LinearLayout>
 

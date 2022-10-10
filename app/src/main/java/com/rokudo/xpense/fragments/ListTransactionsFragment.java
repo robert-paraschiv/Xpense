@@ -21,7 +21,10 @@ import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.databinding.FragmentListTransactionsBinding;
 import com.rokudo.xpense.models.Transaction;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ListTransactionsFragment extends Fragment {
@@ -70,7 +73,7 @@ public class ListTransactionsFragment extends Fragment {
         TransactionViewModel transactionViewModel = new ViewModelProvider(requireActivity())
                 .get(TransactionViewModel.class);
 
-        transactionViewModel.loadTransactions(id)
+        transactionViewModel.loadTransactions(id,getCurrentSelectedMonth())
                 .observe(getViewLifecycleOwner(), values -> {
                     for (Transaction transaction : values) {
                         if (transactionList.contains(transaction)) {
@@ -88,6 +91,15 @@ public class ListTransactionsFragment extends Fragment {
                     }
                     gotTransactionsOnce = true;
                 });
+    }
+
+    private Date getCurrentSelectedMonth() {
+        LocalDateTime localDateTime = LocalDateTime.of(LocalDateTime.now().getYear(),
+                LocalDateTime.now().getMonth(),
+                1,
+                0,
+                0);
+        return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
     }
 
 }

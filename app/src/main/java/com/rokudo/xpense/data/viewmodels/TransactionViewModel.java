@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.rokudo.xpense.data.repositories.TransactionRepo;
 import com.rokudo.xpense.models.Transaction;
 
+import java.util.Date;
 import java.util.List;
 
 public class TransactionViewModel extends AndroidViewModel {
@@ -19,8 +20,8 @@ public class TransactionViewModel extends AndroidViewModel {
         repo = TransactionRepo.getInstance();
     }
 
-    public MutableLiveData<List<Transaction>> loadTransactions(String walletId) {
-        return repo.loadTransactions(walletId);
+    public MutableLiveData<List<Transaction>> loadTransactions(String walletId, Date date) {
+        return repo.loadTransactions(walletId, date);
     }
 
     public MutableLiveData<List<Transaction>> loadTransactions() {
