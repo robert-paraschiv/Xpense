@@ -321,9 +321,12 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentTop="true"
                         android:layout_centerHorizontal="true"
-                        android:layout_margin="12dp"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_marginBottom="12dp"
                         android:gravity="center_horizontal"
-                        android:text="This week's spending" />
+                        android:text="Last 7 days spending" />
 
                     <com.github.mikephil.charting.charts.BarChart
                         android:id="@+id/barChart"

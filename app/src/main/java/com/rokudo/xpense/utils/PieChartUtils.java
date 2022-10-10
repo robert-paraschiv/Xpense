@@ -3,6 +3,8 @@ package com.rokudo.xpense.utils;
 import android.graphics.Color;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
@@ -20,6 +22,21 @@ import java.util.List;
 import java.util.Map;
 
 public class PieChartUtils {
+    public static ArrayList<Integer> PIE_COLORS;
+
+    static {
+        PIE_COLORS = new ArrayList<>();
+        for (int color : ColorTemplate.VORDIPLOM_COLORS) {
+            PIE_COLORS.add(color);
+        }
+        for (int color : ColorTemplate.MATERIAL_COLORS) {
+            PIE_COLORS.add(color);
+        }
+        for (int color : ColorTemplate.COLORFUL_COLORS) {
+            PIE_COLORS.add(color);
+        }
+    }
+
     public static void setupPieChart(PieChart pieChart, int textColor) {
         pieChart.setDrawHoleEnabled(true);
         pieChart.setTouchEnabled(true);
@@ -47,7 +64,8 @@ public class PieChartUtils {
     }
 
 
-    public static void updatePieChartData(PieChart pieChart, String currency, List<Transaction> transactionList, boolean isCalledFromHome) {
+    public static void updatePieChartData(PieChart pieChart, String currency,
+                                          List<Transaction> transactionList, boolean isCalledFromHome) {
         if (transactionList == null) {
             return;
         }
@@ -65,22 +83,10 @@ public class PieChartUtils {
             sum += transaction.getAmount();
         }
 
-        ArrayList<PieEntry> entries = new ArrayList<>();
-        Double finalSum = sum;
-        categories.forEach((key, value) -> entries.add(new PieEntry(getPercentageOfCategory(value, finalSum), key)));
-        ArrayList<Integer> colors = new ArrayList<>();
-        for (int color : ColorTemplate.VORDIPLOM_COLORS) {
-            colors.add(color);
-        }
-        for (int color : ColorTemplate.MATERIAL_COLORS) {
-            colors.add(color);
-        }
-        for (int color : ColorTemplate.COLORFUL_COLORS) {
-            colors.add(color);
-        }
-        entries.sort(Comparator.comparingDouble(PieEntry::getValue).reversed());
+        ArrayList<PieEntry> entries = getPieEntries(categories, sum);
+
         PieDataSet dataSet = new PieDataSet(entries, "");
-        dataSet.setColors(colors);
+        dataSet.setColors(PIE_COLORS);
         if (!isCalledFromHome) {
             dataSet.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
             dataSet.setValueLineColor(new TextView(pieChart.getContext()).getCurrentTextColor());
@@ -89,7 +95,7 @@ public class PieChartUtils {
 
         PieData data = new PieData(dataSet);
         data.setDrawValues(!isCalledFromHome);
-        data.setValueFormatter(new PercentFormatter());
+        data.setValueFormatter(new PercentFormatter(pieChart));
         data.setValueTextSize(12f);
         data.setValueTextColor(new TextView(pieChart.getContext()).getCurrentTextColor());
 
@@ -101,6 +107,15 @@ public class PieChartUtils {
         if (isCalledFromHome)
             pieChart.animateY(1400);
     }
+
+    @NonNull
+    private static ArrayList<PieEntry> getPieEntries(Map<String, Double> categories, Double sum) {
+        ArrayList<PieEntry> entries = new ArrayList<>();
+        categories.forEach((key, value) -> entries.add(new PieEntry(getPercentageOfCategory(value, sum), key)));
+        entries.sort(Comparator.comparingDouble(PieEntry::getValue).reversed());
+        return entries;
+    }
+
 
     private static float getPercentageOfCategory(Double value, Double finalSum) {
         return (float) ((value * 100) / finalSum);

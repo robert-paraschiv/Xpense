@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.models.ExpenseCategory;
+import com.rokudo.xpense.utils.PieChartUtils;
 
 import java.util.List;
 
@@ -56,7 +57,7 @@ public class ExpenseCategoryAdapter extends RecyclerView.Adapter<ExpenseCategory
             holder.categoryPic.setImageDrawable(
                     AppCompatResources.getDrawable(holder.categoryPic.getContext(),
                             expenseCategory.getResourceId()));
-            holder.categoryPic.setColorFilter(holder.categoryName.getCurrentTextColor());
+            holder.categoryPic.setColorFilter(PieChartUtils.PIE_COLORS.get(position));
         }
     }
 

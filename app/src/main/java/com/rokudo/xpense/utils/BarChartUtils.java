@@ -21,11 +21,12 @@ import java.util.List;
 
 public class BarChartUtils {
     private static final String TAG = "BarChartUtils";
+    public static final int CHART_MAX_NR_OF_DAYS = 7;
 
     @SuppressLint("SimpleDateFormat")
     static SimpleDateFormat dayOfMonthFormat = new SimpleDateFormat("dd");
 
-    public static void setupBarChart(BarChart barChart, int textColor,boolean isCalledFromHome) {
+    public static void setupBarChart(BarChart barChart, int textColor, boolean isCalledFromHome) {
         barChart.setMaxVisibleValueCount(60);
         barChart.setPinchZoom(false);
         barChart.setDoubleTapToZoomEnabled(false);
@@ -44,7 +45,7 @@ public class BarChartUtils {
         barChart.getAxisLeft().setEnabled(false);
         barChart.getAxisRight().setEnabled(false);
 
-        if (isCalledFromHome){
+        if (isCalledFromHome) {
             barChart.animateY(2000);
             barChart.invalidate();
         }
@@ -62,7 +63,7 @@ public class BarChartUtils {
 
         int todayDayOfMonth = Integer.parseInt(dayOfMonthFormat.format(new Date()));
         for (Transaction transaction : transactionList) {
-            if (todayDayOfMonth - Integer.parseInt(dayOfMonthFormat.format(transaction.getDate())) > 5) {
+            if (todayDayOfMonth - Integer.parseInt(dayOfMonthFormat.format(transaction.getDate())) >= CHART_MAX_NR_OF_DAYS) {
                 continue;
             }
             TransEntry transEntry = new TransEntry(dayOfMonthFormat.format(transaction.getDate()), transaction.getDate(), Float.parseFloat(transaction.getAmount().toString()));

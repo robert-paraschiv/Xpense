@@ -25,6 +25,7 @@ import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.databinding.FragmentPieDetailsBinding;
 import com.rokudo.xpense.models.ExpenseCategory;
 import com.rokudo.xpense.models.Transaction;
+import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.MapUtil;
 import com.rokudo.xpense.utils.PieChartUtils;
@@ -37,7 +38,8 @@ import java.util.Map;
 public class PieDetailsFragment extends Fragment {
     private FragmentPieDetailsBinding binding;
     private ExpenseCategoryAdapter adapter;
-    private List<ExpenseCategory> categoryList = new ArrayList<>();
+    private final List<ExpenseCategory> categoryList = new ArrayList<>();
+    private Wallet mWallet;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -55,7 +57,8 @@ public class PieDetailsFragment extends Fragment {
 
     private void setUpExpenseCategoryRv() {
         PieDetailsFragmentArgs args = PieDetailsFragmentArgs.fromBundle(requireArguments());
-        adapter = new ExpenseCategoryAdapter(categoryList, args.getWallet().getCurrency());
+        mWallet = args.getWallet();
+        adapter = new ExpenseCategoryAdapter(categoryList, mWallet.getCurrency());
         binding.categoriesRv.setLayoutManager(new LinearLayoutManager(requireContext(), VERTICAL, false));
         binding.categoriesRv.setAdapter(adapter);
     }
@@ -85,7 +88,8 @@ public class PieDetailsFragment extends Fragment {
             });
 
 
-            PieChartUtils.updatePieChartData(binding.pieChart, "", values, false);
+            PieChartUtils.updatePieChartData(binding.pieChart, mWallet.getCurrency(),
+                    values, false);
         });
     }
 
