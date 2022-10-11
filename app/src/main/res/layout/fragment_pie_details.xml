@@ -52,13 +52,30 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <com.google.android.material.chip.Chip
+                android:id="@+id/dateChip"
+                style="@style/Widget.Material3.Chip.Suggestion.Elevated"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="8dp"
+                android:checkable="false"
+                android:text="August 2022"
+                android:textSize="14sp"
+                app:chipIcon="@drawable/ic_round_date_range_24"
+                app:chipIconEnabled="true"
+                app:chipIconTint="@color/sharedIconTintColor"
+                app:iconEndPadding="8dp"
+                app:iconStartPadding="8dp" />
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/pieChartCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/dateChip"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
-                android:clickable="true"
+                android:clickable="false"
                 app:cardCornerRadius="18dp"
                 app:strokeWidth="0dp">
 
@@ -70,8 +87,8 @@
                     <com.github.mikephil.charting.charts.PieChart
                         android:id="@+id/pieChart"
                         android:layout_width="match_parent"
-                        android:layout_height="300dp"
-                        android:layout_margin="8dp"
+                        android:layout_height="280dp"
+                        android:layout_margin="4dp"
                         android:transitionName="pieChart" />
 
                 </RelativeLayout>
