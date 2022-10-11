@@ -1,11 +1,13 @@
 package com.rokudo.xpense.models;
 
+import java.util.List;
 import java.util.Objects;
 
 public class ExpenseCategory {
     String name;
     Integer resourceId;
     Double amount;
+    List<Transaction> transactionList;
 
     public ExpenseCategory(String name, Integer resourceId) {
         this.name = name;
@@ -13,8 +15,9 @@ public class ExpenseCategory {
         this.amount = 0.0;
     }
 
-    public ExpenseCategory(String name, Integer resourceId, Double amount) {
+    public ExpenseCategory(String name, List<Transaction> transactionList, Integer resourceId, Double amount) {
         this.name = name;
+        this.transactionList = transactionList;
         this.resourceId = resourceId;
         this.amount = amount;
     }
@@ -25,6 +28,14 @@ public class ExpenseCategory {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<Transaction> getTransactionList() {
+        return transactionList;
+    }
+
+    public void setTransactionList(List<Transaction> transactionList) {
+        this.transactionList = transactionList;
     }
 
     public Integer getResourceId() {

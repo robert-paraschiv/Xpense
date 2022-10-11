@@ -2,6 +2,7 @@
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="8dp"
@@ -12,33 +13,49 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp">
+        android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/categoryImage"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:contentDescription="@string/user_profile_picture"
-            tools:src="@drawable/ic_round_wine_bar_24" />
-
-        <TextView
-            android:id="@+id/categoryName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginStart="8dp"
-            android:layout_toStartOf="@id/categoryAmount"
-            android:layout_toEndOf="@id/categoryImage"
-            tools:text="Restaurant" />
-
-        <TextView
-            android:id="@+id/categoryAmount"
+        <RelativeLayout
+            android:id="@+id/mainLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            tools:text="2555550.00 RON" />
-    </RelativeLayout>
+            android:layout_margin="8dp">
 
+            <ImageView
+                android:id="@+id/categoryImage"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:contentDescription="@string/user_profile_picture"
+                tools:src="@drawable/ic_round_wine_bar_24" />
+
+            <TextView
+                android:id="@+id/categoryName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="8dp"
+                android:layout_toStartOf="@id/categoryAmount"
+                android:layout_toEndOf="@id/categoryImage"
+                tools:text="Restaurant" />
+
+            <TextView
+                android:id="@+id/categoryAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                tools:text="2555550.00 RON" />
+        </RelativeLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/transactionsRv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/mainLayout"
+            android:visibility="gone"
+            tools:itemCount="3"
+            tools:listitem="@layout/item_transaction"
+            tools:visibility="visible" />
+
+    </RelativeLayout>
 </com.google.android.material.card.MaterialCardView>

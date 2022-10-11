@@ -72,8 +72,9 @@ public class PieChartUtils {
         Map<String, Double> categories = new HashMap<>();
         Double sum = 0.0;
         for (Transaction transaction : transactionList) {
-            if (transaction.getType().equals(Transaction.INCOME_TYPE))
+            if (transaction.getType().equals(Transaction.INCOME_TYPE)) {
                 continue;
+            }
             if (categories.containsKey(transaction.getCategory())) {
                 Double amount = categories.getOrDefault(transaction.getCategory(), 0.0);
                 categories.put(transaction.getCategory(), amount == null ? 0.0f : amount + transaction.getAmount());

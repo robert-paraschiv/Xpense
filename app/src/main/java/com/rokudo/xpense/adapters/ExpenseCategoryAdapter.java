@@ -1,6 +1,8 @@
 package com.rokudo.xpense.adapters;
 
 import android.annotation.SuppressLint;
+import android.transition.ChangeBounds;
+import android.transition.TransitionManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,9 +11,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.models.ExpenseCategory;
 import com.rokudo.xpense.utils.PieChartUtils;
@@ -31,12 +33,24 @@ public class ExpenseCategoryAdapter extends RecyclerView.Adapter<ExpenseCategory
         private final ImageView categoryPic;
         private final TextView categoryName;
         private final TextView categoryAmount;
+        private final RecyclerView transactionsRv;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             this.categoryAmount = itemView.findViewById(R.id.categoryAmount);
             this.categoryName = itemView.findViewById(R.id.categoryName);
             this.categoryPic = itemView.findViewById(R.id.categoryImage);
+            this.transactionsRv = itemView.findViewById(R.id.transactionsRv);
+
+            this.itemView.setOnClickListener(v -> {
+                if (transactionsRv.getVisibility() == View.VISIBLE) {
+                    TransitionManager.beginDelayedTransition(itemView.findViewById(R.id.mainCard), new ChangeBounds().setDuration(50));
+                    transactionsRv.setVisibility(View.GONE);
+                } else {
+                    TransitionManager.beginDelayedTransition(itemView.findViewById(R.id.mainCard), new ChangeBounds().setDuration(500));
+                    transactionsRv.setVisibility(View.VISIBLE);
+                }
+            });
         }
     }
 
@@ -58,6 +72,13 @@ public class ExpenseCategoryAdapter extends RecyclerView.Adapter<ExpenseCategory
                     AppCompatResources.getDrawable(holder.categoryPic.getContext(),
                             expenseCategory.getResourceId()));
             holder.categoryPic.setColorFilter(PieChartUtils.PIE_COLORS.get(position));
+            if (expenseCategory.getTransactionList().isEmpty()) {
+                holder.itemView.findViewById(R.id.mainCard).setClickable(false);
+            } else {
+                holder.itemView.findViewById(R.id.mainCard).setClickable(true);
+                holder.transactionsRv.setLayoutManager(new LinearLayoutManager(holder.transactionsRv.getContext()));
+                holder.transactionsRv.setAdapter(new TransactionsAdapter(expenseCategory.getTransactionList()));
+            }
         }
     }
 

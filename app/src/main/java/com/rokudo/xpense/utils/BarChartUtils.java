@@ -63,6 +63,9 @@ public class BarChartUtils {
 
         int todayDayOfMonth = Integer.parseInt(dayOfMonthFormat.format(new Date()));
         for (Transaction transaction : transactionList) {
+            if (transaction.getType().equals(Transaction.INCOME_TYPE)) {
+                continue;
+            }
             if (todayDayOfMonth - Integer.parseInt(dayOfMonthFormat.format(transaction.getDate())) >= CHART_MAX_NR_OF_DAYS) {
                 continue;
             }

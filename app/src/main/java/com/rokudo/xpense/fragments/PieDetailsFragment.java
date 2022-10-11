@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -20,7 +21,6 @@ import com.google.android.material.shape.ShapeAppearanceModel;
 import com.google.android.material.transition.MaterialContainerTransform;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.ExpenseCategoryAdapter;
-import com.rokudo.xpense.adapters.TransactionsAdapter;
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.databinding.FragmentPieDetailsBinding;
 import com.rokudo.xpense.models.ExpenseCategory;
@@ -31,9 +31,11 @@ import com.rokudo.xpense.utils.MapUtil;
 import com.rokudo.xpense.utils.PieChartUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class PieDetailsFragment extends Fragment {
     private FragmentPieDetailsBinding binding;
@@ -55,6 +57,32 @@ public class PieDetailsFragment extends Fragment {
         return binding.getRoot();
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        MaterialContainerTransform materialContainerTransform = new MaterialContainerTransform();
+        materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+        materialContainerTransform.setEndShapeAppearanceModel(new ShapeAppearanceModel().withCornerSize(18));
+        materialContainerTransform.setStartShapeAppearanceModel(new ShapeAppearanceModel().withCornerSize(48));
+        setSharedElementEnterTransition(materialContainerTransform);
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
+        postponeEnterTransition();
+        final ViewGroup viewGroup = (ViewGroup) view.getParent();
+        viewGroup.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                viewGroup.getViewTreeObserver().removeOnPreDrawListener(this);
+                startPostponedEnterTransition();
+                return true;
+            }
+        });
+
+        super.onViewCreated(view, savedInstanceState);
+    }
+
     private void setUpExpenseCategoryRv() {
         PieDetailsFragmentArgs args = PieDetailsFragmentArgs.fromBundle(requireArguments());
         mWallet = args.getWallet();
@@ -67,9 +95,17 @@ public class PieDetailsFragment extends Fragment {
         TransactionViewModel transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
         transactionViewModel.loadTransactions().observe(getViewLifecycleOwner(), values -> {
             Map<String, Double> categories = new HashMap<>();
+            Map<String, List<Transaction>> transactionsByCategory = new HashMap<>();
             for (Transaction transaction : values) {
                 if (transaction.getType().equals(Transaction.INCOME_TYPE))
                     continue;
+
+                if (transactionsByCategory.containsKey(transaction.getCategory())) {
+                    Objects.requireNonNull(transactionsByCategory.get(transaction.getCategory())).add(transaction);
+                } else {
+                    transactionsByCategory.put(transaction.getCategory(), new ArrayList<>(Collections.singleton(transaction)));
+                }
+
                 if (categories.containsKey(transaction.getCategory())) {
                     Double amount = categories.getOrDefault(transaction.getCategory(), 0.0);
                     categories.put(transaction.getCategory(), amount == null ? 0.0f : amount + transaction.getAmount());
@@ -79,7 +115,7 @@ public class PieDetailsFragment extends Fragment {
             }
             categories = MapUtil.sortByValue(categories);
             categories.forEach((key, value) -> {
-                ExpenseCategory expenseCategory = new ExpenseCategory(key, null, value);
+                ExpenseCategory expenseCategory = new ExpenseCategory(key, transactionsByCategory.get(key), null, value);
                 if (CategoriesUtil.categoryList.contains(expenseCategory)) {
                     expenseCategory.setResourceId(CategoriesUtil.categoryList.get(CategoriesUtil.categoryList.indexOf(expenseCategory)).getResourceId());
                     categoryList.add(expenseCategory);
@@ -92,16 +128,5 @@ public class PieDetailsFragment extends Fragment {
                     values, false);
         });
     }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        MaterialContainerTransform materialContainerTransform = new MaterialContainerTransform();
-        materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
-        materialContainerTransform.setEndShapeAppearanceModel(new ShapeAppearanceModel().withCornerSize(18));
-        materialContainerTransform.setStartShapeAppearanceModel(new ShapeAppearanceModel().withCornerSize(48));
-        setSharedElementEnterTransition(materialContainerTransform);
-        super.onCreate(savedInstanceState);
-    }
-
 
 }
