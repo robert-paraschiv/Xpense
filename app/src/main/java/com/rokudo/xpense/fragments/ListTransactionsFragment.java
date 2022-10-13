@@ -54,16 +54,16 @@ public class ListTransactionsFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        MaterialSharedAxis enter = new MaterialSharedAxis(MaterialSharedAxis.X,true);
+        MaterialSharedAxis enter = new MaterialSharedAxis(MaterialSharedAxis.X, true);
         enter.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
-        MaterialSharedAxis exit = new MaterialSharedAxis(MaterialSharedAxis.X,false);
+        MaterialSharedAxis exit = new MaterialSharedAxis(MaterialSharedAxis.X, false);
         exit.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
         setEnterTransition(enter);
         setReturnTransition(exit);
     }
 
     private void buildRecyclerView() {
-        adapter = new TransactionsAdapter(transactionList);
+        adapter = new TransactionsAdapter(transactionList, false);
         binding.transactionsRv.setLayoutManager(new LinearLayoutManager(requireContext(), VERTICAL, false));
         binding.transactionsRv.setAdapter(adapter);
 //        adapter.setOnItemClickListener();
@@ -73,7 +73,7 @@ public class ListTransactionsFragment extends Fragment {
         TransactionViewModel transactionViewModel = new ViewModelProvider(requireActivity())
                 .get(TransactionViewModel.class);
 
-        transactionViewModel.loadTransactions(id,getCurrentSelectedMonth())
+        transactionViewModel.loadTransactions(id, getCurrentSelectedMonth())
                 .observe(getViewLifecycleOwner(), values -> {
                     for (Transaction transaction : values) {
                         if (transactionList.contains(transaction)) {

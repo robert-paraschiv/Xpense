@@ -24,15 +24,39 @@ import java.util.List;
 
 public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapter.ViewHolder> {
     List<Transaction> transactionList;
+    Boolean smallLayout;
 
-    public TransactionsAdapter(List<Transaction> transactionList) {
+    public TransactionsAdapter(List<Transaction> transactionList, Boolean smallLayout) {
         this.transactionList = transactionList;
+        this.smallLayout = smallLayout;
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        final ImageView transactionImage;
+        final TextView transactionPersonName;
+        final TextView transactionAmount;
+        final TextView transactionDate;
+        final TextView transactionCategory;
+        final TextView transactionTitle;
+
+
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            transactionImage = itemView.findViewById(R.id.transactionImage);
+            transactionPersonName = itemView.findViewById(R.id.transactionPerson);
+            transactionAmount = itemView.findViewById(R.id.transactionAmount);
+            transactionDate = itemView.findViewById(R.id.transactionDate);
+            transactionCategory = itemView.findViewById(R.id.transactionCategory);
+            transactionTitle = itemView.findViewById(R.id.transactionTitle);
+        }
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_transaction, parent, false);
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(smallLayout ? R.layout.item_transaction_small : R.layout.item_transaction,
+                        parent, false);
         return new ViewHolder(view);
     }
 
@@ -73,25 +97,5 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
     @Override
     public int getItemCount() {
         return transactionList.size();
-    }
-
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        final ImageView transactionImage;
-        final TextView transactionPersonName;
-        final TextView transactionAmount;
-        final TextView transactionDate;
-        final TextView transactionCategory;
-        final TextView transactionTitle;
-
-
-        public ViewHolder(@NonNull View itemView) {
-            super(itemView);
-            transactionImage = itemView.findViewById(R.id.transactionImage);
-            transactionPersonName = itemView.findViewById(R.id.transactionPerson);
-            transactionAmount = itemView.findViewById(R.id.transactionAmount);
-            transactionDate = itemView.findViewById(R.id.transactionDate);
-            transactionCategory = itemView.findViewById(R.id.transactionCategory);
-            transactionTitle = itemView.findViewById(R.id.transactionTitle);
-        }
     }
 }
