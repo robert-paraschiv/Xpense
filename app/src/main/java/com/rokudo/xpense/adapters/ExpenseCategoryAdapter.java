@@ -17,7 +17,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.models.ExpenseCategory;
 import com.rokudo.xpense.utils.PieChartUtils;
+import com.rokudo.xpense.utils.TransactionUtils;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 public class ExpenseCategoryAdapter extends RecyclerView.Adapter<ExpenseCategoryAdapter.ViewHolder> {
@@ -67,7 +69,7 @@ public class ExpenseCategoryAdapter extends RecyclerView.Adapter<ExpenseCategory
         ExpenseCategory expenseCategory = categoryList.get(position);
         if (expenseCategory != null) {
             holder.categoryName.setText(expenseCategory.getName());
-            holder.categoryAmount.setText(expenseCategory.getAmount().toString() + " " + currency);
+            holder.categoryAmount.setText(new DecimalFormat("0.00").format(expenseCategory.getAmount()) + " " + currency);
             holder.categoryPic.setImageDrawable(
                     AppCompatResources.getDrawable(holder.categoryPic.getContext(),
                             expenseCategory.getResourceId()));

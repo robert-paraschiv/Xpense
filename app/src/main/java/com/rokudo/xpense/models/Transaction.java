@@ -102,7 +102,9 @@ public class Transaction implements Serializable {
     public Date getDate() {
         return date;
     }
-
+    public Long getDateLong() {
+        return date.getTime();
+    }
     public void setDate(Date date) {
         this.date = date;
     }

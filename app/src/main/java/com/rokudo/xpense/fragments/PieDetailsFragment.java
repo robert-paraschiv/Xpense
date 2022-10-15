@@ -3,6 +3,7 @@ package com.rokudo.xpense.fragments;
 import static androidx.recyclerview.widget.RecyclerView.VERTICAL;
 import static com.rokudo.xpense.utils.PieChartUtils.setupPieChart;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,8 +31,10 @@ import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.MapUtil;
 import com.rokudo.xpense.utils.PieChartUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,10 +54,16 @@ public class PieDetailsFragment extends Fragment {
 
         binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.backBtn).popBackStack());
 
+        initDateChip();
         setupPieChart(binding.pieChart, new TextView(requireContext()).getCurrentTextColor());
         loadTransactions();
         setUpExpenseCategoryRv();
         return binding.getRoot();
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private void initDateChip() {
+        binding.dateChip.setText(new SimpleDateFormat("MMMM yyyy").format(new Date()));
     }
 
     @Override

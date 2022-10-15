@@ -16,7 +16,6 @@ import com.rokudo.xpense.models.Transaction;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 public class BarChartUtils {
@@ -55,21 +54,30 @@ public class BarChartUtils {
 
     public static void updateBarchartData(BarChart barChart, List<Transaction> transactionList, int textColor, boolean isCalledFromHome) {
         barChart.invalidate();
+        transactionList.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
 
         ArrayList<IBarDataSet> dataSets = new ArrayList<>();
         ArrayList<BarEntry> valueSet = new ArrayList<>();
 
         List<TransEntry> transEntryArrayList = new ArrayList<>();
+        List<String> days = new ArrayList<>();
 
-        int todayDayOfMonth = Integer.parseInt(dayOfMonthFormat.format(new Date()));
         for (Transaction transaction : transactionList) {
             if (transaction.getType().equals(Transaction.INCOME_TYPE)) {
                 continue;
             }
-            if (todayDayOfMonth - Integer.parseInt(dayOfMonthFormat.format(transaction.getDate())) >= CHART_MAX_NR_OF_DAYS) {
-                continue;
+
+            if (!days.contains(dayOfMonthFormat.format(transaction.getDate()))) {
+                if (days.size() >= CHART_MAX_NR_OF_DAYS) {
+                    continue;
+                }
+                days.add(dayOfMonthFormat.format(transaction.getDate()));
             }
-            TransEntry transEntry = new TransEntry(dayOfMonthFormat.format(transaction.getDate()), transaction.getDate(), Float.parseFloat(transaction.getAmount().toString()));
+
+            TransEntry transEntry = new TransEntry(dayOfMonthFormat.format(transaction.getDate()),
+                    transaction.getDate(),
+                    Float.parseFloat(transaction.getAmount().toString()));
+
             if (transEntryArrayList.contains(transEntry)) {
                 int index = transEntryArrayList.indexOf(transEntry);
                 transEntryArrayList.get(index).setAmount((float) (transEntryArrayList.get(index).getAmount() + transaction.getAmount()));
