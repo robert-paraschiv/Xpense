@@ -37,11 +37,11 @@ public class PieChartUtils {
         }
     }
 
-    public static void setupPieChart(PieChart pieChart, int textColor) {
+    public static void setupPieChart(PieChart pieChart, int textColor, boolean isCalledFromHome) {
         pieChart.setDrawHoleEnabled(true);
-        pieChart.setTouchEnabled(true);
+        pieChart.setTouchEnabled(!isCalledFromHome);
         pieChart.setUsePercentValues(true);
-        pieChart.setHighlightPerTapEnabled(true);
+        pieChart.setHighlightPerTapEnabled(!isCalledFromHome);
         pieChart.setEntryLabelTextSize(10f);
         pieChart.setEntryLabelColor(Color.BLACK);
         pieChart.setCenterTextSize(11f);

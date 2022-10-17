@@ -30,7 +30,7 @@ public class BarChartUtils {
         barChart.setPinchZoom(false);
         barChart.setDoubleTapToZoomEnabled(false);
         barChart.setScaleEnabled(false);
-//        barChart.setTouchEnabled(false);
+        barChart.setTouchEnabled(!isCalledFromHome);
         barChart.setDrawBarShadow(false);
         barChart.setDrawGridBackground(false);
         barChart.getLegend().setEnabled(false);

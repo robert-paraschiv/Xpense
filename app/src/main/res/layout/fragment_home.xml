@@ -20,7 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="18dp"
-            android:layout_marginBottom="42dp"
+            android:layout_marginBottom="24dp"
             android:orientation="horizontal">
 
             <ImageView
@@ -296,7 +296,7 @@
         <LinearLayout
             android:id="@+id/chartsLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="320dp"
             android:layout_below="@id/walletsCard"
             android:layout_marginStart="18dp"
             android:layout_marginEnd="18dp"
@@ -306,132 +306,147 @@
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="0.5"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:weightSum="1">
 
-                <TextView
-                    android:id="@+id/monthspendingtext2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:gravity="center_horizontal"
-                    android:text="Last 7 days spending"
-                    android:textSize="12sp" />
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/barChartCard"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:clickable="true"
-                    android:transitionName="barChartCard"
-                    app:cardCornerRadius="18dp"
-                    app:strokeWidth="0dp">
+                    android:layout_height="0dp"
+                    android:layout_weight="0.6"
+                    android:orientation="vertical"
+                    tools:ignore="NestedWeights">
 
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-
-                        <com.github.mikephil.charting.charts.BarChart
-                            android:id="@+id/barChart"
-                            android:layout_width="match_parent"
-                            android:layout_height="120dp"
-                            android:layout_marginStart="8dp"
-                            android:layout_marginEnd="8dp"
-                            android:layout_marginBottom="8dp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/barDetailsBtn"
-                            style="@style/Widget.Material3.Button.TextButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="34dp"
-                            android:layout_below="@id/barChart"
-                            android:layout_centerHorizontal="true"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginBottom="8dp"
-                            android:insetLeft="0dp"
-                            android:insetTop="0dp"
-                            android:insetRight="0dp"
-                            android:insetBottom="0dp"
-                            android:text="Show Details"
-                            android:visibility="gone"
-                            app:cornerRadius="10dp" />
-
-                    </RelativeLayout>
-
-                </com.google.android.material.card.MaterialCardView>
-
-                <TextView
-                    android:id="@+id/spentMostTv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="12dp"
-                    android:text="Spent most on"
-                    android:textSize="12sp" />
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/statsCard"
-                    android:layout_width="match_parent"
-                    android:layout_height="140dp"
-                    android:layout_marginTop="4dp"
-                    android:clickable="true"
-                    app:cardBackgroundColor="@color/homeCardColor"
-                    app:cardCornerRadius="18dp"
-                    app:strokeWidth="0dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/monthspendingtext2"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_gravity="center"
-                        android:gravity="center"
-                        android:orientation="vertical">
+                        android:layout_gravity="center_horizontal"
+                        android:gravity="center_horizontal"
+                        android:text="Last 7 days spending"
+                        android:textSize="12sp" />
 
-                        <TextView
-                            android:id="@+id/transactionTitle"
-                            android:layout_width="wrap_content"
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/barChartCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="4dp"
+                        android:clickable="true"
+                        android:transitionName="barChartCard"
+                        app:cardCornerRadius="18dp"
+                        app:strokeWidth="0dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <com.github.mikephil.charting.charts.BarChart
+                                android:id="@+id/barChart"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_above="@id/barDetailsBtn"
+                                android:layout_margin="8dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/barDetailsBtn"
+                                style="@style/Widget.Material3.Button.TextButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="34dp"
+                                android:layout_alignParentBottom="true"
+                                android:layout_centerHorizontal="true"
+                                android:layout_marginBottom="8dp"
+                                android:insetLeft="0dp"
+                                android:insetTop="0dp"
+                                android:insetRight="0dp"
+                                android:insetBottom="0dp"
+                                android:text="Show Details"
+                                android:textSize="12sp"
+                                android:visibility="gone"
+                                app:cornerRadius="10dp" />
+
+                        </RelativeLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="0.4"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/spentMostTv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginEnd="12dp"
+                        android:text="Spent most on"
+                        android:textSize="12sp" />
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/statsCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="4dp"
+                        android:clickable="true"
+                        app:cardBackgroundColor="@color/homeCardColor"
+                        app:cardCornerRadius="18dp"
+                        app:strokeWidth="0dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Transaction Title "
-                            android:textSize="12sp"
-                            android:textStyle="normal" />
+                            android:layout_centerVertical="true"
+                            android:layout_gravity="center"
+                            android:gravity="center"
+                            android:orientation="vertical">
 
-                        <TextView
-                            android:id="@+id/transactionDate"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Fri, Aug 12, 15:48"
-                            android:textSize="10sp"
-                            tools:ignore="SmallSp" />
+                            <TextView
+                                android:id="@+id/transactionTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Transaction Title "
+                                android:textSize="12sp"
+                                android:textStyle="normal" />
 
-                        <TextView
-                            android:id="@+id/transactionAmount"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="- 90.0 lei"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/transactionDate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Fri, Aug 12, 15:48"
+                                android:textSize="10sp"
+                                tools:ignore="SmallSp" />
 
-                        <TextView
-                            android:id="@+id/transactionCategory"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Transport"
-                            android:textSize="10sp"
-                            tools:ignore="SmallSp" />
-                    </LinearLayout>
+                            <TextView
+                                android:id="@+id/transactionAmount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="- 90.0 lei"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
 
-                </com.google.android.material.card.MaterialCardView>
+                            <TextView
+                                android:id="@+id/transactionCategory"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Transport"
+                                android:textSize="10sp"
+                                tools:ignore="SmallSp" />
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+
+
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="0.5"
                 android:orientation="vertical">
 
@@ -449,7 +464,7 @@
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/pieChartCard"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_marginStart="12dp"
                     android:layout_marginTop="4dp"
                     android:clickable="true"
@@ -466,7 +481,8 @@
                         <com.github.mikephil.charting.charts.PieChart
                             android:id="@+id/pieChart"
                             android:layout_width="match_parent"
-                            android:layout_height="230dp"
+                            android:layout_height="match_parent"
+                            android:layout_above="@id/pieDetailsBtn"
                             android:layout_margin="8dp"
                             android:transitionName="pieChart" />
 
@@ -475,9 +491,8 @@
                             style="@style/Widget.Material3.Button.TextButton"
                             android:layout_width="wrap_content"
                             android:layout_height="34dp"
-                            android:layout_below="@id/pieChart"
+                            android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
-                            android:layout_marginTop="8dp"
                             android:layout_marginBottom="8dp"
                             android:insetLeft="0dp"
                             android:insetTop="0dp"
@@ -485,14 +500,16 @@
                             android:insetBottom="0dp"
                             android:text="Show Details"
                             android:textSize="12sp"
+                            android:visibility="gone"
                             app:cornerRadius="10dp" />
 
                     </RelativeLayout>
                 </com.google.android.material.card.MaterialCardView>
+
             </LinearLayout>
 
-
         </LinearLayout>
+
     </RelativeLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

@@ -81,7 +81,7 @@ public class HomeFragment extends Fragment {
             initOnClicks();
 
             setupBarChart(binding.barChart, new TextView(requireContext()).getCurrentTextColor(), true);
-            setupPieChart(binding.pieChart, new TextView(requireContext()).getCurrentTextColor());
+            setupPieChart(binding.pieChart, new TextView(requireContext()).getCurrentTextColor(),true);
         }
 
         loadWalletDetails();
