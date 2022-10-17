@@ -19,5 +19,6 @@
 
     <color name="message_sent_backgroundColor">#424242</color>
     <color name="message_received_backgroundColor">#0064b7</color>
+    <color name="homeCardColor">#01579B</color>
 
 </resources>

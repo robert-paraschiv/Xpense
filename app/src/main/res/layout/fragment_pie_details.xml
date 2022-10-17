@@ -36,7 +36,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginStart="16dp"
                 android:layout_toEndOf="@id/backBtn"
-                android:text="Pie Details"
+                android:text="@string/pie_details"
                 android:textSize="18sp"
                 android:textStyle="bold" />
         </RelativeLayout>
@@ -60,7 +60,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginBottom="8dp"
                 android:checkable="false"
-                android:text="August 2022"
+                tools:text="August 2022"
                 android:textSize="14sp"
                 app:chipIcon="@drawable/ic_round_date_range_24"
                 app:chipIconEnabled="true"
@@ -88,7 +88,10 @@
                         android:id="@+id/pieChart"
                         android:layout_width="match_parent"
                         android:layout_height="280dp"
-                        android:layout_margin="4dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_marginBottom="4dp"
                         android:transitionName="pieChart" />
 
                 </RelativeLayout>

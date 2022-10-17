@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.models.ExpenseCategory;
 import com.rokudo.xpense.utils.PieChartUtils;
-import com.rokudo.xpense.utils.TransactionUtils;
 
 import java.text.DecimalFormat;
 import java.util.List;
