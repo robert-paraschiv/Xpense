@@ -392,51 +392,67 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginTop="4dp"
-                        android:clickable="true"
                         app:cardBackgroundColor="@color/homeCardColor"
                         app:cardCornerRadius="18dp"
                         app:strokeWidth="0dp">
 
-                        <LinearLayout
+                        <RelativeLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_gravity="center"
-                            android:gravity="center"
-                            android:orientation="vertical">
+                            android:layout_height="match_parent"
+                            android:layout_margin="8dp">
 
-                            <TextView
-                                android:id="@+id/transactionTitle"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Transaction Title "
-                                android:textSize="12sp"
-                                android:textStyle="normal" />
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/spentMostRv"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_above="@id/radioGroup"
+                                android:layout_gravity="center"
+                                tools:itemCount="1"
+                                tools:listitem="@layout/item_spent_most" />
 
-                            <TextView
-                                android:id="@+id/transactionDate"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Fri, Aug 12, 15:48"
-                                android:textSize="10sp"
-                                tools:ignore="SmallSp" />
+                            <RadioGroup
+                                android:id="@+id/radioGroup"
+                                android:layout_width="match_parent"
+                                android:layout_height="20dp"
+                                android:layout_alignParentBottom="true"
+                                android:checkedButton="@id/radioBtn1"
+                                android:clickable="false"
+                                android:clipChildren="false"
+                                android:gravity="center"
+                                android:orientation="horizontal">
 
-                            <TextView
-                                android:id="@+id/transactionAmount"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="- 90.0 lei"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
+                                <RadioButton
+                                    android:id="@+id/radioBtn1"
+                                    android:layout_width="15dp"
+                                    android:layout_height="wrap_content"
+                                    android:clickable="false"
+                                    android:minWidth="0dp"
+                                    android:minHeight="0dp"
+                                    android:scaleX="0.25"
+                                    android:scaleY="0.25" />
 
-                            <TextView
-                                android:id="@+id/transactionCategory"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Transport"
-                                android:textSize="10sp"
-                                tools:ignore="SmallSp" />
-                        </LinearLayout>
+                                <RadioButton
+                                    android:id="@+id/radioBtn2"
+                                    android:layout_width="15dp"
+                                    android:layout_height="wrap_content"
+                                    android:clickable="false"
+                                    android:minWidth="0dp"
+                                    android:minHeight="0dp"
+                                    android:scaleX="0.25"
+                                    android:scaleY="0.25" />
+
+                                <RadioButton
+                                    android:id="@+id/radioBtn3"
+                                    android:layout_width="15dp"
+                                    android:layout_height="wrap_content"
+                                    android:clickable="false"
+                                    android:minWidth="0dp"
+                                    android:minHeight="0dp"
+                                    android:scaleX="0.25"
+                                    android:scaleY="0.25" />
+
+                            </RadioGroup>
+                        </RelativeLayout>
 
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>

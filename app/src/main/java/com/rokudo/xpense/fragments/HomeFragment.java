@@ -27,6 +27,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.FragmentNavigator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.PagerSnapHelper;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SnapHelper;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.bumptech.glide.Glide;
@@ -40,23 +44,31 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.rokudo.xpense.R;
+import com.rokudo.xpense.adapters.SpentMostAdapter;
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.data.viewmodels.WalletsViewModel;
 import com.rokudo.xpense.databinding.FragmentHomeBinding;
+import com.rokudo.xpense.models.SpentMostItem;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.models.User;
 import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.DatabaseUtils;
 import com.rokudo.xpense.utils.PrefsUtils;
+import com.rokudo.xpense.utils.TransactionUtils;
 import com.rokudo.xpense.utils.dialogs.AdjustBalanceDialog;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
 import com.rokudo.xpense.utils.dialogs.WalletListDialog;
 
+import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
@@ -68,8 +80,9 @@ public class HomeFragment extends Fragment {
     private Wallet mWallet;
     private WalletsViewModel walletsViewModel;
     private TransactionViewModel transactionViewModel;
-
+    private SpentMostAdapter adapter;
     private Boolean gotTransactionsOnce = false;
+    private final List<SpentMostItem> spentMostItems = new ArrayList<>();
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -81,12 +94,53 @@ public class HomeFragment extends Fragment {
             initOnClicks();
 
             setupBarChart(binding.barChart, new TextView(requireContext()).getCurrentTextColor(), true);
-            setupPieChart(binding.pieChart, new TextView(requireContext()).getCurrentTextColor(),true);
+            setupPieChart(binding.pieChart, new TextView(requireContext()).getCurrentTextColor(), true);
+
+            initSpentMostOn();
         }
 
         loadWalletDetails();
 
         return binding.getRoot();
+    }
+
+    private void initSpentMostOn() {
+        RecyclerView spentMostRv = binding.spentMostRv;
+//        spentMostRv.setHasFixedSize(false);
+        adapter = new SpentMostAdapter(spentMostItems);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false);
+        spentMostRv.setLayoutManager(linearLayoutManager);
+        spentMostRv.setAdapter(adapter);
+        SnapHelper snapHelper = new PagerSnapHelper();
+        snapHelper.attachToRecyclerView(spentMostRv);
+
+        spentMostRv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    View centerView = snapHelper.findSnapView(linearLayoutManager);
+                    int pos;
+                    if (centerView != null) {
+                        pos = linearLayoutManager.getPosition(centerView);
+                        switch (pos) {
+                            case 0:
+                                binding.radioBtn1.setChecked(true);
+                                break;
+                            case 1:
+                                binding.radioBtn2.setChecked(true);
+                                break;
+                            case 2:
+                                binding.radioBtn3.setChecked(true);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+        });
+
     }
 
     private void loadWalletDetails() {
@@ -137,6 +191,7 @@ public class HomeFragment extends Fragment {
                         updateBarchartData(binding.barChart,
                                 values, new TextView(requireContext()).getCurrentTextColor(),
                                 true);
+                        updateSpentMostOn(values);
                     }
                     gotTransactionsOnce = true;
                 });
@@ -145,6 +200,82 @@ public class HomeFragment extends Fragment {
                 updateLatestTransactionUI(value, binding, requireContext());
             }
         });
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void updateSpentMostOn(List<Transaction> values) {
+        Map<String, Double> categories = new HashMap<>();
+        Map<LocalDate, Double> days = new HashMap<>();
+        Transaction expensiveTransaction = null;
+        for (Transaction transaction : values) {
+
+            if (transaction.getType().equals(Transaction.INCOME_TYPE)) {
+                continue;
+            }
+
+            if (expensiveTransaction == null) {
+                expensiveTransaction = transaction;
+            } else if (expensiveTransaction.getAmount() < transaction.getAmount()) {
+                expensiveTransaction = transaction;
+            }
+
+            LocalDate transactionDate = transaction.getDate().toInstant().atZone(ZoneOffset.UTC).toLocalDate();
+
+            if (days.containsKey(transactionDate)) {
+                Double amount = days.getOrDefault(transactionDate, 0.0);
+                days.put(transactionDate, amount == null ? 0.0f : amount + transaction.getAmount());
+            } else {
+                days.put(transactionDate, transaction.getAmount());
+            }
+
+            if (categories.containsKey(transaction.getCategory())) {
+                Double amount = categories.getOrDefault(transaction.getCategory(), 0.0);
+                categories.put(transaction.getCategory(), amount == null ? 0.0f : amount + transaction.getAmount());
+            } else {
+                categories.put(transaction.getCategory(), transaction.getAmount());
+            }
+        }
+
+        SpentMostItem mostExpensiveTransaction = new SpentMostItem(expensiveTransaction != null ? expensiveTransaction.getTitle() : "",
+                expensiveTransaction != null ? expensiveTransaction.getCategory() : "",
+                "- " + (expensiveTransaction != null ?
+                        new DecimalFormat("0.00").format(expensiveTransaction.getAmount())
+                        : "") + " " + mWallet.getCurrency(),
+                expensiveTransaction != null ? TransactionUtils.getTransactionDateString(expensiveTransaction) : "");
+
+        SpentMostItem mostExpensiveCategory = new SpentMostItem();
+        mostExpensiveCategory.setTitle("Most Expensive category ");
+        categories.forEach((key, value) -> {
+            if (mostExpensiveCategory.getAmount() == null) {
+                mostExpensiveCategory.setAmount(String.valueOf(value));
+            } else if (Double.parseDouble(mostExpensiveCategory.getAmount()) < value) {
+                mostExpensiveCategory.setCategory(key);
+                mostExpensiveCategory.setAmount(value + "");
+            }
+        });
+        mostExpensiveCategory.setAmount(new DecimalFormat("0.00").format(Double.parseDouble(mostExpensiveCategory.getAmount())) + " " + mWallet.getCurrency());
+
+        SpentMostItem mostExpensiveDay = new SpentMostItem();
+        mostExpensiveDay.setTitle("Most expensive day");
+        days.forEach((key, value) -> {
+            if (mostExpensiveDay.getAmount() == null) {
+                mostExpensiveDay.setAmount(String.valueOf(value));
+            } else if (Double.parseDouble(mostExpensiveDay.getAmount()) < value) {
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("E, MMM d");
+                mostExpensiveDay.setDate(dateTimeFormatter.format(key));
+                mostExpensiveDay.setAmount(value + "");
+            }
+        });
+        mostExpensiveDay.setAmount(new DecimalFormat("0.00").format(Double.parseDouble(mostExpensiveDay.getAmount())) + " " + mWallet.getCurrency());
+
+
+        List<SpentMostItem> spentMostItemList = new ArrayList<>();
+        spentMostItemList.add(mostExpensiveTransaction);
+        spentMostItemList.add(mostExpensiveCategory);
+        spentMostItemList.add(mostExpensiveDay);
+        spentMostItems.clear();
+        spentMostItems.addAll(spentMostItemList);
+        adapter.notifyDataSetChanged();
     }
 
     private Date getCurrentMonth() {
