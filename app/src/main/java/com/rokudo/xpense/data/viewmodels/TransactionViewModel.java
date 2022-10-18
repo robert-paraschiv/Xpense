@@ -28,6 +28,10 @@ public class TransactionViewModel extends AndroidViewModel {
         return repo.loadTransactions();
     }
 
+    public MutableLiveData<List<Transaction>> loadTransactionsDateInterval(String walletId, Date start, Date end) {
+        return repo.loadTransactionsDateInterval(walletId, start, end);
+    }
+
     public MutableLiveData<String> addTransaction(Transaction transaction) {
         return repo.addTransaction(transaction);
     }

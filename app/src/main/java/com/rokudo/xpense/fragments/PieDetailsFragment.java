@@ -54,10 +54,12 @@ public class PieDetailsFragment extends Fragment {
 
         binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.backBtn).popBackStack());
 
-        initDateChip();
         setupPieChart(binding.pieChart, new TextView(requireContext()).getCurrentTextColor(), false);
-        loadTransactions();
         setUpExpenseCategoryRv();
+        initDateChip();
+
+        loadTransactions();
+
         return binding.getRoot();
     }
 

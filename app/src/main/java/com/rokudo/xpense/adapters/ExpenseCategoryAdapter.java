@@ -73,7 +73,7 @@ public class ExpenseCategoryAdapter extends RecyclerView.Adapter<ExpenseCategory
                     AppCompatResources.getDrawable(holder.categoryPic.getContext(),
                             expenseCategory.getResourceId()));
             holder.categoryPic.setColorFilter(PieChartUtils.PIE_COLORS.get(position));
-            if (expenseCategory.getTransactionList().isEmpty()) {
+            if (expenseCategory.getTransactionList() == null || expenseCategory.getTransactionList().isEmpty()) {
                 holder.itemView.findViewById(R.id.mainCard).setClickable(false);
             } else {
                 holder.itemView.findViewById(R.id.mainCard).setClickable(true);

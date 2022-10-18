@@ -68,11 +68,12 @@ public class SpentMostUtils {
 
         SpentMostItem mostExpensiveDay = new SpentMostItem();
         mostExpensiveDay.setTitle("Most expensive day");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("E, MMM d");
         days.forEach((key, value) -> {
             if (mostExpensiveDay.getAmount() == null) {
                 mostExpensiveDay.setAmount(String.valueOf(value));
+                mostExpensiveDay.setDate(dateTimeFormatter.format(key));
             } else if (Double.parseDouble(mostExpensiveDay.getAmount()) < value) {
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("E, MMM d");
                 mostExpensiveDay.setDate(dateTimeFormatter.format(key));
                 mostExpensiveDay.setAmount(value + "");
             }
