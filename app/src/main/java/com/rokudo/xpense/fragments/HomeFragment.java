@@ -7,6 +7,7 @@ import static com.rokudo.xpense.utils.BarChartUtils.updateBarchartData;
 import static com.rokudo.xpense.utils.DatabaseUtils.usersRef;
 import static com.rokudo.xpense.utils.PieChartUtils.setupPieChart;
 import static com.rokudo.xpense.utils.PieChartUtils.updatePieChartData;
+import static com.rokudo.xpense.utils.SpentMostUtils.updateSpentMostOn;
 import static com.rokudo.xpense.utils.TransactionUtils.updateLatestTransactionUI;
 import static com.rokudo.xpense.utils.UserUtils.checkIfUserPicIsDifferent;
 import static com.rokudo.xpense.utils.dialogs.DialogUtils.getCircularProgressDrawable;
@@ -54,21 +55,15 @@ import com.rokudo.xpense.models.User;
 import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.DatabaseUtils;
 import com.rokudo.xpense.utils.PrefsUtils;
-import com.rokudo.xpense.utils.TransactionUtils;
 import com.rokudo.xpense.utils.dialogs.AdjustBalanceDialog;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
 import com.rokudo.xpense.utils.dialogs.WalletListDialog;
 
-import java.text.DecimalFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
@@ -144,9 +139,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadWalletDetails() {
-        String selectedWalletId = requireContext()
-                .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE)
-                .getString("selectedWalletId", "");
+        String selectedWalletId = requireContext().getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE).getString("selectedWalletId", "");
 
         walletsViewModel.loadWallet(selectedWalletId).observe(getViewLifecycleOwner(), wallet -> {
             if (wallet == null) {
@@ -165,36 +158,30 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadTransactions(String id) {
-        transactionViewModel.loadTransactions(id, getCurrentMonth())
-                .observe(getViewLifecycleOwner(), values -> {
-                    boolean needUpdate = false;
-                    for (Transaction transaction : values) {
-                        if (transactionList.contains(transaction)) {
-                            if (isTransactionDifferent(transaction, transactionList.get(transactionList.indexOf(transaction)))) {
-                                needUpdate = true;
-                                transactionList.set(transactionList.indexOf(transaction), transaction);
-                            }
-                        } else {
-                            if (gotTransactionsOnce) {
-                                transactionList.add(0, transaction);
-                            } else {
-                                transactionList.add(transaction);
-                            }
-                            needUpdate = true;
-                        }
+        transactionViewModel.loadTransactions(id, getCurrentMonth()).observe(getViewLifecycleOwner(), values -> {
+            boolean needUpdate = false;
+            for (Transaction transaction : values) {
+                if (transactionList.contains(transaction)) {
+                    if (isTransactionDifferent(transaction, transactionList.get(transactionList.indexOf(transaction)))) {
+                        needUpdate = true;
+                        transactionList.set(transactionList.indexOf(transaction), transaction);
                     }
-                    if (needUpdate || values.isEmpty()) {
-                        updatePieChartData(binding.pieChart
-                                , mWallet == null ? "" : mWallet.getCurrency(),
-                                values,
-                                true);
-                        updateBarchartData(binding.barChart,
-                                values, new TextView(requireContext()).getCurrentTextColor(),
-                                true);
-                        updateSpentMostOn(values);
+                } else {
+                    if (gotTransactionsOnce) {
+                        transactionList.add(0, transaction);
+                    } else {
+                        transactionList.add(transaction);
                     }
-                    gotTransactionsOnce = true;
-                });
+                    needUpdate = true;
+                }
+            }
+            if (needUpdate || values.isEmpty()) {
+                updatePieChartData(binding.pieChart, mWallet == null ? "" : mWallet.getCurrency(), values, true);
+                updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor(), true);
+                updateSpentMostOn(values, mWallet.getCurrency(), adapter);
+            }
+            gotTransactionsOnce = true;
+        });
         transactionViewModel.loadLatestTransaction().observe(getViewLifecycleOwner(), value -> {
             if (value != null) {
                 updateLatestTransactionUI(value, binding, requireContext());
@@ -202,96 +189,14 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private void updateSpentMostOn(List<Transaction> values) {
-        Map<String, Double> categories = new HashMap<>();
-        Map<LocalDate, Double> days = new HashMap<>();
-        Transaction expensiveTransaction = null;
-        for (Transaction transaction : values) {
-
-            if (transaction.getType().equals(Transaction.INCOME_TYPE)) {
-                continue;
-            }
-
-            if (expensiveTransaction == null) {
-                expensiveTransaction = transaction;
-            } else if (expensiveTransaction.getAmount() < transaction.getAmount()) {
-                expensiveTransaction = transaction;
-            }
-
-            LocalDate transactionDate = transaction.getDate().toInstant().atZone(ZoneOffset.UTC).toLocalDate();
-
-            if (days.containsKey(transactionDate)) {
-                Double amount = days.getOrDefault(transactionDate, 0.0);
-                days.put(transactionDate, amount == null ? 0.0f : amount + transaction.getAmount());
-            } else {
-                days.put(transactionDate, transaction.getAmount());
-            }
-
-            if (categories.containsKey(transaction.getCategory())) {
-                Double amount = categories.getOrDefault(transaction.getCategory(), 0.0);
-                categories.put(transaction.getCategory(), amount == null ? 0.0f : amount + transaction.getAmount());
-            } else {
-                categories.put(transaction.getCategory(), transaction.getAmount());
-            }
-        }
-
-        SpentMostItem mostExpensiveTransaction = new SpentMostItem(expensiveTransaction != null ? expensiveTransaction.getTitle() : "",
-                expensiveTransaction != null ? expensiveTransaction.getCategory() : "",
-                "- " + (expensiveTransaction != null ?
-                        new DecimalFormat("0.00").format(expensiveTransaction.getAmount())
-                        : "") + " " + mWallet.getCurrency(),
-                expensiveTransaction != null ? TransactionUtils.getTransactionDateString(expensiveTransaction) : "");
-
-        SpentMostItem mostExpensiveCategory = new SpentMostItem();
-        mostExpensiveCategory.setTitle("Most Expensive category ");
-        categories.forEach((key, value) -> {
-            if (mostExpensiveCategory.getAmount() == null) {
-                mostExpensiveCategory.setAmount(String.valueOf(value));
-            } else if (Double.parseDouble(mostExpensiveCategory.getAmount()) < value) {
-                mostExpensiveCategory.setCategory(key);
-                mostExpensiveCategory.setAmount(value + "");
-            }
-        });
-        mostExpensiveCategory.setAmount(new DecimalFormat("0.00").format(Double.parseDouble(mostExpensiveCategory.getAmount())) + " " + mWallet.getCurrency());
-
-        SpentMostItem mostExpensiveDay = new SpentMostItem();
-        mostExpensiveDay.setTitle("Most expensive day");
-        days.forEach((key, value) -> {
-            if (mostExpensiveDay.getAmount() == null) {
-                mostExpensiveDay.setAmount(String.valueOf(value));
-            } else if (Double.parseDouble(mostExpensiveDay.getAmount()) < value) {
-                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("E, MMM d");
-                mostExpensiveDay.setDate(dateTimeFormatter.format(key));
-                mostExpensiveDay.setAmount(value + "");
-            }
-        });
-        mostExpensiveDay.setAmount(new DecimalFormat("0.00").format(Double.parseDouble(mostExpensiveDay.getAmount())) + " " + mWallet.getCurrency());
-
-
-        List<SpentMostItem> spentMostItemList = new ArrayList<>();
-        spentMostItemList.add(mostExpensiveTransaction);
-        spentMostItemList.add(mostExpensiveCategory);
-        spentMostItemList.add(mostExpensiveDay);
-        spentMostItems.clear();
-        spentMostItems.addAll(spentMostItemList);
-        adapter.notifyDataSetChanged();
-    }
-
     private Date getCurrentMonth() {
-        LocalDateTime localDateTime = LocalDateTime.of(LocalDateTime.now().getYear(),
-                LocalDateTime.now().getMonth(),
-                1,
-                0,
-                0);
+        LocalDateTime localDateTime = LocalDateTime.of(LocalDateTime.now().getYear(), LocalDateTime.now().getMonth(), 1, 0, 0);
         return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
     }
 
     private boolean isTransactionDifferent(Transaction newTransaction, Transaction oldTransaction) {
-        if (!newTransaction.getAmount().equals(oldTransaction.getAmount()))
-            return true;
-        if (!newTransaction.getCategory().equals(oldTransaction.getCategory()))
-            return true;
+        if (!newTransaction.getAmount().equals(oldTransaction.getAmount())) return true;
+        if (!newTransaction.getCategory().equals(oldTransaction.getCategory())) return true;
         return !newTransaction.getType().equals(oldTransaction.getType());
     }
 
@@ -305,15 +210,7 @@ public class HomeFragment extends Fragment {
         } else {
             binding.sharedWithLayout.setVisibility(View.VISIBLE);
 
-            Glide.with(binding.sharedWithIcon)
-                    .load(getOtherUserProfilePic(wallet.getWalletUsers()))
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .apply(RequestOptions.circleCropTransform())
-                    .placeholder(DialogUtils.getCircularProgressDrawable(requireContext()))
-                    .fallback(R.drawable.ic_baseline_person_24)
-                    .error(R.drawable.ic_baseline_person_24)
-                    .transition(withCrossFade())
-                    .into(binding.sharedWithIcon);
+            Glide.with(binding.sharedWithIcon).load(getOtherUserProfilePic(wallet.getWalletUsers())).diskCacheStrategy(DiskCacheStrategy.ALL).apply(RequestOptions.circleCropTransform()).placeholder(DialogUtils.getCircularProgressDrawable(requireContext())).fallback(R.drawable.ic_baseline_person_24).error(R.drawable.ic_baseline_person_24).transition(withCrossFade()).into(binding.sharedWithIcon);
         }
 
     }
@@ -338,8 +235,7 @@ public class HomeFragment extends Fragment {
     private void getUserDetails() {
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             if (FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber() != null) {
-                userDetailsListenerRegistration = usersRef.document(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber())
-                        .addSnapshotListener(userDetailsEventListener);
+                userDetailsListenerRegistration = usersRef.document(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber()).addSnapshotListener(userDetailsEventListener);
             }
         }
     }
@@ -360,14 +256,7 @@ public class HomeFragment extends Fragment {
 
         if (binding.profileImage.getDrawable() == null || checkIfUserPicIsDifferent(user, DatabaseUtils.getCurrentUser())) {
             CircularProgressDrawable circularProgressDrawable = getCircularProgressDrawable(requireContext());
-            Glide.with(requireContext())
-                    .load(user.getPictureUrl())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .apply(RequestOptions.circleCropTransform())
-                    .placeholder(circularProgressDrawable)
-                    .fallback(R.drawable.ic_baseline_person_24)
-                    .transition(withCrossFade())
-                    .into(binding.profileImage);
+            Glide.with(requireContext()).load(user.getPictureUrl()).diskCacheStrategy(DiskCacheStrategy.ALL).apply(RequestOptions.circleCropTransform()).placeholder(circularProgressDrawable).fallback(R.drawable.ic_baseline_person_24).transition(withCrossFade()).into(binding.profileImage);
         }
     }
 
@@ -387,9 +276,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void navigateToBarDetails() {
-        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
-                .addSharedElement(binding.barChartCard, "barChartCard")
-                .build();
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder().addSharedElement(binding.barChartCard, "barChartCard").build();
 
         NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToBarDetailsFragment(mWallet);
 
@@ -403,9 +290,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void navigateToPieDetails() {
-        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
-                .addSharedElement(binding.pieChartCard, "pieChartCard")
-                .build();
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder().addSharedElement(binding.pieChartCard, "pieChartCard").build();
 
         NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToPieDetailsFragment(mWallet);
 
@@ -429,9 +314,7 @@ public class HomeFragment extends Fragment {
     private void handleAddWalletBtnClick() {
         binding.addWalletBtn.setTransitionName("addWalletTransition");
 
-        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
-                .addSharedElement(binding.addWalletBtn, "addWalletTransition")
-                .build();
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder().addSharedElement(binding.addWalletBtn, "addWalletTransition").build();
 
         NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToAddWalletFragment();
 
@@ -453,8 +336,7 @@ public class HomeFragment extends Fragment {
         setExitTransition(exit);
         setReenterTransition(reenter);
 
-        Navigation.findNavController(binding.getRoot()).navigate(HomeFragmentDirections
-                .actionHomeFragmentToEditWalletFragment(wallet));
+        Navigation.findNavController(binding.getRoot()).navigate(HomeFragmentDirections.actionHomeFragmentToEditWalletFragment(wallet));
     }
 
     private void handleAdjustBalanceBtnClick() {
@@ -477,9 +359,7 @@ public class HomeFragment extends Fragment {
 
     private void navigateToAddTransaction(String amount) {
         binding.adjustBalanceBtn.setTransitionName("adjustBalance");
-        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
-                .addSharedElement(binding.adjustBalanceBtn, "adjustBalance")
-                .build();
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder().addSharedElement(binding.adjustBalanceBtn, "adjustBalance").build();
 
         Transaction transaction = new Transaction();
         if (Double.parseDouble(amount) > mWallet.getAmount()) {
@@ -490,8 +370,7 @@ public class HomeFragment extends Fragment {
             transaction.setAmount(mWallet.getAmount() - Double.parseDouble(amount));
         }
 
-        NavDirections navDirections = HomeFragmentDirections
-                .actionHomeFragmentToAddTransactionLayout(mWallet.getId(), mWallet.getCurrency(), transaction);
+        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToAddTransactionLayout(mWallet.getId(), mWallet.getCurrency(), transaction);
 
         Hold hold = new Hold();
         hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
@@ -505,9 +384,7 @@ public class HomeFragment extends Fragment {
     private void navigateToSettings() {
         binding.profileImage.setTransitionName("settingsTransition");
 
-        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
-                .addSharedElement(binding.profileImage, "settingsTransition")
-                .build();
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder().addSharedElement(binding.profileImage, "settingsTransition").build();
 
         NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToSettingsFragment();
 
@@ -521,12 +398,9 @@ public class HomeFragment extends Fragment {
     }
 
     private void navigateToAddTransaction() {
-        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
-                .addSharedElement(binding.addTransactionBtn, getString(R.string.transition_name_add_transaction))
-                .build();
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder().addSharedElement(binding.addTransactionBtn, getString(R.string.transition_name_add_transaction)).build();
 
-        NavDirections navDirections = HomeFragmentDirections
-                .actionHomeFragmentToAddTransactionLayout(mWallet.getId(), mWallet.getCurrency(), null);
+        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToAddTransactionLayout(mWallet.getId(), mWallet.getCurrency(), null);
 
         Hold hold = new Hold();
         hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
@@ -547,8 +421,7 @@ public class HomeFragment extends Fragment {
         setExitTransition(exit);
         setReenterTransition(reenter);
 
-        Navigation.findNavController(binding.getRoot()).navigate(HomeFragmentDirections
-                .actionHomeFragmentToListTransactionsFragment(mWallet.getId(), mWallet.getCurrency()));
+        Navigation.findNavController(binding.getRoot()).navigate(HomeFragmentDirections.actionHomeFragmentToListTransactionsFragment(mWallet.getId(), mWallet.getCurrency()));
     }
 
     private void showWalletList() {

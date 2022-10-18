@@ -15,10 +15,14 @@ import com.rokudo.xpense.models.SpentMostItem;
 import java.util.List;
 
 public class SpentMostAdapter extends RecyclerView.Adapter<SpentMostAdapter.ViewHolder> {
-    private final List<SpentMostItem> spentMostItems;
+    private List<SpentMostItem> spentMostItems;
 
     public SpentMostAdapter(List<SpentMostItem> spentMostItems) {
         this.spentMostItems = spentMostItems;
+    }
+
+    public void setItems(List<SpentMostItem> spentMostItemList) {
+        this.spentMostItems = spentMostItemList;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
