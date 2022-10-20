@@ -178,7 +178,7 @@ public class HomeFragment extends Fragment {
             if (needUpdate || values.isEmpty()) {
                 updatePieChartData(binding.pieChart, mWallet == null ? "" : mWallet.getCurrency(), values, true);
                 updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor(), true);
-                updateSpentMostOn(values, mWallet.getCurrency(), adapter);
+                updateSpentMostOn(values, mWallet == null ? "" : mWallet.getCurrency(), adapter);
             }
             gotTransactionsOnce = true;
         });

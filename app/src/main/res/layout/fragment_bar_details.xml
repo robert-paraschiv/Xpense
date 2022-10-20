@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:background="@color/fragments_background"
     android:transitionName="barChartCard"
-    tools:context=".fragments.BarDetailsFragment">
+    tools:context=".fragments.BarDetailsFragment"
+    tools:ignore="HardcodedText">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
@@ -43,51 +44,62 @@
 
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/barChartCard"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/toolbar"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        app:cardCornerRadius="18dp"
-        app:strokeWidth="0dp">
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/monthspendingtext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:layout_margin="12dp"
-                android:gravity="center_horizontal"
-                android:text="This month's spending" />
-
-            <com.github.mikephil.charting.charts.BarChart
-                android:id="@+id/barChart"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/barChartCard"
                 android:layout_width="match_parent"
-                android:layout_height="220dp"
-                android:layout_below="@id/monthspendingtext"
-                android:layout_marginBottom="16dp"
-                android:transitionName="pieChart" />
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="12dp"
+                app:cardCornerRadius="18dp"
+                app:strokeWidth="0dp">
 
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/monthspendingtext"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_margin="12dp"
+                        android:gravity="center_horizontal"
+                        android:text="This month's spending" />
+
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:id="@+id/barChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp"
+                        android:layout_below="@id/monthspendingtext"
+                        android:layout_marginBottom="16dp"
+                        android:transitionName="pieChart" />
+
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/categoriesRv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/barChartCard"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                tools:listitem="@layout/item_expense_category" />
         </RelativeLayout>
-    </com.google.android.material.card.MaterialCardView>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/categoriesRv"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/barChartCard"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="18dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
-        tools:listitem="@layout/item_expense_category" />
-
+    </androidx.core.widget.NestedScrollView>
 
 </RelativeLayout>

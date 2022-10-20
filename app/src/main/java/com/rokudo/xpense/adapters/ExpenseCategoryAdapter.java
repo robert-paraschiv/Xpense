@@ -14,6 +14,7 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.button.MaterialButton;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.models.ExpenseCategory;
 import com.rokudo.xpense.utils.PieChartUtils;
@@ -35,6 +36,7 @@ public class ExpenseCategoryAdapter extends RecyclerView.Adapter<ExpenseCategory
         private final TextView categoryName;
         private final TextView categoryAmount;
         private final RecyclerView transactionsRv;
+        private final MaterialButton expandBtn;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -42,16 +44,22 @@ public class ExpenseCategoryAdapter extends RecyclerView.Adapter<ExpenseCategory
             this.categoryName = itemView.findViewById(R.id.categoryName);
             this.categoryPic = itemView.findViewById(R.id.categoryImage);
             this.transactionsRv = itemView.findViewById(R.id.transactionsRv);
+            this.expandBtn = itemView.findViewById(R.id.expandBtn);
+
+            this.expandBtn.setOnClickListener(v -> itemView.performClick());
 
             this.itemView.setOnClickListener(v -> {
                 if (transactionsRv.getVisibility() == View.VISIBLE) {
                     TransitionManager.beginDelayedTransition(itemView.findViewById(R.id.mainCard), new ChangeBounds().setDuration(50));
                     transactionsRv.setVisibility(View.GONE);
+                    this.expandBtn.setIconResource(R.drawable.ic_round_arrow_drop_down_24);
                 } else {
                     TransitionManager.beginDelayedTransition(itemView.findViewById(R.id.mainCard), new ChangeBounds().setDuration(500));
                     transactionsRv.setVisibility(View.VISIBLE);
+                    this.expandBtn.setIconResource(R.drawable.ic_round_arrow_drop_up_24);
                 }
             });
+
         }
     }
 

@@ -22,7 +22,7 @@ public class BarDetailsUtils {
     private static final String TAG = "BarChartUtils";
 
     @SuppressLint("SimpleDateFormat")
-    static SimpleDateFormat dayOfMonthFormat = new SimpleDateFormat("dd");
+    static SimpleDateFormat dayOfMonthFormat = new SimpleDateFormat("d MMM");
 
     public static void setupBarChart(BarChart barChart, int textColor) {
 //        barChart.setMaxVisibleValueCount(60);
@@ -45,6 +45,8 @@ public class BarDetailsUtils {
 
         barChart.getDescription().setEnabled(false);
         barChart.getXAxis().setGranularity(1f);
+        barChart.getXAxis().setLabelRotationAngle(-45);
+        barChart.getXAxis().setTextSize(8f);
     }
 
     public static void updateBarchartData(BarChart barChart, List<Transaction> transactionList, int textColor) {
