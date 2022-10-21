@@ -8,11 +8,13 @@ public class ExpenseCategory {
     Integer resourceId;
     Double amount;
     List<Transaction> transactionList;
+    Integer color;
 
-    public ExpenseCategory(String name, Integer resourceId) {
+    public ExpenseCategory(String name, Integer resourceId, Integer color) {
         this.name = name;
         this.resourceId = resourceId;
         this.amount = 0.0;
+        this.color = color;
     }
 
     public ExpenseCategory(String name, List<Transaction> transactionList, Integer resourceId, Double amount) {
@@ -52,6 +54,14 @@ public class ExpenseCategory {
 
     public void setAmount(Double amount) {
         this.amount = amount;
+    }
+
+    public Integer getColor() {
+        return color;
+    }
+
+    public void setColor(Integer color) {
+        this.color = color;
     }
 
     @Override

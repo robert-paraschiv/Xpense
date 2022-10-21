@@ -80,7 +80,7 @@ public class AddTransactionFragment extends Fragment {
             ExpenseCategory category = CategoriesUtil.categoryList.get(i);
             Chip chip = (Chip) getLayoutInflater().inflate(R.layout.item_category, binding.categoryChipGroup, false);
             chip.setText(category.getName());
-            chip.setChipIconTint(ColorStateList.valueOf(PieChartUtils.PIE_COLORS.get(i)));
+            chip.setChipIconTint(ColorStateList.valueOf(CategoriesUtil.categoryList.get(i).getColor()));
             chip.setChipIcon(getResources().getDrawable(category.getResourceId(), requireContext().getTheme()));
             chip.setChecked(indexToCheck == i);
 
@@ -141,7 +141,7 @@ public class AddTransactionFragment extends Fragment {
             if (chip != null)
                 selectedCategory = CategoriesUtil.categoryList.get(
                         CategoriesUtil.categoryList.indexOf(
-                                new ExpenseCategory(chip.getText().toString(), null)
+                                new ExpenseCategory(chip.getText().toString(), null, null)
                         )
                 );
         });

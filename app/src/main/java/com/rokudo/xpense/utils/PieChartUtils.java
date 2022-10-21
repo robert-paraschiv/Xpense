@@ -11,7 +11,7 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
-import com.github.mikephil.charting.utils.ColorTemplate;
+import com.rokudo.xpense.models.ExpenseCategory;
 import com.rokudo.xpense.models.Transaction;
 
 import java.text.DecimalFormat;
@@ -22,20 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 public class PieChartUtils {
-    public static ArrayList<Integer> PIE_COLORS;
-
-    static {
-        PIE_COLORS = new ArrayList<>();
-        for (int color : ColorTemplate.VORDIPLOM_COLORS) {
-            PIE_COLORS.add(color);
-        }
-        for (int color : ColorTemplate.MATERIAL_COLORS) {
-            PIE_COLORS.add(color);
-        }
-        for (int color : ColorTemplate.COLORFUL_COLORS) {
-            PIE_COLORS.add(color);
-        }
-    }
 
     public static void setupPieChart(PieChart pieChart, int textColor, boolean isCalledFromHome) {
         pieChart.setDrawHoleEnabled(true);
@@ -85,9 +71,17 @@ public class PieChartUtils {
         }
 
         ArrayList<PieEntry> entries = getPieEntries(categories, sum);
-
         PieDataSet dataSet = new PieDataSet(entries, "");
-        dataSet.setColors(PIE_COLORS);
+
+        //Get colors ordered to map label colors from Category Utils
+        ArrayList<Integer> pieColors = new ArrayList<>();
+        entries.forEach(value ->
+                pieColors.add(CategoriesUtil.categoryList.get(
+                                CategoriesUtil.categoryList.indexOf(new ExpenseCategory(value.getLabel(), null, null)))
+                        .getColor()));
+
+        dataSet.setColors(pieColors);
+
         if (!isCalledFromHome) {
             dataSet.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
             dataSet.setValueLineColor(new TextView(pieChart.getContext()).getCurrentTextColor());

@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.models.ExpenseCategory;
-import com.rokudo.xpense.utils.PieChartUtils;
+import com.rokudo.xpense.utils.CategoriesUtil;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -80,7 +80,8 @@ public class ExpenseCategoryAdapter extends RecyclerView.Adapter<ExpenseCategory
             holder.categoryPic.setImageDrawable(
                     AppCompatResources.getDrawable(holder.categoryPic.getContext(),
                             expenseCategory.getResourceId()));
-            holder.categoryPic.setColorFilter(PieChartUtils.PIE_COLORS.get(position));
+            holder.categoryPic.setColorFilter(CategoriesUtil.categoryList.get(
+                    CategoriesUtil.categoryList.indexOf(expenseCategory)).getColor());
             if (expenseCategory.getTransactionList() == null || expenseCategory.getTransactionList().isEmpty()) {
                 holder.itemView.findViewById(R.id.mainCard).setClickable(false);
             } else {
