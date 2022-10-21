@@ -30,7 +30,6 @@ import com.rokudo.xpense.models.ExpenseCategory;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.DatabaseUtils;
-import com.rokudo.xpense.utils.PieChartUtils;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -51,6 +50,7 @@ public class AddTransactionFragment extends Fragment {
         binding = FragmentAddTransactionBinding.inflate(inflater, container, false);
 
         handleArgs();
+        buildCategoriesRv();
 
         getWalletId();
         initOnClicks();
@@ -75,14 +75,14 @@ public class AddTransactionFragment extends Fragment {
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
-    private void buildCategoriesRv(int indexToCheck) {
+    private void buildCategoriesRv() {
         for (int i = 0; i < CategoriesUtil.categoryList.size(); i++) {
             ExpenseCategory category = CategoriesUtil.categoryList.get(i);
             Chip chip = (Chip) getLayoutInflater().inflate(R.layout.item_category, binding.categoryChipGroup, false);
             chip.setText(category.getName());
             chip.setChipIconTint(ColorStateList.valueOf(CategoriesUtil.categoryList.get(i).getColor()));
             chip.setChipIcon(getResources().getDrawable(category.getResourceId(), requireContext().getTheme()));
-            chip.setChecked(indexToCheck == i);
+
 
             binding.categoryChipGroup.addView(chip);
         }
@@ -95,7 +95,6 @@ public class AddTransactionFragment extends Fragment {
             binding.getRoot().setTransitionName(requireContext().getResources().getString(R.string.transition_name_add_transaction));
             binding.selectedTextDummy.setText("Expense Category");
             selectedCategory = CategoriesUtil.categoryList.get(0);
-            buildCategoriesRv(0);
         } else {
             Transaction transaction = args.getTransaction();
             binding.getRoot().setTransitionName("adjustBalance");
@@ -106,13 +105,11 @@ public class AddTransactionFragment extends Fragment {
                 binding.incomeChip.setChecked(true);
                 binding.selectedTextDummy.setText("Income Category");
                 selectedCategory = CategoriesUtil.categoryList.get(CategoriesUtil.categoryList.size() - 1);
-                buildCategoriesRv(CategoriesUtil.categoryList.size() - 1);
             } else {
                 binding.expenseChip.setChecked(true);
                 binding.incomeChip.setChecked(false);
                 binding.selectedTextDummy.setText("Expense Category");
                 selectedCategory = CategoriesUtil.categoryList.get(0);
-                buildCategoriesRv(0);
             }
         }
     }
@@ -148,6 +145,23 @@ public class AddTransactionFragment extends Fragment {
     }
 
     private void addTransactionToDb() {
+        if (binding.categoryChipGroup.getCheckedChipId() == View.NO_ID) {
+            binding.pleaseSelectTv.setVisibility(View.VISIBLE);
+            binding.selectedTextDummy.setVisibility(View.INVISIBLE);
+            binding.getRoot().postDelayed(() -> {
+                binding.pleaseSelectTv.setVisibility(View.GONE);
+                binding.selectedTextDummy.setVisibility(View.VISIBLE);
+            }, 1500);
+            return;
+        }
+        if (binding.transactionAmount.getText() == null
+                || binding.transactionAmount.getText().toString().isEmpty()) {
+            binding.amountInputLayout.setError("Please input your amount");
+            binding.amountInputLayout.postDelayed(() ->
+                    binding.amountInputLayout.setError(null), 1500);
+            return;
+        }
+
         DocumentReference documentReference = DatabaseUtils.transactionsRef.document();
         Transaction transaction = new Transaction();
         transaction.setId(documentReference.getId());

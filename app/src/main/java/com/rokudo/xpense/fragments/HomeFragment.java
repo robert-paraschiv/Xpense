@@ -139,7 +139,9 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadWalletDetails() {
-        String selectedWalletId = requireContext().getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE).getString("selectedWalletId", "");
+        String selectedWalletId = requireContext()
+                .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE)
+                .getString("selectedWalletId", "");
 
         walletsViewModel.loadWallet(selectedWalletId).observe(getViewLifecycleOwner(), wallet -> {
             if (wallet == null) {
@@ -190,7 +192,8 @@ public class HomeFragment extends Fragment {
     }
 
     private Date getCurrentMonth() {
-        LocalDateTime localDateTime = LocalDateTime.of(LocalDateTime.now().getYear(), LocalDateTime.now().getMonth(), 1, 0, 0);
+        LocalDateTime localDateTime = LocalDateTime.of(LocalDateTime.now().getYear(),
+                LocalDateTime.now().getMonth(), 1, 0, 0);
         return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
     }
 
@@ -205,12 +208,22 @@ public class HomeFragment extends Fragment {
         binding.walletTitle.setText(wallet.getTitle());
         binding.walletAmount.setText(wallet.getAmount().toString());
         binding.walletCurrency.setText(wallet.getCurrency());
-        if (wallet.getWalletUsers() == null || wallet.getWalletUsers().isEmpty() || wallet.getWalletUsers().size() < 2) {
+        if (wallet.getWalletUsers() == null
+                || wallet.getWalletUsers().isEmpty()
+                || wallet.getWalletUsers().size() < 2) {
             binding.sharedWithLayout.setVisibility(View.GONE);
         } else {
             binding.sharedWithLayout.setVisibility(View.VISIBLE);
 
-            Glide.with(binding.sharedWithIcon).load(getOtherUserProfilePic(wallet.getWalletUsers())).diskCacheStrategy(DiskCacheStrategy.ALL).apply(RequestOptions.circleCropTransform()).placeholder(DialogUtils.getCircularProgressDrawable(requireContext())).fallback(R.drawable.ic_baseline_person_24).error(R.drawable.ic_baseline_person_24).transition(withCrossFade()).into(binding.sharedWithIcon);
+            Glide.with(binding.sharedWithIcon)
+                    .load(getOtherUserProfilePic(wallet.getWalletUsers()))
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .apply(RequestOptions.circleCropTransform())
+                    .placeholder(DialogUtils.getCircularProgressDrawable(requireContext()))
+                    .fallback(R.drawable.ic_baseline_person_24)
+                    .error(R.drawable.ic_baseline_person_24)
+                    .transition(withCrossFade())
+                    .into(binding.sharedWithIcon);
         }
 
     }
@@ -235,7 +248,10 @@ public class HomeFragment extends Fragment {
     private void getUserDetails() {
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             if (FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber() != null) {
-                userDetailsListenerRegistration = usersRef.document(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber()).addSnapshotListener(userDetailsEventListener);
+                userDetailsListenerRegistration = usersRef.document(FirebaseAuth.getInstance()
+                                .getCurrentUser()
+                                .getPhoneNumber())
+                        .addSnapshotListener(userDetailsEventListener);
             }
         }
     }
@@ -254,9 +270,17 @@ public class HomeFragment extends Fragment {
     private void updateUserDetailsUI(User user) {
         binding.welcomeTv.setText(String.format("Welcome, %s", user.getName()));
 
-        if (binding.profileImage.getDrawable() == null || checkIfUserPicIsDifferent(user, DatabaseUtils.getCurrentUser())) {
+        if (binding.profileImage.getDrawable() == null
+                || checkIfUserPicIsDifferent(user, DatabaseUtils.getCurrentUser())) {
             CircularProgressDrawable circularProgressDrawable = getCircularProgressDrawable(requireContext());
-            Glide.with(requireContext()).load(user.getPictureUrl()).diskCacheStrategy(DiskCacheStrategy.ALL).apply(RequestOptions.circleCropTransform()).placeholder(circularProgressDrawable).fallback(R.drawable.ic_baseline_person_24).transition(withCrossFade()).into(binding.profileImage);
+            Glide.with(requireContext())
+                    .load(user.getPictureUrl())
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .apply(RequestOptions.circleCropTransform())
+                    .placeholder(circularProgressDrawable)
+                    .fallback(R.drawable.ic_baseline_person_24)
+                    .transition(withCrossFade())
+                    .into(binding.profileImage);
         }
     }
 
@@ -267,6 +291,7 @@ public class HomeFragment extends Fragment {
         binding.walletTitle.setOnClickListener(view -> showWalletList());
         binding.addTransactionBtn.setOnClickListener(view -> navigateToAddTransaction());
         binding.seeAllTransactionsBtn.setOnClickListener(view -> navigateToTransactionsListFragment());
+        binding.latestTransactionCard.setOnClickListener(v -> navigateToTransactionsListFragment());
         binding.adjustBalanceBtn.setOnClickListener(view -> handleAdjustBalanceBtnClick());
         binding.barChartCard.setOnClickListener(view -> navigateToBarDetails());
         binding.barDetailsBtn.setOnClickListener(view -> navigateToBarDetails());
@@ -276,9 +301,12 @@ public class HomeFragment extends Fragment {
     }
 
     private void navigateToBarDetails() {
-        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder().addSharedElement(binding.barChartCard, "barChartCard").build();
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+                .addSharedElement(binding.barChartCard, "barChartCard")
+                .build();
 
-        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToBarDetailsFragment(mWallet);
+        NavDirections navDirections = HomeFragmentDirections
+                .actionHomeFragmentToBarDetailsFragment(mWallet);
 
         Hold hold = new Hold();
         hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
@@ -290,9 +318,11 @@ public class HomeFragment extends Fragment {
     }
 
     private void navigateToPieDetails() {
-        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder().addSharedElement(binding.pieChartCard, "pieChartCard").build();
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+                .addSharedElement(binding.pieChartCard, "pieChartCard").build();
 
-        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToPieDetailsFragment(mWallet);
+        NavDirections navDirections = HomeFragmentDirections
+                .actionHomeFragmentToPieDetailsFragment(mWallet);
 
         Hold hold = new Hold();
         hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
@@ -314,7 +344,9 @@ public class HomeFragment extends Fragment {
     private void handleAddWalletBtnClick() {
         binding.addWalletBtn.setTransitionName("addWalletTransition");
 
-        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder().addSharedElement(binding.addWalletBtn, "addWalletTransition").build();
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+                .addSharedElement(binding.addWalletBtn, "addWalletTransition")
+                .build();
 
         NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToAddWalletFragment();
 
@@ -336,7 +368,9 @@ public class HomeFragment extends Fragment {
         setExitTransition(exit);
         setReenterTransition(reenter);
 
-        Navigation.findNavController(binding.getRoot()).navigate(HomeFragmentDirections.actionHomeFragmentToEditWalletFragment(wallet));
+        Navigation.findNavController(binding.getRoot())
+                .navigate(HomeFragmentDirections
+                        .actionHomeFragmentToEditWalletFragment(wallet));
     }
 
     private void handleAdjustBalanceBtnClick() {
@@ -359,7 +393,9 @@ public class HomeFragment extends Fragment {
 
     private void navigateToAddTransaction(String amount) {
         binding.adjustBalanceBtn.setTransitionName("adjustBalance");
-        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder().addSharedElement(binding.adjustBalanceBtn, "adjustBalance").build();
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+                .addSharedElement(binding.adjustBalanceBtn, "adjustBalance")
+                .build();
 
         Transaction transaction = new Transaction();
         if (Double.parseDouble(amount) > mWallet.getAmount()) {
@@ -370,7 +406,10 @@ public class HomeFragment extends Fragment {
             transaction.setAmount(mWallet.getAmount() - Double.parseDouble(amount));
         }
 
-        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToAddTransactionLayout(mWallet.getId(), mWallet.getCurrency(), transaction);
+        NavDirections navDirections = HomeFragmentDirections
+                .actionHomeFragmentToAddTransactionLayout(mWallet.getId(),
+                        mWallet.getCurrency(),
+                        transaction);
 
         Hold hold = new Hold();
         hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
@@ -398,9 +437,15 @@ public class HomeFragment extends Fragment {
     }
 
     private void navigateToAddTransaction() {
-        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder().addSharedElement(binding.addTransactionBtn, getString(R.string.transition_name_add_transaction)).build();
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+                .addSharedElement(binding.addTransactionBtn,
+                        getString(R.string.transition_name_add_transaction))
+                .build();
 
-        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToAddTransactionLayout(mWallet.getId(), mWallet.getCurrency(), null);
+        NavDirections navDirections = HomeFragmentDirections
+                .actionHomeFragmentToAddTransactionLayout(mWallet.getId(),
+                        mWallet.getCurrency(),
+                        null);
 
         Hold hold = new Hold();
         hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
@@ -421,7 +466,10 @@ public class HomeFragment extends Fragment {
         setExitTransition(exit);
         setReenterTransition(reenter);
 
-        Navigation.findNavController(binding.getRoot()).navigate(HomeFragmentDirections.actionHomeFragmentToListTransactionsFragment(mWallet.getId(), mWallet.getCurrency()));
+        Navigation.findNavController(binding.getRoot())
+                .navigate(HomeFragmentDirections
+                        .actionHomeFragmentToListTransactionsFragment(mWallet.getId(),
+                                mWallet.getCurrency()));
     }
 
     private void showWalletList() {

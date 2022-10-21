@@ -154,6 +154,19 @@
                 android:text="Expense Category"
                 android:textSize="12sp" />
 
+            <TextView
+                android:id="@+id/pleaseSelectTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/amountInputLayout"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="18dp"
+                android:text="Please select a category first"
+                android:textColor="@android:color/holo_red_dark"
+                android:textSize="18sp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
             <RelativeLayout
                 android:id="@+id/transactionCategoryLayout"
                 android:layout_width="match_parent"
@@ -177,7 +190,6 @@
             </RelativeLayout>
 
             <DatePicker
-                android:theme="@style/DialogTheme"
                 android:id="@+id/simpleDatePicker"
                 android:layout_width="match_parent"
                 android:layout_height="140dp"
@@ -187,7 +199,8 @@
                 android:layout_marginTop="18dp"
                 android:layout_marginEnd="18dp"
                 android:calendarViewShown="false"
-                android:datePickerMode="spinner" />
+                android:datePickerMode="spinner"
+                android:theme="@style/DialogTheme" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/saveTransactionBtn"
