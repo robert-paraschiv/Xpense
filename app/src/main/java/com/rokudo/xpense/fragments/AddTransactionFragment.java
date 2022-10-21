@@ -33,6 +33,7 @@ import com.rokudo.xpense.utils.DatabaseUtils;
 import com.rokudo.xpense.utils.PieChartUtils;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Objects;
 
 @SuppressLint("SetTextI18n")
@@ -129,6 +130,7 @@ public class AddTransactionFragment extends Fragment {
 
     @SuppressLint("ResourceType")
     private void initOnClicks() {
+        binding.simpleDatePicker.setMaxDate(new Date().getTime());
         binding.backBtn.setOnClickListener(view -> {
             hideKeyboard(view);
             Navigation.findNavController(binding.getRoot()).popBackStack();

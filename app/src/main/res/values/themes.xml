@@ -54,4 +54,13 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">22dp</item>
     </style>
+
+    <style name="DialogTheme" parent="MaterialAlertDialog.Material3">
+        <!--selected day-->
+        <item name="android:colorControlActivated">@android:color/holo_red_dark</item>
+        <!--days of the month-->
+        <item name="android:textColorPrimary">@android:color/holo_orange_dark</item>
+        <!--days of the week-->
+        <item name="android:textColorSecondary">@android:color/holo_orange_light</item>
+    </style>
 </resources>

@@ -32,4 +32,13 @@
         <item name="windowActionModeOverlay">true</item>
         <item name="android:windowActivityTransitions">true</item>
     </style>
+
+    <style name="DialogTheme" parent="MaterialAlertDialog.Material3">
+        <!--selected day-->
+        <item name="android:colorControlActivated">@android:color/system_accent1_200</item>
+        <!--days of the month-->
+        <item name="android:textColorPrimary">@android:color/system_accent1_500</item>
+        <!--days of the week-->
+        <item name="android:textColorSecondary">@android:color/system_neutral2_500</item>
+    </style>
 </resources>
