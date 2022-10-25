@@ -86,19 +86,15 @@ public class TransactionRepo {
     }
 
     public MutableLiveData<List<Transaction>> loadTransactionsDateInterval(String walletId, Date start, Date end) {
-        if (transactionListener != null) {
-            transactionListener.remove();
-        }
-        transactionListener = DatabaseUtils.transactionsRef
+        MutableLiveData<List<Transaction>> data = new MutableLiveData<>();
+        DatabaseUtils.transactionsRef
                 .whereEqualTo("walletId", walletId)
                 .whereGreaterThan("date", start)
                 .whereLessThan("date", end)
                 .orderBy("date", Query.Direction.DESCENDING)
-                .addSnapshotListener((value, error) -> {
-                    if (error != null || value == null || value.isEmpty()) {
-                        Log.e(TAG, "loadTransactions: null or error: ", error);
-                        allTransactionList.setValue(new ArrayList<>());
-                        latestTransaction.setValue(new Transaction());
+                .get().addOnSuccessListener(value -> {
+                    if (value == null || value.isEmpty()) {
+                        data.setValue(new ArrayList<>());
                     } else {
                         List<Transaction> transactionList = new ArrayList<>();
                         for (DocumentSnapshot documentSnapshot : value) {
@@ -108,12 +104,10 @@ public class TransactionRepo {
                                 transactionList.add(transaction);
                             }
                         }
-                        latestTransaction.setValue(transactionList.size() == 0 ? new Transaction() : transactionList.get(0));
-                        allTransactionList.setValue(transactionList);
+                        data.setValue(transactionList);
                     }
                 });
 
-
-        return allTransactionList;
+        return data;
     }
 }

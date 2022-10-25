@@ -3,6 +3,8 @@ package com.rokudo.xpense.utils;
 import android.annotation.SuppressLint;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -55,24 +57,7 @@ public class BarDetailsUtils {
         ArrayList<IBarDataSet> dataSets = new ArrayList<>();
         ArrayList<BarEntry> valueSet = new ArrayList<>();
 
-        List<TransEntry> transEntryArrayList = new ArrayList<>();
-
-        for (Transaction transaction : transactionList) {
-            if (transaction.getType().equals(Transaction.INCOME_TYPE)) {
-                continue;
-            }
-
-            TransEntry transEntry = new TransEntry(dayOfMonthFormat.format(transaction.getDate()),
-                    transaction.getDate(),
-                    Float.parseFloat(transaction.getAmount().toString()));
-
-            if (transEntryArrayList.contains(transEntry)) {
-                int index = transEntryArrayList.indexOf(transEntry);
-                transEntryArrayList.get(index).setAmount((float) (transEntryArrayList.get(index).getAmount() + transaction.getAmount()));
-            } else {
-                transEntryArrayList.add(transEntry);
-            }
-        }
+        List<TransEntry> transEntryArrayList = getTransEntryArrayList(transactionList);
 
         transEntryArrayList.sort(Comparator.comparingLong(transEntry -> transEntry.getDate().getTime()));
         for (int i = 0; i < transEntryArrayList.size(); i++) {
@@ -111,5 +96,28 @@ public class BarDetailsUtils {
 //        barChart.getXAxis().setLabelRotationAngle(-45);
 
         barChart.invalidate();
+    }
+
+    @NonNull
+    public static List<TransEntry> getTransEntryArrayList(List<Transaction> transactionList) {
+        List<TransEntry> transEntryArrayList = new ArrayList<>();
+
+        for (Transaction transaction : transactionList) {
+            if (transaction.getType().equals(Transaction.INCOME_TYPE)) {
+                continue;
+            }
+
+            TransEntry transEntry = new TransEntry(dayOfMonthFormat.format(transaction.getDate()),
+                    transaction.getDate(),
+                    Float.parseFloat(transaction.getAmount().toString()));
+
+            if (transEntryArrayList.contains(transEntry)) {
+                int index = transEntryArrayList.indexOf(transEntry);
+                transEntryArrayList.get(index).setAmount((float) (transEntryArrayList.get(index).getAmount() + transaction.getAmount()));
+            } else {
+                transEntryArrayList.add(transEntry);
+            }
+        }
+        return transEntryArrayList;
     }
 }

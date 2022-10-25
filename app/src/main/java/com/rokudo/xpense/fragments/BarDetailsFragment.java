@@ -2,7 +2,9 @@ package com.rokudo.xpense.fragments;
 
 import static androidx.recyclerview.widget.RecyclerView.VERTICAL;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +17,9 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.google.android.material.shape.ShapeAppearanceModel;
 import com.google.android.material.transition.MaterialContainerTransform;
 import com.rokudo.xpense.R;
@@ -22,13 +27,15 @@ import com.rokudo.xpense.adapters.ExpenseCategoryAdapter;
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.databinding.FragmentBarDetailsBinding;
 import com.rokudo.xpense.models.ExpenseCategory;
+import com.rokudo.xpense.models.TransEntry;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.models.Wallet;
-import com.rokudo.xpense.utils.BarChartUtils;
 import com.rokudo.xpense.utils.BarDetailsUtils;
 import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.MapUtil;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -39,12 +46,15 @@ import java.util.Map;
 import java.util.Objects;
 
 public class BarDetailsFragment extends Fragment {
+    private static final String TAG = "BarDetailsFragment";
 
     private FragmentBarDetailsBinding binding;
     private TransactionViewModel transactionViewModel;
     private ExpenseCategoryAdapter adapter;
     private Wallet mWallet;
-    private final List<ExpenseCategory> categoryList = new ArrayList<>();
+    private List<ExpenseCategory> categoryList = new ArrayList<>();
+    private List<TransEntry> transEntryList = new ArrayList<>();
+    private boolean firstLoad = true;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -52,16 +62,68 @@ public class BarDetailsFragment extends Fragment {
         // Inflate the layout for this fragment
         binding = FragmentBarDetailsBinding.inflate(inflater, container, false);
 
-        binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.backBtn).popBackStack());
+        initOnClicks();
 
         transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
 
         BarDetailsUtils.setupBarChart(binding.barChart, new TextView(requireContext()).getCurrentTextColor());
         setUpExpenseCategoryRv();
 
-        loadTransactions();
+        loadThisMonthTransactions();
 
         return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
+        postponeEnterTransition();
+        super.onViewCreated(view, savedInstanceState);
+    }
+
+    private void initOnClicks() {
+        binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.backBtn).popBackStack());
+        binding.barChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                resetCategoriesRv();
+                Log.d(TAG, "onValueSelected: " + e.toString());
+                TransEntry transEntry = transEntryList.get((int) e.getX());
+
+                LocalDateTime localDateTime = transEntry
+                        .getDate()
+                        .toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime();
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(localDateTime.getYear(),
+                        localDateTime.getMonth().getValue() - 1,
+                        localDateTime.getDayOfMonth(),
+                        23, 59);
+                Date end = calendar.getTime();
+
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.set(Calendar.MINUTE, 0);
+                Date start = calendar.getTime();
+
+                loadTransactions(start, end, false);
+            }
+
+            @Override
+            public void onNothingSelected() {
+                resetCategoriesRv();
+                loadThisMonthTransactions();
+            }
+        });
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void resetCategoriesRv() {
+        categoryList = new ArrayList<>();
+        adapter = new ExpenseCategoryAdapter(categoryList, mWallet.getCurrency());
+        binding.categoriesRv.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
     }
 
     private void setUpExpenseCategoryRv() {
@@ -72,7 +134,8 @@ public class BarDetailsFragment extends Fragment {
         binding.categoriesRv.setAdapter(adapter);
     }
 
-    private void loadTransactions() {
+
+    private void loadThisMonthTransactions() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
@@ -86,39 +149,72 @@ public class BarDetailsFragment extends Fragment {
                 0, 0);
         Date start = calendar.getTime();
 
-        transactionViewModel.loadTransactionsDateInterval(mWallet.getId(), start, end).observe(getViewLifecycleOwner(), values -> {
-            Map<String, Double> categories = new HashMap<>();
-            Map<String, List<Transaction>> transactionsByCategory = new HashMap<>();
-            for (Transaction transaction : values) {
-                if (transaction.getType().equals(Transaction.INCOME_TYPE))
-                    continue;
+        loadTransactions(start, end, true);
+    }
 
-                if (transactionsByCategory.containsKey(transaction.getCategory())) {
-                    Objects.requireNonNull(transactionsByCategory.get(transaction.getCategory())).add(transaction);
-                } else {
-                    transactionsByCategory.put(transaction.getCategory(), new ArrayList<>(Collections.singleton(transaction)));
-                }
+    private void loadTransactions(Date start, Date end, Boolean updateBar) {
+        transactionViewModel
+                .loadTransactionsDateInterval(mWallet.getId(), start, end)
+                .observe(getViewLifecycleOwner(), values -> {
+                    if (values == null || values.isEmpty()) {
+                        Log.e(TAG, "loadTransactions: empty");
+                    } else {
+                        sortTransactions(values);
+                        if (updateBar) {
+                            BarDetailsUtils.updateBarchartData(binding.barChart,
+                                    values,
+                                    new TextView(requireContext()).getCurrentTextColor());
+                            transEntryList = BarDetailsUtils.getTransEntryArrayList(values);
+                        }
+                        if (firstLoad) {
+                            startPostponedEnterTransition();
+                            firstLoad = false;
+                        }
+                        binding.categoriesRv.scheduleLayoutAnimation();
+                    }
+                });
+    }
 
-                if (categories.containsKey(transaction.getCategory())) {
-                    Double amount = categories.getOrDefault(transaction.getCategory(), 0.0);
-                    categories.put(transaction.getCategory(), amount == null ? 0.0f : amount + transaction.getAmount());
-                } else {
-                    categories.put(transaction.getCategory(), transaction.getAmount());
+    private void sortTransactions(List<Transaction> values) {
+        Map<String, Double> categories = new HashMap<>();
+        Map<String, List<Transaction>> transactionsByCategory = new HashMap<>();
+        for (Transaction transaction : values) {
+            if (transaction.getType().equals(Transaction.INCOME_TYPE))
+                continue;
+
+            if (transactionsByCategory.containsKey(transaction.getCategory())) {
+                Objects.requireNonNull(transactionsByCategory
+                                .get(transaction.getCategory()))
+                        .add(transaction);
+            } else {
+                transactionsByCategory.put(transaction.getCategory(),
+                        new ArrayList<>(Collections.singleton(transaction)));
+            }
+
+            if (categories.containsKey(transaction.getCategory())) {
+                Double amount = categories.getOrDefault(transaction.getCategory(), 0.0);
+                categories.put(transaction.getCategory(),
+                        amount == null ? 0.0f : amount + transaction.getAmount());
+            } else {
+                categories.put(transaction.getCategory(), transaction.getAmount());
+            }
+        }
+        categories = MapUtil.sortByValue(categories);
+        categories.forEach((key, value) -> {
+            ExpenseCategory expenseCategory = new ExpenseCategory(key,
+                    transactionsByCategory.get(key),
+                    null,
+                    value);
+            if (CategoriesUtil.categoryList.contains(expenseCategory)) {
+                expenseCategory.setResourceId(
+                        CategoriesUtil.categoryList.get(
+                                        CategoriesUtil.categoryList.indexOf(expenseCategory))
+                                .getResourceId());
+                if (!categoryList.contains(expenseCategory)) {
+                    categoryList.add(expenseCategory);
+                    adapter.notifyItemInserted(categoryList.size() - 1);
                 }
             }
-            categories = MapUtil.sortByValue(categories);
-            categories.forEach((key, value) -> {
-                ExpenseCategory expenseCategory = new ExpenseCategory(key, transactionsByCategory.get(key), null, value);
-                if (CategoriesUtil.categoryList.contains(expenseCategory)) {
-                    expenseCategory.setResourceId(CategoriesUtil.categoryList.get(CategoriesUtil.categoryList.indexOf(expenseCategory)).getResourceId());
-                    if (!categoryList.contains(expenseCategory)) {
-                        categoryList.add(expenseCategory);
-                        adapter.notifyItemInserted(categoryList.size() - 1);
-                    }
-                }
-            });
-            binding.barChart.setMaxVisibleValueCount(31);
-            BarDetailsUtils.updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor());
         });
     }
 
