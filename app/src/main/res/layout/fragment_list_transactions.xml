@@ -44,6 +44,7 @@
     </com.google.android.material.appbar.MaterialToolbar>
 
     <androidx.recyclerview.widget.RecyclerView
+        android:layoutAnimation="@anim/layout_animation_slide_right"
         android:id="@+id/transactionsRv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

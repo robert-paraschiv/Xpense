@@ -34,7 +34,7 @@ public class BarChartUtils {
         barChart.setDrawBarShadow(false);
         barChart.setDrawGridBackground(false);
         barChart.getLegend().setEnabled(false);
-        barChart.setFitBars(true);
+//        barChart.setFitBars(true);
 
         XAxis xAxis = barChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -112,9 +112,8 @@ public class BarChartUtils {
 
 
         BarDataSet barDataSet = new BarDataSet(valueSet, "");
-        barDataSet.setDrawValues(true);
+        barDataSet.setDrawValues(false);
         barDataSet.setValueTextSize(10);
-        barDataSet.setValueTextColor(textColor);
         barDataSet.setValueTextColor(textColor);
 
         dataSets.add(barDataSet);

@@ -11,4 +11,5 @@
     <string name="pie_details">Pie Details</string>
     <integer name="transition_duration_millis">600</integer>
     <integer name="categories_insert_animation_duration">200</integer>
+    <integer name="categories_insert_slide_right_animation_duration">250</integer>
 </resources>

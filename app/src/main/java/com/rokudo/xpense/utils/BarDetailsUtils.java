@@ -1,6 +1,7 @@
 package com.rokudo.xpense.utils;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -87,13 +88,11 @@ public class BarDetailsUtils {
         barDataSet.setDrawValues(true);
         barDataSet.setValueTextSize(10);
         barDataSet.setValueTextColor(textColor);
-        barDataSet.setValueTextColor(textColor);
 
         dataSets.add(barDataSet);
         barChart.setData(new BarData(dataSets));
 
         barChart.getXAxis().setLabelCount(valueSet.size());
-//        barChart.getXAxis().setLabelRotationAngle(-45);
 
         barChart.invalidate();
     }
