@@ -10,7 +10,9 @@
 
     <color name="sharedIconTintColor">#FFFFFFFF</color>
 
-    <color name="fragments_background">#202020</color>
+    <color name="cards_bg_color">#2A3136</color>
+    <color name="fragments_bg_color">#161C20</color>
+
     <color name="dialog_background_color">#202020</color>
     <color name="status_bar_color">#202020</color>
 
@@ -19,8 +21,7 @@
 
     <color name="message_sent_backgroundColor">#424242</color>
     <color name="message_received_backgroundColor">#0064b7</color>
-    <color name="homeCardColor">#01579B</color>
 
     <color name="home_chip_bg_color">#00838F</color>
-    
+
 </resources>

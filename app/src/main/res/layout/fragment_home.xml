@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/fragments_background"
+    android:background="@color/fragments_bg_color"
     android:transitionGroup="true"
     tools:context=".fragments.HomeFragment"
     tools:ignore="HardcodedText">
@@ -13,7 +13,7 @@
         android:id="@+id/home_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/fragments_background"
+        android:background="@color/fragments_bg_color"
         app:contentInsetStart="0dp">
 
         <RelativeLayout
@@ -52,6 +52,7 @@
         android:layout_below="@id/home_toolbar">
 
         <com.google.android.material.card.MaterialCardView
+            app:cardBackgroundColor="@color/cards_bg_color"
             android:id="@+id/walletsCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -258,6 +259,7 @@
                     </RelativeLayout>
 
                     <com.google.android.material.card.MaterialCardView
+                        app:cardBackgroundColor="@color/cards_bg_color"
                         android:id="@+id/latestTransactionCard"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -318,6 +320,7 @@
                         android:textSize="12sp" />
 
                     <com.google.android.material.card.MaterialCardView
+                        app:cardBackgroundColor="@color/cards_bg_color"
                         android:id="@+id/barChartCard"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -385,7 +388,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginTop="4dp"
-                        app:cardBackgroundColor="@color/homeCardColor"
+                        app:cardBackgroundColor="@color/cards_bg_color"
                         app:cardCornerRadius="18dp"
                         app:strokeWidth="0dp">
 
@@ -471,6 +474,7 @@
                     android:textSize="12sp" />
 
                 <com.google.android.material.card.MaterialCardView
+                    app:cardBackgroundColor="@color/cards_bg_color"
                     android:id="@+id/pieChartCard"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -492,7 +496,10 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_above="@id/pieDetailsBtn"
-                            android:layout_margin="8dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_marginBottom="8dp"
                             android:transitionName="pieChart" />
 
                         <com.google.android.material.button.MaterialButton

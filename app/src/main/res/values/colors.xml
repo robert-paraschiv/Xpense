@@ -10,7 +10,6 @@
 
     <color name="sharedIconTintColor">#FF000000</color>
 
-    <color name="fragments_background">#ffffff</color>
     <color name="dialog_background_color">#ffffff</color>
     <color name="status_bar_color">#f6f6f6</color>
 
@@ -20,7 +19,9 @@
     <color name="message_sent_backgroundColor">#f0f0f0</color>
     <color name="message_received_backgroundColor">#40C4FF</color>
     <color name="dialog_handle_color">#C0C0C0</color>
-    <color name="homeCardColor">#B2EBF2</color>
+
+    <color name="cards_bg_color">#B2EBF2</color>
+    <color name="fragments_bg_color">#FFFFFF</color>
 
     <color name="home_chip_bg_color">#80DEEA</color>
 </resources>

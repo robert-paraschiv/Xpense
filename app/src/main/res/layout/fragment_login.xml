@@ -5,7 +5,7 @@
     android:id="@+id/login_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/fragments_background"
+    android:background="@color/fragments_bg_color"
     tools:context=".fragments.login.LoginFragment">
 
     <RelativeLayout

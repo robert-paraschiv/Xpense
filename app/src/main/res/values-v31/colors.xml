@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="fragments_background">@android:color/system_neutral2_10</color>
     <color name="dialog_background_color">@android:color/system_neutral2_100</color>
     <color name="status_bar_color">@android:color/system_neutral2_1000</color>
 
@@ -10,7 +9,9 @@
 
     <color name="message_sent_backgroundColor">@android:color/system_neutral2_50</color>
     <color name="message_received_backgroundColor">@android:color/system_neutral1_200</color>
-    <color name="homeCardColor">@android:color/system_accent1_100</color>
+
+    <color name="cards_bg_color">@android:color/system_neutral2_10</color>
+    <color name="fragments_bg_color">@android:color/system_neutral2_50</color>
 
     <color name="home_chip_bg_color">@color/material_dynamic_primary90</color>
 </resources>

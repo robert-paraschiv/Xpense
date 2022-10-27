@@ -17,12 +17,12 @@
 
         <!-- change navigation bar color -->
         <item name="android:navigationBarColor">
-            @color/fragments_background
+            @color/fragments_bg_color
         </item>
 
         <!-- change status bar color -->
         <item name="android:statusBarColor">
-            @color/fragments_background
+            @color/fragments_bg_color
         </item>
 
         <item name="android:windowLightStatusBar">false</item>

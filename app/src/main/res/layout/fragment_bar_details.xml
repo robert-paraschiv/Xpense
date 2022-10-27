@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/fragments_background"
+    android:background="@color/fragments_bg_color"
     android:transitionName="barChartCard"
     tools:context=".fragments.BarDetailsFragment"
     tools:ignore="HardcodedText">
@@ -70,6 +70,7 @@
                 tools:text="August 2022" />
 
             <com.google.android.material.card.MaterialCardView
+                app:cardBackgroundColor="@color/cards_bg_color"
                 android:id="@+id/barChartCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

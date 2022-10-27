@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/fragments_background"
+    android:background="@color/fragments_bg_color"
     android:transitionName="pieChartCard"
     tools:context=".fragments.PieDetailsFragment">
 
@@ -69,6 +69,7 @@
                 app:iconStartPadding="8dp" />
 
             <com.google.android.material.card.MaterialCardView
+                app:cardBackgroundColor="@color/cards_bg_color"
                 android:id="@+id/pieChartCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
