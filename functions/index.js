@@ -2,17 +2,42 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase)
 
-exports.transactionInsertionListener = functions.firestore.document("Transactions/{transactionID}").onCreate((snap, context) => {
+exports.transactionInsertionListener = functions.firestore.document("Transactions/{transactionID}").onWrite((snap, context) => {
 
-    const transaction = snap.data();
-    if (transaction.type == "Income") {
-        return admin.firestore().collection("Wallets").doc(transaction.walletId).update({
-            amount: admin.firestore.FieldValue.increment(transaction.amount)
-        });
+    var isNewTrans = false;
+    if (snap.before.exists) {
+        isNewTrans = true;
+    }
+
+
+    if (isNewTrans) {
+        const transaction = snap.after.exists ? snap.after.data() : null;
+        if (transaction == null) {
+            return 0;
+        }
+
+        if (transaction.type == "Income") {
+            return admin.firestore().collection("Wallets").doc(transaction.walletId).update({
+                amount: admin.firestore.FieldValue.increment(transaction.amount)
+            });
+        } else {
+            return admin.firestore().collection("Wallets").doc(transaction.walletId).update({
+                amount: admin.firestore.FieldValue.increment(-transaction.amount)
+            });
+        }
     } else {
-        return admin.firestore().collection("Wallets").doc(transaction.walletId).update({
-            amount: admin.firestore.FieldValue.increment(-transaction.amount)
-        });
+        const transBefore = snap.before.exists ? snap.before.data() : null;
+        const transAfter = snap.after.exists ? snap.after.data() : null;
+
+        if (transBefore != null && transAfter != null) {
+            if (transAfter.amount != transBefore.amount) {
+                return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
+                    amount: admin.firestore.FieldValue.increment(transAfter.amount - transBefore.amount)
+                });
+            }
+        }
+
+        return 0;
     }
 
 });
