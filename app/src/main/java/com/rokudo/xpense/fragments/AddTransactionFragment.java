@@ -40,7 +40,7 @@ public class AddTransactionFragment extends Fragment {
     private FragmentAddTransactionBinding binding;
     private String walletId;
     private String currency;
-    private ExpenseCategory selectedCategory = CategoriesUtil.categoryList.get(0);
+    private ExpenseCategory selectedCategory;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -76,11 +76,11 @@ public class AddTransactionFragment extends Fragment {
 
     @SuppressLint("UseCompatLoadingForDrawables")
     private void buildCategoriesRv() {
-        for (int i = 0; i < CategoriesUtil.categoryList.size(); i++) {
-            ExpenseCategory category = CategoriesUtil.categoryList.get(i);
+        for (int i = 0; i < CategoriesUtil.expenseCategoryList.size(); i++) {
+            ExpenseCategory category = CategoriesUtil.expenseCategoryList.get(i);
             Chip chip = (Chip) getLayoutInflater().inflate(R.layout.item_category, binding.categoryChipGroup, false);
             chip.setText(category.getName());
-            chip.setChipIconTint(ColorStateList.valueOf(CategoriesUtil.categoryList.get(i).getColor()));
+            chip.setChipIconTint(ColorStateList.valueOf(CategoriesUtil.expenseCategoryList.get(i).getColor()));
             chip.setChipIcon(getResources().getDrawable(category.getResourceId(), requireContext().getTheme()));
 
 
@@ -94,7 +94,7 @@ public class AddTransactionFragment extends Fragment {
         if (args.getTransaction() == null) {
             binding.getRoot().setTransitionName(requireContext().getResources().getString(R.string.transition_name_add_transaction));
             binding.selectedTextDummy.setText("Expense Category");
-            selectedCategory = CategoriesUtil.categoryList.get(0);
+            selectedCategory = CategoriesUtil.expenseCategoryList.get(0);
         } else {
             Transaction transaction = args.getTransaction();
             binding.getRoot().setTransitionName("adjustBalance");
@@ -104,12 +104,14 @@ public class AddTransactionFragment extends Fragment {
                 binding.expenseChip.setChecked(false);
                 binding.incomeChip.setChecked(true);
                 binding.selectedTextDummy.setText("Income Category");
-                selectedCategory = CategoriesUtil.categoryList.get(CategoriesUtil.categoryList.size() - 1);
+                selectedCategory = new ExpenseCategory("Income", null, null);
+                binding.categoryChipGroup.setVisibility(View.GONE);
             } else {
                 binding.expenseChip.setChecked(true);
                 binding.incomeChip.setChecked(false);
                 binding.selectedTextDummy.setText("Expense Category");
-                selectedCategory = CategoriesUtil.categoryList.get(0);
+                selectedCategory = CategoriesUtil.expenseCategoryList.get(0);
+                binding.categoryChipGroup.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -136,11 +138,23 @@ public class AddTransactionFragment extends Fragment {
         binding.categoryChipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
             Chip chip = group.findViewById(checkedIds.get(0));
             if (chip != null)
-                selectedCategory = CategoriesUtil.categoryList.get(
-                        CategoriesUtil.categoryList.indexOf(
+                selectedCategory = CategoriesUtil.expenseCategoryList.get(
+                        CategoriesUtil.expenseCategoryList.indexOf(
                                 new ExpenseCategory(chip.getText().toString(), null, null)
                         )
                 );
+        });
+        binding.incomeChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                selectedCategory = new ExpenseCategory("Income", null, null);
+                binding.categoryChipGroup.setVisibility(View.GONE);
+            }
+        });
+        binding.expenseChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                selectedCategory = null;
+                binding.categoryChipGroup.setVisibility(View.VISIBLE);
+            }
         });
     }
 

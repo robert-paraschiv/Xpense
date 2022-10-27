@@ -76,8 +76,8 @@ public class PieChartUtils {
         //Get colors ordered to map label colors from Category Utils
         ArrayList<Integer> pieColors = new ArrayList<>();
         entries.forEach(value ->
-                pieColors.add(CategoriesUtil.categoryList.get(
-                                CategoriesUtil.categoryList.indexOf(new ExpenseCategory(value.getLabel(), null, null)))
+                pieColors.add(CategoriesUtil.expenseCategoryList.get(
+                                CategoriesUtil.expenseCategoryList.indexOf(new ExpenseCategory(value.getLabel(), null, null)))
                         .getColor()));
 
         dataSet.setColors(pieColors);

@@ -127,8 +127,8 @@ public class PieDetailsFragment extends Fragment {
             categories = MapUtil.sortByValue(categories);
             categories.forEach((key, value) -> {
                 ExpenseCategory expenseCategory = new ExpenseCategory(key, transactionsByCategory.get(key), null, value);
-                if (CategoriesUtil.categoryList.contains(expenseCategory)) {
-                    expenseCategory.setResourceId(CategoriesUtil.categoryList.get(CategoriesUtil.categoryList.indexOf(expenseCategory)).getResourceId());
+                if (CategoriesUtil.expenseCategoryList.contains(expenseCategory)) {
+                    expenseCategory.setResourceId(CategoriesUtil.expenseCategoryList.get(CategoriesUtil.expenseCategoryList.indexOf(expenseCategory)).getResourceId());
                     categoryList.add(expenseCategory);
                     adapter.notifyItemInserted(categoryList.size() - 1);
                 }

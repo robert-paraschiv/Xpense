@@ -80,8 +80,8 @@ public class ExpenseCategoryAdapter extends RecyclerView.Adapter<ExpenseCategory
             holder.categoryPic.setImageDrawable(
                     AppCompatResources.getDrawable(holder.categoryPic.getContext(),
                             expenseCategory.getResourceId()));
-            holder.categoryPic.setColorFilter(CategoriesUtil.categoryList.get(
-                    CategoriesUtil.categoryList.indexOf(expenseCategory)).getColor());
+            holder.categoryPic.setColorFilter(CategoriesUtil.expenseCategoryList.get(
+                    CategoriesUtil.expenseCategoryList.indexOf(expenseCategory)).getColor());
             if (expenseCategory.getTransactionList() == null || expenseCategory.getTransactionList().isEmpty()) {
                 holder.itemView.findViewById(R.id.mainCard).setClickable(false);
             } else {

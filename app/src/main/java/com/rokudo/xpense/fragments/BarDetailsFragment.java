@@ -205,10 +205,10 @@ public class BarDetailsFragment extends Fragment {
                     transactionsByCategory.get(key),
                     null,
                     value);
-            if (CategoriesUtil.categoryList.contains(expenseCategory)) {
+            if (CategoriesUtil.expenseCategoryList.contains(expenseCategory)) {
                 expenseCategory.setResourceId(
-                        CategoriesUtil.categoryList.get(
-                                        CategoriesUtil.categoryList.indexOf(expenseCategory))
+                        CategoriesUtil.expenseCategoryList.get(
+                                        CategoriesUtil.expenseCategoryList.indexOf(expenseCategory))
                                 .getResourceId());
                 if (!categoryList.contains(expenseCategory)) {
                     categoryList.add(expenseCategory);
