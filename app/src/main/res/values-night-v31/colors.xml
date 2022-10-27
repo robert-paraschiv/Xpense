@@ -14,5 +14,7 @@
     <color name="cards_bg_color">@android:color/system_neutral2_800</color>
     <color name="fragments_bg_color">@android:color/system_neutral2_900</color>
 
+    <color name="chip_card_bg_color">@android:color/system_neutral2_700</color>
+    <color name="selected_chip_bg_color">@android:color/system_neutral2_900</color>
     <color name="home_chip_bg_color">@color/material_dynamic_primary30</color>
 </resources>

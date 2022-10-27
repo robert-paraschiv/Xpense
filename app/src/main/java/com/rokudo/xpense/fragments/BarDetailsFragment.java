@@ -34,6 +34,7 @@ import com.rokudo.xpense.utils.BarDetailsUtils;
 import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.MapUtil;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -63,6 +64,7 @@ public class BarDetailsFragment extends Fragment {
         binding = FragmentBarDetailsBinding.inflate(inflater, container, false);
 
         initOnClicks();
+        initDateChip();
 
         transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
 
@@ -72,6 +74,11 @@ public class BarDetailsFragment extends Fragment {
         loadThisMonthTransactions();
 
         return binding.getRoot();
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private void initDateChip() {
+        binding.dateChip.setText("This month");
     }
 
     @Override

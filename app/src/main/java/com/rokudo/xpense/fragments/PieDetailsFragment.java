@@ -65,7 +65,8 @@ public class PieDetailsFragment extends Fragment {
 
     @SuppressLint("SimpleDateFormat")
     private void initDateChip() {
-        binding.dateChip.setText(new SimpleDateFormat("MMMM yyyy").format(new Date()));
+        binding.dateChip.setText("This month");
+//        binding.dateChip.setText(new SimpleDateFormat("MMMM yyyy").format(new Date()));
     }
 
     @Override

@@ -22,6 +22,8 @@
     <color name="message_sent_backgroundColor">#424242</color>
     <color name="message_received_backgroundColor">#0064b7</color>
 
-    <color name="home_chip_bg_color">#00838F</color>
+    <color name="chip_card_bg_color">#40484D</color>
+    <color name="selected_chip_bg_color">#161C20</color>
+    <color name="home_chip_bg_color">#004C69</color>
 
 </resources>

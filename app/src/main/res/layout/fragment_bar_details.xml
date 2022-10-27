@@ -61,7 +61,9 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginBottom="8dp"
                 android:checkable="false"
+                android:elevation="0dp"
                 android:textSize="14sp"
+                app:chipBackgroundColor="@color/cards_bg_color"
                 app:chipIcon="@drawable/ic_round_date_range_24"
                 app:chipIconEnabled="true"
                 app:chipIconTint="@color/sharedIconTintColor"
@@ -70,23 +72,89 @@
                 tools:text="August 2022" />
 
             <com.google.android.material.card.MaterialCardView
-                app:cardBackgroundColor="@color/cards_bg_color"
                 android:id="@+id/barChartCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/dateChip"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
+                app:cardBackgroundColor="@color/cards_bg_color"
                 app:cardCornerRadius="18dp"
                 app:strokeWidth="0dp">
 
-                <com.github.mikephil.charting.charts.BarChart
-                    android:id="@+id/barChart"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="280dp"
-                    android:layout_marginBottom="16dp"
-                    android:transitionName="pieChart" />
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="18dp"
+                        android:layout_marginTop="8dp"
+                        android:text="RON 3009"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="18dp"
+                        android:text="Total spent"
+                        android:textSize="12sp" />
+
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:id="@+id/barChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="280dp"
+                        android:layout_marginBottom="16dp"
+                        android:transitionName="pieChart" />
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="8dp"
+                        app:cardBackgroundColor="@color/chip_card_bg_color"
+                        app:strokeWidth="0dp">
+
+                        <com.google.android.material.chip.ChipGroup
+                            app:singleSelection="true"
+                            app:selectionRequired="true"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:chipSpacing="2dp">
+
+                            <com.google.android.material.chip.Chip
+                                style="@style/Widget.Material3.Chip.Assist"
+                                android:layout_width="wrap_content"
+                                android:layout_height="32dp"
+                                android:checked="true"
+                                android:text="1 week"
+                                android:checkable="true"
+                                android:clickable="true"
+                                android:focusable="true"
+                                app:chipBackgroundColor="@color/bar_details_chip_state_list"
+                                app:chipMinTouchTargetSize="0dp"
+                                app:chipStrokeWidth="0dp" />
+
+                            <com.google.android.material.chip.Chip
+                                android:checkable="true"
+                                android:clickable="true"
+                                android:focusable="true"
+                                style="@style/Widget.Material3.Chip.Assist"
+                                android:layout_width="wrap_content"
+                                android:layout_height="32dp"
+                                android:text="All month"
+                                app:chipBackgroundColor="@color/bar_details_chip_state_list"
+                                app:chipMinTouchTargetSize="0dp"
+                                app:chipStrokeWidth="0dp" />
+
+                        </com.google.android.material.chip.ChipGroup>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <androidx.recyclerview.widget.RecyclerView
