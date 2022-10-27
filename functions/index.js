@@ -4,9 +4,9 @@ admin.initializeApp(functions.config().firebase)
 
 exports.transactionInsertionListener = functions.firestore.document("Transactions/{transactionID}").onWrite((snap, context) => {
 
-    var isNewTrans = false;
+    var isNewTrans = true;
     if (snap.before.exists) {
-        isNewTrans = true;
+        isNewTrans = false;
     }
 
 
@@ -29,12 +29,30 @@ exports.transactionInsertionListener = functions.firestore.document("Transaction
         const transBefore = snap.before.exists ? snap.before.data() : null;
         const transAfter = snap.after.exists ? snap.after.data() : null;
 
-        if (transBefore != null && transAfter != null) {
-            if (transAfter.amount != transBefore.amount) {
-                return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
-                    amount: admin.firestore.FieldValue.increment(transAfter.amount - transBefore.amount)
-                });
+        if (transBefore.type == transAfter.type) {
+
+            if (transBefore != null && transAfter != null) {
+                if (transAfter.amount != transBefore.amount) {
+
+                    if (transAfter.type == "Expense") {
+
+                        if (transBefore.amount < transAfter.amount) {
+                            var decrement = transAfter.amount - transBefore.amount;
+
+                            return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
+                                amount: admin.firestore.FieldValue.increment(-decrement)
+                            });
+                        } else {
+                            var increment = transBefore.amount - transAfter.amount;
+
+                            return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
+                                amount: admin.firestore.FieldValue.increment(increment)
+                            });
+                        }
+                    }
+                }
             }
+
         }
 
         return 0;
