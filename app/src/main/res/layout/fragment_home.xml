@@ -198,42 +198,32 @@
                         tools:text="13020.00" />
                 </LinearLayout>
 
-                <RelativeLayout
-                    android:id="@+id/editWalletLayout"
-                    android:layout_width="match_parent"
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/adjustBalanceBtn"
+                    style="@style/Widget.Material3.Chip.Suggestion"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/walletDetailsLayout"
+                    android:layout_alignParentStart="true"
                     android:layout_marginStart="24dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="24dp"
                     android:layout_marginBottom="8dp"
-                    android:orientation="horizontal">
+                    android:elevation="0dp"
+                    android:text="Adjust Balance"
+                    android:textSize="12sp"
+                    app:chipBackgroundColor="@color/home_chip_bg_color"
+                    app:chipIcon="@drawable/ic_round_edit_24"
+                    app:chipIconEnabled="true"
+                    app:chipMinTouchTargetSize="0dp"
+                    app:chipStrokeWidth="0dp" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/adjustBalanceBtn"
-                        android:layout_width="wrap_content"
-                        android:layout_height="34dp"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        android:insetLeft="0dp"
-                        android:insetTop="0dp"
-                        android:insetRight="0dp"
-                        android:insetBottom="0dp"
-                        android:padding="8dp"
-                        android:text="Adjust Balance"
-                        android:textSize="12sp"
-                        app:cornerRadius="10dp"
-                        app:icon="@drawable/ic_round_edit_24"
-                        app:iconGravity="textStart"
-                        app:iconPadding="4dp" />
-
-                </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/lastTransactionLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/editWalletLayout"
+                    android:layout_below="@id/adjustBalanceBtn"
                     android:layout_marginTop="8dp"
                     android:orientation="vertical">
 

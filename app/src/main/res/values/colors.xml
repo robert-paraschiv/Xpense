@@ -22,4 +22,5 @@
     <color name="dialog_handle_color">#C0C0C0</color>
     <color name="homeCardColor">#B2EBF2</color>
 
+    <color name="home_chip_bg_color">#80DEEA</color>
 </resources>

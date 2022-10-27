@@ -53,39 +53,39 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <com.google.android.material.chip.Chip
+                android:id="@+id/dateChip"
+                style="@style/Widget.Material3.Chip.Suggestion.Elevated"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginBottom="8dp"
+                android:checkable="false"
+                android:textSize="14sp"
+                app:chipIcon="@drawable/ic_round_date_range_24"
+                app:chipIconEnabled="true"
+                app:chipIconTint="@color/sharedIconTintColor"
+                app:iconEndPadding="8dp"
+                app:iconStartPadding="8dp"
+                tools:text="August 2022" />
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/barChartCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/dateChip"
                 android:layout_marginStart="12dp"
-                android:layout_marginTop="8dp"
                 android:layout_marginEnd="12dp"
                 app:cardCornerRadius="18dp"
                 app:strokeWidth="0dp">
 
-                <RelativeLayout
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/barChart"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="280dp"
+                    android:layout_marginBottom="16dp"
+                    android:transitionName="pieChart" />
 
-                    <TextView
-                        android:id="@+id/monthspendingtext"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentTop="true"
-                        android:layout_centerHorizontal="true"
-                        android:layout_margin="12dp"
-                        android:gravity="center_horizontal"
-                        android:text="This month's spending" />
-
-                    <com.github.mikephil.charting.charts.BarChart
-                        android:id="@+id/barChart"
-                        android:layout_width="match_parent"
-                        android:layout_height="220dp"
-                        android:layout_below="@id/monthspendingtext"
-                        android:layout_marginBottom="16dp"
-                        android:transitionName="pieChart" />
-
-                </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -98,6 +98,7 @@
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
                 android:layoutAnimation="@anim/layout_animation_fall_down"
+                tools:itemCount="8"
                 tools:listitem="@layout/item_expense_category" />
         </RelativeLayout>
 

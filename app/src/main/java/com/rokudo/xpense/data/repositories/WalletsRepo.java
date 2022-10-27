@@ -18,8 +18,6 @@ public class WalletsRepo {
     private static final String TAG = "WalletsRepo";
 
     private static WalletsRepo instance;
-
-    private ListenerRegistration walletsListener;
     private ListenerRegistration walletListener;
 
     private final MutableLiveData<ArrayList<Wallet>> allWallets;
@@ -96,18 +94,15 @@ public class WalletsRepo {
     }
 
     public MutableLiveData<ArrayList<Wallet>> getWallets() {
-        if (walletsListener != null) {
-            walletsListener.remove();
-        }
-
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            walletsListener = DatabaseUtils.walletsRef
+            DatabaseUtils.walletsRef
                     .whereArrayContains("users", FirebaseAuth.getInstance().getCurrentUser().getUid())
-                    .addSnapshotListener((value, error) -> {
-                        if (error != null || value == null) {
-                            Log.e(TAG, "getWallets: empty or: ", error);
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (queryDocumentSnapshots == null || queryDocumentSnapshots.isEmpty()) {
+                            Log.e(TAG, "getWallets: empty or null");
                         } else {
-                            for (DocumentSnapshot documentSnapshot : value) {
+                            for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
                                 Wallet wallet = documentSnapshot.toObject(Wallet.class);
                                 if (wallet != null) {
                                     wallet.setId(documentSnapshot.getId());

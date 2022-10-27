@@ -11,4 +11,6 @@
     <color name="message_sent_backgroundColor">@android:color/system_neutral2_50</color>
     <color name="message_received_backgroundColor">@android:color/system_neutral1_200</color>
     <color name="homeCardColor">@android:color/system_accent1_100</color>
+
+    <color name="home_chip_bg_color">@color/material_dynamic_primary90</color>
 </resources>

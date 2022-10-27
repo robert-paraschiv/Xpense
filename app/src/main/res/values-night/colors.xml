@@ -21,4 +21,6 @@
     <color name="message_received_backgroundColor">#0064b7</color>
     <color name="homeCardColor">#01579B</color>
 
+    <color name="home_chip_bg_color">#00838F</color>
+    
 </resources>
