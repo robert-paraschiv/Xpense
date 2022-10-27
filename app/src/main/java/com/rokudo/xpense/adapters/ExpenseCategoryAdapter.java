@@ -87,7 +87,7 @@ public class ExpenseCategoryAdapter extends RecyclerView.Adapter<ExpenseCategory
             } else {
                 holder.itemView.findViewById(R.id.mainCard).setClickable(true);
                 holder.transactionsRv.setLayoutManager(new LinearLayoutManager(holder.transactionsRv.getContext()));
-                holder.transactionsRv.setAdapter(new TransactionsAdapter(expenseCategory.getTransactionList(), true));
+                holder.transactionsRv.setAdapter(new TransactionsAdapter(expenseCategory.getTransactionList(), true, null));
             }
         }
     }

@@ -31,6 +31,8 @@ import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.DatabaseUtils;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
@@ -41,6 +43,7 @@ public class AddTransactionFragment extends Fragment {
     private String walletId;
     private String currency;
     private ExpenseCategory selectedCategory;
+    private Transaction mTransaction;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -49,8 +52,8 @@ public class AddTransactionFragment extends Fragment {
         // Inflate the layout for this fragment
         binding = FragmentAddTransactionBinding.inflate(inflater, container, false);
 
-        handleArgs();
         buildCategoriesRv();
+        handleArgs();
 
         getWalletId();
         initOnClicks();
@@ -95,23 +98,44 @@ public class AddTransactionFragment extends Fragment {
             binding.getRoot().setTransitionName(requireContext().getResources().getString(R.string.transition_name_add_transaction));
             binding.selectedTextDummy.setText("Expense Category");
             selectedCategory = CategoriesUtil.expenseCategoryList.get(0);
+            binding.simpleDatePicker.setMaxDate(new Date().getTime());
         } else {
-            Transaction transaction = args.getTransaction();
+            if (args.getTransaction() == null) {
+                return;
+            }
+            mTransaction = args.getTransaction();
             binding.getRoot().setTransitionName("adjustBalance");
-            binding.transactionAmount.setText(transaction.getAmount().toString());
+            binding.transactionAmount.setText(mTransaction.getAmount().toString());
+            binding.transactionTitle.setText(mTransaction.getTitle());
+            LocalDate localDate = mTransaction.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+//            binding.simpleDatePicker.setMaxDate(new Date().getTime());
+            binding.simpleDatePicker.updateDate(localDate.getYear(), localDate.getMonthValue() - 1, localDate.getDayOfMonth());
+            binding.saveTransactionBtn.setText("Save");
 
-            if (transaction.getType().equals("Income")) {
+
+            if (mTransaction.getType().equals(INCOME_TYPE)) {
                 binding.expenseChip.setChecked(false);
                 binding.incomeChip.setChecked(true);
-                binding.selectedTextDummy.setText("Income Category");
                 selectedCategory = new ExpenseCategory("Income", null, null);
+                binding.selectedTextDummy.setVisibility(View.GONE);
                 binding.categoryChipGroup.setVisibility(View.GONE);
             } else {
                 binding.expenseChip.setChecked(true);
                 binding.incomeChip.setChecked(false);
-                binding.selectedTextDummy.setText("Expense Category");
-                selectedCategory = CategoriesUtil.expenseCategoryList.get(0);
+                selectedCategory = CategoriesUtil.expenseCategoryList.get(
+                        CategoriesUtil.expenseCategoryList
+                                .indexOf(new ExpenseCategory(mTransaction.getCategory(), null, null)));
+
+                binding.selectedTextDummy.setVisibility(View.VISIBLE);
                 binding.categoryChipGroup.setVisibility(View.VISIBLE);
+
+                for (int i = 0; i < binding.categoryChipGroup.getChildCount(); i++) {
+                    Chip chip = (Chip) binding.categoryChipGroup.getChildAt(i);
+                    if (i == CategoriesUtil.expenseCategoryList.indexOf(
+                            new ExpenseCategory(mTransaction.getCategory(), null, null))) {
+                        chip.setChecked(true);
+                    }
+                }
             }
         }
     }
@@ -129,7 +153,6 @@ public class AddTransactionFragment extends Fragment {
 
     @SuppressLint("ResourceType")
     private void initOnClicks() {
-        binding.simpleDatePicker.setMaxDate(new Date().getTime());
         binding.backBtn.setOnClickListener(view -> {
             hideKeyboard(view);
             Navigation.findNavController(binding.getRoot()).popBackStack();
@@ -148,11 +171,13 @@ public class AddTransactionFragment extends Fragment {
             if (isChecked) {
                 selectedCategory = new ExpenseCategory("Income", null, null);
                 binding.categoryChipGroup.setVisibility(View.GONE);
+                binding.selectedTextDummy.setVisibility(View.GONE);
             }
         });
         binding.expenseChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 selectedCategory = null;
+                binding.selectedTextDummy.setVisibility(View.VISIBLE);
                 binding.categoryChipGroup.setVisibility(View.VISIBLE);
             }
         });
@@ -176,9 +201,8 @@ public class AddTransactionFragment extends Fragment {
             return;
         }
 
-        DocumentReference documentReference = DatabaseUtils.transactionsRef.document();
         Transaction transaction = new Transaction();
-        transaction.setId(documentReference.getId());
+
         transaction.setWalletId(walletId);
         transaction.setAmount(Double.valueOf(Objects.requireNonNull(binding.transactionAmount.getText()).toString()));
         transaction.setCurrency(currency);
@@ -195,11 +219,24 @@ public class AddTransactionFragment extends Fragment {
         transaction.setType(binding.incomeChip.isChecked() ? INCOME_TYPE : EXPENSE_TYPE);
         TransactionViewModel viewModel =
                 new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
-        viewModel.addTransaction(transaction).observe(getViewLifecycleOwner(), result -> {
-            if (result.equals("Success")) {
-                Navigation.findNavController(binding.getRoot()).popBackStack();
-            }
-        });
+
+        if (mTransaction == null) {
+            DocumentReference documentReference = DatabaseUtils.transactionsRef.document();
+            transaction.setId(documentReference.getId());
+
+            viewModel.addTransaction(transaction).observe(getViewLifecycleOwner(), result -> {
+                if (result.equals("Success")) {
+                    Navigation.findNavController(binding.getRoot()).popBackStack();
+                }
+            });
+        } else {
+            transaction.setId(mTransaction.getId());
+            viewModel.updateTransaction(transaction).observe(getViewLifecycleOwner(), result -> {
+                if (result.equals("Success")) {
+                    Navigation.findNavController(binding.getRoot()).popBackStack();
+                }
+            });
+        }
     }
 
     @Override

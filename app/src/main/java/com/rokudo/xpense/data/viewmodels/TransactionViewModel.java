@@ -4,6 +4,7 @@ import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.rokudo.xpense.data.repositories.TransactionRepo;
@@ -41,4 +42,7 @@ public class TransactionViewModel extends AndroidViewModel {
     }
 
 
+    public MutableLiveData<String> updateTransaction(Transaction transaction) {
+        return repo.updateTransaction(transaction);
+    }
 }

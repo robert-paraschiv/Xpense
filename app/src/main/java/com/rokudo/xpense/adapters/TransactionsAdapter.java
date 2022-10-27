@@ -23,15 +23,21 @@ import com.rokudo.xpense.utils.dialogs.DialogUtils;
 import java.util.List;
 
 public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapter.ViewHolder> {
-    List<Transaction> transactionList;
+    private final List<Transaction> transactionList;
+    private final OnTransactionClickListener onTransactionClickListener;
     Boolean smallLayout;
 
-    public TransactionsAdapter(List<Transaction> transactionList, Boolean smallLayout) {
+    public TransactionsAdapter(List<Transaction> transactionList, Boolean smallLayout, OnTransactionClickListener onTransactionClickListener) {
         this.transactionList = transactionList;
         this.smallLayout = smallLayout;
+        this.onTransactionClickListener = onTransactionClickListener;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public interface OnTransactionClickListener {
+        void onClick(Transaction transaction);
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final ImageView transactionImage;
         final TextView transactionPersonName;
         final TextView transactionAmount;
@@ -48,6 +54,18 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
             transactionDate = itemView.findViewById(R.id.transactionDate);
             transactionCategory = itemView.findViewById(R.id.transactionCategory);
             transactionTitle = itemView.findViewById(R.id.transactionTitle);
+            itemView.setOnClickListener(this);
+
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (onTransactionClickListener != null) {
+                int position = getBindingAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    onTransactionClickListener.onClick(transactionList.get(position));
+                }
+            }
         }
     }
 

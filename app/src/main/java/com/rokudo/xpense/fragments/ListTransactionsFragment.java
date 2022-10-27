@@ -27,13 +27,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class ListTransactionsFragment extends Fragment {
+public class ListTransactionsFragment extends Fragment implements TransactionsAdapter.OnTransactionClickListener {
 
     private FragmentListTransactionsBinding binding;
     private TransactionsAdapter adapter;
 
     boolean gotTransactionsOnce = false;
     private final List<Transaction> transactionList = new ArrayList<>();
+    private String walletId;
+    private String currency;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -43,6 +45,8 @@ public class ListTransactionsFragment extends Fragment {
 
         buildRecyclerView();
         ListTransactionsFragmentArgs args = ListTransactionsFragmentArgs.fromBundle(requireArguments());
+        walletId = args.getWalletId();
+        currency = args.getWalletCurrency();
         loadTransactions(args.getWalletId());
 
         binding.backBtn.setOnClickListener(view -> Navigation.findNavController(view).popBackStack());
@@ -63,7 +67,7 @@ public class ListTransactionsFragment extends Fragment {
     }
 
     private void buildRecyclerView() {
-        adapter = new TransactionsAdapter(transactionList, false);
+        adapter = new TransactionsAdapter(transactionList, false, this);
         binding.transactionsRv.setLayoutManager(new LinearLayoutManager(requireContext(), VERTICAL, false));
         binding.transactionsRv.setAdapter(adapter);
 //        adapter.setOnItemClickListener();
@@ -102,4 +106,10 @@ public class ListTransactionsFragment extends Fragment {
         return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
     }
 
+    @Override
+    public void onClick(Transaction transaction) {
+        Navigation.findNavController(binding.getRoot()).navigate(
+                ListTransactionsFragmentDirections
+                        .actionListTransactionsFragmentToAddTransactionLayout(walletId, currency, transaction));
+    }
 }

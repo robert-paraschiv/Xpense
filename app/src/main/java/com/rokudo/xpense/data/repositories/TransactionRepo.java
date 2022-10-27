@@ -24,6 +24,7 @@ public class TransactionRepo {
     private final MutableLiveData<List<Transaction>> allTransactionList;
     private final MutableLiveData<Transaction> latestTransaction;
     private final MutableLiveData<String> addTransactionStatus;
+    private final MutableLiveData<String> updateTransactionStatus;
 
     public static TransactionRepo getInstance() {
         if (instance == null) {
@@ -36,6 +37,7 @@ public class TransactionRepo {
         this.allTransactionList = new MutableLiveData<>();
         this.addTransactionStatus = new MutableLiveData<>();
         this.latestTransaction = new MutableLiveData<>();
+        this.updateTransactionStatus = new MutableLiveData<>();
     }
 
     public MutableLiveData<List<Transaction>> loadTransactions() {
@@ -109,5 +111,13 @@ public class TransactionRepo {
                 });
 
         return data;
+    }
+
+    public MutableLiveData<String> updateTransaction(Transaction transaction) {
+        DatabaseUtils.transactionsRef.document(transaction.getId())
+                .set(transaction)
+                .addOnSuccessListener(result -> updateTransactionStatus.setValue("Success"));
+
+        return updateTransactionStatus;
     }
 }
