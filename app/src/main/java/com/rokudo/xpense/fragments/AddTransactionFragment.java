@@ -107,9 +107,13 @@ public class AddTransactionFragment extends Fragment {
             binding.getRoot().setTransitionName("adjustBalance");
             binding.transactionAmount.setText(mTransaction.getAmount().toString());
             binding.transactionTitle.setText(mTransaction.getTitle());
-            LocalDate localDate = mTransaction.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+            if (mTransaction.getDate() != null) {
+                LocalDate localDate = mTransaction.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 //            binding.simpleDatePicker.setMaxDate(new Date().getTime());
-            binding.simpleDatePicker.updateDate(localDate.getYear(), localDate.getMonthValue() - 1, localDate.getDayOfMonth());
+                binding.simpleDatePicker.updateDate(localDate.getYear(), localDate.getMonthValue() - 1, localDate.getDayOfMonth());
+            }
+
             binding.saveTransactionBtn.setText("Save");
 
 
@@ -184,7 +188,7 @@ public class AddTransactionFragment extends Fragment {
     }
 
     private void addTransactionToDb() {
-        if (binding.categoryChipGroup.getCheckedChipId() == View.NO_ID) {
+        if (selectedCategory == null) {
             binding.pleaseSelectTv.setVisibility(View.VISIBLE);
             binding.selectedTextDummy.setVisibility(View.INVISIBLE);
             binding.getRoot().postDelayed(() -> {
@@ -230,7 +234,12 @@ public class AddTransactionFragment extends Fragment {
                 }
             });
         } else {
-            transaction.setId(mTransaction.getId());
+            if (mTransaction.getId() == null) {
+                DocumentReference documentReference = DatabaseUtils.transactionsRef.document();
+                transaction.setId(documentReference.getId());
+            } else {
+                transaction.setId(mTransaction.getId());
+            }
             viewModel.updateTransaction(transaction).observe(getViewLifecycleOwner(), result -> {
                 if (result.equals("Success")) {
                     Navigation.findNavController(binding.getRoot()).popBackStack();
