@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.provider.MediaStore;
 import android.util.Log;
@@ -30,28 +31,49 @@ import com.google.android.material.transition.MaterialFadeThrough;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.StorageReference;
 import com.rokudo.xpense.R;
+import com.rokudo.xpense.adapters.InvitationAdapter;
 import com.rokudo.xpense.databinding.FragmentSettingsBinding;
+import com.rokudo.xpense.models.Invitation;
 import com.rokudo.xpense.utils.DatabaseUtils;
 import com.rokudo.xpense.utils.RotateBitmap;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
 import com.rokudo.xpense.utils.dialogs.UploadingDialog;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class SettingsFragment extends Fragment {
     private static final String TAG = "SettingsFragment";
 
     private FragmentSettingsBinding binding;
+    private InvitationAdapter adapter;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentSettingsBinding.inflate(inflater, container, false);
 
-        binding.signOutBtn.setOnClickListener(view -> FirebaseAuth.getInstance().signOut());
+        initOnClicks();
+        initViews();
+        buildRv();
 
-        binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.getRoot()).popBackStack());
+        return binding.getRoot();
+    }
 
+    private void buildRv() {
+        List<Invitation> invitationList = new ArrayList<>();
+        invitationList.add(new Invitation("Robert", "My wallet"));
+        invitationList.add(new Invitation("Robert", "My wallet"));
+        invitationList.add(new Invitation("Robert", "My wallet"));
+        invitationList.add(new Invitation("Robert", "My wallet"));
+
+        adapter = new InvitationAdapter(invitationList);
+        binding.invitationsRv.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.invitationsRv.setAdapter(adapter);
+    }
+
+    private void initViews() {
         Glide.with(binding.getRoot())
                 .load(DatabaseUtils.getCurrentUser().getPictureUrl())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -61,14 +83,19 @@ public class SettingsFragment extends Fragment {
                 .transition(withCrossFade())
                 .into(binding.profilePicture);
 
+
+        binding.name.setText(DatabaseUtils.getCurrentUser().getName());
+    }
+
+    private void initOnClicks() {
+        binding.signOutBtn.setOnClickListener(view -> FirebaseAuth.getInstance().signOut());
+
+        binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.getRoot()).popBackStack());
+
         binding.profilePicture.setOnClickListener(view -> {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startForResultFromGallery.launch(intent);
         });
-
-        binding.name.setText(DatabaseUtils.getCurrentUser().getName());
-
-        return binding.getRoot();
     }
 
     private final ActivityResultLauncher<Intent> startForResultFromGallery = registerForActivityResult(

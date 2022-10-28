@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="14dp"
+    app:cardBackgroundColor="@color/cards_bg_color"
+    app:cardCornerRadius="18dp"
+    app:strokeWidth="0dp"
+    tools:ignore="HardcodedText">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/invitationPersonImage"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="8dp"
+            android:contentDescription="@string/user_profile_picture"
+            android:src="@drawable/ic_baseline_person_24" />
+
+        <LinearLayout
+            android:id="@+id/invDetailsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/invitationPersonImage"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/invitationPersonName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="18dp"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:text="Person Name" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="18dp"
+                android:text="has invited you to be a partner to their wallet"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/walletTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="18dp"
+                android:textSize="12sp"
+                android:textStyle="bold|italic"
+                tools:text="Wallet Title" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/invDetailsLayout"
+            android:layout_marginTop="12dp"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/acceptChip"
+                style="@style/Widget.Material3.Chip.Assist"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:layout_marginEnd="38dp"
+                android:checkable="true"
+                android:checked="true"
+                android:clickable="true"
+                android:elevation="0dp"
+                android:focusable="true"
+                android:text="Accept"
+                app:chipBackgroundColor="@color/chip_card_bg_color"
+                app:chipIcon="@drawable/ic_round_check_24"
+                app:chipMinTouchTargetSize="0dp"
+                app:chipStrokeWidth="0dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/declineChip"
+                style="@style/Widget.Material3.Chip.Assist"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:checkable="true"
+                android:checked="true"
+                android:clickable="true"
+                android:elevation="0dp"
+                android:focusable="true"
+                android:text="Decline"
+                app:chipBackgroundColor="@color/chip_card_bg_color"
+                app:chipIcon="@drawable/ic_round_do_not_disturb_alt_24"
+                app:chipMinTouchTargetSize="0dp"
+                app:chipStrokeWidth="0dp" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+</com.google.android.material.card.MaterialCardView>
