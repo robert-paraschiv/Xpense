@@ -68,6 +68,7 @@
                     style="@style/Widget.Material3.Chip.Filter.Elevated"
                     android:layout_width="wrap_content"
                     android:layout_height="60dp"
+                    android:elevation="1dp"
                     android:text="Income"
                     android:textSize="18sp"
                     app:textEndPadding="18dp"
@@ -79,14 +80,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="60dp"
                     android:checked="true"
+                    android:elevation="1dp"
                     android:text="Expense"
                     android:textSize="18sp"
                     app:textEndPadding="18dp"
                     app:textStartPadding="18dp" />
             </com.google.android.material.chip.ChipGroup>
 
-
             <com.google.android.material.textfield.TextInputLayout
+                app:boxBackgroundColor="@color/cards_bg_color"
                 android:id="@+id/titleLayout"
                 style="@style/Widget.Material3.TextInputLayout.FilledBox"
                 android:layout_width="match_parent"
@@ -115,6 +117,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                app:boxBackgroundColor="@color/cards_bg_color"
                 android:id="@+id/amountInputLayout"
                 style="@style/Widget.Material3.TextInputLayout.FilledBox"
                 android:layout_width="match_parent"

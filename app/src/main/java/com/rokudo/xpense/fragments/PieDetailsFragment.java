@@ -31,10 +31,9 @@ import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.MapUtil;
 import com.rokudo.xpense.utils.PieChartUtils;
 
-import java.text.SimpleDateFormat;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +44,7 @@ public class PieDetailsFragment extends Fragment {
     private ExpenseCategoryAdapter adapter;
     private final List<ExpenseCategory> categoryList = new ArrayList<>();
     private Wallet mWallet;
+    Double sum = 0.0;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -63,7 +63,7 @@ public class PieDetailsFragment extends Fragment {
         return binding.getRoot();
     }
 
-    @SuppressLint("SimpleDateFormat")
+    @SuppressLint({"SimpleDateFormat", "SetTextI18n"})
     private void initDateChip() {
         binding.dateChip.setText("This month");
 //        binding.dateChip.setText(new SimpleDateFormat("MMMM yyyy").format(new Date()));
@@ -103,6 +103,7 @@ public class PieDetailsFragment extends Fragment {
         binding.categoriesRv.setAdapter(adapter);
     }
 
+    @SuppressLint("SetTextI18n")
     private void loadTransactions() {
         TransactionViewModel transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
         transactionViewModel.loadTransactions().observe(getViewLifecycleOwner(), values -> {
@@ -125,6 +126,7 @@ public class PieDetailsFragment extends Fragment {
                     categories.put(transaction.getCategory(), transaction.getAmount());
                 }
             }
+            sum = 0.0;
             categories = MapUtil.sortByValue(categories);
             categories.forEach((key, value) -> {
                 ExpenseCategory expenseCategory = new ExpenseCategory(key, transactionsByCategory.get(key), null, value);
@@ -133,11 +135,13 @@ public class PieDetailsFragment extends Fragment {
                     categoryList.add(expenseCategory);
                     adapter.notifyItemInserted(categoryList.size() - 1);
                 }
+                sum += value;
             });
-
 
             PieChartUtils.updatePieChartData(binding.pieChart, mWallet.getCurrency(),
                     values, false);
+
+            binding.totalAmountTv.setText(mWallet.getCurrency() + " " + new DecimalFormat("0.00").format(sum));
         });
     }
 

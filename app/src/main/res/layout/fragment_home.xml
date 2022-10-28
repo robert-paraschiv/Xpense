@@ -306,7 +306,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="0.6"
+                    android:layout_weight="0.55"
                     android:orientation="vertical"
                     tools:ignore="NestedWeights">
 
@@ -369,7 +369,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="0.4"
+                    android:layout_weight="0.45"
                     android:orientation="vertical">
 
                     <TextView

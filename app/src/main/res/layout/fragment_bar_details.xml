@@ -88,13 +88,14 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/totalAmountTv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="18dp"
                         android:layout_marginTop="8dp"
-                        android:text="RON 3009"
                         android:textSize="28sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        tools:text="RON 3009" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -106,7 +107,7 @@
                     <com.github.mikephil.charting.charts.BarChart
                         android:id="@+id/barChart"
                         android:layout_width="match_parent"
-                        android:layout_height="280dp"
+                        android:layout_height="240dp"
                         android:layout_marginBottom="16dp"
                         android:transitionName="pieChart" />
 
@@ -119,32 +120,32 @@
                         app:strokeWidth="0dp">
 
                         <com.google.android.material.chip.ChipGroup
-                            app:singleSelection="true"
-                            app:selectionRequired="true"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            app:chipSpacing="2dp">
+                            app:chipSpacing="2dp"
+                            app:selectionRequired="true"
+                            app:singleSelection="true">
 
                             <com.google.android.material.chip.Chip
                                 style="@style/Widget.Material3.Chip.Assist"
                                 android:layout_width="wrap_content"
                                 android:layout_height="32dp"
-                                android:checked="true"
-                                android:text="1 week"
                                 android:checkable="true"
+                                android:checked="true"
                                 android:clickable="true"
                                 android:focusable="true"
+                                android:text="1 week"
                                 app:chipBackgroundColor="@color/bar_details_chip_state_list"
                                 app:chipMinTouchTargetSize="0dp"
                                 app:chipStrokeWidth="0dp" />
 
                             <com.google.android.material.chip.Chip
-                                android:checkable="true"
-                                android:clickable="true"
-                                android:focusable="true"
                                 style="@style/Widget.Material3.Chip.Assist"
                                 android:layout_width="wrap_content"
                                 android:layout_height="32dp"
+                                android:checkable="true"
+                                android:clickable="true"
+                                android:focusable="true"
                                 android:text="All month"
                                 app:chipBackgroundColor="@color/bar_details_chip_state_list"
                                 app:chipMinTouchTargetSize="0dp"

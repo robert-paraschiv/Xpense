@@ -33,8 +33,9 @@ import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.BarDetailsUtils;
 import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.MapUtil;
+import com.rokudo.xpense.utils.TransactionUtils;
 
-import java.text.SimpleDateFormat;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -56,6 +57,7 @@ public class BarDetailsFragment extends Fragment {
     private List<ExpenseCategory> categoryList = new ArrayList<>();
     private List<TransEntry> transEntryList = new ArrayList<>();
     private boolean firstLoad = true;
+    Double sum = 0.0;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -76,7 +78,7 @@ public class BarDetailsFragment extends Fragment {
         return binding.getRoot();
     }
 
-    @SuppressLint("SimpleDateFormat")
+    @SuppressLint({"SimpleDateFormat", "SetTextI18n"})
     private void initDateChip() {
         binding.dateChip.setText("This month");
     }
@@ -182,6 +184,7 @@ public class BarDetailsFragment extends Fragment {
                 });
     }
 
+    @SuppressLint("SetTextI18n")
     private void sortTransactions(List<Transaction> values) {
         Map<String, Double> categories = new HashMap<>();
         Map<String, List<Transaction>> transactionsByCategory = new HashMap<>();
@@ -207,7 +210,10 @@ public class BarDetailsFragment extends Fragment {
             }
         }
         categories = MapUtil.sortByValue(categories);
+
+        sum = 0.0;
         categories.forEach((key, value) -> {
+            sum += value;
             ExpenseCategory expenseCategory = new ExpenseCategory(key,
                     transactionsByCategory.get(key),
                     null,
@@ -223,6 +229,8 @@ public class BarDetailsFragment extends Fragment {
                 }
             }
         });
+
+        binding.totalAmountTv.setText(mWallet.getCurrency() + " " + new DecimalFormat("0.00").format(sum));
     }
 
     @Override

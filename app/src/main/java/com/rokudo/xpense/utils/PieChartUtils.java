@@ -24,19 +24,25 @@ import java.util.Map;
 public class PieChartUtils {
 
     public static void setupPieChart(PieChart pieChart, int textColor, boolean isCalledFromHome) {
-        pieChart.setDrawHoleEnabled(true);
-        pieChart.setTouchEnabled(!isCalledFromHome);
+                pieChart.setTouchEnabled(!isCalledFromHome);
         pieChart.setUsePercentValues(true);
         pieChart.setHighlightPerTapEnabled(!isCalledFromHome);
+
         pieChart.setEntryLabelTextSize(10f);
         pieChart.setEntryLabelColor(Color.BLACK);
-        pieChart.setCenterTextSize(11f);
-        pieChart.setHoleRadius(48f);
-        pieChart.setCenterTextColor(textColor);
+
+        pieChart.setDrawHoleEnabled(true);
+        pieChart.setHoleRadius(isCalledFromHome ? 48f : 34f);
         pieChart.setHoleColor(Color.TRANSPARENT);
+        pieChart.setTransparentCircleRadius(isCalledFromHome ? 52f : 38f);
+        pieChart.setDrawCenterText(isCalledFromHome);
+        pieChart.setCenterTextSize(11f);
+        pieChart.setCenterTextColor(textColor);
+
         pieChart.getDescription().setEnabled(false);
         pieChart.setDrawEntryLabels(false);
         pieChart.setMinAngleForSlices(20f);
+
         Legend l = pieChart.getLegend();
         l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
         l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
@@ -46,7 +52,6 @@ public class PieChartUtils {
         l.setYEntrySpace(0f);
         l.setWordWrapEnabled(true);
         l.setTextColor(textColor);
-        pieChart.setTransparentCircleRadius(52f);
     }
 
 
@@ -85,7 +90,8 @@ public class PieChartUtils {
         if (!isCalledFromHome) {
             dataSet.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
             dataSet.setValueLineColor(new TextView(pieChart.getContext()).getCurrentTextColor());
-            dataSet.setValueLinePart1OffsetPercentage(90f);
+            dataSet.setValueLinePart1OffsetPercentage(80f);
+            dataSet.setValueLinePart1Length(0.5f);
         }
 
         PieData data = new PieData(dataSet);

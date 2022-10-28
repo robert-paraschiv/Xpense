@@ -85,6 +85,8 @@ public class AddTransactionFragment extends Fragment {
             chip.setText(category.getName());
             chip.setChipIconTint(ColorStateList.valueOf(CategoriesUtil.expenseCategoryList.get(i).getColor()));
             chip.setChipIcon(getResources().getDrawable(category.getResourceId(), requireContext().getTheme()));
+            chip.setChipBackgroundColor(ColorStateList.valueOf(getResources().getColor(R.color.cards_bg_color, requireActivity().getTheme())));
+            chip.setElevation(0);
 
 
             binding.categoryChipGroup.addView(chip);
