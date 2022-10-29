@@ -342,13 +342,13 @@ public class HomeFragment extends Fragment {
     }
 
     private void handleAddWalletBtnClick() {
-        binding.addWalletBtn.setTransitionName("addWalletTransition");
+        binding.addWalletBtn.setTransitionName("editWalletTransition");
 
         FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
-                .addSharedElement(binding.addWalletBtn, "addWalletTransition")
+                .addSharedElement(binding.addWalletBtn, "editWalletTransition")
                 .build();
 
-        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToAddWalletFragment();
+        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToEditWalletFragment(null);
 
         Hold hold = new Hold();
         hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
