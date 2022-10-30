@@ -85,6 +85,7 @@ exports.profilePictureChangeListener = functions.firestore.document("Users/{user
                     walletUsers.forEach(element => {
                         if (element.userId === userID) {
                             element.userPic = picAfter;
+                            element.userName = nameAfter;
                         }
                     });
 

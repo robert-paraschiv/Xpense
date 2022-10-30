@@ -8,6 +8,7 @@ import java.util.Objects;
 public class WalletUser {
     private String userId;
     private String userPic;
+    private String userName;
 
     public WalletUser() {
     }
@@ -26,6 +27,14 @@ public class WalletUser {
 
     public void setUserPic(String userPic) {
         this.userPic = userPic;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     @Override
@@ -47,6 +56,17 @@ public class WalletUser {
         for (WalletUser walletUser : walletUsers) {
             if (!walletUser.getUserId().equals(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())) {
                 return walletUser.getUserPic();
+            }
+        }
+        return null;
+    }
+
+    public static WalletUser getOtherWalletUser(List<WalletUser> walletUsers) {
+        if (walletUsers == null)
+            return null;
+        for (WalletUser walletUser : walletUsers) {
+            if (!walletUser.getUserId().equals(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())) {
+                return walletUser;
             }
         }
         return null;

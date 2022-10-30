@@ -133,12 +133,14 @@
         android:layout_below="@id/currencyTextInputLayout"
         android:layout_centerHorizontal="true"
         android:layout_margin="8dp"
+        android:clickable="true"
+        android:minWidth="150dp"
         app:cardBackgroundColor="@color/cards_bg_color"
         app:cardCornerRadius="18dp"
         app:strokeWidth="0dp">
 
         <RelativeLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="12dp">
 
@@ -148,9 +150,10 @@
                 android:layout_height="50dp"
                 android:layout_centerHorizontal="true"
                 android:contentDescription="@string/user_profile_picture"
-                tools:src="@drawable/ic_baseline_person_24" />
+                android:src="@drawable/ic_baseline_person_24" />
 
             <TextView
+                android:id="@+id/invitedPersonName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/invitedPersonPic"
@@ -165,11 +168,14 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/saveWalletBtn"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/invitedPersonCard"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="18dp"
-        android:text="Save Wallet" />
+        android:layout_marginStart="18dp"
+        android:layout_marginEnd="18dp"
+        android:layout_marginBottom="38dp"
+        android:text="Save Wallet"
+        app:cornerRadius="10dp" />
 
 </RelativeLayout>

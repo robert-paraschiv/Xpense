@@ -60,7 +60,6 @@ public class BarDetailsUtils {
 
         List<TransEntry> transEntryArrayList = getTransEntryArrayList(transactionList);
 
-        transEntryArrayList.sort(Comparator.comparingLong(transEntry -> transEntry.getDate().getTime()));
         for (int i = 0; i < transEntryArrayList.size(); i++) {
             BarEntry barEntry = new BarEntry(i, transEntryArrayList.get(i).getAmount());
             valueSet.add(barEntry);
@@ -117,6 +116,7 @@ public class BarDetailsUtils {
                 transEntryArrayList.add(transEntry);
             }
         }
+        transEntryArrayList.sort(Comparator.comparingLong(transEntry -> transEntry.getDate().getTime()));
         return transEntryArrayList;
     }
 }

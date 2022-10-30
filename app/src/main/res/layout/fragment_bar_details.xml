@@ -134,7 +134,7 @@
                                 android:checked="true"
                                 android:clickable="true"
                                 android:focusable="true"
-                                android:text="1 week"
+                                android:text="Last 7 days"
                                 app:chipBackgroundColor="@color/bar_details_chip_state_list"
                                 app:chipMinTouchTargetSize="0dp"
                                 app:chipStrokeWidth="0dp" />

@@ -1,5 +1,9 @@
 package com.rokudo.xpense.fragments;
 
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+import static com.rokudo.xpense.models.WalletUser.getOtherUserProfilePic;
+import static com.rokudo.xpense.models.WalletUser.getOtherWalletUser;
+
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,14 +16,19 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.transition.MaterialSharedAxis;
 import com.google.firebase.firestore.DocumentReference;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.data.viewmodels.WalletsViewModel;
 import com.rokudo.xpense.databinding.FragmentEditWalletBinding;
 import com.rokudo.xpense.models.Wallet;
+import com.rokudo.xpense.models.WalletUser;
 import com.rokudo.xpense.utils.DatabaseUtils;
 import com.rokudo.xpense.utils.PrefsUtils;
+import com.rokudo.xpense.utils.dialogs.DialogUtils;
 
 import java.util.Collections;
 import java.util.Date;
@@ -57,6 +66,21 @@ public class EditWalletFragment extends Fragment {
             binding.walletTitleInput.setText(mWallet.getTitle() == null ? "" : mWallet.getTitle());
             binding.currencyDropBox.setText(mWallet.getCurrency() == null ? "" : mWallet.getCurrency());
             binding.walletAmountInput.setText(mWallet.getAmount() == null ? "" : mWallet.getAmount() + "");
+            if (mWallet.getWalletUsers().size() > 1) {
+                WalletUser otherUser = getOtherWalletUser(mWallet.getWalletUsers());
+
+                binding.invitedPersonName.setText(otherUser.getUserName() == null ? "" : otherUser.getUserName());
+
+                Glide.with(requireContext())
+                        .load(otherUser.getUserPic())
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .apply(RequestOptions.circleCropTransform())
+                        .placeholder(DialogUtils.getCircularProgressDrawable(requireContext()))
+                        .fallback(R.drawable.ic_baseline_person_24)
+                        .error(R.drawable.ic_baseline_person_24)
+                        .transition(withCrossFade())
+                        .into(binding.invitedPersonPic);
+            }
         }
     }
 

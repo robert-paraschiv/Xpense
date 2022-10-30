@@ -30,6 +30,7 @@ import com.rokudo.xpense.models.ExpenseCategory;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.DatabaseUtils;
+import com.rokudo.xpense.utils.dialogs.UploadingDialog;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -128,12 +129,18 @@ public class AddTransactionFragment extends Fragment {
             } else {
                 binding.expenseChip.setChecked(true);
                 binding.incomeChip.setChecked(false);
+
+                binding.selectedTextDummy.setVisibility(View.VISIBLE);
+                binding.categoryChipGroup.setVisibility(View.VISIBLE);
+
+                if (mTransaction.getCategory() == null) {
+                    return;
+                }
+
                 selectedCategory = CategoriesUtil.expenseCategoryList.get(
                         CategoriesUtil.expenseCategoryList
                                 .indexOf(new ExpenseCategory(mTransaction.getCategory(), null, null)));
 
-                binding.selectedTextDummy.setVisibility(View.VISIBLE);
-                binding.categoryChipGroup.setVisibility(View.VISIBLE);
 
                 for (int i = 0; i < binding.categoryChipGroup.getChildCount(); i++) {
                     Chip chip = (Chip) binding.categoryChipGroup.getChildAt(i);
@@ -142,6 +149,7 @@ public class AddTransactionFragment extends Fragment {
                         chip.setChecked(true);
                     }
                 }
+
             }
         }
     }
@@ -230,8 +238,11 @@ public class AddTransactionFragment extends Fragment {
             DocumentReference documentReference = DatabaseUtils.transactionsRef.document();
             transaction.setId(documentReference.getId());
 
+            UploadingDialog uploadingDialog = new UploadingDialog("Please Wait...");
+            uploadingDialog.show(getParentFragmentManager(), "wait");
             viewModel.addTransaction(transaction).observe(getViewLifecycleOwner(), result -> {
                 if (result.equals("Success")) {
+                    uploadingDialog.dismiss();
                     Navigation.findNavController(binding.getRoot()).popBackStack();
                 }
             });
@@ -242,8 +253,11 @@ public class AddTransactionFragment extends Fragment {
             } else {
                 transaction.setId(mTransaction.getId());
             }
+            UploadingDialog uploadingDialog = new UploadingDialog("Please Wait...");
+            uploadingDialog.show(getParentFragmentManager(), "wait");
             viewModel.updateTransaction(transaction).observe(getViewLifecycleOwner(), result -> {
                 if (result.equals("Success")) {
+                    uploadingDialog.dismiss();
                     Navigation.findNavController(binding.getRoot()).popBackStack();
                 }
             });
