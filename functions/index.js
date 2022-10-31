@@ -82,12 +82,14 @@ exports.profilePictureChangeListener = functions.firestore.document("Users/{user
                 querySnapshot.forEach(doc => {
                     let walletUsers = doc.data().walletUsers;
 
-                    walletUsers.forEach(element => {
-                        if (element.userId === userID) {
-                            element.userPic = picAfter;
-                            element.userName = nameAfter;
-                        }
-                    });
+                    if (walletUsers != null) {
+                        walletUsers.forEach(element => {
+                            if (element.userId === userID) {
+                                element.userPic = picAfter;
+                                element.userName = nameAfter;
+                            }
+                        });
+                    }
 
                     batch.update(doc.ref, { "walletUsers": walletUsers });
 

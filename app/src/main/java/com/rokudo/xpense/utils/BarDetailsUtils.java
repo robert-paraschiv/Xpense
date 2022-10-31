@@ -1,7 +1,6 @@
 package com.rokudo.xpense.utils;
 
 import android.annotation.SuppressLint;
-import android.graphics.Color;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -28,7 +27,6 @@ public class BarDetailsUtils {
     static SimpleDateFormat dayOfMonthFormat = new SimpleDateFormat("d MMM");
 
     public static void setupBarChart(BarChart barChart, int textColor) {
-//        barChart.setMaxVisibleValueCount(60);
         barChart.setPinchZoom(false);
         barChart.setDoubleTapToZoomEnabled(false);
         barChart.setScaleEnabled(false);

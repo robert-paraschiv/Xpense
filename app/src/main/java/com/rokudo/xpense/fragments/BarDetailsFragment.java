@@ -33,9 +33,9 @@ import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.BarDetailsUtils;
 import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.MapUtil;
-import com.rokudo.xpense.utils.TransactionUtils;
 
 import java.text.DecimalFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -73,7 +73,8 @@ public class BarDetailsFragment extends Fragment {
         BarDetailsUtils.setupBarChart(binding.barChart, new TextView(requireContext()).getCurrentTextColor());
         setUpExpenseCategoryRv();
 
-        loadThisMonthTransactions();
+//        loadThisMonthTransactions();
+        loadLast7DaysTransactions();
 
         return binding.getRoot();
     }
@@ -91,6 +92,14 @@ public class BarDetailsFragment extends Fragment {
 
     private void initOnClicks() {
         binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.backBtn).popBackStack());
+        binding.allMonthChip.setOnClickListener(v -> {
+            resetCategoriesRv();
+            loadThisMonthTransactions();
+        });
+        binding.last7DaysChip.setOnClickListener(v -> {
+            resetCategoriesRv();
+            loadLast7DaysTransactions();
+        });
         binding.barChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
@@ -122,7 +131,11 @@ public class BarDetailsFragment extends Fragment {
             @Override
             public void onNothingSelected() {
                 resetCategoriesRv();
-                loadThisMonthTransactions();
+                if (binding.last7DaysChip.isChecked()) {
+                    loadLast7DaysTransactions();
+                } else if (binding.allMonthChip.isChecked()) {
+                    loadThisMonthTransactions();
+                }
             }
         });
     }
@@ -143,6 +156,25 @@ public class BarDetailsFragment extends Fragment {
         binding.categoriesRv.setAdapter(adapter);
     }
 
+    private void loadLast7DaysTransactions() {
+        Date end = new Date();
+
+        Date start = new Date(end.getTime() - Duration.ofDays(7).toMillis());
+        LocalDateTime localDateTime = start
+                .toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(localDateTime.getYear(),
+                localDateTime.getMonth().getValue() - 1,
+                localDateTime.getDayOfMonth(),
+                0, 0);
+
+        start = calendar.getTime();
+
+        loadTransactions(start, end, true);
+    }
 
     private void loadThisMonthTransactions() {
         Calendar calendar = Calendar.getInstance();

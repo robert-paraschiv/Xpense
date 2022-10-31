@@ -127,6 +127,7 @@
                             app:singleSelection="true">
 
                             <com.google.android.material.chip.Chip
+                                android:id="@+id/last7DaysChip"
                                 style="@style/Widget.Material3.Chip.Assist"
                                 android:layout_width="wrap_content"
                                 android:layout_height="32dp"
@@ -140,6 +141,7 @@
                                 app:chipStrokeWidth="0dp" />
 
                             <com.google.android.material.chip.Chip
+                                android:id="@+id/allMonthChip"
                                 style="@style/Widget.Material3.Chip.Assist"
                                 android:layout_width="wrap_content"
                                 android:layout_height="32dp"
