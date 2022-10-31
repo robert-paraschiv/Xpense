@@ -161,6 +161,9 @@ public class HomeFragment extends Fragment {
 
     private void loadTransactions(String id) {
         transactionViewModel.loadTransactions(id, getCurrentMonth()).observe(getViewLifecycleOwner(), values -> {
+            if (values == null || values.isEmpty()) {
+                return;
+            }
             boolean needUpdate = false;
             for (Transaction transaction : values) {
                 if (transactionList.contains(transaction)) {
@@ -476,6 +479,10 @@ public class HomeFragment extends Fragment {
         walletsViewModel.loadWallets().observe(getViewLifecycleOwner(), new Observer<ArrayList<Wallet>>() {
             @Override
             public void onChanged(ArrayList<Wallet> wallets) {
+                if (wallets == null || wallets.isEmpty()) {
+                    return;
+                }
+
                 WalletListDialog walletListDialog = new WalletListDialog(wallets);
                 walletListDialog.setClickListener(new WalletListDialog.OnClickListener() {
                     @Override

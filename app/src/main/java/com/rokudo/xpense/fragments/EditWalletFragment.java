@@ -1,7 +1,6 @@
 package com.rokudo.xpense.fragments;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
-import static com.rokudo.xpense.models.WalletUser.getOtherUserProfilePic;
 import static com.rokudo.xpense.models.WalletUser.getOtherWalletUser;
 
 import android.annotation.SuppressLint;
@@ -61,12 +60,14 @@ public class EditWalletFragment extends Fragment {
 
         if (mWallet == null) {
             binding.fragmentTitleTv.setText("Add Wallet");
+            binding.invitedPersonCard.setVisibility(View.GONE);
         } else {
+            binding.invitedPersonCard.setVisibility(View.VISIBLE);
             binding.fragmentTitleTv.setText("Edit Wallet");
             binding.walletTitleInput.setText(mWallet.getTitle() == null ? "" : mWallet.getTitle());
             binding.currencyDropBox.setText(mWallet.getCurrency() == null ? "" : mWallet.getCurrency());
             binding.walletAmountInput.setText(mWallet.getAmount() == null ? "" : mWallet.getAmount() + "");
-            if (mWallet.getWalletUsers().size() > 1) {
+            if (mWallet.getWalletUsers() != null && mWallet.getWalletUsers().size() > 1) {
                 WalletUser otherUser = getOtherWalletUser(mWallet.getWalletUsers());
 
                 binding.invitedPersonName.setText(otherUser.getUserName() == null ? "" : otherUser.getUserName());
@@ -93,6 +94,8 @@ public class EditWalletFragment extends Fragment {
                 updateWallet();
             }
         });
+        binding.invitedPersonCard.setOnClickListener(v -> Navigation.findNavController(binding.getRoot())
+                .navigate(EditWalletFragmentDirections.actionEditWalletFragmentToContactsFragment(mWallet)));
     }
 
     private void updateWallet() {

@@ -20,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -31,9 +32,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.StorageReference;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.InvitationAdapter;
+import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
+import com.rokudo.xpense.data.viewmodels.WalletsViewModel;
 import com.rokudo.xpense.databinding.FragmentSettingsBinding;
 import com.rokudo.xpense.models.Invitation;
 import com.rokudo.xpense.utils.DatabaseUtils;
+import com.rokudo.xpense.utils.PrefsUtils;
 import com.rokudo.xpense.utils.RotateBitmap;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
 import com.rokudo.xpense.utils.dialogs.UploadingDialog;
@@ -87,7 +91,10 @@ public class SettingsFragment extends Fragment {
     }
 
     private void initOnClicks() {
-        binding.signOutBtn.setOnClickListener(view -> FirebaseAuth.getInstance().signOut());
+        binding.signOutBtn.setOnClickListener(view -> {
+            deleteViewModelsData();
+            FirebaseAuth.getInstance().signOut();
+        });
 
         binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.getRoot()).popBackStack());
 
@@ -95,6 +102,15 @@ public class SettingsFragment extends Fragment {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startForResultFromGallery.launch(intent);
         });
+    }
+
+    private void deleteViewModelsData() {
+        TransactionViewModel transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
+        WalletsViewModel walletsViewModel = new ViewModelProvider(requireActivity()).get(WalletsViewModel.class);
+
+        transactionViewModel.removeAllData();
+        walletsViewModel.removeAllData();
+        PrefsUtils.setSelectedWalletId(requireContext(),null);
     }
 
     private final ActivityResultLauncher<Intent> startForResultFromGallery = registerForActivityResult(

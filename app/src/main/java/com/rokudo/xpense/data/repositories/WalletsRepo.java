@@ -21,7 +21,7 @@ public class WalletsRepo {
     private ListenerRegistration walletListener;
 
     private final MutableLiveData<ArrayList<Wallet>> allWallets;
-    private final ArrayList<Wallet> walletList;
+    private ArrayList<Wallet> walletList;
     private final MutableLiveData<Wallet> walletMutableLiveData;
 
     public static WalletsRepo getInstance() {
@@ -37,12 +37,22 @@ public class WalletsRepo {
         this.walletMutableLiveData = new MutableLiveData<>();
     }
 
+    public void removeAllWalletsData() {
+        if (walletListener != null) {
+            walletListener.remove();
+        }
+        allWallets.setValue(null);
+        walletList = new ArrayList<>();
+        walletMutableLiveData.setValue(null);
+    }
+
     public MutableLiveData<String> addWallet(Wallet wallet) {
         MutableLiveData<String> mutableLiveData = new MutableLiveData<>();
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            DatabaseUtils.walletsRef.document(wallet.getId()).set(wallet).addOnSuccessListener(documentReference ->
-                    Log.d(TAG, "onSuccess: added wallet " + wallet));
-            mutableLiveData.setValue("Success");
+            DatabaseUtils.walletsRef.document(wallet.getId()).set(wallet).addOnSuccessListener(documentReference -> {
+                Log.d(TAG, "onSuccess: added wallet " + wallet);
+                mutableLiveData.setValue("Success");
+            });
         }
         return mutableLiveData;
     }

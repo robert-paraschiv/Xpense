@@ -100,5 +100,9 @@
         android:id="@+id/contactsFragment"
         android:name="com.rokudo.xpense.fragments.ContactsFragment"
         android:label="fragment_contacts"
-        tools:layout="@layout/fragment_contacts" />
+        tools:layout="@layout/fragment_contacts" >
+        <argument
+            android:name="wallet"
+            app:argType="com.rokudo.xpense.models.Wallet" />
+    </fragment>
 </navigation>

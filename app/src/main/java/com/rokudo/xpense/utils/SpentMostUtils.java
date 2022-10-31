@@ -52,7 +52,12 @@ public class SpentMostUtils {
             }
         }
 
-        SpentMostItem mostExpensiveTransaction = new SpentMostItem(expensiveTransaction != null ? expensiveTransaction.getTitle() : "", expensiveTransaction != null ? expensiveTransaction.getCategory() : "", "- " + (expensiveTransaction != null ? new DecimalFormat("0.00").format(expensiveTransaction.getAmount()) : "") + " " + currency, expensiveTransaction != null ? TransactionUtils.getTransactionDateString(expensiveTransaction) : "");
+        SpentMostItem mostExpensiveTransaction = new SpentMostItem(
+                expensiveTransaction != null ? expensiveTransaction.getTitle() : "",
+                expensiveTransaction != null ? expensiveTransaction.getCategory() : "",
+                "- " + (expensiveTransaction != null ? new DecimalFormat("0.00")
+                        .format(expensiveTransaction.getAmount()) : "") + " " + currency,
+                expensiveTransaction != null ? TransactionUtils.getTransactionDateString(expensiveTransaction) : "");
 
         SpentMostItem mostExpensiveCategory = new SpentMostItem();
         mostExpensiveCategory.setTitle("Most Expensive category ");
@@ -64,7 +69,9 @@ public class SpentMostUtils {
                 mostExpensiveCategory.setAmount(value + "");
             }
         });
-        mostExpensiveCategory.setAmount(new DecimalFormat("0.00").format(Double.parseDouble(mostExpensiveCategory.getAmount())) + " " + currency);
+        mostExpensiveCategory.setAmount(new DecimalFormat("0.00")
+                .format(Double.parseDouble(mostExpensiveCategory.getAmount() == null ? "0.00" : mostExpensiveCategory.getAmount()))
+                + " " + currency);
 
         SpentMostItem mostExpensiveDay = new SpentMostItem();
         mostExpensiveDay.setTitle("Most expensive day");
@@ -78,7 +85,9 @@ public class SpentMostUtils {
                 mostExpensiveDay.setAmount(value + "");
             }
         });
-        mostExpensiveDay.setAmount(new DecimalFormat("0.00").format(Double.parseDouble(mostExpensiveDay.getAmount())) + " " + currency);
+        mostExpensiveDay.setAmount(new DecimalFormat("0.00")
+                .format(Double.parseDouble(mostExpensiveDay.getAmount() == null ? "0.00" : mostExpensiveDay.getAmount()))
+                + " " + currency);
 
 
         List<SpentMostItem> spentMostItemList = new ArrayList<>();

@@ -11,6 +11,7 @@ import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.utils.DatabaseUtils;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -40,17 +41,35 @@ public class TransactionRepo {
         this.updateTransactionStatus = new MutableLiveData<>();
     }
 
+    public void removeAllTransactionsData() {
+        if (transactionListener != null) {
+            transactionListener.remove();
+        }
+        allTransactionList.setValue(null);
+        addTransactionStatus.setValue(null);
+        latestTransaction.setValue(null);
+        updateTransactionStatus.setValue(null);
+    }
+
     public MutableLiveData<List<Transaction>> loadTransactions() {
         return allTransactionList;
     }
 
     public MutableLiveData<List<Transaction>> loadTransactions(String walletId, Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.getActualMaximum(Calendar.DAY_OF_MONTH),
+                0, 0);
+        Date end = new Date();
+
         if (transactionListener != null) {
             transactionListener.remove();
         }
         transactionListener = DatabaseUtils.transactionsRef
                 .whereEqualTo("walletId", walletId)
                 .whereGreaterThan("date", date)
+                .whereLessThan("date", end)
                 .orderBy("date", Query.Direction.DESCENDING)
                 .addSnapshotListener((value, error) -> {
                     if (error != null || value == null || value.isEmpty()) {

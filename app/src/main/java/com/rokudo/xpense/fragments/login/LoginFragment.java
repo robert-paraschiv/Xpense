@@ -4,18 +4,17 @@ import static com.rokudo.xpense.utils.DatabaseUtils.usersRef;
 
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
-
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -25,11 +24,16 @@ import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthOptions;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.rokudo.xpense.R;
 import com.rokudo.xpense.activities.MainActivity;
+import com.rokudo.xpense.data.viewmodels.WalletsViewModel;
 import com.rokudo.xpense.databinding.FragmentLoginBinding;
 import com.rokudo.xpense.models.User;
+import com.rokudo.xpense.models.Wallet;
+import com.rokudo.xpense.utils.DatabaseUtils;
+import com.rokudo.xpense.utils.PrefsUtils;
 
+import java.util.Collections;
+import java.util.Date;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -95,6 +99,29 @@ public class LoginFragment extends Fragment {
 
                                 usersRef.document(Objects.requireNonNull(edtPhone.getText()).toString()).set(user)
                                         .addOnSuccessListener(unused -> Log.d(TAG, "signInWithCredential: added user to db"));
+
+                                Wallet defaultWallet = new Wallet();
+                                defaultWallet.setId(DatabaseUtils.walletsRef.document().getId());
+                                defaultWallet.setAmount(0.0);
+                                defaultWallet.setCreation_date(new Date());
+                                defaultWallet.setCurrency("RON");
+                                defaultWallet.setTitle("Default Wallet");
+                                defaultWallet.setUsers(Collections.singletonList(user.getUid()));
+                                defaultWallet.setCreator_id(user.getUid());
+
+                                PrefsUtils.setSelectedWalletId(requireContext(), defaultWallet.getId());
+                                WalletsViewModel walletsViewModel = new ViewModelProvider(requireActivity()).get(WalletsViewModel.class);
+                                walletsViewModel.addWallet(defaultWallet).observe(getViewLifecycleOwner(), s -> {
+                                    if (s.equals("Success")) {
+                                        Navigation.findNavController(binding.getRoot()).popBackStack();
+                                    }
+                                });
+
+                                DatabaseUtils.walletsRef.document(defaultWallet.getId())
+                                        .set(defaultWallet)
+                                        .addOnSuccessListener(documentReference
+                                                -> Log.d(TAG, "onSuccess: added default wallet"));
+
                                 FirebaseMessaging.getInstance().getToken().addOnSuccessListener(token ->
                                         usersRef.document(Objects.requireNonNull(edtPhone.getText()).toString())
                                                 .update("token", token)

@@ -87,6 +87,11 @@ public class BarDetailsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
         postponeEnterTransition();
+        view.postDelayed(() -> {
+            if (firstLoad) {
+                startPostponedEnterTransition();
+            }
+        }, 3000);
         super.onViewCreated(view, savedInstanceState);
     }
 
