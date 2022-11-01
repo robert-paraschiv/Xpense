@@ -48,12 +48,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class SettingsFragment extends Fragment {
+public class SettingsFragment extends Fragment implements InvitationAdapter.InvitationClickListener {
     private static final String TAG = "SettingsFragment";
 
     private FragmentSettingsBinding binding;
     private InvitationAdapter adapter;
-    List<Invitation> invitationList = new ArrayList<>();
+    private final List<Invitation> invitationList = new ArrayList<>();
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -75,9 +75,20 @@ public class SettingsFragment extends Fragment {
             } else {
                 for (Invitation invitation : values) {
                     if (invitationList.contains(invitation)) {
-                        invitationList.set(invitationList.indexOf(invitation), invitation);
-                        adapter.notifyItemChanged(invitationList.indexOf(invitation));
+                        if (invitation.getStatus().equals(Invitation.STATUS_ACCEPTED)
+                                || invitation.getStatus().equals(Invitation.STATUS_DECLINED)) {
+                            adapter.notifyItemRemoved(invitationList.indexOf(invitation));
+                            invitationList.remove(invitation);
+
+                        } else {
+                            invitationList.set(invitationList.indexOf(invitation), invitation);
+                            adapter.notifyItemChanged(invitationList.indexOf(invitation));
+                        }
                     } else {
+                        if (invitation.getStatus().equals(Invitation.STATUS_ACCEPTED)
+                                || invitation.getStatus().equals(Invitation.STATUS_DECLINED)) {
+                            continue;
+                        }
                         invitationList.add(invitation);
                         adapter.notifyItemInserted(invitationList.indexOf(invitation));
                     }
@@ -90,6 +101,7 @@ public class SettingsFragment extends Fragment {
         adapter = new InvitationAdapter(invitationList);
         binding.invitationsRv.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.invitationsRv.setAdapter(adapter);
+        adapter.setInvitationClickListener(this);
     }
 
     private void initViews() {
@@ -202,5 +214,15 @@ public class SettingsFragment extends Fragment {
         setSharedElementEnterTransition(materialContainerTransform);
 
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onAcceptClick(Invitation invitation) {
+        DatabaseUtils.invitationsRef.document(invitation.getId()).update("status", Invitation.STATUS_ACCEPTED);
+    }
+
+    @Override
+    public void onDeclineClick(Invitation invitation) {
+        DatabaseUtils.invitationsRef.document(invitation.getId()).update("status", Invitation.STATUS_DECLINED);
     }
 }

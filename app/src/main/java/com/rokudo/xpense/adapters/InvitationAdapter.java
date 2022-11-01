@@ -17,12 +17,23 @@ import java.util.List;
 
 public class InvitationAdapter extends RecyclerView.Adapter<InvitationAdapter.ViewHolder> {
     private final List<Invitation> invitationList;
+    private InvitationClickListener invitationClickListener;
 
     public InvitationAdapter(List<Invitation> invitationList) {
         this.invitationList = invitationList;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public void setInvitationClickListener(InvitationClickListener invitationClickListener) {
+        this.invitationClickListener = invitationClickListener;
+    }
+
+    public interface InvitationClickListener {
+        void onAcceptClick(Invitation invitation);
+
+        void onDeclineClick(Invitation invitation);
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final TextView personName;
         final TextView walletName;
         final ImageView personPic;
@@ -36,6 +47,23 @@ public class InvitationAdapter extends RecyclerView.Adapter<InvitationAdapter.Vi
             personPic = itemView.findViewById(R.id.invitationPersonImage);
             acceptChip = itemView.findViewById(R.id.acceptChip);
             declineChip = itemView.findViewById(R.id.declineChip);
+
+            acceptChip.setOnClickListener(v -> {
+                if (invitationClickListener != null) {
+                    int position = getBindingAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        invitationClickListener.onAcceptClick(invitationList.get(position));
+                    }
+                }
+            });
+            declineChip.setOnClickListener(v -> {
+                if (invitationClickListener != null) {
+                    int position = getBindingAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        invitationClickListener.onDeclineClick(invitationList.get(position));
+                    }
+                }
+            });
         }
 
         @Override

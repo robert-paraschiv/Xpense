@@ -20,11 +20,10 @@ exports.invitesListener = functions.firestore.document("Invitations/{invitationI
     const newInvite = snap.after.exists ? snap.after.data() : null;
     const oldInvite = snap.before.exists ? snap.before.data() : null;
 
+    let receiverPhoneNumber = newInvite.invited_person_phone_number;
 
     if (isNewTrans) {
         //Send notification
-
-        let receiverPhoneNumber = newInvite.invited_person_phone_number;
 
         return admin.firestore().collection("Users").doc(receiverPhoneNumber)
             .get()
@@ -51,41 +50,39 @@ exports.invitesListener = functions.firestore.document("Invitations/{invitationI
             });
 
     } else {
-        //Add to wallet
-        let receiverPhoneNumber = newInvite.invited_person_phone_number;
-        return admin.firestore().collection("Users").doc(receiverPhoneNumber)
-            .get()
-            .then(documentSnapshot => {
-                let user = documentSnapshot.data();
+        if (newInvite.status == "Accepted") {
+            //Add to wallet
+            return admin.firestore().collection("Users").doc(receiverPhoneNumber)
+                .get()
+                .then(documentSnapshot => {
+                    let user = documentSnapshot.data();
 
-                if (user == null) {
-                    return console.log("User was null");
-                } else {
-                    const receiverUser = {
-                        userId: user.uid,
-                        userName: user.name,
-                        userPic: user.pictureUrl
-                    };
-                    const senderUser = {
-                        userId: newInvite.creator_id,
-                        userName: newInvite.creator_name,
-                        userPic: newInvite.creator_pic_url
-                    };
-                    const walletUsers = [receiverUser, senderUser];
-                    const users = [receiverUser.creator_id, user.uid];
+                    if (user == null) {
+                        return console.log("User was null");
+                    } else {
+                        const receiverUser = {
+                            userId: user.uid,
+                            userName: user.name,
+                            userPic: user.pictureUrl
+                        };
+                        const senderUser = {
+                            userId: newInvite.creator_id,
+                            userName: newInvite.creator_name,
+                            userPic: newInvite.creator_pic_url
+                        };
+                        const walletUsers = [receiverUser, senderUser];
+                        const users = [senderUser.userId, user.uid];
 
-                    // const batch = admin.firestore().batch();
-                    // batch.update(firestore.collection("Wallets").doc(invitationID), {
-                    //     "users": users,
-                    //     "walletUsers": walletUsers
-                    // });
-                    return admin.firestore().collection("Wallets").doc(invitationID).update({
-                        "users": users,
-                        "walletUsers": walletUsers
-                    });
-                }
-            });
+                        return admin.firestore().collection("Wallets").doc(invitationID).update({
+                            "users": users,
+                            "walletUsers": walletUsers
+                        });
+                    }
+                });
 
+        } else {
+            return 0;
+        }
     }
 
 });

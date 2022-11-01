@@ -38,7 +38,6 @@ public class InvitesRepo {
         }
         invitesListener = DatabaseUtils.invitationsRef
                 .whereEqualTo("invited_person_phone_number", DatabaseUtils.getCurrentUser().getPhoneNumber())
-                .whereEqualTo("status", Invitation.STATUS_SENT)
                 .orderBy("date", Query.Direction.DESCENDING)
                 .addSnapshotListener((value, error) -> {
                     if (error != null || value == null || value.isEmpty()) {
