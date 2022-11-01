@@ -31,11 +31,15 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.ContactsAdapter;
 import com.rokudo.xpense.databinding.FragmentContactsBinding;
+import com.rokudo.xpense.models.Invitation;
 import com.rokudo.xpense.models.User;
+import com.rokudo.xpense.models.Wallet;
+import com.rokudo.xpense.utils.DatabaseUtils;
 import com.rokudo.xpense.utils.dialogs.TimedDialog;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class ContactsFragment extends Fragment implements ContactsAdapter.OnContactClickListener {
@@ -44,6 +48,7 @@ public class ContactsFragment extends Fragment implements ContactsAdapter.OnCont
     private FragmentContactsBinding binding;
     private final List<User> contactsWithApp = new ArrayList<>();
     private ContactsAdapter adapter;
+    private Wallet mWallet;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -51,12 +56,16 @@ public class ContactsFragment extends Fragment implements ContactsAdapter.OnCont
         // Inflate the layout for this fragment
         binding = FragmentContactsBinding.inflate(inflater, container, false);
 
-
+        getWalletPassed();
         initOnClicks();
         checkPermissions();
         buildRv();
 
         return binding.getRoot();
+    }
+
+    private void getWalletPassed() {
+        mWallet = ContactsFragmentArgs.fromBundle(requireArguments()).getWallet();
     }
 
     private void initOnClicks() {
@@ -147,16 +156,36 @@ public class ContactsFragment extends Fragment implements ContactsAdapter.OnCont
         });
     }
 
-
     @Override
     public void onClick(User user) {
-        // TODO: 10/31/2022 send invitation
-        TimedDialog uploadingDialog = new TimedDialog("Sent invitation to " + user.getName());
+        Invitation invitation = new Invitation();
+        invitation.setId(mWallet == null ? "" : mWallet.getId());
+        invitation.setWallet_title(mWallet.getTitle());
+        invitation.setStatus(Invitation.STATUS_SENT);
+        invitation.setDate(new Date());
+        invitation.setCreator_id(DatabaseUtils.getCurrentUser().getUid());
+        invitation.setCreator_name(DatabaseUtils.getCurrentUser().getName());
+        invitation.setCreator_pic_url(DatabaseUtils.getCurrentUser().getPictureUrl());
+        invitation.setInvited_person_phone_number(user.getPhoneNumber());
+
+        TimedDialog uploadingDialog = new TimedDialog("Sending invitation to " + user.getName() + " ...");
         uploadingDialog.show(getParentFragmentManager(), "sentInvite");
 
-        binding.getRoot().postDelayed(() -> {
-            uploadingDialog.dismiss();
-            Navigation.findNavController(binding.getRoot()).popBackStack(R.id.homeFragment, false);
-        }, 1500);
+        DatabaseUtils.invitationsRef.document(invitation.getId()).get().addOnCompleteListener(task -> {
+            if (task.getResult().exists()) {
+                Toast.makeText(requireContext(), "A user has already been invited to this wallet", Toast.LENGTH_LONG).show();
+                uploadingDialog.dismiss();
+                Navigation.findNavController(binding.getRoot()).popBackStack(R.id.homeFragment, false);
+            } else {
+                DatabaseUtils.invitationsRef.document(invitation.getId()).set(invitation).addOnSuccessListener(unused -> {
+                    uploadingDialog.startAnimation();
+
+                    binding.getRoot().postDelayed(() -> {
+                        uploadingDialog.dismiss();
+                        Navigation.findNavController(binding.getRoot()).popBackStack(R.id.homeFragment, false);
+                    }, 1500);
+                });
+            }
+        });
     }
 }

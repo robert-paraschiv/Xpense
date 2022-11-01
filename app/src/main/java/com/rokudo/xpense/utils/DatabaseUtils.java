@@ -11,6 +11,7 @@ public class DatabaseUtils {
     public static CollectionReference usersRef = FirebaseFirestore.getInstance().collection("Users");
     public static CollectionReference walletsRef = FirebaseFirestore.getInstance().collection("Wallets");
     public static CollectionReference transactionsRef = FirebaseFirestore.getInstance().collection("Transactions");
+    public static CollectionReference invitationsRef = FirebaseFirestore.getInstance().collection("Invitations");
     public static StorageReference userPicturesRef = FirebaseStorage.getInstance().getReference("UserPictures");
 
 

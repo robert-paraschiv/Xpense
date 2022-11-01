@@ -1,9 +1,15 @@
 package com.rokudo.xpense.models;
 
+import androidx.annotation.NonNull;
+
 import java.util.Date;
 import java.util.Objects;
 
 public class Invitation {
+    public static final String STATUS_SENT = "Sent";
+    public static final String STATUS_ACCEPTED = "Accepted";
+    public static final String STATUS_DECLINED = "Declined";
+
     private String id;
     private String creator_id;
     private String creator_name;
@@ -98,6 +104,7 @@ public class Invitation {
         return Objects.hash(id);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Invitation{" +

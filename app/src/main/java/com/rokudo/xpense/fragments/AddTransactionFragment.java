@@ -241,7 +241,7 @@ public class AddTransactionFragment extends Fragment {
             UploadingDialog uploadingDialog = new UploadingDialog("Please Wait...");
             uploadingDialog.show(getParentFragmentManager(), "wait");
             viewModel.addTransaction(transaction).observe(getViewLifecycleOwner(), result -> {
-                if (result.equals("Success")) {
+                if (result != null && result.equals("Success")) {
                     uploadingDialog.dismiss();
                     Navigation.findNavController(binding.getRoot()).popBackStack();
                 }

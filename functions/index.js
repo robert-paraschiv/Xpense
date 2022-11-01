@@ -2,6 +2,53 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase)
 
+exports.invitesListener = functions.firestore.document("Invites/{invitationID}").onWrite((snap, context) => {
+    const invitationID = context.params.invitationID;
+
+    var isNewTrans = true;
+    if (snap.before.exists) {
+        isNewTrans = false;
+    }
+
+    const newInvite = snap.after.exists ? snap.after.data() : null;
+    const oldInvite = snap.before.exists ? snap.before.data() : null;
+
+
+    if (isNewTrans) {
+        //Send notification
+
+        let receiverPhoneNumber = newInvite.invited_person_phone_number;
+
+        return admin.firestore().collection("Users").document(receiverPhoneNumber)
+            .get()
+            .then(documentSnapshot => {
+                let user = documentSnapshot.data();
+
+                if (user == null) {
+                    return console.log("User was null");
+                } else {
+                    const messsage = {
+                        data: {
+                            "senderName": String(newInvite.creator_name),
+                            "senderPictureUrl": String(newInvite.creator_pic_url),
+                            "walletTitle": String(newInvite.wallet_title),
+                            "walletID": String(invitationID)
+                        },
+                        token: user.token
+                    }
+                    return admin.messaging().send(messsage).then(result => {
+                        return console.log("Notification sent ");
+                    });
+
+                }
+            });
+
+    } else {
+        //Add to wallet
+    }
+
+});
+
 exports.transactionInsertionListener = functions.firestore.document("Transactions/{transactionID}").onWrite((snap, context) => {
 
     var isNewTrans = true;

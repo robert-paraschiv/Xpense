@@ -18,6 +18,7 @@ import com.rokudo.xpense.R;
 
 public class TimedDialog extends BottomSheetDialogFragment {
     private String title;
+    private View dialogView;
 
     public TimedDialog(String title) {
         this.title = title;
@@ -26,24 +27,10 @@ public class TimedDialog extends BottomSheetDialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        final View dialogView = getLayoutInflater().inflate(R.layout.dialog_timed, null);
+        dialogView = getLayoutInflater().inflate(R.layout.dialog_timed, null);
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext(), R.style.CustomBottomSheetDialogTheme);
 
-        LinearProgressIndicator progressIndicator =
-                dialogView.findViewById(R.id.progressIndicator);
-
-        ValueAnimator animator = ValueAnimator.ofInt(0, progressIndicator.getMax());
-        animator.setDuration(1500);
-        animator.addUpdateListener(animation -> progressIndicator.setProgress((Integer) animation.getAnimatedValue()));
-        animator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                // start your activity here
-                bottomSheetDialog.dismiss();
-            }
-        });
-        animator.start();
+//        startAnimation(dialogView);
 
         if (title != null) {
             ((TextView) dialogView.findViewById(R.id.name)).setText(title);
@@ -59,5 +46,25 @@ public class TimedDialog extends BottomSheetDialogFragment {
 
 
         return bottomSheetDialog;
+    }
+
+    public void startAnimation() {
+        LinearProgressIndicator progressIndicator =
+                dialogView.findViewById(R.id.progressIndicator);
+
+        ((TextView) dialogView.findViewById(R.id.name)).setText("Invitation sent");
+
+        ValueAnimator animator = ValueAnimator.ofInt(0, progressIndicator.getMax());
+        animator.setDuration(1500);
+        animator.addUpdateListener(animation -> progressIndicator.setProgress((Integer) animation.getAnimatedValue()));
+        animator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                // start your activity here
+//                bottomSheetDialog.dismiss();
+            }
+        });
+        animator.start();
     }
 }
