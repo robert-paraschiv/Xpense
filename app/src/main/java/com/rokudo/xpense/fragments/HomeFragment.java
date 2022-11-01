@@ -59,9 +59,8 @@ import com.rokudo.xpense.utils.dialogs.AdjustBalanceDialog;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
 import com.rokudo.xpense.utils.dialogs.WalletListDialog;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -195,9 +194,12 @@ public class HomeFragment extends Fragment {
     }
 
     private Date getCurrentMonth() {
-        LocalDateTime localDateTime = LocalDateTime.of(LocalDateTime.now().getYear(),
-                LocalDateTime.now().getMonth(), 1, 0, 0);
-        return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.getActualMinimum(Calendar.DAY_OF_MONTH),
+                0, 0);
+        return calendar.getTime();
     }
 
     private boolean isTransactionDifferent(Transaction newTransaction, Transaction oldTransaction) {

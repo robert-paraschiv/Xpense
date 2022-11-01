@@ -55,20 +55,20 @@ public class TransactionRepo {
         return allTransactionList;
     }
 
-    public MutableLiveData<List<Transaction>> loadTransactions(String walletId, Date date) {
+    public MutableLiveData<List<Transaction>> loadTransactions(String walletId, Date startDate) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
                 calendar.getActualMaximum(Calendar.DAY_OF_MONTH),
-                0, 0);
-        Date end = new Date();
+                23, 59);
+        Date end = calendar.getTime();
 
         if (transactionListener != null) {
             transactionListener.remove();
         }
         transactionListener = DatabaseUtils.transactionsRef
                 .whereEqualTo("walletId", walletId)
-                .whereGreaterThan("date", date)
+                .whereGreaterThan("date", startDate)
                 .whereLessThan("date", end)
                 .orderBy("date", Query.Direction.DESCENDING)
                 .addSnapshotListener((value, error) -> {

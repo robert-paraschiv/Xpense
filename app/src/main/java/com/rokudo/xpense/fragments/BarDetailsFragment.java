@@ -162,7 +162,12 @@ public class BarDetailsFragment extends Fragment {
     }
 
     private void loadLast7DaysTransactions() {
-        Date end = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH),
+                23, 59);
+        Date end = calendar.getTime();
 
         Date start = new Date(end.getTime() - Duration.ofDays(7).toMillis());
         LocalDateTime localDateTime = start
@@ -170,7 +175,6 @@ public class BarDetailsFragment extends Fragment {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDateTime();
 
-        Calendar calendar = Calendar.getInstance();
         calendar.set(localDateTime.getYear(),
                 localDateTime.getMonth().getValue() - 1,
                 localDateTime.getDayOfMonth(),
@@ -186,8 +190,8 @@ public class BarDetailsFragment extends Fragment {
         calendar.set(calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
                 calendar.getActualMaximum(Calendar.DAY_OF_MONTH),
-                0, 0);
-        Date end = new Date();
+                23, 59);
+        Date end = calendar.getTime();
 
         calendar.set(calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
