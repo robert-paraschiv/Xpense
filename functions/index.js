@@ -2,13 +2,19 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase)
 
-exports.invitesListener = functions.firestore.document("Invites/{invitationID}").onWrite((snap, context) => {
+exports.invitesListener = functions.firestore.document("Invitations/{invitationID}").onWrite((snap, context) => {
     const invitationID = context.params.invitationID;
+
+    if (!snap.after.exists) {
+        //Invitation was deleted by server or user
+        return 0;        
+    }
 
     var isNewTrans = true;
     if (snap.before.exists) {
         isNewTrans = false;
     }
+
 
     const newInvite = snap.after.exists ? snap.after.data() : null;
     const oldInvite = snap.before.exists ? snap.before.data() : null;
@@ -19,7 +25,7 @@ exports.invitesListener = functions.firestore.document("Invites/{invitationID}")
 
         let receiverPhoneNumber = newInvite.invited_person_phone_number;
 
-        return admin.firestore().collection("Users").document(receiverPhoneNumber)
+        return admin.firestore().collection("Users").doc(receiverPhoneNumber)
             .get()
             .then(documentSnapshot => {
                 let user = documentSnapshot.data();

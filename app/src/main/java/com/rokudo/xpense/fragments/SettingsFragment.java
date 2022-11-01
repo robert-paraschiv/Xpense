@@ -32,6 +32,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.StorageReference;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.InvitationAdapter;
+import com.rokudo.xpense.data.viewmodels.InvitesViewModel;
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.data.viewmodels.WalletsViewModel;
 import com.rokudo.xpense.databinding.FragmentSettingsBinding;
@@ -52,6 +53,7 @@ public class SettingsFragment extends Fragment {
 
     private FragmentSettingsBinding binding;
     private InvitationAdapter adapter;
+    List<Invitation> invitationList = new ArrayList<>();
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -60,17 +62,31 @@ public class SettingsFragment extends Fragment {
         initOnClicks();
         initViews();
         buildRv();
+        loadInvitations();
 
         return binding.getRoot();
     }
 
-    private void buildRv() {
-        List<Invitation> invitationList = new ArrayList<>();
-        invitationList.add(new Invitation("Robert", "My wallet"));
-        invitationList.add(new Invitation("Robert", "My wallet"));
-        invitationList.add(new Invitation("Robert", "My wallet"));
-        invitationList.add(new Invitation("Robert", "My wallet"));
+    private void loadInvitations() {
+        InvitesViewModel invitesViewModel = new ViewModelProvider(requireActivity()).get(InvitesViewModel.class);
+        invitesViewModel.loadInvitations().observe(getViewLifecycleOwner(), values -> {
+            if (values == null || values.isEmpty()) {
+                Log.d(TAG, "loadInvitations: empty or null");
+            } else {
+                for (Invitation invitation : values) {
+                    if (invitationList.contains(invitation)) {
+                        invitationList.set(invitationList.indexOf(invitation), invitation);
+                        adapter.notifyItemChanged(invitationList.indexOf(invitation));
+                    } else {
+                        invitationList.add(invitation);
+                        adapter.notifyItemInserted(invitationList.indexOf(invitation));
+                    }
+                }
+            }
+        });
+    }
 
+    private void buildRv() {
         adapter = new InvitationAdapter(invitationList);
         binding.invitationsRv.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.invitationsRv.setAdapter(adapter);
@@ -110,7 +126,7 @@ public class SettingsFragment extends Fragment {
 
         transactionViewModel.removeAllData();
         walletsViewModel.removeAllData();
-        PrefsUtils.setSelectedWalletId(requireContext(),null);
+        PrefsUtils.setSelectedWalletId(requireContext(), null);
     }
 
     private final ActivityResultLauncher<Intent> startForResultFromGallery = registerForActivityResult(
