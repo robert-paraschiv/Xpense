@@ -1,5 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const { firestore } = require('firebase-admin');
 admin.initializeApp(functions.config().firebase)
 
 exports.invitesListener = functions.firestore.document("Invitations/{invitationID}").onWrite((snap, context) => {
@@ -7,7 +8,7 @@ exports.invitesListener = functions.firestore.document("Invitations/{invitationI
 
     if (!snap.after.exists) {
         //Invitation was deleted by server or user
-        return 0;        
+        return 0;
     }
 
     var isNewTrans = true;
@@ -51,6 +52,40 @@ exports.invitesListener = functions.firestore.document("Invitations/{invitationI
 
     } else {
         //Add to wallet
+        let receiverPhoneNumber = newInvite.invited_person_phone_number;
+        return admin.firestore().collection("Users").doc(receiverPhoneNumber)
+            .get()
+            .then(documentSnapshot => {
+                let user = documentSnapshot.data();
+
+                if (user == null) {
+                    return console.log("User was null");
+                } else {
+                    const receiverUser = {
+                        userId: user.uid,
+                        userName: user.name,
+                        userPic: user.pictureUrl
+                    };
+                    const senderUser = {
+                        userId: newInvite.creator_id,
+                        userName: newInvite.creator_name,
+                        userPic: newInvite.creator_pic_url
+                    };
+                    const walletUsers = [receiverUser, senderUser];
+                    const users = [receiverUser.creator_id, user.uid];
+
+                    // const batch = admin.firestore().batch();
+                    // batch.update(firestore.collection("Wallets").doc(invitationID), {
+                    //     "users": users,
+                    //     "walletUsers": walletUsers
+                    // });
+                    return admin.firestore().collection("Wallets").doc(invitationID).update({
+                        "users": users,
+                        "walletUsers": walletUsers
+                    });
+                }
+            });
+
     }
 
 });
