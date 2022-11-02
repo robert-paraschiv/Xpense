@@ -35,6 +35,7 @@ public class BarDetailsUtils {
         barChart.setDrawGridBackground(false);
         barChart.getLegend().setEnabled(false);
         barChart.setFitBars(true);
+        barChart.setExtraBottomOffset(8f);
 
         XAxis xAxis = barChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -50,13 +51,13 @@ public class BarDetailsUtils {
         barChart.getXAxis().setTextSize(8f);
     }
 
-    public static void updateBarchartData(BarChart barChart, List<Transaction> transactionList, int textColor) {
+    public static void updateBarchartData(BarChart barChart, List<Transaction> transactionList, int textColor, Boolean last7days) {
         transactionList.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
 
         ArrayList<IBarDataSet> dataSets = new ArrayList<>();
         ArrayList<BarEntry> valueSet = new ArrayList<>();
 
-        List<TransEntry> transEntryArrayList = getTransEntryArrayList(transactionList);
+        List<TransEntry> transEntryArrayList = getTransEntryArrayList(transactionList, last7days);
 
         for (int i = 0; i < transEntryArrayList.size(); i++) {
             BarEntry barEntry = new BarEntry(i, transEntryArrayList.get(i).getAmount());
@@ -95,8 +96,8 @@ public class BarDetailsUtils {
     }
 
     @NonNull
-    public static List<TransEntry> getTransEntryArrayList(List<Transaction> transactionList) {
-        List<TransEntry> transEntryArrayList = new ArrayList<>();
+    public static List<TransEntry> getTransEntryArrayList(List<Transaction> transactionList, Boolean last7days) {
+        List<TransEntry> transEntryArrayList = last7days ? DateUtils.getLast7Days(dayOfMonthFormat) : new ArrayList<>();
 
         for (Transaction transaction : transactionList) {
             if (transaction.getType().equals(Transaction.INCOME_TYPE)) {

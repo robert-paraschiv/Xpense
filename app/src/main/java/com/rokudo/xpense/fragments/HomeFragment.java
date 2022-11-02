@@ -59,6 +59,9 @@ import com.rokudo.xpense.utils.dialogs.AdjustBalanceDialog;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
 import com.rokudo.xpense.utils.dialogs.WalletListDialog;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -154,9 +157,50 @@ public class HomeFragment extends Fragment {
                 updateWalletUI(wallet);
                 loadTransactions(wallet.getId());
                 mWallet = wallet;
+                loadLast7DaysTransactions();
             }
         });
     }
+
+    private void loadLast7DaysTransactions() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH),
+                23, 59);
+        Date end = calendar.getTime();
+
+        Date start = new Date(end.getTime() - Duration.ofDays(7).toMillis());
+        LocalDateTime localDateTime = start
+                .toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+
+        calendar.set(localDateTime.getYear(),
+                localDateTime.getMonth().getValue() - 1,
+                localDateTime.getDayOfMonth(),
+                0, 0);
+
+        start = calendar.getTime();
+
+        loadTransactions(start, end);
+    }
+
+    private void loadTransactions(Date start, Date end) {
+        transactionViewModel
+                .loadTransactionsDateInterval(mWallet.getId(), start, end)
+                .observe(getViewLifecycleOwner(), values -> {
+                    if (values == null || values.isEmpty()) {
+                        Log.e(TAG, "loadTransactions: empty");
+                    } else {
+                        updateBarchartData(binding.barChart,
+                                values,
+                                new TextView(requireContext()).getCurrentTextColor());
+                    }
+                });
+    }
+
+
 
     private void loadTransactions(String id) {
         transactionViewModel.loadTransactions(id, getCurrentMonth()).observe(getViewLifecycleOwner(), values -> {
@@ -181,7 +225,7 @@ public class HomeFragment extends Fragment {
             }
             if (needUpdate || values.isEmpty()) {
                 updatePieChartData(binding.pieChart, mWallet == null ? "" : mWallet.getCurrency(), values, true);
-                updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor(), true);
+                updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor());
                 updateSpentMostOn(values, mWallet == null ? "" : mWallet.getCurrency(), adapter);
             }
             gotTransactionsOnce = true;
@@ -497,6 +541,7 @@ public class HomeFragment extends Fragment {
                         binding.pieChart.clear();
                         loadWalletDetails();
                         loadTransactions(wallet.getId());
+                        loadLast7DaysTransactions();
                     }
 
                     @Override

@@ -130,7 +130,7 @@ public class BarDetailsFragment extends Fragment {
                 calendar.set(Calendar.MINUTE, 0);
                 Date start = calendar.getTime();
 
-                loadTransactions(start, end, false);
+                loadTransactions(start, end, false, false);
             }
 
             @Override
@@ -182,7 +182,7 @@ public class BarDetailsFragment extends Fragment {
 
         start = calendar.getTime();
 
-        loadTransactions(start, end, true);
+        loadTransactions(start, end, true, true);
     }
 
     private void loadThisMonthTransactions() {
@@ -199,10 +199,10 @@ public class BarDetailsFragment extends Fragment {
                 0, 0);
         Date start = calendar.getTime();
 
-        loadTransactions(start, end, true);
+        loadTransactions(start, end, true, false);
     }
 
-    private void loadTransactions(Date start, Date end, Boolean updateBar) {
+    private void loadTransactions(Date start, Date end, Boolean updateBar, Boolean last7Days) {
         transactionViewModel
                 .loadTransactionsDateInterval(mWallet.getId(), start, end)
                 .observe(getViewLifecycleOwner(), values -> {
@@ -213,8 +213,8 @@ public class BarDetailsFragment extends Fragment {
                         if (updateBar) {
                             BarDetailsUtils.updateBarchartData(binding.barChart,
                                     values,
-                                    new TextView(requireContext()).getCurrentTextColor());
-                            transEntryList = BarDetailsUtils.getTransEntryArrayList(values);
+                                    new TextView(requireContext()).getCurrentTextColor(), last7Days);
+                            transEntryList = BarDetailsUtils.getTransEntryArrayList(values, last7Days);
                         }
                         if (firstLoad) {
                             startPostponedEnterTransition();

@@ -34,7 +34,7 @@ public class BarChartUtils {
         barChart.setDrawBarShadow(false);
         barChart.setDrawGridBackground(false);
         barChart.getLegend().setEnabled(false);
-//        barChart.setFitBars(true);
+        barChart.setExtraBottomOffset(4f);
 
         XAxis xAxis = barChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -52,14 +52,15 @@ public class BarChartUtils {
         barChart.getDescription().setEnabled(false);
     }
 
-    public static void updateBarchartData(BarChart barChart, List<Transaction> transactionList, int textColor, boolean isCalledFromHome) {
+    public static void updateBarchartData(BarChart barChart, List<Transaction> transactionList, int textColor) {
         barChart.invalidate();
         transactionList.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
 
         ArrayList<IBarDataSet> dataSets = new ArrayList<>();
         ArrayList<BarEntry> valueSet = new ArrayList<>();
 
-        List<TransEntry> transEntryArrayList = new ArrayList<>();
+//        List<TransEntry> transEntryArrayList = new ArrayList<>();
+        List<TransEntry> transEntryArrayList = DateUtils.getLast7Days(dayOfMonthFormat);
         List<String> days = new ArrayList<>();
 
         for (Transaction transaction : transactionList) {
@@ -110,7 +111,6 @@ public class BarChartUtils {
             Log.e(TAG, "updateBarchartData: ", exception);
         }
 
-
         BarDataSet barDataSet = new BarDataSet(valueSet, "");
         barDataSet.setDrawValues(false);
         barDataSet.setValueTextSize(10);
@@ -118,8 +118,8 @@ public class BarChartUtils {
 
         dataSets.add(barDataSet);
         barChart.setData(new BarData(dataSets));
-        if (isCalledFromHome)
-            barChart.animate();
+
+        barChart.animate();
     }
 
 }
