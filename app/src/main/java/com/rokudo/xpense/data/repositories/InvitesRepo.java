@@ -32,6 +32,10 @@ public class InvitesRepo {
         return instance;
     }
 
+    public void updateStatus(String id, String status) {
+        DatabaseUtils.invitationsRef.document(id).update("status", status);
+    }
+
     public MutableLiveData<List<Invitation>> loadInvites() {
         if (invitesListener != null) {
             invitesListener.remove();

@@ -51,6 +51,7 @@ import java.util.Objects;
 public class SettingsFragment extends Fragment implements InvitationAdapter.InvitationClickListener {
     private static final String TAG = "SettingsFragment";
 
+    private InvitesViewModel invitesViewModel;
     private FragmentSettingsBinding binding;
     private InvitationAdapter adapter;
     private final List<Invitation> invitationList = new ArrayList<>();
@@ -58,6 +59,8 @@ public class SettingsFragment extends Fragment implements InvitationAdapter.Invi
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentSettingsBinding.inflate(inflater, container, false);
+
+        invitesViewModel = new ViewModelProvider(requireActivity()).get(InvitesViewModel.class);
 
         initOnClicks();
         initViews();
@@ -68,7 +71,6 @@ public class SettingsFragment extends Fragment implements InvitationAdapter.Invi
     }
 
     private void loadInvitations() {
-        InvitesViewModel invitesViewModel = new ViewModelProvider(requireActivity()).get(InvitesViewModel.class);
         invitesViewModel.loadInvitations().observe(getViewLifecycleOwner(), values -> {
             if (values == null || values.isEmpty()) {
                 Log.d(TAG, "loadInvitations: empty or null");
@@ -218,11 +220,11 @@ public class SettingsFragment extends Fragment implements InvitationAdapter.Invi
 
     @Override
     public void onAcceptClick(Invitation invitation) {
-        DatabaseUtils.invitationsRef.document(invitation.getId()).update("status", Invitation.STATUS_ACCEPTED);
+        invitesViewModel.updateStatus(invitation.getId(), Invitation.STATUS_ACCEPTED);
     }
 
     @Override
     public void onDeclineClick(Invitation invitation) {
-        DatabaseUtils.invitationsRef.document(invitation.getId()).update("status", Invitation.STATUS_DECLINED);
+        invitesViewModel.updateStatus(invitation.getId(), Invitation.STATUS_DECLINED);
     }
 }

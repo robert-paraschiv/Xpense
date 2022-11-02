@@ -22,4 +22,8 @@ public class InvitesViewModel extends AndroidViewModel {
     public MutableLiveData<List<Invitation>> loadInvitations() {
         return repo.loadInvites();
     }
+
+    public void updateStatus(String id, String status) {
+        repo.updateStatus(id, status);
+    }
 }
