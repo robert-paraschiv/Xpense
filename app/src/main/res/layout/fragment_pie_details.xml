@@ -79,7 +79,7 @@
                 android:layout_marginEnd="12dp"
                 android:clickable="false"
                 app:cardBackgroundColor="@color/cards_bg_color"
-                app:cardCornerRadius="18dp"
+                app:cardCornerRadius="@dimen/main_cards_corner_radius"
                 app:strokeWidth="0dp">
 
                 <LinearLayout

@@ -65,36 +65,70 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/profilePicture"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="20dp"
-                android:contentDescription="@string/user_profile_picture"
-                tools:src="@color/teal_200" />
-
-            <TextView
-                android:id="@+id/name"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/nameCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/profilePicture"
+                android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginEnd="16dp"
-                android:gravity="center"
-                android:maxLines="1"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                tools:text="Full Name Possibly very large here" />
+                android:layout_marginStart="18dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginEnd="18dp"
+                app:cardBackgroundColor="@color/cards_bg_color"
+                app:cardCornerRadius="@dimen/main_cards_corner_radius"
+                app:strokeWidth="0dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/profilePicture"
+                        android:layout_width="180dp"
+                        android:layout_height="180dp"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="20dp"
+                        android:contentDescription="@string/user_profile_picture"
+                        tools:src="@color/teal_200" />
+
+                    <ImageView
+                        android:id="@+id/placeHolderTap"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/profilePicture"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="2dp"
+                        android:contentDescription="@string/user_profile_picture"
+                        android:src="@drawable/ic_baseline_add_photo_alternate_24"
+                        android:text="Tap to change"
+                        android:textSize="10sp"
+                        app:tint="@color/sharedIconTintColor"
+                        tools:ignore="SmallSp" />
+
+                    <TextView
+                        android:id="@+id/name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/placeHolderTap"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="28dp"
+                        android:layout_marginBottom="18dp"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        tools:text="Full Name Possibly very large here" />
+
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
+
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/saveBtn"
                 style="@style/Widget.Material3.Button.TextButton.Dialog"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/name"
+                android:layout_below="@+id/nameCard"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="8dp"
                 android:text="Save"
@@ -104,15 +138,15 @@
 
             <TextView
                 android:id="@+id/placeholder"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/saveBtn"
-                android:layout_marginStart="18dp"
+                android:layout_centerHorizontal="true"
                 android:layout_marginTop="18dp"
-                android:layout_marginEnd="18dp"
                 android:maxLines="1"
                 android:text="Wallet Invitations"
-                android:textSize="11sp" />
+                android:textSize="10sp"
+                tools:ignore="SmallSp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/invitationsRv"
@@ -120,7 +154,7 @@
                 android:layout_height="match_parent"
                 android:layout_below="@id/placeholder"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="8dp"
                 android:layoutAnimation="@anim/layout_animation_fall_down"

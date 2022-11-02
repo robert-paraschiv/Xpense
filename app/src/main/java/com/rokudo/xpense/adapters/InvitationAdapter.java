@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.models.Invitation;
@@ -37,8 +38,8 @@ public class InvitationAdapter extends RecyclerView.Adapter<InvitationAdapter.Vi
         final TextView personName;
         final TextView walletName;
         final ImageView personPic;
-        final Chip acceptChip;
-        final Chip declineChip;
+        final MaterialButton acceptChip;
+        final MaterialButton declineChip;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);

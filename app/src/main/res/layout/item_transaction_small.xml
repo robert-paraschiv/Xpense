@@ -9,7 +9,7 @@
     android:layout_marginEnd="12dp"
     android:clickable="true"
     android:padding="8dp"
-    app:cardCornerRadius="18dp"
+    app:cardCornerRadius="@dimen/main_cards_corner_radius"
     app:strokeWidth="0dp">
 
     <ImageView
