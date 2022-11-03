@@ -346,7 +346,11 @@ public class HomeFragment extends Fragment {
         binding.barDetailsBtn.setOnClickListener(view -> navigateToBarDetails());
         binding.pieChartCard.setOnClickListener(view -> navigateToPieDetails());
         binding.pieDetailsBtn.setOnClickListener(view -> navigateToPieDetails());
-        binding.emptyTransactions.setOnClickListener(v -> deleteTransactions());
+        binding.openBankFab.setOnClickListener(v -> navigateToBankFragment());
+    }
+
+    private void navigateToBankFragment() {
+        Navigation.findNavController(binding.getRoot()).navigate(HomeFragmentDirections.actionHomeFragmentToConnectToBankFragment());
     }
 
     private void navigateToBarDetails() {

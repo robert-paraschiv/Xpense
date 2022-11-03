@@ -28,6 +28,9 @@
         <action
             android:id="@+id/action_homeFragment_to_barDetailsFragment"
             app:destination="@id/barDetailsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_connectToBankFragment"
+            app:destination="@id/connectToBankFragment" />
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
@@ -105,4 +108,9 @@
             android:name="wallet"
             app:argType="com.rokudo.xpense.models.Wallet" />
     </fragment>
+    <fragment
+        android:id="@+id/connectToBankFragment"
+        android:name="com.rokudo.xpense.fragments.SelectBankFragment"
+        android:label="fragment_connect_to_bank"
+        tools:layout="@layout/fragment_connect_to_bank" />
 </navigation>
