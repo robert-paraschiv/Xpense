@@ -1,7 +1,9 @@
 package com.rokudo.xpense.utils;
 
 public class NordigenUtils {
-    public static String token = "";
+    public static String TOKEN_VAL = "";
+
+    public static final String TOKEN_PREFS_NAME = "token";
 
     public static String NORDIGEN_SECRET_KEY_ID = "2b45a92d-84e3-4c34-8ead-5ce335809a03";
 

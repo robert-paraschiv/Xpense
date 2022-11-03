@@ -112,5 +112,18 @@
         android:id="@+id/connectToBankFragment"
         android:name="com.rokudo.xpense.fragments.SelectBankFragment"
         android:label="fragment_connect_to_bank"
-        tools:layout="@layout/fragment_connect_to_bank" />
+        tools:layout="@layout/fragment_connect_to_bank" >
+        <action
+            android:id="@+id/action_connectToBankFragment_to_accTransListFragment"
+            app:destination="@id/accTransListFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/accTransListFragment"
+        android:name="com.rokudo.xpense.fragments.AccTransListFragment"
+        android:label="fragment_acc_trans_list"
+        tools:layout="@layout/fragment_acc_trans_list" >
+        <argument
+            android:name="acc_id"
+            app:argType="string" />
+    </fragment>
 </navigation>

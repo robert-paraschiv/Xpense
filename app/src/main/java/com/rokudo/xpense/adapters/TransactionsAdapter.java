@@ -84,20 +84,27 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
         Transaction transaction = transactionList.get(position);
         if (transaction != null) {
             holder.transactionPersonName.setText(transaction.getUserName());
-            String transAmountPrefix;
-            if (transaction.getType().equals("Income")) {
-                transAmountPrefix = "+ ";
-                holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_green_dark
-                        , holder.transactionAmount.getContext().getTheme()));
-            } else {
-                transAmountPrefix = "- ";
-                holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_red_dark
-                        , holder.transactionAmount.getContext().getTheme()));
+            String transAmountPrefix = "";
+            if (transaction.getType() != null) {
+
+                if (transaction.getType().equals("Income")) {
+                    transAmountPrefix = "+ ";
+                    holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_green_dark
+                            , holder.transactionAmount.getContext().getTheme()));
+                } else {
+                    transAmountPrefix = "- ";
+                    holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_red_dark
+                            , holder.transactionAmount.getContext().getTheme()));
+                }
             }
+            if (transaction.getAmount() != null)
             holder.transactionAmount.setText(transAmountPrefix + transaction.getAmount().toString());
-            holder.transactionTitle.setText(transaction.getTitle());
-            holder.transactionDate.setText(getTransactionDateString(transaction));
-            holder.transactionCategory.setText(transaction.getCategory());
+            if (transaction.getTitle() != null)
+                holder.transactionTitle.setText(transaction.getTitle());
+            if (transaction.getDate() != null)
+                holder.transactionDate.setText(getTransactionDateString(transaction));
+            if (transaction.getCategory() != null)
+                holder.transactionCategory.setText(transaction.getCategory());
 
             Glide.with(holder.transactionImage)
                     .load(transaction.getPicUrl())

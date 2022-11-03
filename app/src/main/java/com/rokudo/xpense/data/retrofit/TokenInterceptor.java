@@ -18,7 +18,7 @@ public class TokenInterceptor implements Interceptor {
 
         //rewrite the request to add bearer token
         Request newRequest = chain.request().newBuilder()
-                .header("Authorization", "Bearer " + NordigenUtils.token)
+                .header("Authorization", "Bearer " + NordigenUtils.TOKEN_VAL)
                 .build();
 
         return chain.proceed(newRequest);
