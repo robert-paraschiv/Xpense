@@ -155,6 +155,7 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
                         PrefsUtils.setString(requireContext(),
                                 "EUA" + institution.getId(),
                                 response.body() != null ? response.body().getId() : "");
+                        getRequisition(institution, response.body().getId());
                     }
                 }
 
@@ -164,52 +165,56 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
                 }
             });
         } else {
-            String REQUISITION = requireContext()
-                    .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE)
-                    .getString("REQUISITION" + institution.getId(), "");
-            GetDataService service = RetrofitClientInstance.geInstance().create(GetDataService.class);
-            if (REQUISITION.isEmpty()) {
-                Call<Requisition> call = service.createRequisition(institution.getId(),
-                        "http://localhost",
-                        EUA_ID,
-                        "EN",
-                        DatabaseUtils.getCurrentUser().getUid());
-
-                call.enqueue(new Callback<Requisition>() {
-                    @Override
-                    public void onResponse(@NonNull Call<Requisition> call, @NonNull Response<Requisition> response) {
-                        if (response.isSuccessful()) {
-                            Log.d(TAG, "onResponse: success ");
-                            PrefsUtils.setString(requireContext(), "REQUISITION" + institution.getId(),
-                                    response.body() != null ? response.body().getId() : "");
-                            getRequisitionDetails(REQUISITION, service);
-
-                        } else {
-                            Log.e(TAG, "onResponse: failed " + response.message());
-                        }
-
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<Requisition> call, @NonNull Throwable t) {
-                        Log.e(TAG, "onFailure: " + t.getMessage());
-                    }
-                });
-
-            } else {
-                //Get requisition details
-                String ACC_ID = requireContext()
-                        .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE)
-                        .getString("ACC_ID" + REQUISITION, "");
-                if (ACC_ID.isEmpty()) {
-                    getRequisitionDetails(REQUISITION, service);
-                } else {
-                    getAccountDetails(ACC_ID, service);
-                }
-
-            }
+            getRequisition(institution, EUA_ID);
         }
 
+    }
+
+    private void getRequisition(Institution institution, String EUA_ID) {
+        String REQUISITION = requireContext()
+                .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE)
+                .getString("REQUISITION" + institution.getId(), "");
+        GetDataService service = RetrofitClientInstance.geInstance().create(GetDataService.class);
+        if (REQUISITION.isEmpty()) {
+            Call<Requisition> call = service.createRequisition(institution.getId(),
+                    "http://localhost",
+                    EUA_ID,
+                    "EN",
+                    institution.getId() + DatabaseUtils.getCurrentUser().getUid());
+
+            call.enqueue(new Callback<Requisition>() {
+                @Override
+                public void onResponse(@NonNull Call<Requisition> call, @NonNull Response<Requisition> response) {
+                    if (response.isSuccessful()) {
+                        Log.d(TAG, "onResponse: success ");
+                        PrefsUtils.setString(requireContext(), "REQUISITION" + institution.getId(),
+                                response.body() != null ? response.body().getId() : "");
+                        getRequisitionDetails(REQUISITION, service);
+
+                    } else {
+                        Log.e(TAG, "onResponse: failed " + response.message());
+                    }
+
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<Requisition> call, @NonNull Throwable t) {
+                    Log.e(TAG, "onFailure: " + t.getMessage());
+                }
+            });
+
+        } else {
+            //Get requisition details
+            String ACC_ID = requireContext()
+                    .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE)
+                    .getString("ACC_ID" + REQUISITION, "");
+            if (ACC_ID.isEmpty()) {
+                getRequisitionDetails(REQUISITION, service);
+            } else {
+                getAccountDetails(ACC_ID, service);
+            }
+
+        }
     }
 
     private void getAccountDetails(String acc_id, GetDataService service) {
@@ -277,11 +282,11 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
     }
 
     private void getAccounts(Requisition requisition, GetDataService service) {
-        if (requisition.getAccounts().length > 0) {
+        if (requisition.getAccounts() != null && requisition.getAccounts().length > 0) {
             Log.d(TAG, "getAccounts: length > 0");
             PrefsUtils.setString(requireContext(), "ACC_ID" + requisition.getId(), requisition.getAccounts()[0]);
             getAccountDetails(requisition.getAccounts()[0], service);
-        } else {
+        } else{
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(requisition.getLink())));
             Log.e(TAG, "getAccounts: no accounts");
             Toast.makeText(requireContext(), "No accounts", Toast.LENGTH_SHORT).show();
