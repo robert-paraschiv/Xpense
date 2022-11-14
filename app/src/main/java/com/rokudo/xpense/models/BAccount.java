@@ -9,6 +9,9 @@ public class BAccount {
     String owner_id;
     String EUA_id;
     String requisition_id;
+    String institutionId;
+    String bankName;
+    String bankPic;
     Map<String, String> accounts;
     List<String> walletIds;
 
@@ -58,6 +61,30 @@ public class BAccount {
 
     public void setWalletIds(List<String> walletIds) {
         this.walletIds = walletIds;
+    }
+
+    public String getInstitutionId() {
+        return institutionId;
+    }
+
+    public void setInstitutionId(String institutionId) {
+        this.institutionId = institutionId;
+    }
+
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
+
+    public String getBankPic() {
+        return bankPic;
+    }
+
+    public void setBankPic(String bankPic) {
+        this.bankPic = bankPic;
     }
 
     @Override

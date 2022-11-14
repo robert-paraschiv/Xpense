@@ -2,7 +2,6 @@ package com.rokudo.xpense.fragments;
 
 import static com.rokudo.xpense.utils.NordigenUtils.TOKEN_PREFS_NAME;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -15,36 +14,37 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.rokudo.xpense.adapters.BanksAdapter;
+import com.rokudo.xpense.data.viewmodels.BankApiViewModel;
 import com.rokudo.xpense.data.retrofit.GetDataService;
 import com.rokudo.xpense.data.retrofit.RetrofitClientInstance;
-import com.rokudo.xpense.data.retrofit.models.EndUserAgreement;
 import com.rokudo.xpense.data.retrofit.models.Institution;
 import com.rokudo.xpense.data.retrofit.models.Requisition;
-import com.rokudo.xpense.data.retrofit.models.Token;
 import com.rokudo.xpense.databinding.FragmentConnectToBankBinding;
-import com.rokudo.xpense.utils.DatabaseUtils;
+import com.rokudo.xpense.models.BAccount;
 import com.rokudo.xpense.utils.NordigenUtils;
 import com.rokudo.xpense.utils.PrefsUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.Map;
 
 public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankTapListener {
-    private static final String TAG = "ConnectToBankFragment";
+    private static final String TAG = "SelectBankFragment";
 
     private FragmentConnectToBankBinding binding;
     private final List<Institution> bankList = new ArrayList<>();
     private BanksAdapter adapter;
+    private BAccount bAccount = new BAccount();
+    private String walletId;
+    private BankApiViewModel bankApiViewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -52,10 +52,25 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
         // Inflate the layout for this fragment
         binding = FragmentConnectToBankBinding.inflate(inflater, container, false);
 
+        bankApiViewModel = new ViewModelProvider(requireActivity()).get(BankApiViewModel.class);
+
+        initOnClicks();
+        handleArgsPassed();
         buildRv();
-        callInstitutionsList();
+        getInstitutionsList();
 
         return binding.getRoot();
+    }
+
+    private void initOnClicks() {
+        binding.backBtn.setOnClickListener(v ->
+                Navigation.findNavController(binding.getRoot()).popBackStack());
+    }
+
+    private void handleArgsPassed() {
+        SelectBankFragmentArgs args = SelectBankFragmentArgs.fromBundle(requireArguments());
+        walletId = args.getWalletId();
+        bAccount.setWalletIds(Collections.singletonList(walletId));
     }
 
     private void buildRv() {
@@ -65,7 +80,7 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
         adapter.setOnItemClickListener(this);
     }
 
-    private void callInstitutionsList() {
+    private void getInstitutionsList() {
         String token = requireContext()
                 .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE)
                 .getString(TOKEN_PREFS_NAME, "");
@@ -75,99 +90,62 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
             //get Institutions List
             //get EUA for user
 
-            NordigenUtils.TOKEN_VAL = token;
-            GetDataService service = RetrofitClientInstance.geInstance().create(GetDataService.class);
-            Call<List<Institution>> call = service.getAllInstitutions();
+            bankApiViewModel.getInstitutionList().observe(getViewLifecycleOwner(), institutions -> {
+                if (institutions == null ) {
+                    getToken();
+                    Log.d(TAG, "getInstitutionsList: null or empty");
+                } else {
+                    binding.banksRV.setVisibility(View.VISIBLE);
+                    binding.progressIndicator.setVisibility(View.GONE);
 
-            call.enqueue(new Callback<List<Institution>>() {
-                @SuppressLint("NotifyDataSetChanged")
-                @Override
-                public void onResponse(@NonNull Call<List<Institution>> call, @NonNull Response<List<Institution>> response) {
-                    Log.d(TAG, "onResponse: ");
-                    if (response.isSuccessful()) {
-                        if (response.body() != null) {
-
-                            binding.banksRV.setVisibility(View.VISIBLE);
-                            binding.progressIndicator.setVisibility(View.GONE);
-
-                            for (Institution institution : response.body()) {
-                                bankList.add(institution);
-                                adapter.notifyItemInserted(bankList.size() - 1);
-                            }
-                        }
-                    } else {
-                        getToken();
+                    for (Institution institution : institutions) {
+                        bankList.add(institution);
+                        adapter.notifyItemInserted(bankList.size() - 1);
                     }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<List<Institution>> call, @NonNull Throwable t) {
-                    Log.e(TAG, "onFailure: " + t.getMessage());
                 }
             });
         }
     }
 
     private void getToken() {
-        GetDataService service = RetrofitClientInstance.geInstance().create(GetDataService.class);
-        Call<Token> call = service.getToken(NordigenUtils.NORDIGEN_SECRET_KEY_ID, NordigenUtils.NORDIGEN_SECRET_KEY);
-
-        call.enqueue(new Callback<Token>() {
-            @Override
-            public void onResponse(@NonNull Call<Token> call, @NonNull Response<Token> response) {
-                Log.d(TAG, "onResponse: ");
-                if (response.isSuccessful()) {
-                    if (response.body() != null) {
-                        NordigenUtils.TOKEN_VAL = response.body().getAccess();
-                        PrefsUtils.setToken(requireContext(), NordigenUtils.TOKEN_VAL);
-                        callInstitutionsList();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Token> call, @NonNull Throwable t) {
-                Log.e(TAG, "onFailure: " + t.getMessage());
+        bankApiViewModel.getToken().observe(getViewLifecycleOwner(), token -> {
+            if (token == null) {
+                Log.d(TAG, "getToken: null");
+            } else {
+                NordigenUtils.TOKEN_VAL = token.getAccess();
+                PrefsUtils.setToken(requireContext(), NordigenUtils.TOKEN_VAL);
+                getInstitutionsList();
             }
         });
-
     }
 
     @Override
     public void onClick(Institution institution) {
+        bAccount.setInstitutionId(institution.getId());
+        bAccount.setBankName(institution.getName());
+        bAccount.setBankPic(institution.getLogo());
         String EUA_ID = requireContext()
                 .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE)
                 .getString("EUA" + institution.getId(), "");
         if (EUA_ID.isEmpty()) {
             //Create EUA
 
-            GetDataService service = RetrofitClientInstance.geInstance().create(GetDataService.class);
-            List<String> scopeList =
-                    new ArrayList<>(Arrays.asList("balances", "details", "transactions"));
-            Call<EndUserAgreement> call = service.createEUA(institution.getId(), scopeList);
-
-            call.enqueue(new Callback<EndUserAgreement>() {
-                @Override
-                public void onResponse(@NonNull Call<EndUserAgreement> call, @NonNull Response<EndUserAgreement> response) {
-                    Log.d(TAG, "onResponse: ");
-                    if (response.isSuccessful()) {
-                        Log.d(TAG, "onResponse: ");
-                        PrefsUtils.setString(requireContext(),
-                                "EUA" + institution.getId(),
-                                response.body() != null ? response.body().getId() : "");
-                        getRequisition(institution, response.body().getId());
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<EndUserAgreement> call, @NonNull Throwable t) {
-                    Log.e(TAG, "onFailure: " + t.getMessage());
+            bankApiViewModel.createEUA(institution.getId()).observe(getViewLifecycleOwner(), endUserAgreement -> {
+                if (endUserAgreement == null) {
+                    Log.d(TAG, "onClick: EUA Null");
+                } else {
+                    PrefsUtils.setString(requireContext(),
+                            "EUA" + institution.getId(),
+                            endUserAgreement.getId());
+                    bAccount.setEUA_id(endUserAgreement.getId());
+                    getRequisition(institution, endUserAgreement.getId());
                 }
             });
+
         } else {
+            bAccount.setEUA_id(EUA_ID);
             getRequisition(institution, EUA_ID);
         }
-
     }
 
     private void getRequisition(Institution institution, String EUA_ID) {
@@ -176,48 +154,36 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
                 .getString("REQUISITION" + institution.getId(), "");
         GetDataService service = RetrofitClientInstance.geInstance().create(GetDataService.class);
         if (REQUISITION.isEmpty()) {
-            Call<Requisition> call = service.createRequisition(institution.getId(),
-                    "http://localhost",
-                    EUA_ID,
-                    "EN",
-                    institution.getId() + DatabaseUtils.getCurrentUser().getUid());
-
-            call.enqueue(new Callback<Requisition>() {
-                @Override
-                public void onResponse(@NonNull Call<Requisition> call, @NonNull Response<Requisition> response) {
-                    if (response.isSuccessful()) {
-                        Log.d(TAG, "onResponse: success ");
-                        PrefsUtils.setString(requireContext(), "REQUISITION" + institution.getId(),
-                                response.body() != null ? response.body().getId() : "");
-                        getRequisitionDetails(REQUISITION, service);
-
-                    } else {
-                        Log.e(TAG, "onResponse: failed " + response.message());
-                    }
-
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<Requisition> call, @NonNull Throwable t) {
-                    Log.e(TAG, "onFailure: " + t.getMessage());
-                }
-            });
+            bankApiViewModel.createRequisition(institution.getId(), EUA_ID)
+                    .observe(getViewLifecycleOwner(), requisition -> {
+                        if (requisition == null) {
+                            Log.e(TAG, "onResponse: requisition null ");
+                        } else {
+                            PrefsUtils.setString(requireContext(), "REQUISITION" + institution.getId(),
+                                    requisition.getId());
+                            bAccount.setRequisition_id(requisition.getId());
+                            getRequisitionDetails(REQUISITION);
+                        }
+                    });
 
         } else {
             //Get requisition details
             String ACC_ID = requireContext()
                     .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE)
                     .getString("ACC_ID" + REQUISITION, "");
+            bAccount.setRequisition_id(REQUISITION);
             if (ACC_ID.isEmpty()) {
-                getRequisitionDetails(REQUISITION, service);
+                getRequisitionDetails(REQUISITION);
             } else {
-                getAccountDetails(ACC_ID, service);
+                Map<String, String> accounts = new HashMap<>();
+                accounts.put(ACC_ID, ACC_ID);
+                bAccount.setAccounts(accounts);
+                getAccountDetails(ACC_ID);
             }
-
         }
     }
 
-    private void getAccountDetails(String acc_id, GetDataService service) {
+    private void getAccountDetails(String acc_id) {
 //        Call<AccountDetails> call = service.getAccountDetails(acc_id);
 //        call.enqueue(new Callback<AccountDetails>() {
 //            @Override
@@ -259,34 +225,28 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
 
     }
 
-    private void getRequisitionDetails(String REQUISITION, GetDataService service) {
-        service.getRequisitionById(REQUISITION).enqueue(new Callback<Requisition>() {
-            @Override
-            public void onResponse(@NonNull Call<Requisition> call, @NonNull Response<Requisition> response) {
-                if (response.isSuccessful()) {
-                    Log.d(TAG, "onResponse: success ");
-                    if (response.body() != null) {
-                        getAccounts(response.body(), service);
+    private void getRequisitionDetails(String requisitionID) {
+        bankApiViewModel.getRequisitionDetails(requisitionID)
+                .observe(getViewLifecycleOwner(), requisition -> {
+                    if (requisition == null) {
+                        Log.e(TAG, "onFailure: requisition details null");
+                    } else {
+                        getAccounts(requisition);
                     }
-
-                } else {
-                    Log.e(TAG, "onResponse: failed " + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Requisition> call, @NonNull Throwable t) {
-                Log.e(TAG, "onFailure: " + t.getMessage());
-            }
-        });
+                });
     }
 
-    private void getAccounts(Requisition requisition, GetDataService service) {
+    private void getAccounts(Requisition requisition) {
         if (requisition.getAccounts() != null && requisition.getAccounts().length > 0) {
             Log.d(TAG, "getAccounts: length > 0");
             PrefsUtils.setString(requireContext(), "ACC_ID" + requisition.getId(), requisition.getAccounts()[0]);
-            getAccountDetails(requisition.getAccounts()[0], service);
-        } else{
+            Map<String, String> accounts = new HashMap<>();
+            for (int i = 0; i < requisition.getAccounts().length; i++) {
+                accounts.put(requisition.getAccounts()[i], requisition.getAccounts()[i]);
+            }
+            bAccount.setAccounts(accounts);
+            getAccountDetails(requisition.getAccounts()[0]);
+        } else {
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(requisition.getLink())));
             Log.e(TAG, "getAccounts: no accounts");
             Toast.makeText(requireContext(), "No accounts", Toast.LENGTH_SHORT).show();

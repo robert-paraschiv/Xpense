@@ -1,7 +1,5 @@
 package com.rokudo.xpense.models;
 
-import androidx.annotation.NonNull;
-
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.Date;
@@ -17,6 +15,7 @@ public class Wallet implements Serializable {
     private Date creation_date;
     private List<String> users;
     private List<WalletUser> walletUsers;
+    private BAccount bAccount;
 
     public Wallet() {
     }
@@ -86,7 +85,14 @@ public class Wallet implements Serializable {
         this.walletUsers = walletUsers;
     }
 
-    @NonNull
+    public BAccount getbAccount() {
+        return bAccount;
+    }
+
+    public void setbAccount(BAccount bAccount) {
+        this.bAccount = bAccount;
+    }
+
     @Override
     public String toString() {
         return "Wallet{" +
@@ -97,6 +103,8 @@ public class Wallet implements Serializable {
                 ", currency='" + currency + '\'' +
                 ", creation_date=" + creation_date +
                 ", users=" + users +
+                ", walletUsers=" + walletUsers +
+                ", bAccount=" + bAccount +
                 '}';
     }
 

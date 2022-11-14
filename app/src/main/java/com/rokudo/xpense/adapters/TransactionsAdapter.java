@@ -98,7 +98,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
                 }
             }
             if (transaction.getAmount() != null)
-            holder.transactionAmount.setText(transAmountPrefix + transaction.getAmount().toString());
+                holder.transactionAmount.setText(transAmountPrefix + transaction.getAmount().toString());
             if (transaction.getTitle() != null)
                 holder.transactionTitle.setText(transaction.getTitle());
             if (transaction.getDate() != null)

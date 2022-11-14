@@ -201,7 +201,6 @@ public class HomeFragment extends Fragment {
     }
 
 
-
     private void loadTransactions(String id) {
         transactionViewModel.loadTransactions(id, getCurrentMonth()).observe(getViewLifecycleOwner(), values -> {
             if (values == null || values.isEmpty()) {
@@ -275,6 +274,9 @@ public class HomeFragment extends Fragment {
                     .into(binding.sharedWithIcon);
         }
 
+        if (wallet.getbAccount() != null) {
+            binding.bankAccountChip.setText(wallet.getbAccount().getBankName());
+        }
     }
 
     @Override
@@ -346,11 +348,14 @@ public class HomeFragment extends Fragment {
         binding.barDetailsBtn.setOnClickListener(view -> navigateToBarDetails());
         binding.pieChartCard.setOnClickListener(view -> navigateToPieDetails());
         binding.pieDetailsBtn.setOnClickListener(view -> navigateToPieDetails());
-        binding.openBankFab.setOnClickListener(v -> navigateToBankFragment());
+//        binding.openBankFab.setOnClickListener(v -> navigateToBankFragment());
+        binding.bankAccountChip.setOnClickListener(v -> navigateToBankFragment());
     }
 
     private void navigateToBankFragment() {
-        Navigation.findNavController(binding.getRoot()).navigate(HomeFragmentDirections.actionHomeFragmentToConnectToBankFragment());
+        Navigation.findNavController(binding.getRoot())
+                .navigate(HomeFragmentDirections
+                        .actionHomeFragmentToConnectToBankFragment(mWallet.getId()));
     }
 
     private void navigateToBarDetails() {

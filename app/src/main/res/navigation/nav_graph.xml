@@ -116,6 +116,9 @@
         <action
             android:id="@+id/action_connectToBankFragment_to_accTransListFragment"
             app:destination="@id/accTransListFragment" />
+        <argument
+            android:name="walletId"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/accTransListFragment"

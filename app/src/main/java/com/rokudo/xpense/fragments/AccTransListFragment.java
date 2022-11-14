@@ -3,31 +3,26 @@ package com.rokudo.xpense.fragments;
 import static androidx.recyclerview.widget.RecyclerView.VERTICAL;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.rokudo.xpense.adapters.TransactionsAdapter;
-import com.rokudo.xpense.data.retrofit.GetDataService;
-import com.rokudo.xpense.data.retrofit.RetrofitClientInstance;
+import com.rokudo.xpense.data.viewmodels.BankApiViewModel;
 import com.rokudo.xpense.data.retrofit.models.BankTransaction;
-import com.rokudo.xpense.data.retrofit.models.TransactionsResponse;
 import com.rokudo.xpense.databinding.FragmentAccTransListBinding;
 import com.rokudo.xpense.models.Transaction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class AccTransListFragment extends Fragment implements TransactionsAdapter.OnTransactionClickListener {
     private static final String TAG = "AccTransListFragment";
@@ -36,6 +31,7 @@ public class AccTransListFragment extends Fragment implements TransactionsAdapte
     private TransactionsAdapter adapter;
     private List<BankTransaction> bankTransactionList = new ArrayList<>();
     private List<Transaction> transactionList = new ArrayList<>();
+    private BankApiViewModel bankApiViewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -43,10 +39,18 @@ public class AccTransListFragment extends Fragment implements TransactionsAdapte
         // Inflate the layout for this fragment
         binding = FragmentAccTransListBinding.inflate(inflater, container, false);
 
+        bankApiViewModel = new ViewModelProvider(requireActivity()).get(BankApiViewModel.class);
+
+        initOnClicks();
         buildRecyclerView();
         getArgsPassed();
 
         return binding.getRoot();
+    }
+
+    private void initOnClicks() {
+        binding.backBtn.setOnClickListener(v ->
+                Navigation.findNavController(binding.getRoot()).popBackStack());
     }
 
     private void buildRecyclerView() {
@@ -59,39 +63,27 @@ public class AccTransListFragment extends Fragment implements TransactionsAdapte
     private void getArgsPassed() {
         AccTransListFragmentArgs args = AccTransListFragmentArgs.fromBundle(requireArguments());
 
-        GetDataService service = RetrofitClientInstance.geInstance().create(GetDataService.class);
-        Call<TransactionsResponse> call = service.getAccountTransactions(args.getAccId());
-        call.enqueue(new Callback<TransactionsResponse>() {
-            @Override
-            public void onResponse(@NonNull Call<TransactionsResponse> call, @NonNull Response<TransactionsResponse> response) {
-                if (response.isSuccessful()) {
-                    Log.d(TAG, "onResponse: " + response.body());
-                    if (response.body() != null) {
-                        bankTransactionList.addAll(Arrays.asList(response.body().getTransactions().getBooked()));
-                        bankTransactionList.addAll(Arrays.asList(response.body().getTransactions().getPending()));
+        bankApiViewModel.getAccountTransactions(args.getAccId())
+                .observe(getViewLifecycleOwner(), transactionsResponse -> {
+                    if (transactionsResponse == null) {
+                        Log.e(TAG, "onResponse: null trans response");
+                    } else {
+                        bankTransactionList.addAll(Arrays.asList(transactionsResponse.getTransactions().getBooked()));
+                        bankTransactionList.addAll(Arrays.asList(transactionsResponse.getTransactions().getPending()));
+                        for (int i = 0; i < bankTransactionList.size(); i++) {
+                            BankTransaction bankTransaction = bankTransactionList.get(i);
+
+                            Transaction transaction = new Transaction();
+                            transaction.setId(bankTransaction.getTransactionId());
+                            transaction.setAmount(bankTransaction.getTransactionAmount().getAmount().doubleValue());
+                            transaction.setCurrency(bankTransaction.getTransactionAmount().getCurrency());
+                            transaction.setTitle(bankTransaction.getRemittanceInformationUnstructured());
+
+                            transactionList.add(transaction);
+                            adapter.notifyItemInserted(transactionList.indexOf(transaction));
+                        }
                     }
-                    for (int i = 0; i < bankTransactionList.size(); i++) {
-                        BankTransaction bankTransaction = bankTransactionList.get(i);
-
-                        Transaction transaction = new Transaction();
-                        transaction.setId(bankTransaction.getTransactionId());
-                        transaction.setAmount(bankTransaction.getTransactionAmount().getAmount().doubleValue());
-                        transaction.setCurrency(bankTransaction.getTransactionAmount().getCurrency());
-                        transaction.setTitle(bankTransaction.getRemittanceInformationUnstructured());
-
-                        transactionList.add(transaction);
-                        adapter.notifyItemInserted(transactionList.indexOf(transaction));
-                    }
-                } else {
-                    Log.e(TAG, "onResponse: " + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<TransactionsResponse> call, @NonNull Throwable t) {
-                Log.e(TAG, "onResponse: " + t.getMessage());
-            }
-        });
+                });
     }
 
     @Override

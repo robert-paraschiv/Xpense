@@ -1,5 +1,7 @@
 package com.rokudo.xpense.data.retrofit.models;
 
+import java.util.Arrays;
+
 public class Transactions {
     private BankTransaction[] booked;
     private BankTransaction[] pending;
@@ -26,5 +28,13 @@ public class Transactions {
 
     public void setPending( BankTransaction[] pending) {
         this.pending = pending;
+    }
+
+    @Override
+    public String toString() {
+        return "Transactions{" +
+                "booked=" + Arrays.toString(booked) +
+                ", pending=" + Arrays.toString(pending) +
+                '}';
     }
 }

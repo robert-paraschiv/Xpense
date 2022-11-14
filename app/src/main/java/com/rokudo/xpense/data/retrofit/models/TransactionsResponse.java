@@ -17,4 +17,11 @@ public class TransactionsResponse {
     public void setTransactions(Transactions transactions) {
         this.transactions = transactions;
     }
+
+    @Override
+    public String toString() {
+        return "TransactionsResponse{" +
+                "transactions=" + transactions +
+                '}';
+    }
 }

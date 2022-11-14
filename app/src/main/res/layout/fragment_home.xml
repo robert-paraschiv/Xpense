@@ -52,13 +52,13 @@
         android:layout_below="@id/home_toolbar">
 
         <com.google.android.material.card.MaterialCardView
-            app:cardBackgroundColor="@color/cards_bg_color"
             android:id="@+id/walletsCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="18dp"
             android:layout_marginEnd="18dp"
             android:layout_marginBottom="18dp"
+            app:cardBackgroundColor="@color/cards_bg_color"
             app:cardCornerRadius="@dimen/main_cards_corner_radius"
             app:strokeWidth="0dp">
 
@@ -219,6 +219,26 @@
                     app:chipMinTouchTargetSize="0dp"
                     app:chipStrokeWidth="0dp" />
 
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/bankAccountChip"
+                    style="@style/Widget.Material3.Chip.Suggestion"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/walletDetailsLayout"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginBottom="8dp"
+                    android:elevation="0dp"
+                    android:text="+ Bank Account"
+                    android:textSize="12sp"
+                    app:chipBackgroundColor="@color/home_chip_bg_color"
+                    app:chipIcon="@drawable/ic_baseline_local_atm_24"
+                    app:chipIconEnabled="true"
+                    app:chipMinTouchTargetSize="0dp"
+                    app:chipStrokeWidth="0dp" />
+
 
                 <RelativeLayout
                     android:id="@+id/lastTransactionLayout"
@@ -259,7 +279,6 @@
                     </RelativeLayout>
 
                     <com.google.android.material.card.MaterialCardView
-                        app:cardBackgroundColor="@color/cards_bg_color"
                         android:id="@+id/latestTransactionCard"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -269,6 +288,7 @@
                         android:layout_marginEnd="16dp"
                         android:layout_marginBottom="16dp"
                         android:clickable="true"
+                        app:cardBackgroundColor="@color/cards_bg_color"
                         app:strokeWidth="0dp">
 
                         <include
@@ -320,13 +340,13 @@
                         android:textSize="12sp" />
 
                     <com.google.android.material.card.MaterialCardView
-                        app:cardBackgroundColor="@color/cards_bg_color"
                         android:id="@+id/barChartCard"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginTop="4dp"
                         android:clickable="true"
                         android:transitionName="barChartCard"
+                        app:cardBackgroundColor="@color/cards_bg_color"
                         app:cardCornerRadius="@dimen/main_cards_corner_radius"
                         app:strokeWidth="0dp">
 
@@ -474,7 +494,6 @@
                     android:textSize="12sp" />
 
                 <com.google.android.material.card.MaterialCardView
-                    app:cardBackgroundColor="@color/cards_bg_color"
                     android:id="@+id/pieChartCard"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -482,6 +501,7 @@
                     android:layout_marginTop="4dp"
                     android:clickable="true"
                     android:transitionName="pieChartCard"
+                    app:cardBackgroundColor="@color/cards_bg_color"
                     app:cardCornerRadius="@dimen/main_cards_corner_radius"
                     app:strokeWidth="0dp">
 
@@ -544,20 +564,20 @@
         app:layout_anchorGravity="bottom|end"
         app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/openBankFab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true"
-        android:layout_gravity="bottom|end"
-        android:layout_marginStart="18dp"
-        android:layout_marginBottom="22dp"
-        android:contentDescription="@string/add_conversation_button"
-        android:src="@drawable/ic_baseline_local_atm_24"
-        android:visibility="visible"
-        app:fabSize="normal"
-        app:layout_anchorGravity="bottom|start"
-        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
+<!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
+<!--        android:id="@+id/openBankFab"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_alignParentStart="true"-->
+<!--        android:layout_alignParentBottom="true"-->
+<!--        android:layout_gravity="bottom|end"-->
+<!--        android:layout_marginStart="18dp"-->
+<!--        android:layout_marginBottom="22dp"-->
+<!--        android:contentDescription="@string/add_conversation_button"-->
+<!--        android:src="@drawable/ic_baseline_local_atm_24"-->
+<!--        android:visibility="visible"-->
+<!--        app:fabSize="normal"-->
+<!--        app:layout_anchorGravity="bottom|start"-->
+<!--        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />-->
 
 </RelativeLayout>
