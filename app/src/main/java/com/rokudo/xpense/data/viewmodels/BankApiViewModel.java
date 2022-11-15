@@ -51,4 +51,8 @@ public class BankApiViewModel extends AndroidViewModel {
     public MutableLiveData<TransactionsResponse> getAccountTransactions(String account_id){
         return repo.getAccountTransactions(account_id);
     }
+
+    public String getRequisitionError(){
+        return repo.getRequisitionError();
+    }
 }

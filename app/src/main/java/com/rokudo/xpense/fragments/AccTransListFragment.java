@@ -65,9 +65,12 @@ public class AccTransListFragment extends Fragment implements TransactionsAdapte
 
         bankApiViewModel.getAccountTransactions(args.getAccId())
                 .observe(getViewLifecycleOwner(), transactionsResponse -> {
-                    if (transactionsResponse == null) {
+                    if (transactionsResponse == null || transactionsResponse.getTransactions() == null) {
                         Log.e(TAG, "onResponse: null trans response");
                     } else {
+
+                        binding.progressIndicator.setVisibility(View.GONE);
+
                         bankTransactionList.addAll(Arrays.asList(transactionsResponse.getTransactions().getBooked()));
                         bankTransactionList.addAll(Arrays.asList(transactionsResponse.getTransactions().getPending()));
                         for (int i = 0; i < bankTransactionList.size(); i++) {

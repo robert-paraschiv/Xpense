@@ -17,13 +17,28 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Xpense"
-        tools:targetApi="31" >
+        tools:targetApi="31">
+        <activity
+            android:name=".activities.LinkActivity"
+            android:exported="true">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="https"
+                    android:host="xpense"
+                    android:path="/launch">
+                </data>
+            </intent-filter>
+        </activity>
         <activity
             android:name=".activities.LoginActivity"
             android:exported="false" />
         <activity
             android:name=".activities.MainActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -39,8 +54,8 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".notifications.AcceptReceiver"/>
-        <receiver android:name=".notifications.DeclineReceiver"/>
+        <receiver android:name=".notifications.AcceptReceiver" />
+        <receiver android:name=".notifications.DeclineReceiver" />
     </application>
 
 </manifest>

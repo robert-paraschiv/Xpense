@@ -14,12 +14,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.rokudo.xpense.adapters.BanksAdapter;
+import com.rokudo.xpense.data.retrofit.models.AccountDetails;
 import com.rokudo.xpense.data.viewmodels.BankApiViewModel;
 import com.rokudo.xpense.data.retrofit.GetDataService;
 import com.rokudo.xpense.data.retrofit.RetrofitClientInstance;
@@ -27,10 +29,14 @@ import com.rokudo.xpense.data.retrofit.models.Institution;
 import com.rokudo.xpense.data.retrofit.models.Requisition;
 import com.rokudo.xpense.databinding.FragmentConnectToBankBinding;
 import com.rokudo.xpense.models.BAccount;
+import com.rokudo.xpense.utils.DatabaseUtils;
 import com.rokudo.xpense.utils.NordigenUtils;
 import com.rokudo.xpense.utils.PrefsUtils;
+import com.rokudo.xpense.utils.dialogs.BankAccsListDialog;
+import com.rokudo.xpense.utils.dialogs.UploadingDialog;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +77,7 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
         SelectBankFragmentArgs args = SelectBankFragmentArgs.fromBundle(requireArguments());
         walletId = args.getWalletId();
         bAccount.setWalletIds(Collections.singletonList(walletId));
+        bAccount.setOwner_id(DatabaseUtils.getCurrentUser().getUid());
     }
 
     private void buildRv() {
@@ -91,7 +98,7 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
             //get EUA for user
 
             bankApiViewModel.getInstitutionList().observe(getViewLifecycleOwner(), institutions -> {
-                if (institutions == null ) {
+                if (institutions == null) {
                     getToken();
                     Log.d(TAG, "getInstitutionsList: null or empty");
                 } else {
@@ -131,7 +138,7 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
             //Create EUA
 
             bankApiViewModel.createEUA(institution.getId()).observe(getViewLifecycleOwner(), endUserAgreement -> {
-                if (endUserAgreement == null) {
+                if (endUserAgreement == null || endUserAgreement.getId() == null) {
                     Log.d(TAG, "onClick: EUA Null");
                 } else {
                     PrefsUtils.setString(requireContext(),
@@ -152,12 +159,14 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
         String REQUISITION = requireContext()
                 .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE)
                 .getString("REQUISITION" + institution.getId(), "");
-        GetDataService service = RetrofitClientInstance.geInstance().create(GetDataService.class);
         if (REQUISITION.isEmpty()) {
             bankApiViewModel.createRequisition(institution.getId(), EUA_ID)
                     .observe(getViewLifecycleOwner(), requisition -> {
-                        if (requisition == null) {
+                        if (requisition == null || requisition.getId() == null) {
                             Log.e(TAG, "onResponse: requisition null ");
+                            if (bankApiViewModel.getRequisitionError() != null && !bankApiViewModel.getRequisitionError().isEmpty()) {
+                                Log.e(TAG, "getRequisition: " + bankApiViewModel.getRequisitionError());
+                            }
                         } else {
                             PrefsUtils.setString(requireContext(), "REQUISITION" + institution.getId(),
                                     requisition.getId());
@@ -172,18 +181,21 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
                     .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE)
                     .getString("ACC_ID" + REQUISITION, "");
             bAccount.setRequisition_id(REQUISITION);
-            if (ACC_ID.isEmpty()) {
-                getRequisitionDetails(REQUISITION);
-            } else {
-                Map<String, String> accounts = new HashMap<>();
-                accounts.put(ACC_ID, ACC_ID);
-                bAccount.setAccounts(accounts);
-                getAccountDetails(ACC_ID);
-            }
+
+            getRequisitionDetails(REQUISITION);
+
+//            if (ACC_ID.isEmpty()) {
+//                getRequisitionDetails(REQUISITION);
+//            } else {
+//                bAccount.setAccounts(new ArrayList<>(Collections.singletonList(ACC_ID)));
+//                getAccountDetails(ACC_ID);
+//            }
         }
     }
 
     private void getAccountDetails(String acc_id) {
+
+
 //        Call<AccountDetails> call = service.getAccountDetails(acc_id);
 //        call.enqueue(new Callback<AccountDetails>() {
 //            @Override
@@ -228,7 +240,7 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
     private void getRequisitionDetails(String requisitionID) {
         bankApiViewModel.getRequisitionDetails(requisitionID)
                 .observe(getViewLifecycleOwner(), requisition -> {
-                    if (requisition == null) {
+                    if (requisition == null || requisition.getId() == null) {
                         Log.e(TAG, "onFailure: requisition details null");
                     } else {
                         getAccounts(requisition);
@@ -240,16 +252,41 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
         if (requisition.getAccounts() != null && requisition.getAccounts().length > 0) {
             Log.d(TAG, "getAccounts: length > 0");
             PrefsUtils.setString(requireContext(), "ACC_ID" + requisition.getId(), requisition.getAccounts()[0]);
-            Map<String, String> accounts = new HashMap<>();
-            for (int i = 0; i < requisition.getAccounts().length; i++) {
-                accounts.put(requisition.getAccounts()[i], requisition.getAccounts()[i]);
-            }
+            List<String> accounts = new ArrayList<>(Arrays.asList(requisition.getAccounts()));
             bAccount.setAccounts(accounts);
-            getAccountDetails(requisition.getAccounts()[0]);
+            getAccountsDetails(Arrays.asList(requisition.getAccounts()));
         } else {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(requisition.getLink())));
+            if (requisition.getLink() == null) {
+                Log.e(TAG, "getAccounts: requisition link null");
+            } else {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(requisition.getLink())));
+            }
             Log.e(TAG, "getAccounts: no accounts");
             Toast.makeText(requireContext(), "No accounts", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void getAccountsDetails(List<String> accounts) {
+        UploadingDialog dialog = new UploadingDialog("Retrieving Data...");
+        dialog.show(getParentFragmentManager(), "wait");
+
+        //show dialog with accounts
+        List<AccountDetails> accountDetailsList = new ArrayList<>();
+        for (String acc : accounts) {
+            bankApiViewModel.getAccountDetails(acc)
+                    .observe(getViewLifecycleOwner(), accountDetails -> {
+                        if (accountDetails == null || accountDetails.getAccount() == null) {
+                            Log.e(TAG, "getAccountsDetails: empty account or null");
+                        } else {
+                            accountDetailsList.add(accountDetails);
+                            Log.d(TAG, "getAccountsDetails: ");
+                        }
+                        if (accountDetailsList.size() == accounts.size()) {
+                            dialog.dismiss();
+                            BankAccsListDialog bankAccsListDialog=new BankAccsListDialog(accountDetailsList);
+                            bankAccsListDialog.show(getParentFragmentManager(),"BankAccountListDialog");
+                        }
+                    });
         }
     }
 }

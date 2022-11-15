@@ -46,6 +46,17 @@
 
     </com.google.android.material.appbar.MaterialToolbar>
 
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progressIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="60dp"
+        android:indeterminate="true"
+        app:indicatorSize="80dp"
+        tools:progress="80" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/transactionsRv"
         android:layout_width="match_parent"

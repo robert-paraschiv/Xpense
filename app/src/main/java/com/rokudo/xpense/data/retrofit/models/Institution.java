@@ -1,21 +1,12 @@
 package com.rokudo.xpense.data.retrofit.models;
 
-import com.google.gson.annotations.SerializedName;
-
 public class Institution {
-    @SerializedName("id")
     private String id;
-    @SerializedName("name")
     private String name;
-    @SerializedName("bic")
     private String bic;
-    @SerializedName("transaction_total_days")
     private Integer transaction_total_days;
-    @SerializedName("countries")
     private String[] countries;
-    @SerializedName("logo")
     private String logo;
-    @SerializedName("payments")
     private Boolean payments;
 
     public Institution(String id, String name, String bic, Integer transaction_total_days,

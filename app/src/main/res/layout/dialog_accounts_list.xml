@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/walletListDialogRootId"
+    android:background="@drawable/dialog_person_info_background"
+    app:layout_behavior="@string/bottom_sheet_behavior">
+
+    <ImageView
+        android:id="@+id/dialogHandle"
+        android:layout_width="48dp"
+        android:layout_height="8dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:contentDescription="@string/dialog_handle"
+        android:src="@drawable/dialog_handle" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/bankAccountsListRv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/dialogHandle"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="42dp"
+        android:layout_marginEnd="18dp"
+        android:layout_marginBottom="24dp"
+        tools:itemCount="4"
+        tools:listitem="@layout/item_wallet" />
+
+</RelativeLayout>

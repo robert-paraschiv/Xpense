@@ -12,7 +12,7 @@ public class BAccount {
     String institutionId;
     String bankName;
     String bankPic;
-    Map<String, String> accounts;
+    List<String> accounts;
     List<String> walletIds;
 
     public String getId() {
@@ -47,11 +47,11 @@ public class BAccount {
         this.requisition_id = requisition_id;
     }
 
-    public Map<String, String> getAccounts() {
+    public  List<String> getAccounts() {
         return accounts;
     }
 
-    public void setAccounts(Map<String, String> accounts) {
+    public void setAccounts( List<String> accounts) {
         this.accounts = accounts;
     }
 

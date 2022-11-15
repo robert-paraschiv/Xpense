@@ -38,7 +38,9 @@ public interface GetDataService {
                                         @Field("redirect") String redirect,
                                         @Field("agreement") String agreement,
                                         @Field("user_language") String user_language,
-                                        @Field("reference") String reference);
+                                        @Field("reference") String reference,
+                                        @Field("account_selection") Boolean account_selection,
+                                        @Field("redirect_immediate") Boolean redirect_immediate);
 
 
     @GET("requisitions/{id}")

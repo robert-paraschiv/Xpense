@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.gson.JsonObject;
 import com.rokudo.xpense.data.retrofit.GetDataService;
 import com.rokudo.xpense.data.retrofit.RetrofitClientInstance;
 import com.rokudo.xpense.data.retrofit.models.AccountDetails;
@@ -16,6 +17,10 @@ import com.rokudo.xpense.data.retrofit.models.TransactionsResponse;
 import com.rokudo.xpense.utils.DatabaseUtils;
 import com.rokudo.xpense.utils.NordigenUtils;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +35,11 @@ public class BankApiRepo {
     private static BankApiRepo instance;
     GetDataService service = RetrofitClientInstance.geInstance().create(GetDataService.class);
     private final MutableLiveData<Token> tokenMutableLiveData = new MutableLiveData<>();
+    private String requisitionError;
+
+    public String getRequisitionError() {
+        return requisitionError;
+    }
 
     public static BankApiRepo getInstance() {
         if (instance == null) {
@@ -47,8 +57,6 @@ public class BankApiRepo {
                         if (response.isSuccessful()) {
                             if (response.body() != null) {
                                 NordigenUtils.TOKEN_VAL = response.body().getAccess();
-//                        PrefsUtils.setToken(requireContext(), NordigenUtils.TOKEN_VAL);
-//                        callInstitutionsList();
                                 tokenMutableLiveData.setValue(response.body());
                             }
                         }
@@ -120,19 +128,23 @@ public class BankApiRepo {
         MutableLiveData<Requisition> requisitionMutableLiveData = new MutableLiveData<>();
 
         service.createRequisition(institutionID,
-                        "http://localhost",
+                        "https://xpense/launch",
                         EUA_ID,
                         "EN",
-                        institutionID + DatabaseUtils.getCurrentUser().getUid())
+                        DatabaseUtils.getCurrentUser().getPhoneNumber() + "_" + EUA_ID,
+                        true,
+                        true)
                 .enqueue(new Callback<Requisition>() {
                     @Override
                     public void onResponse(@NonNull Call<Requisition> call, @NonNull Response<Requisition> response) {
                         if (response.isSuccessful()) {
                             Log.d(TAG, "onResponse: success ");
+                            requisitionError = null;
                             requisitionMutableLiveData.setValue(response.body());
-
                         } else {
                             Log.e(TAG, "onResponse: failed " + response.message());
+                            requisitionError = response.errorBody() != null ? response.errorBody().toString() : null;
+                            requisitionMutableLiveData.setValue(null);
                         }
 
                     }
@@ -140,6 +152,7 @@ public class BankApiRepo {
                     @Override
                     public void onFailure(@NonNull Call<Requisition> call, @NonNull Throwable t) {
                         Log.e(TAG, "onFailure: " + t.getMessage());
+                        requisitionError = t.getMessage();
                         requisitionMutableLiveData.setValue(null);
                     }
                 });
@@ -213,6 +226,12 @@ public class BankApiRepo {
                         } else {
                             Log.e(TAG, "onResponse: " + response.message());
                             accountTransactionsLiveData.setValue(null);
+                            try {
+                                JSONObject jsonObject = new JSONObject(response.errorBody().string());
+                                Log.e(TAG, "onResponse: " + jsonObject);
+                            } catch (IOException | JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
 
