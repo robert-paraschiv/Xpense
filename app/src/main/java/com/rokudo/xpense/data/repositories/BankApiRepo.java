@@ -5,7 +5,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
-import com.google.gson.JsonObject;
 import com.rokudo.xpense.data.retrofit.GetDataService;
 import com.rokudo.xpense.data.retrofit.RetrofitClientInstance;
 import com.rokudo.xpense.data.retrofit.models.AccountDetails;
@@ -25,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -124,7 +124,7 @@ public class BankApiRepo {
         return agreementMutableLiveData;
     }
 
-    public MutableLiveData<Requisition> createRequisition(String institutionID, String EUA_ID) {
+    public MutableLiveData<Requisition> createRequisition(String institutionID, String EUA_ID, Boolean account_selection) {
         MutableLiveData<Requisition> requisitionMutableLiveData = new MutableLiveData<>();
 
         service.createRequisition(institutionID,
@@ -132,7 +132,7 @@ public class BankApiRepo {
                         EUA_ID,
                         "EN",
                         DatabaseUtils.getCurrentUser().getPhoneNumber() + "_" + EUA_ID,
-                        true,
+                        account_selection,
                         true)
                 .enqueue(new Callback<Requisition>() {
                     @Override
@@ -143,7 +143,7 @@ public class BankApiRepo {
                             requisitionMutableLiveData.setValue(response.body());
                         } else {
                             Log.e(TAG, "onResponse: failed " + response.message());
-                            requisitionError = response.errorBody() != null ? response.errorBody().toString() : null;
+                            requisitionError = getErrorMessage(response.errorBody() == null ? null : response.errorBody());
                             requisitionMutableLiveData.setValue(null);
                         }
 
@@ -222,26 +222,35 @@ public class BankApiRepo {
                     public void onResponse(@NonNull Call<TransactionsResponse> call, @NonNull Response<TransactionsResponse> response) {
                         if (response.isSuccessful()) {
                             Log.d(TAG, "onResponse: " + response.body());
+                            requisitionError = null;
                             accountTransactionsLiveData.setValue(response.body());
                         } else {
                             Log.e(TAG, "onResponse: " + response.message());
+                            requisitionError = getErrorMessage(response.errorBody() != null ? response.errorBody() : null);
                             accountTransactionsLiveData.setValue(null);
-                            try {
-                                JSONObject jsonObject = new JSONObject(response.errorBody().string());
-                                Log.e(TAG, "onResponse: " + jsonObject);
-                            } catch (IOException | JSONException e) {
-                                e.printStackTrace();
-                            }
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<TransactionsResponse> call, @NonNull Throwable t) {
                         Log.e(TAG, "onResponse: " + t.getMessage());
+                        requisitionError = t.getMessage();
                         accountTransactionsLiveData.setValue(null);
                     }
                 });
 
         return accountTransactionsLiveData;
+    }
+
+    private String getErrorMessage(@NonNull ResponseBody response) {
+        String errorMessage = null;
+        try {
+            JSONObject jsonObject = new JSONObject(response.string());
+            errorMessage = jsonObject.toString();
+            Log.e(TAG, "onResponse: " + jsonObject);
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
+        return errorMessage;
     }
 }

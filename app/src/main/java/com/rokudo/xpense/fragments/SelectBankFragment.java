@@ -145,33 +145,36 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
                             "EUA" + institution.getId(),
                             endUserAgreement.getId());
                     bAccount.setEUA_id(endUserAgreement.getId());
-                    getRequisition(institution, endUserAgreement.getId());
+                    getRequisition(institution, endUserAgreement.getId(), true);
                 }
             });
 
         } else {
             bAccount.setEUA_id(EUA_ID);
-            getRequisition(institution, EUA_ID);
+            getRequisition(institution, EUA_ID, true);
         }
     }
 
-    private void getRequisition(Institution institution, String EUA_ID) {
+    private void getRequisition(Institution institution, String EUA_ID, Boolean account_selection) {
         String REQUISITION = requireContext()
                 .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE)
                 .getString("REQUISITION" + institution.getId(), "");
         if (REQUISITION.isEmpty()) {
-            bankApiViewModel.createRequisition(institution.getId(), EUA_ID)
+            bankApiViewModel.createRequisition(institution.getId(), EUA_ID, account_selection)
                     .observe(getViewLifecycleOwner(), requisition -> {
                         if (requisition == null || requisition.getId() == null) {
                             Log.e(TAG, "onResponse: requisition null ");
                             if (bankApiViewModel.getRequisitionError() != null && !bankApiViewModel.getRequisitionError().isEmpty()) {
                                 Log.e(TAG, "getRequisition: " + bankApiViewModel.getRequisitionError());
+                                if (bankApiViewModel.getRequisitionError().contains("Account selection not supported")) {
+                                    getRequisition(institution, EUA_ID, false);
+                                }
                             }
                         } else {
                             PrefsUtils.setString(requireContext(), "REQUISITION" + institution.getId(),
                                     requisition.getId());
                             bAccount.setRequisition_id(requisition.getId());
-                            getRequisitionDetails(REQUISITION);
+                            getAccounts(requisition);
                         }
                     });
 
@@ -241,7 +244,7 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
         bankApiViewModel.getRequisitionDetails(requisitionID)
                 .observe(getViewLifecycleOwner(), requisition -> {
                     if (requisition == null || requisition.getId() == null) {
-                        Log.e(TAG, "onFailure: requisition details null");
+                        Log.e(TAG, "getRequisitionDetails: requisition details null");
                     } else {
                         getAccounts(requisition);
                     }
@@ -283,8 +286,8 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
                         }
                         if (accountDetailsList.size() == accounts.size()) {
                             dialog.dismiss();
-                            BankAccsListDialog bankAccsListDialog=new BankAccsListDialog(accountDetailsList);
-                            bankAccsListDialog.show(getParentFragmentManager(),"BankAccountListDialog");
+                            BankAccsListDialog bankAccsListDialog = new BankAccsListDialog(accountDetailsList);
+                            bankAccsListDialog.show(getParentFragmentManager(), "BankAccountListDialog");
                         }
                     });
         }

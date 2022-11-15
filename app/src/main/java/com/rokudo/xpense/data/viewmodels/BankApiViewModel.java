@@ -36,8 +36,8 @@ public class BankApiViewModel extends AndroidViewModel {
         return repo.createEUA(institutionID);
     }
 
-    public MutableLiveData<Requisition> createRequisition(String institutionID, String EUA_ID) {
-        return repo.createRequisition(institutionID, EUA_ID);
+    public MutableLiveData<Requisition> createRequisition(String institutionID, String EUA_ID,Boolean account_selection) {
+        return repo.createRequisition(institutionID, EUA_ID,account_selection);
     }
 
     public MutableLiveData<Requisition> getRequisitionDetails(String requisitionID){
