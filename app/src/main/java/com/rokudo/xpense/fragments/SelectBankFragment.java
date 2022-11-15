@@ -24,6 +24,7 @@ import com.rokudo.xpense.data.retrofit.models.AccountDetails;
 import com.rokudo.xpense.data.retrofit.models.EndUserAgreement;
 import com.rokudo.xpense.data.retrofit.models.Institution;
 import com.rokudo.xpense.data.retrofit.models.Requisition;
+import com.rokudo.xpense.data.viewmodels.BAccountsViewModel;
 import com.rokudo.xpense.data.viewmodels.BankApiViewModel;
 import com.rokudo.xpense.databinding.FragmentConnectToBankBinding;
 import com.rokudo.xpense.models.BAccount;
@@ -48,6 +49,7 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
     private BanksAdapter adapter;
     private final BAccount bAccount = new BAccount();
     private BankApiViewModel bankApiViewModel;
+    private BAccountsViewModel bAccountsViewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -56,6 +58,7 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
         binding = FragmentConnectToBankBinding.inflate(inflater, container, false);
 
         bankApiViewModel = new ViewModelProvider(requireActivity()).get(BankApiViewModel.class);
+        bAccountsViewModel = new ViewModelProvider(requireActivity()).get(BAccountsViewModel.class);
 
         initOnClicks();
         handleArgsPassed();
@@ -222,12 +225,14 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
             if (requisition.getLink() == null) {
                 Log.e(TAG, "getAccounts: requisition link null");
             } else {
+                PrefsUtils.saveBAccountToPrefs(requireContext(), bAccount);
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(requisition.getLink())));
             }
             Log.e(TAG, "getAccounts: no accounts");
             Toast.makeText(requireContext(), "No accounts", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     private void getAccountsDetails(List<String> accounts) {
         UploadingDialog dialog = new UploadingDialog("Retrieving Data...");

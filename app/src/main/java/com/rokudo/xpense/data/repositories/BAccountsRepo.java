@@ -2,12 +2,12 @@ package com.rokudo.xpense.data.repositories;
 
 import static com.rokudo.xpense.utils.DatabaseUtils.bAccountsRef;
 
+import android.util.Log;
+
 import androidx.lifecycle.MutableLiveData;
 
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.rokudo.xpense.models.BAccount;
 import com.rokudo.xpense.utils.DatabaseUtils;
 
@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BAccountsRepo {
+    private static final String TAG = "BAccountsRepo";
+
     private static BAccountsRepo instance;
 
     private ListenerRegistration bAccountListener;
@@ -27,11 +29,17 @@ public class BAccountsRepo {
         this.userBAccountLiveData = new MutableLiveData<>();
     }
 
-    public  static BAccountsRepo getInstance() {
+    public static BAccountsRepo getInstance() {
         if (instance == null) {
             instance = new BAccountsRepo();
         }
         return instance;
+    }
+
+    public void addBAccount(BAccount bAccount){
+        bAccount.setId(bAccountsRef.document().getId());
+        bAccountsRef.document(bAccount.getId()).set(bAccount)
+                .addOnSuccessListener(unused -> Log.d(TAG, "onSuccess: added"));
     }
 
     public MutableLiveData<List<BAccount>> getUserBAccounts() {

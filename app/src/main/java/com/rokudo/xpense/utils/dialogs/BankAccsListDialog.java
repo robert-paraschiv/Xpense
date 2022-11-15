@@ -14,8 +14,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.BankAccAdapter;
-import com.rokudo.xpense.adapters.WalletsAdapter;
-import com.rokudo.xpense.data.retrofit.models.Account;
 import com.rokudo.xpense.data.retrofit.models.AccountDetails;
 
 import java.util.List;

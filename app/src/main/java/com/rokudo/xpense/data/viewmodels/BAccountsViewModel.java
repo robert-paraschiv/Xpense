@@ -26,4 +26,8 @@ public class BAccountsViewModel extends AndroidViewModel {
     public MutableLiveData<List<BAccount>> getUserBAccounts() {
         return repo.getUserBAccounts();
     }
+
+    public void addBAccount(BAccount bAccount) {
+        repo.addBAccount(bAccount);
+    }
 }
