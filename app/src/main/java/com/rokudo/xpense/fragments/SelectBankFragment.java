@@ -14,7 +14,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,11 +21,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.rokudo.xpense.adapters.BanksAdapter;
 import com.rokudo.xpense.data.retrofit.models.AccountDetails;
-import com.rokudo.xpense.data.viewmodels.BankApiViewModel;
-import com.rokudo.xpense.data.retrofit.GetDataService;
-import com.rokudo.xpense.data.retrofit.RetrofitClientInstance;
+import com.rokudo.xpense.data.retrofit.models.EndUserAgreement;
 import com.rokudo.xpense.data.retrofit.models.Institution;
 import com.rokudo.xpense.data.retrofit.models.Requisition;
+import com.rokudo.xpense.data.viewmodels.BankApiViewModel;
 import com.rokudo.xpense.databinding.FragmentConnectToBankBinding;
 import com.rokudo.xpense.models.BAccount;
 import com.rokudo.xpense.utils.DatabaseUtils;
@@ -35,12 +33,12 @@ import com.rokudo.xpense.utils.PrefsUtils;
 import com.rokudo.xpense.utils.dialogs.BankAccsListDialog;
 import com.rokudo.xpense.utils.dialogs.UploadingDialog;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankTapListener {
     private static final String TAG = "SelectBankFragment";
@@ -48,8 +46,7 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
     private FragmentConnectToBankBinding binding;
     private final List<Institution> bankList = new ArrayList<>();
     private BanksAdapter adapter;
-    private BAccount bAccount = new BAccount();
-    private String walletId;
+    private final BAccount bAccount = new BAccount();
     private BankApiViewModel bankApiViewModel;
 
     @Override
@@ -71,11 +68,22 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
     private void initOnClicks() {
         binding.backBtn.setOnClickListener(v ->
                 Navigation.findNavController(binding.getRoot()).popBackStack());
+        binding.deleteRequisitionsFab.setOnClickListener(v -> deleteRequisitions());
+    }
+
+    private void deleteRequisitions() {
+        bankApiViewModel.getAllRequisitions().observe(getViewLifecycleOwner(), requisitionsResult -> {
+            if (requisitionsResult != null && requisitionsResult.getResults() != null && requisitionsResult.getResults().length > 0) {
+                for (int i = 0; i < requisitionsResult.getResults().length; i++) {
+                    bankApiViewModel.deleteRequisition(requisitionsResult.getResults()[i].getId());
+                }
+            }
+        });
     }
 
     private void handleArgsPassed() {
         SelectBankFragmentArgs args = SelectBankFragmentArgs.fromBundle(requireArguments());
-        walletId = args.getWalletId();
+        String walletId = args.getWalletId();
         bAccount.setWalletIds(Collections.singletonList(walletId));
         bAccount.setOwner_id(DatabaseUtils.getCurrentUser().getUid());
     }
@@ -145,6 +153,7 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
                             "EUA" + institution.getId(),
                             endUserAgreement.getId());
                     bAccount.setEUA_id(endUserAgreement.getId());
+                    bAccount.setEUA_EndDate(getEuaEndDate(endUserAgreement));
                     getRequisition(institution, endUserAgreement.getId(), true);
                 }
             });
@@ -153,6 +162,11 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
             bAccount.setEUA_id(EUA_ID);
             getRequisition(institution, EUA_ID, true);
         }
+    }
+
+    @NonNull
+    private Date getEuaEndDate(EndUserAgreement endUserAgreement) {
+        return new Date(new Date().getTime() + Duration.ofDays(endUserAgreement.getAccess_valid_for_days()).toMillis());
     }
 
     private void getRequisition(Institution institution, String EUA_ID, Boolean account_selection) {
@@ -180,64 +194,10 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
 
         } else {
             //Get requisition details
-            String ACC_ID = requireContext()
-                    .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE)
-                    .getString("ACC_ID" + REQUISITION, "");
             bAccount.setRequisition_id(REQUISITION);
 
             getRequisitionDetails(REQUISITION);
-
-//            if (ACC_ID.isEmpty()) {
-//                getRequisitionDetails(REQUISITION);
-//            } else {
-//                bAccount.setAccounts(new ArrayList<>(Collections.singletonList(ACC_ID)));
-//                getAccountDetails(ACC_ID);
-//            }
         }
-    }
-
-    private void getAccountDetails(String acc_id) {
-
-
-//        Call<AccountDetails> call = service.getAccountDetails(acc_id);
-//        call.enqueue(new Callback<AccountDetails>() {
-//            @Override
-//            public void onResponse(@NonNull Call<AccountDetails> call, @NonNull Response<AccountDetails> response) {
-//                Log.d(TAG, "onResponse: ");
-//                if (response.isSuccessful()) {
-//                    Log.d(TAG, "onResponse: " + response.body());
-//                } else {
-//                    Log.e(TAG, "onResponse: " + response.message());
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(@NonNull Call<AccountDetails> call, @NonNull Throwable t) {
-//                Log.e(TAG, "onResponse: " + t.getMessage());
-//            }
-//        });
-
-        Navigation.findNavController(binding.getRoot())
-                .navigate(SelectBankFragmentDirections.actionConnectToBankFragmentToAccTransListFragment(acc_id));
-
-
-//        Call<TransactionsResponse> call = service.getAccountTransactions(acc_id);
-//        call.enqueue(new Callback<TransactionsResponse>() {
-//            @Override
-//            public void onResponse(@NonNull Call<TransactionsResponse> call, @NonNull Response<TransactionsResponse> response) {
-//                if (response.isSuccessful()) {
-//                    Log.d(TAG, "onResponse: " + response.body());
-//                } else {
-//                    Log.e(TAG, "onResponse: " + response.message());
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(@NonNull Call<TransactionsResponse> call, @NonNull Throwable t) {
-//                Log.e(TAG, "onResponse: " + t.getMessage());
-//            }
-//        });
-
     }
 
     private void getRequisitionDetails(String requisitionID) {

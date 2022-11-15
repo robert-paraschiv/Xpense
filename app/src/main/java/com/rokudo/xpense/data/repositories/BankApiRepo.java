@@ -8,9 +8,11 @@ import androidx.lifecycle.MutableLiveData;
 import com.rokudo.xpense.data.retrofit.GetDataService;
 import com.rokudo.xpense.data.retrofit.RetrofitClientInstance;
 import com.rokudo.xpense.data.retrofit.models.AccountDetails;
+import com.rokudo.xpense.data.retrofit.models.DeleteResponse;
 import com.rokudo.xpense.data.retrofit.models.EndUserAgreement;
 import com.rokudo.xpense.data.retrofit.models.Institution;
 import com.rokudo.xpense.data.retrofit.models.Requisition;
+import com.rokudo.xpense.data.retrofit.models.RequisitionsResult;
 import com.rokudo.xpense.data.retrofit.models.Token;
 import com.rokudo.xpense.data.retrofit.models.TransactionsResponse;
 import com.rokudo.xpense.utils.DatabaseUtils;
@@ -131,7 +133,7 @@ public class BankApiRepo {
                         "https://xpense/launch",
                         EUA_ID,
                         "EN",
-                        DatabaseUtils.getCurrentUser().getPhoneNumber() + "_" + EUA_ID,
+                        DatabaseUtils.getCurrentUser().getPhoneNumber() + "_" + institutionID,
                         account_selection,
                         true)
                 .enqueue(new Callback<Requisition>() {
@@ -143,7 +145,7 @@ public class BankApiRepo {
                             requisitionMutableLiveData.setValue(response.body());
                         } else {
                             Log.e(TAG, "onResponse: failed " + response.message());
-                            requisitionError = getErrorMessage(response.errorBody() == null ? null : response.errorBody());
+                            requisitionError = getErrorMessage(response.errorBody());
                             requisitionMutableLiveData.setValue(null);
                         }
 
@@ -226,7 +228,7 @@ public class BankApiRepo {
                             accountTransactionsLiveData.setValue(response.body());
                         } else {
                             Log.e(TAG, "onResponse: " + response.message());
-                            requisitionError = getErrorMessage(response.errorBody() != null ? response.errorBody() : null);
+                            requisitionError = getErrorMessage(response.errorBody());
                             accountTransactionsLiveData.setValue(null);
                         }
                     }
@@ -242,7 +244,10 @@ public class BankApiRepo {
         return accountTransactionsLiveData;
     }
 
-    private String getErrorMessage(@NonNull ResponseBody response) {
+    private String getErrorMessage(ResponseBody response) {
+        if (response == null)
+            return null;
+
         String errorMessage = null;
         try {
             JSONObject jsonObject = new JSONObject(response.string());
@@ -252,5 +257,41 @@ public class BankApiRepo {
             e.printStackTrace();
         }
         return errorMessage;
+    }
+
+    public MutableLiveData<RequisitionsResult> getAllRequisitions() {
+        MutableLiveData<RequisitionsResult> requisitionsResultMutableLiveData = new MutableLiveData<>();
+
+        service.getRequisitions().enqueue(new Callback<RequisitionsResult>() {
+            @Override
+            public void onResponse(@NonNull Call<RequisitionsResult> call, @NonNull Response<RequisitionsResult> response) {
+                if (response.isSuccessful()) {
+                    requisitionsResultMutableLiveData.setValue(response.body());
+                } else {
+                    requisitionsResultMutableLiveData.setValue(null);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<RequisitionsResult> call, @NonNull Throwable t) {
+                Log.e(TAG, "onFailure: ", t);
+            }
+        });
+
+        return requisitionsResultMutableLiveData;
+    }
+
+    public void deleteRequisition(String requisition_id) {
+        service.deleteRequisition(requisition_id).enqueue(new Callback<DeleteResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<DeleteResponse> call, @NonNull Response<DeleteResponse> response) {
+                Log.d(TAG, "onResponse: " + response.message());
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<DeleteResponse> call, @NonNull Throwable t) {
+                Log.e(TAG, "onFailure: ", t);
+            }
+        });
     }
 }

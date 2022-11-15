@@ -1,21 +1,12 @@
 package com.rokudo.xpense.data.retrofit.models;
 
-import com.google.gson.annotations.SerializedName;
-
 public class EndUserAgreement {
-    @SerializedName("id")
     private String id;
-    @SerializedName("created")
     private String created;
-    @SerializedName("max_historical_days")
     private Integer max_historical_days;
-    @SerializedName("access_valid_for_days")
     private Integer access_valid_for_days;
-    @SerializedName("access_scope")
     private String[] access_scope;
-    @SerializedName("accepted")
     private String accepted;
-    @SerializedName("institution_id")
     private String institution_id;
 
     public EndUserAgreement(String id, String created, Integer max_historical_days,

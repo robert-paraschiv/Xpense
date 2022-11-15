@@ -1,23 +1,10 @@
 package com.rokudo.xpense.data.retrofit.models;
 
-import java.util.List;
-
-public class EUAResponse {
+public class RequisitionsResult {
     private Integer count;
     private String next;
     private String previous;
-    private List<EndUserAgreement> results;
-
-    public EUAResponse(Integer count, String next, String previous,
-                       List<EndUserAgreement> results) {
-        this.count = count;
-        this.next = next;
-        this.previous = previous;
-        this.results = results;
-    }
-
-    public EUAResponse() {
-    }
+    private Requisition[] results;
 
     public Integer getCount() {
         return count;
@@ -43,11 +30,11 @@ public class EUAResponse {
         this.previous = previous;
     }
 
-    public List<EndUserAgreement> getResults() {
+    public Requisition[] getResults() {
         return results;
     }
 
-    public void setResults(List<EndUserAgreement> results) {
+    public void setResults(Requisition[] results) {
         this.results = results;
     }
 }

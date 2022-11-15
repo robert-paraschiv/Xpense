@@ -1,5 +1,6 @@
 package com.rokudo.xpense.models;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -14,6 +15,7 @@ public class BAccount {
     String bankPic;
     List<String> accounts;
     List<String> walletIds;
+    private Date EUA_EndDate;
 
     public String getId() {
         return id;
@@ -85,6 +87,14 @@ public class BAccount {
 
     public void setBankPic(String bankPic) {
         this.bankPic = bankPic;
+    }
+
+    public Date getEUA_EndDate() {
+        return EUA_EndDate;
+    }
+
+    public void setEUA_EndDate(Date EUA_EndDate) {
+        this.EUA_EndDate = EUA_EndDate;
     }
 
     @Override

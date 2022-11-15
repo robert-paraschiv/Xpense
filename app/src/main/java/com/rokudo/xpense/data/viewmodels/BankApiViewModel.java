@@ -11,6 +11,7 @@ import com.rokudo.xpense.data.retrofit.models.AccountDetails;
 import com.rokudo.xpense.data.retrofit.models.EndUserAgreement;
 import com.rokudo.xpense.data.retrofit.models.Institution;
 import com.rokudo.xpense.data.retrofit.models.Requisition;
+import com.rokudo.xpense.data.retrofit.models.RequisitionsResult;
 import com.rokudo.xpense.data.retrofit.models.Token;
 import com.rokudo.xpense.data.retrofit.models.TransactionsResponse;
 
@@ -54,5 +55,13 @@ public class BankApiViewModel extends AndroidViewModel {
 
     public String getRequisitionError(){
         return repo.getRequisitionError();
+    }
+
+    public MutableLiveData<RequisitionsResult> getAllRequisitions() {
+        return repo.getAllRequisitions();
+    }
+
+    public void deleteRequisition(String requisition_ID){
+        repo.deleteRequisition(requisition_ID);
     }
 }
