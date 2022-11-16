@@ -14,6 +14,7 @@ import static com.rokudo.xpense.utils.dialogs.DialogUtils.getCircularProgressDra
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -37,6 +39,8 @@ import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialFadeThrough;
 import com.google.android.material.transition.MaterialSharedAxis;
@@ -276,6 +280,27 @@ public class HomeFragment extends Fragment {
 
         if (wallet.getbAccount() != null) {
             binding.bankAccountChip.setText(wallet.getbAccount().getBankName());
+            Glide.with(binding.bankAccountChip)
+                    .asDrawable()
+                    .load(wallet.getbAccount().getBankPic())
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .apply(RequestOptions.circleCropTransform())
+                    .placeholder(DialogUtils.getCircularProgressDrawable(requireContext()))
+                    .fallback(R.drawable.ic_baseline_person_24)
+                    .error(R.drawable.ic_baseline_person_24)
+                    .transition(withCrossFade())
+                    .into(new CustomTarget<Drawable>() {
+                        @Override
+                        public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                            binding.bankAccountChip.setChipIcon(resource);
+                            binding.bankAccountChip.setChipIconTint(null);
+                        }
+
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+                        }
+                    });
+
         }
     }
 
@@ -349,7 +374,33 @@ public class HomeFragment extends Fragment {
         binding.pieChartCard.setOnClickListener(view -> navigateToPieDetails());
         binding.pieDetailsBtn.setOnClickListener(view -> navigateToPieDetails());
 //        binding.openBankFab.setOnClickListener(v -> navigateToBankFragment());
-        binding.bankAccountChip.setOnClickListener(v -> navigateToBankFragment());
+        binding.bankAccountChip.setOnClickListener(v -> handleBankChipClick());
+    }
+
+    private void handleBankChipClick() {
+        if (mWallet.getbAccount() == null) {
+            navigateToBankFragment();
+        } else {
+            navigateToBankAccountDetails();
+        }
+    }
+
+    private void navigateToBankAccountDetails() {
+        binding.bankAccountChip.setTransitionName("bankAccountDetailsTransition");
+
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+                .addSharedElement(binding.bankAccountChip, "bankAccountDetailsTransition")
+                .build();
+
+        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToBAccountDetailsFragment(mWallet.getbAccount());
+
+        Hold hold = new Hold();
+        hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+
+        setExitTransition(hold);
+        setReenterTransition(hold);
+
+        Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
     }
 
     private void navigateToBankFragment() {

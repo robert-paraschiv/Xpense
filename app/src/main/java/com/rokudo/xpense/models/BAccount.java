@@ -1,11 +1,12 @@
 package com.rokudo.xpense.models;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class BAccount {
+public class BAccount implements Serializable {
     String id;
     String owner_id;
     String EUA_id;
@@ -95,6 +96,22 @@ public class BAccount {
 
     public void setEUA_EndDate(Date EUA_EndDate) {
         this.EUA_EndDate = EUA_EndDate;
+    }
+
+    @Override
+    public String toString() {
+        return "BAccount{" +
+                "id='" + id + '\'' +
+                ", owner_id='" + owner_id + '\'' +
+                ", EUA_id='" + EUA_id + '\'' +
+                ", requisition_id='" + requisition_id + '\'' +
+                ", institutionId='" + institutionId + '\'' +
+                ", bankName='" + bankName + '\'' +
+                ", bankPic='" + bankPic + '\'' +
+                ", accounts=" + accounts +
+                ", walletIds=" + walletIds +
+                ", EUA_EndDate=" + EUA_EndDate +
+                '}';
     }
 
     @Override

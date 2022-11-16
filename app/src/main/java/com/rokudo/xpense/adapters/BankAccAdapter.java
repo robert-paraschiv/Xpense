@@ -11,17 +11,21 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.data.retrofit.models.Account;
 import com.rokudo.xpense.data.retrofit.models.AccountDetails;
+import com.rokudo.xpense.utils.dialogs.BankAccsListDialog;
 
 import java.util.List;
 
 public class BankAccAdapter extends RecyclerView.Adapter<BankAccAdapter.ViewHolder> {
     List<AccountDetails> accountDetailsList;
 
-    public BankAccAdapter(List<AccountDetails> accountDetailsList) {
+    private final BankAccsListDialog.OnBAccClickListener onBAccClickListener;
+
+    public BankAccAdapter(List<AccountDetails> accountDetailsList, BankAccsListDialog.OnBAccClickListener onBAccClickListener) {
         this.accountDetailsList = accountDetailsList;
+        this.onBAccClickListener = onBAccClickListener;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView accountType, accountIban, accountCurrency;
 
         public ViewHolder(@NonNull View itemView) {
@@ -29,11 +33,17 @@ public class BankAccAdapter extends RecyclerView.Adapter<BankAccAdapter.ViewHold
             this.accountType = itemView.findViewById(R.id.bankAccType);
             this.accountIban = itemView.findViewById(R.id.bankAccIban);
             this.accountCurrency = itemView.findViewById(R.id.bankAccCurrency);
+            itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
-
+            if (onBAccClickListener != null) {
+                int position = getBindingAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    onBAccClickListener.onAccountClick(position);
+                }
+            }
         }
     }
 

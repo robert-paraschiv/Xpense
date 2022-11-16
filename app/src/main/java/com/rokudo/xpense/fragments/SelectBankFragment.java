@@ -253,6 +253,19 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
                             dialog.dismiss();
                             BankAccsListDialog bankAccsListDialog = new BankAccsListDialog(accountDetailsList);
                             bankAccsListDialog.show(getParentFragmentManager(), "BankAccountListDialog");
+                            bankAccsListDialog.setClickListener(position -> {
+                                Log.d(TAG, "getAccountsDetails: " + accounts.get(position));
+                                bAccount.setAccounts(new ArrayList<>(Collections.singletonList(accounts.get(position))));
+
+                                DatabaseUtils.walletsRef.document(bAccount.getWalletIds().get(0))
+                                        .update("bAccount", bAccount)
+                                        .addOnSuccessListener(unused -> {
+                                            Log.d(TAG, "getAccountsDetails: updated wallet with bank account");
+                                            bankAccsListDialog.dismiss();
+                                            Navigation.findNavController(binding.getRoot())
+                                                    .popBackStack();
+                                        });
+                            });
                         }
                     });
         }

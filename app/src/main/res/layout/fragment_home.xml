@@ -234,7 +234,7 @@
                     android:elevation="0dp"
                     android:text="+ Bank Account"
                     android:textSize="12sp"
-                    app:chipBackgroundColor="@color/home_chip_bg_color"
+                    app:chipBackgroundColor="@color/fragments_bg_color"
                     app:chipIcon="@drawable/ic_baseline_local_atm_24"
                     app:chipIconEnabled="true"
                     app:chipIconTint="@color/sharedIconTintColor"

@@ -31,6 +31,9 @@
         <action
             android:id="@+id/action_homeFragment_to_connectToBankFragment"
             app:destination="@id/connectToBankFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_BAccountDetailsFragment"
+            app:destination="@id/BAccountDetailsFragment" />
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
@@ -128,5 +131,14 @@
         <argument
             android:name="acc_id"
             app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/BAccountDetailsFragment"
+        android:name="com.rokudo.xpense.fragments.BAccountDetailsFragment"
+        android:label="fragment_b_account_details"
+        tools:layout="@layout/fragment_b_account_details" >
+        <argument
+            android:name="bAccount"
+            app:argType="com.rokudo.xpense.models.BAccount" />
     </fragment>
 </navigation>

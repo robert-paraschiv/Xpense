@@ -6,8 +6,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -16,10 +16,12 @@ import com.rokudo.xpense.data.retrofit.models.AccountDetails;
 import com.rokudo.xpense.data.retrofit.models.Requisition;
 import com.rokudo.xpense.data.viewmodels.BankApiViewModel;
 import com.rokudo.xpense.models.BAccount;
+import com.rokudo.xpense.utils.DatabaseUtils;
 import com.rokudo.xpense.utils.PrefsUtils;
 import com.rokudo.xpense.utils.dialogs.BankAccsListDialog;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -43,42 +45,57 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleIntent(Intent intent) {
-        if (intent != null) {
-            if (intent.getData() != null) {
-                if (intent.getData().getHost().equals("xpense")) {
-                    BAccount bAccount = PrefsUtils.getSavedObjectFromPreference(this);
-                    BankApiViewModel viewModel = new ViewModelProvider(this).get(BankApiViewModel.class);
-                    if (bAccount != null) {
-                        viewModel.getRequisitionDetails(bAccount.getRequisition_id()).observe(this, requisition -> {
-                            if (requisition == null || requisition.getId() == null) {
-                                Log.e(TAG, "handleIntent: requisition was null");
-                            } else {
-                                // Show select accounts
-                                if (requisition.getAccounts().length == 1) {
-                                    // TODO: 11/15/2022  add to wallet
-                                } else if (requisition.getAccounts().length > 1) {
-                                    List<AccountDetails> accountDetailsList = new ArrayList<>();
-                                    for (int i = 0; i < requisition.getAccounts().length; i++) {
-                                        viewModel.getAccountDetails(requisition.getAccounts()[i])
-                                                .observe(this, accountDetails -> {
-                                                    if (accountDetails == null || accountDetails.getAccount() == null) {
-                                                        Log.e(TAG, "handleIntent: could not get account details ");
-                                                    } else {
-                                                        accountDetailsList.add(accountDetails);
-                                                        if (accountDetailsList.size() == requisition.getAccounts().length) {
-                                                            // TODO: 11/15/2022 show dialog
-                                                            BankAccsListDialog bankAccsListDialog = new BankAccsListDialog(accountDetailsList);
-                                                            bankAccsListDialog.show(getSupportFragmentManager(), "BankAccountListDialog");
-                                                        }
-                                                    }
-                                                });
-                                    }
-                                }
-                            }
-                        });
+        if (intent != null && intent.getData() != null && intent.getData().getHost().equals("xpense")) {
+            BAccount bAccount = PrefsUtils.getSavedObjectFromPreference(this);
+            BankApiViewModel viewModel = new ViewModelProvider(this).get(BankApiViewModel.class);
+            if (bAccount == null) {
+                Log.e(TAG, "handleIntent: bank account from prefs was null");
+                return;
+            }
+
+            viewModel.getRequisitionDetails(bAccount.getRequisition_id()).observe(this, requisition -> {
+                if (requisition == null || requisition.getId() == null) {
+                    Log.e(TAG, "handleIntent: requisition was null");
+                } else {
+                    // Show select accounts
+                    if (requisition.getAccounts().length == 1) {
+                        // TODO: 11/15/2022  add to wallet
+                    } else if (requisition.getAccounts().length > 1) {
+                        getAccountsDetails(viewModel, requisition, bAccount);
                     }
                 }
-            }
+            });
+
+        }
+    }
+
+
+    private void getAccountsDetails(BankApiViewModel viewModel, Requisition requisition, BAccount bAccount) {
+        List<AccountDetails> accountDetailsList = new ArrayList<>();
+        for (int i = 0; i < requisition.getAccounts().length; i++) {
+            viewModel.getAccountDetails(requisition.getAccounts()[i])
+                    .observe(this, accountDetails -> {
+                        if (accountDetails == null || accountDetails.getAccount() == null) {
+                            Log.e(TAG, "handleIntent: could not get account details ");
+                        } else {
+                            accountDetailsList.add(accountDetails);
+                            if (accountDetailsList.size() == requisition.getAccounts().length) {
+                                BankAccsListDialog bankAccsListDialog = new BankAccsListDialog(accountDetailsList);
+                                bankAccsListDialog.show(getSupportFragmentManager(), "BankAccountListDialog");
+                                bankAccsListDialog.setClickListener(position -> {
+                                    Log.d(TAG, "getAccountsDetails: " + requisition.getAccounts()[position]);
+                                    bAccount.setAccounts(new ArrayList<>(Collections.singletonList(requisition.getAccounts()[position])));
+
+                                    DatabaseUtils.walletsRef.document(bAccount.getWalletIds().get(0))
+                                            .update("bAccount", bAccount)
+                                            .addOnSuccessListener(unused -> {
+                                                Log.d(TAG, "getAccountsDetails: updated wallet with bank account");
+                                                bankAccsListDialog.dismiss();
+                                            });
+                                });
+                            }
+                        }
+                    });
         }
     }
 
