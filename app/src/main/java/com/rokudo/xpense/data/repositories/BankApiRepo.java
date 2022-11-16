@@ -8,6 +8,8 @@ import androidx.lifecycle.MutableLiveData;
 import com.rokudo.xpense.data.retrofit.GetDataService;
 import com.rokudo.xpense.data.retrofit.RetrofitClientInstance;
 import com.rokudo.xpense.data.retrofit.models.AccountDetails;
+import com.rokudo.xpense.data.retrofit.models.Balance;
+import com.rokudo.xpense.data.retrofit.models.Balances;
 import com.rokudo.xpense.data.retrofit.models.DeleteResponse;
 import com.rokudo.xpense.data.retrofit.models.EndUserAgreement;
 import com.rokudo.xpense.data.retrofit.models.Institution;
@@ -200,7 +202,7 @@ public class BankApiRepo {
                 if (response.isSuccessful()) {
                     accountDetailsMutableLiveData.setValue(response.body());
                 } else {
-                    Log.e(TAG, "onResponse: " + response.message());
+                    Log.e(TAG, "onResponse: " + getErrorMessage(response.errorBody()));
                     accountDetailsMutableLiveData.setValue(null);
                 }
             }
@@ -215,10 +217,10 @@ public class BankApiRepo {
         return accountDetailsMutableLiveData;
     }
 
-    public MutableLiveData<TransactionsResponse> getAccountTransactions(String account_id) {
+    public MutableLiveData<TransactionsResponse> getAccountTransactions(String account_id, String date_from) {
         MutableLiveData<TransactionsResponse> accountTransactionsLiveData = new MutableLiveData<>();
 
-        service.getAccountTransactions(account_id)
+        service.getAccountTransactions(account_id, date_from)
                 .enqueue(new Callback<TransactionsResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<TransactionsResponse> call, @NonNull Response<TransactionsResponse> response) {
@@ -293,5 +295,29 @@ public class BankApiRepo {
                 Log.e(TAG, "onFailure: ", t);
             }
         });
+    }
+
+    public MutableLiveData<Balances> getAccountBalances(String account_id) {
+        MutableLiveData<Balances> objectMutableLiveData = new MutableLiveData<>();
+
+        service.getAccountBalances(account_id).enqueue(new Callback<Balances>() {
+            @Override
+            public void onResponse(@NonNull Call<Balances> call, @NonNull Response<Balances> response) {
+                if (response.isSuccessful()) {
+                    objectMutableLiveData.setValue(response.body());
+                } else {
+                    objectMutableLiveData.setValue(null);
+                    Log.e(TAG, "onResponse: " + getErrorMessage(response.errorBody()));
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Balances> call, @NonNull Throwable t) {
+                objectMutableLiveData.setValue(null);
+                Log.e(TAG, "onFailure: ", t);
+            }
+        });
+
+        return objectMutableLiveData;
     }
 }

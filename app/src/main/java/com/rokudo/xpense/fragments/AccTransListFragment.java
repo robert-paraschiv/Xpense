@@ -62,8 +62,8 @@ public class AccTransListFragment extends Fragment implements TransactionsAdapte
 
     private void getArgsPassed() {
         AccTransListFragmentArgs args = AccTransListFragmentArgs.fromBundle(requireArguments());
-
-        bankApiViewModel.getAccountTransactions(args.getAccId())
+        String date_from = "2022-11-01";
+        bankApiViewModel.getAccountTransactions(args.getAccId(), date_from)
                 .observe(getViewLifecycleOwner(), transactionsResponse -> {
                     if (transactionsResponse == null || transactionsResponse.getTransactions() == null) {
                         Log.e(TAG, "onResponse: null trans response");

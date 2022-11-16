@@ -106,6 +106,8 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
             if (transaction.getCategory() != null)
                 holder.transactionCategory.setText(transaction.getCategory());
 
+            holder.transactionImage.setVisibility(transaction.getPicUrl() == null ? View.GONE : View.VISIBLE);
+
             Glide.with(holder.transactionImage)
                     .load(transaction.getPicUrl())
                     .diskCacheStrategy(DiskCacheStrategy.ALL)

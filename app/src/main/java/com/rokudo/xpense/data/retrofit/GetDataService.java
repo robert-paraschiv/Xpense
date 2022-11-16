@@ -1,6 +1,7 @@
 package com.rokudo.xpense.data.retrofit;
 
 import com.rokudo.xpense.data.retrofit.models.AccountDetails;
+import com.rokudo.xpense.data.retrofit.models.Balances;
 import com.rokudo.xpense.data.retrofit.models.DeleteResponse;
 import com.rokudo.xpense.data.retrofit.models.EndUserAgreement;
 import com.rokudo.xpense.data.retrofit.models.Institution;
@@ -18,6 +19,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface GetDataService {
 
@@ -55,12 +57,12 @@ public interface GetDataService {
     Call<DeleteResponse> deleteRequisition(@Path("id") String id);
 
     @GET("/api/v2/accounts/{id}/transactions/")
-    Call<TransactionsResponse> getAccountTransactions(@Path("id") String id);
+    Call<TransactionsResponse> getAccountTransactions(@Path("id") String id, @Query("date_from") String date_from);
 
     @GET("/api/v2/accounts/{id}/details/")
     Call<AccountDetails> getAccountDetails(@Path("id") String id);
 
     @GET("/api/v2/accounts/{id}/balances/")
-    Call<Object> getAccountBalances(@Path("id") String id);
+    Call<Balances> getAccountBalances(@Path("id") String id);
 
 }

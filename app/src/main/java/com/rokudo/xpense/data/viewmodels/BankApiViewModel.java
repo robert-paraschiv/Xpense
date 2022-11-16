@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.rokudo.xpense.data.repositories.BankApiRepo;
 import com.rokudo.xpense.data.retrofit.models.AccountDetails;
+import com.rokudo.xpense.data.retrofit.models.Balances;
 import com.rokudo.xpense.data.retrofit.models.EndUserAgreement;
 import com.rokudo.xpense.data.retrofit.models.Institution;
 import com.rokudo.xpense.data.retrofit.models.Requisition;
@@ -37,23 +38,27 @@ public class BankApiViewModel extends AndroidViewModel {
         return repo.createEUA(institutionID);
     }
 
-    public MutableLiveData<Requisition> createRequisition(String institutionID, String EUA_ID,Boolean account_selection) {
-        return repo.createRequisition(institutionID, EUA_ID,account_selection);
+    public MutableLiveData<Requisition> createRequisition(String institutionID, String EUA_ID, Boolean account_selection) {
+        return repo.createRequisition(institutionID, EUA_ID, account_selection);
     }
 
-    public MutableLiveData<Requisition> getRequisitionDetails(String requisitionID){
+    public MutableLiveData<Requisition> getRequisitionDetails(String requisitionID) {
         return repo.getRequisitionDetails(requisitionID);
     }
 
-    public MutableLiveData<AccountDetails> getAccountDetails(String account_id){
+    public MutableLiveData<AccountDetails> getAccountDetails(String account_id) {
         return repo.getAccountDetails(account_id);
     }
 
-    public MutableLiveData<TransactionsResponse> getAccountTransactions(String account_id){
-        return repo.getAccountTransactions(account_id);
+    public MutableLiveData<Balances> getAccountBalances(String account_id) {
+        return repo.getAccountBalances(account_id);
     }
 
-    public String getRequisitionError(){
+    public MutableLiveData<TransactionsResponse> getAccountTransactions(String account_id, String date_from) {
+        return repo.getAccountTransactions(account_id, date_from);
+    }
+
+    public String getRequisitionError() {
         return repo.getRequisitionError();
     }
 
@@ -61,7 +66,7 @@ public class BankApiViewModel extends AndroidViewModel {
         return repo.getAllRequisitions();
     }
 
-    public void deleteRequisition(String requisition_ID){
+    public void deleteRequisition(String requisition_ID) {
         repo.deleteRequisition(requisition_ID);
     }
 }

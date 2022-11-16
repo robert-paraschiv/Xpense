@@ -9,6 +9,7 @@
     <string name="user_profile_picture">User profile picture</string>
     <string name="transition_name_add_transaction">addTransaction</string>
     <string name="pie_details">Pie Details</string>
+    <string name="bank_logo">Bank logo</string>
     <integer name="transition_duration_millis">600</integer>
     <integer name="categories_insert_animation_duration">200</integer>
     <integer name="categories_insert_slide_right_animation_duration">250</integer>
