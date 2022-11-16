@@ -33,9 +33,14 @@ import com.rokudo.xpense.utils.NordigenUtils;
 import com.rokudo.xpense.utils.PrefsUtils;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class BAccountDetailsFragment extends Fragment implements TransactionsAdapter.OnTransactionClickListener {
     private static final String TAG = "BAccountDetailsFragment";
@@ -54,6 +59,8 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
         binding = FragmentBAccountDetailsBinding.inflate(inflater, container, false);
 
         bankApiViewModel = new ViewModelProvider(requireActivity()).get(BankApiViewModel.class);
+
+        binding.detailsShimer.startShimmer();
 
         buildRecyclerView();
         getArgsPassed();
@@ -105,19 +112,23 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
                             binding.accIBAN.setText(accountDetails.getAccount().getIban());
                             binding.accCurrency.setText(accountDetails.getAccount().getCurrency());
                         }
+
+                        bankApiViewModel.getAccountBalances(bAccount.getAccounts().get(0))
+                                .observe(getViewLifecycleOwner(), balances -> {
+                                    if (balances == null) {
+                                        Log.e(TAG, "onChanged: null balances");
+                                    } else {
+                                        Log.d(TAG, "onChanged: " + balances);
+                                        binding.accAmount.setText(balances.getBalances()[0].getBalanceAmount().get("amount"));
+                                        binding.accDetails.setVisibility(View.VISIBLE);
+                                        binding.detailsShimer.stopShimmer();
+                                        binding.detailsShimer.setVisibility(View.INVISIBLE);
+                                    }
+                                });
                     });
 
-            bankApiViewModel.getAccountBalances(bAccount.getAccounts().get(0))
-                    .observe(getViewLifecycleOwner(), balances -> {
-                        if (balances == null) {
-                            Log.e(TAG, "onChanged: null balances");
-                        } else {
-                            Log.d(TAG, "onChanged: " + balances);
-                            binding.accAmount.setText(balances.getBalances()[0].getBalanceAmount().get("amount"));
-                        }
-                    });
 
-            String date_from = "2022-11-01";
+            String date_from = "2022-11-10";
             bankApiViewModel.getAccountTransactions(bAccount.getAccounts().get(0), date_from)
                     .observe(getViewLifecycleOwner(), transactionsResponse -> {
                         if (transactionsResponse == null || transactionsResponse.getTransactions() == null) {
@@ -127,7 +138,27 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
                             binding.progressIndicator.setVisibility(View.GONE);
 
                             bankTransactionList.addAll(Arrays.asList(transactionsResponse.getTransactions().getBooked()));
-                            bankTransactionList.addAll(Arrays.asList(transactionsResponse.getTransactions().getPending()));
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd");
+                            bankTransactionList.sort((o1, o2) -> {
+                                if (o1.getBookingDate() != null && o2.getBookingDate() != null) {
+                                    try {
+                                        return Objects.requireNonNull(simpleDateFormat.parse(o1.getBookingDate()))
+                                                .compareTo(simpleDateFormat.parse(o2.getBookingDate()));
+                                    } catch (ParseException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                if (o1.getBookingDate() == null && o2.getBookingDate() != null) {
+                                    return 1;
+                                } else {
+                                    return -1;
+                                }
+                            });
+
+                            for (BankTransaction bankTransaction : transactionsResponse.getTransactions().getPending()) {
+                                bankTransactionList.add(0,bankTransaction);
+                            }
+
                             for (int i = 0; i < bankTransactionList.size(); i++) {
                                 BankTransaction bankTransaction = bankTransactionList.get(i);
 
@@ -141,9 +172,7 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
                                 adapter.notifyItemInserted(transactionList.indexOf(transaction));
                             }
                         }
-
                     });
-
         }
     }
 

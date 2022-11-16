@@ -96,9 +96,20 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
                     holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_red_dark
                             , holder.transactionAmount.getContext().getTheme()));
                 }
+            } else {
+                if (transaction.getAmount() != null) {
+                    if (transaction.getAmount() < 0) {
+                        holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_red_dark
+                                , holder.transactionAmount.getContext().getTheme()));
+                    } else {
+                        transAmountPrefix = "+ ";
+                        holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_green_dark
+                                , holder.transactionAmount.getContext().getTheme()));
+                    }
+                }
             }
             if (transaction.getAmount() != null)
-                holder.transactionAmount.setText(transAmountPrefix + transaction.getAmount().toString());
+                holder.transactionAmount.setText(transAmountPrefix + transaction.getAmount().toString() + " " + transaction.getCurrency());
             if (transaction.getTitle() != null)
                 holder.transactionTitle.setText(transaction.getTitle());
             if (transaction.getDate() != null)

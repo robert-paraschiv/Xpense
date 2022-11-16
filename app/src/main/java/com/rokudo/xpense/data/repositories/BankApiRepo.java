@@ -8,7 +8,6 @@ import androidx.lifecycle.MutableLiveData;
 import com.rokudo.xpense.data.retrofit.GetDataService;
 import com.rokudo.xpense.data.retrofit.RetrofitClientInstance;
 import com.rokudo.xpense.data.retrofit.models.AccountDetails;
-import com.rokudo.xpense.data.retrofit.models.Balance;
 import com.rokudo.xpense.data.retrofit.models.Balances;
 import com.rokudo.xpense.data.retrofit.models.DeleteResponse;
 import com.rokudo.xpense.data.retrofit.models.EndUserAgreement;
@@ -40,6 +39,17 @@ public class BankApiRepo {
     GetDataService service = RetrofitClientInstance.geInstance().create(GetDataService.class);
     private final MutableLiveData<Token> tokenMutableLiveData = new MutableLiveData<>();
     private String requisitionError;
+    private final MutableLiveData<List<Institution>> institutionLiveData;
+    private final MutableLiveData<AccountDetails> accountDetailsMutableLiveData;
+    private final MutableLiveData<Balances> balancesMutableLiveData;
+    private final MutableLiveData<TransactionsResponse> accountTransactionsLiveData;
+
+    public BankApiRepo() {
+        this.institutionLiveData = new MutableLiveData<>();
+        this.balancesMutableLiveData = new MutableLiveData<>();
+        this.accountTransactionsLiveData = new MutableLiveData<>();
+        this.accountDetailsMutableLiveData = new MutableLiveData<>();
+    }
 
     public String getRequisitionError() {
         return requisitionError;
@@ -76,7 +86,6 @@ public class BankApiRepo {
     }
 
     public MutableLiveData<List<Institution>> getInstitutionList() {
-        MutableLiveData<List<Institution>> institutionLiveData = new MutableLiveData<>();
 
         service.getAllInstitutions()
                 .enqueue(new Callback<List<Institution>>() {
@@ -193,8 +202,6 @@ public class BankApiRepo {
     }
 
     public MutableLiveData<AccountDetails> getAccountDetails(String account_id) {
-        MutableLiveData<AccountDetails> accountDetailsMutableLiveData = new MutableLiveData<>();
-
         service.getAccountDetails(account_id).enqueue(new Callback<AccountDetails>() {
             @Override
             public void onResponse(@NonNull Call<AccountDetails> call, @NonNull Response<AccountDetails> response) {
@@ -217,9 +224,30 @@ public class BankApiRepo {
         return accountDetailsMutableLiveData;
     }
 
-    public MutableLiveData<TransactionsResponse> getAccountTransactions(String account_id, String date_from) {
-        MutableLiveData<TransactionsResponse> accountTransactionsLiveData = new MutableLiveData<>();
+    public MutableLiveData<Balances> getAccountBalances(String account_id) {
 
+        service.getAccountBalances(account_id).enqueue(new Callback<Balances>() {
+            @Override
+            public void onResponse(@NonNull Call<Balances> call, @NonNull Response<Balances> response) {
+                if (response.isSuccessful()) {
+                    balancesMutableLiveData.setValue(response.body());
+                } else {
+                    balancesMutableLiveData.setValue(null);
+                    Log.e(TAG, "onResponse: " + getErrorMessage(response.errorBody()));
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Balances> call, @NonNull Throwable t) {
+                balancesMutableLiveData.setValue(null);
+                Log.e(TAG, "onFailure: ", t);
+            }
+        });
+
+        return balancesMutableLiveData;
+    }
+
+    public MutableLiveData<TransactionsResponse> getAccountTransactions(String account_id, String date_from) {
         service.getAccountTransactions(account_id, date_from)
                 .enqueue(new Callback<TransactionsResponse>() {
                     @Override
@@ -297,27 +325,4 @@ public class BankApiRepo {
         });
     }
 
-    public MutableLiveData<Balances> getAccountBalances(String account_id) {
-        MutableLiveData<Balances> objectMutableLiveData = new MutableLiveData<>();
-
-        service.getAccountBalances(account_id).enqueue(new Callback<Balances>() {
-            @Override
-            public void onResponse(@NonNull Call<Balances> call, @NonNull Response<Balances> response) {
-                if (response.isSuccessful()) {
-                    objectMutableLiveData.setValue(response.body());
-                } else {
-                    objectMutableLiveData.setValue(null);
-                    Log.e(TAG, "onResponse: " + getErrorMessage(response.errorBody()));
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Balances> call, @NonNull Throwable t) {
-                objectMutableLiveData.setValue(null);
-                Log.e(TAG, "onFailure: ", t);
-            }
-        });
-
-        return objectMutableLiveData;
-    }
 }
