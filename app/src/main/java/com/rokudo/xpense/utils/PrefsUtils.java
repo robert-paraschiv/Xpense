@@ -1,5 +1,7 @@
 package com.rokudo.xpense.utils;
 
+import static com.rokudo.xpense.utils.NordigenUtils.TOKEN_PREFS_NAME;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -39,7 +41,7 @@ public class PrefsUtils {
         SharedPreferences settings = context
                 .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString("token", token);
+        editor.putString(TOKEN_PREFS_NAME, token);
         editor.apply();
     }
 

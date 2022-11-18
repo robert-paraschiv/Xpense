@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
@@ -37,8 +38,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,12 +59,19 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
 
         bankApiViewModel = new ViewModelProvider(requireActivity()).get(BankApiViewModel.class);
 
+        initOnClicks();
+
         binding.detailsShimer.startShimmer();
 
         buildRecyclerView();
         getArgsPassed();
 
         return binding.getRoot();
+    }
+
+    private void initOnClicks() {
+        binding.backBtn.setOnClickListener(v ->
+                Navigation.findNavController(binding.getRoot()).popBackStack());
     }
 
     private void getArgsPassed() {
@@ -101,79 +107,104 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
                 .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE)
                 .getString(TOKEN_PREFS_NAME, "");
         NordigenUtils.TOKEN_VAL = token;
+
         if (token.isEmpty()) {
             getToken(bAccount);
         } else {
-            bankApiViewModel.getAccountDetails(bAccount.getAccounts().get(0))
-                    .observe(getViewLifecycleOwner(), accountDetails -> {
-                        if (accountDetails == null || accountDetails.getAccount() == null) {
-                            Log.e(TAG, "getBankAccountDetails: null acc details");
-                        } else {
-                            binding.accIBAN.setText(accountDetails.getAccount().getIban());
-                            binding.accCurrency.setText(accountDetails.getAccount().getCurrency());
-                        }
-
-                        bankApiViewModel.getAccountBalances(bAccount.getAccounts().get(0))
-                                .observe(getViewLifecycleOwner(), balances -> {
-                                    if (balances == null) {
-                                        Log.e(TAG, "onChanged: null balances");
-                                    } else {
-                                        Log.d(TAG, "onChanged: " + balances);
-                                        binding.accAmount.setText(balances.getBalances()[0].getBalanceAmount().get("amount"));
-                                        binding.accDetails.setVisibility(View.VISIBLE);
-                                        binding.detailsShimer.stopShimmer();
-                                        binding.detailsShimer.setVisibility(View.INVISIBLE);
-                                    }
-                                });
-                    });
-
-
-            String date_from = "2022-11-10";
-            bankApiViewModel.getAccountTransactions(bAccount.getAccounts().get(0), date_from)
-                    .observe(getViewLifecycleOwner(), transactionsResponse -> {
-                        if (transactionsResponse == null || transactionsResponse.getTransactions() == null) {
-                            Log.e(TAG, "onResponse: null trans response");
-                        } else {
-
-                            binding.progressIndicator.setVisibility(View.GONE);
-
-                            bankTransactionList.addAll(Arrays.asList(transactionsResponse.getTransactions().getBooked()));
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd");
-                            bankTransactionList.sort((o1, o2) -> {
-                                if (o1.getBookingDate() != null && o2.getBookingDate() != null) {
-                                    try {
-                                        return Objects.requireNonNull(simpleDateFormat.parse(o1.getBookingDate()))
-                                                .compareTo(simpleDateFormat.parse(o2.getBookingDate()));
-                                    } catch (ParseException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                                if (o1.getBookingDate() == null && o2.getBookingDate() != null) {
-                                    return 1;
-                                } else {
-                                    return -1;
-                                }
-                            });
-
-                            for (BankTransaction bankTransaction : transactionsResponse.getTransactions().getPending()) {
-                                bankTransactionList.add(0,bankTransaction);
-                            }
-
-                            for (int i = 0; i < bankTransactionList.size(); i++) {
-                                BankTransaction bankTransaction = bankTransactionList.get(i);
-
-                                Transaction transaction = new Transaction();
-                                transaction.setId(bankTransaction.getTransactionId());
-                                transaction.setAmount(bankTransaction.getTransactionAmount().getAmount().doubleValue());
-                                transaction.setCurrency(bankTransaction.getTransactionAmount().getCurrency());
-                                transaction.setTitle(bankTransaction.getRemittanceInformationUnstructured());
-
-                                transactionList.add(transaction);
-                                adapter.notifyItemInserted(transactionList.indexOf(transaction));
-                            }
-                        }
-                    });
+            checkToken(bAccount, token);
         }
+
+    }
+
+    private void checkToken(BAccount bAccount, String token) {
+        bankApiViewModel.refreshToken(token).observe(getViewLifecycleOwner(), s -> {
+            Log.d(TAG, "getBankAccountDetails: " + s);
+            if (s.contains("Token is invalid or expired")) {
+                getToken(bAccount);
+            } else {
+                getAccountDetails(bAccount);
+                getAccountBalances(bAccount);
+                getAccountTransactions(bAccount);
+            }
+        });
+    }
+
+    private void getAccountTransactions(BAccount bAccount) {
+        String date_from = "2022-11-10";
+        bankApiViewModel.getAccountTransactions(bAccount.getAccounts().get(0), date_from)
+                .observe(getViewLifecycleOwner(), transactionsResponse -> {
+                    if (transactionsResponse == null || transactionsResponse.getTransactions() == null) {
+                        Log.e(TAG, "onResponse: null trans response");
+                    } else {
+
+                        binding.progressIndicator.setVisibility(View.GONE);
+                        transactionList.clear();
+                        bankTransactionList.clear();
+                        adapter.notifyDataSetChanged();
+                        bankTransactionList.addAll(Arrays.asList(transactionsResponse.getTransactions().getBooked()));
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd");
+                        bankTransactionList.sort((o1, o2) -> {
+                            if (o1.getBookingDate() != null && o2.getBookingDate() != null) {
+                                try {
+                                    return Objects.requireNonNull(simpleDateFormat.parse(o1.getBookingDate()))
+                                            .compareTo(simpleDateFormat.parse(o2.getBookingDate()));
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            if (o1.getBookingDate() == null && o2.getBookingDate() != null) {
+                                return 1;
+                            } else {
+                                return -1;
+                            }
+                        });
+
+                        for (BankTransaction bankTransaction : transactionsResponse.getTransactions().getPending()) {
+                            bankTransactionList.add(0, bankTransaction);
+                        }
+
+                        for (int i = 0; i < bankTransactionList.size(); i++) {
+                            BankTransaction bankTransaction = bankTransactionList.get(i);
+
+                            Transaction transaction = new Transaction();
+                            transaction.setId(bankTransaction.getTransactionId());
+                            transaction.setAmount(bankTransaction.getTransactionAmount().getAmount().doubleValue());
+                            transaction.setCurrency(bankTransaction.getTransactionAmount().getCurrency());
+                            transaction.setTitle(bankTransaction.getRemittanceInformationUnstructured());
+
+                            transactionList.add(transaction);
+                            adapter.notifyItemInserted(transactionList.indexOf(transaction));
+                        }
+                    }
+                });
+    }
+
+    private void getAccountBalances(BAccount bAccount) {
+        bankApiViewModel.getAccountBalances(bAccount.getAccounts().get(0))
+                .observe(getViewLifecycleOwner(), balances -> {
+                    if (balances == null) {
+                        Log.e(TAG, "onChanged: null balances");
+                    } else {
+                        Log.d(TAG, "onChanged: " + balances);
+                        binding.accAmount.setText(balances.getBalances()[0].getBalanceAmount().get("amount"));
+                        binding.accDetails.setVisibility(View.VISIBLE);
+                        binding.detailsShimer.stopShimmer();
+                        binding.detailsShimer.setVisibility(View.INVISIBLE);
+                    }
+                });
+    }
+
+    private void getAccountDetails(BAccount bAccount) {
+        bankApiViewModel.getAccountDetails(bAccount.getAccounts().get(0))
+                .observe(getViewLifecycleOwner(), accountDetails -> {
+                    if (accountDetails == null || accountDetails.getAccount() == null) {
+                        Log.e(TAG, "getBankAccountDetails: null acc details");
+                    } else {
+                        Log.d(TAG, "getBankAccountDetails: on change ");
+                        binding.accIBAN.setText(accountDetails.getAccount().getIban());
+                        binding.accCurrency.setText(accountDetails.getAccount().getCurrency());
+                    }
+                });
     }
 
     private void getToken(BAccount bAccount) {

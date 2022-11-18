@@ -31,6 +31,10 @@ public interface GetDataService {
     Call<Token> getToken(@Field("secret_id") String secret_id, @Field("secret_key") String secret_key);
 
     @FormUrlEncoded
+    @POST("/api/v2/token/refresh/")
+    Call<String> refreshToken(@Field("refresh") String refresh);
+
+    @FormUrlEncoded
     @POST("/api/v2/agreements/enduser/")
     Call<EndUserAgreement> createEUA(@Field("institution_id") String institution_id,
                                      @Field("access_scope") List<String> access_scope);

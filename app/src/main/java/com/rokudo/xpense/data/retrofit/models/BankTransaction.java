@@ -1,5 +1,7 @@
 package com.rokudo.xpense.data.retrofit.models;
 
+import java.util.Objects;
+
 public class BankTransaction {
     private String transactionId;
     private String endToEndId;
@@ -91,6 +93,19 @@ public class BankTransaction {
                 ", proprietaryBankTransactionCode='" + proprietaryBankTransactionCode + '\'' +
                 ", internalTransactionId='" + internalTransactionId + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BankTransaction that = (BankTransaction) o;
+        return Objects.equals(transactionId, that.transactionId) && Objects.equals(internalTransactionId, that.internalTransactionId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(transactionId, internalTransactionId);
     }
 }
 

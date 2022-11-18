@@ -11,59 +11,40 @@
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="?android:attr/actionBarSize"
+        android:layout_height="wrap_content"
         app:contentInsetStart="0dp">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/backBtn"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="4dp"
-                app:icon="@drawable/ic_round_arrow_back_ios_24"
-                app:iconGravity="start"
-                app:iconPadding="0dp"
-                app:iconSize="25dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="16dp"
-                android:layout_toEndOf="@id/backBtn"
-                android:text="Bank Account Details"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-        </RelativeLayout>
-
-    </com.google.android.material.appbar.MaterialToolbar>
-
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/toolbar">
-
-        <LinearLayout
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_marginStart="18dp"
+            android:layout_marginEnd="18dp"
+            android:orientation="vertical"
+            app:cardBackgroundColor="@color/bar_details_chip_state_list"
+            app:strokeWidth="0dp">
 
-            <com.google.android.material.card.MaterialCardView
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="18dp"
-                android:orientation="vertical"
-                app:cardBackgroundColor="@color/bar_details_chip_state_list"
-                app:strokeWidth="0dp">
+                android:layout_height="wrap_content"
+                android:layout_margin="14dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/backBtn"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="8dp"
+                    app:icon="@drawable/ic_round_arrow_back_ios_24"
+                    app:iconGravity="start"
+                    app:iconPadding="0dp"
+                    app:iconSize="25dp" />
+
 
                 <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/backBtn">
 
 
                     <com.facebook.shimmer.ShimmerFrameLayout
@@ -78,7 +59,6 @@
                         android:id="@+id/accDetails"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="24dp"
                         android:layout_marginEnd="24dp"
                         android:orientation="vertical"
                         android:padding="18dp"
@@ -149,7 +129,21 @@
                     </LinearLayout>
 
                 </RelativeLayout>
-            </com.google.android.material.card.MaterialCardView>
+            </RelativeLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </com.google.android.material.appbar.MaterialToolbar>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/transactionsRv"

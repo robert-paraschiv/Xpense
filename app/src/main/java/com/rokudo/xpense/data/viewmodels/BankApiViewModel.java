@@ -30,6 +30,10 @@ public class BankApiViewModel extends AndroidViewModel {
         return repo.getToken();
     }
 
+    public MutableLiveData<String> refreshToken(String token) {
+        return repo.refreshToken(token);
+    }
+
     public MutableLiveData<List<Institution>> getInstitutionList() {
         return repo.getInstitutionList();
     }

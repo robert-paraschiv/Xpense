@@ -39,16 +39,16 @@ public class BankApiRepo {
     GetDataService service = RetrofitClientInstance.geInstance().create(GetDataService.class);
     private final MutableLiveData<Token> tokenMutableLiveData = new MutableLiveData<>();
     private String requisitionError;
-    private final MutableLiveData<List<Institution>> institutionLiveData;
-    private final MutableLiveData<AccountDetails> accountDetailsMutableLiveData;
-    private final MutableLiveData<Balances> balancesMutableLiveData;
-    private final MutableLiveData<TransactionsResponse> accountTransactionsLiveData;
+//    private final MutableLiveData<List<Institution>> institutionLiveData;
+//    private final MutableLiveData<AccountDetails> accountDetailsMutableLiveData;
+//    private final MutableLiveData<Balances> balancesMutableLiveData;
+//    private final MutableLiveData<TransactionsResponse> accountTransactionsLiveData;
 
     public BankApiRepo() {
-        this.institutionLiveData = new MutableLiveData<>();
-        this.balancesMutableLiveData = new MutableLiveData<>();
-        this.accountTransactionsLiveData = new MutableLiveData<>();
-        this.accountDetailsMutableLiveData = new MutableLiveData<>();
+//        this.institutionLiveData = new MutableLiveData<>();
+//        this.balancesMutableLiveData = new MutableLiveData<>();
+//        this.accountTransactionsLiveData = new MutableLiveData<>();
+//        this.accountDetailsMutableLiveData = new MutableLiveData<>();
     }
 
     public String getRequisitionError() {
@@ -85,7 +85,35 @@ public class BankApiRepo {
         return tokenMutableLiveData;
     }
 
+    public MutableLiveData<String> refreshToken(String token) {
+        MutableLiveData<String> tokenLiveData = new MutableLiveData<>();
+
+        service.refreshToken(token)
+                .enqueue(new Callback<String>() {
+                    @Override
+                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                        Log.d(TAG, "onResponse: ");
+                        if (response.isSuccessful()) {
+                            if (response.body() != null) {
+                                tokenLiveData.setValue(response.body());
+                            }
+                        } else {
+                            tokenLiveData.setValue(getErrorMessage(response.errorBody()));
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                        Log.e(TAG, "onFailure: " + t.getMessage());
+                        tokenLiveData.setValue(null);
+                    }
+                });
+
+        return tokenLiveData;
+    }
+
     public MutableLiveData<List<Institution>> getInstitutionList() {
+        MutableLiveData<List<Institution>> institutionLiveData = new MutableLiveData<>();
 
         service.getAllInstitutions()
                 .enqueue(new Callback<List<Institution>>() {
@@ -202,6 +230,8 @@ public class BankApiRepo {
     }
 
     public MutableLiveData<AccountDetails> getAccountDetails(String account_id) {
+        MutableLiveData<AccountDetails> accountDetailsMutableLiveData = new MutableLiveData<>();
+
         service.getAccountDetails(account_id).enqueue(new Callback<AccountDetails>() {
             @Override
             public void onResponse(@NonNull Call<AccountDetails> call, @NonNull Response<AccountDetails> response) {
@@ -225,6 +255,7 @@ public class BankApiRepo {
     }
 
     public MutableLiveData<Balances> getAccountBalances(String account_id) {
+        MutableLiveData<Balances> balancesMutableLiveData = new MutableLiveData<>();
 
         service.getAccountBalances(account_id).enqueue(new Callback<Balances>() {
             @Override
@@ -248,6 +279,7 @@ public class BankApiRepo {
     }
 
     public MutableLiveData<TransactionsResponse> getAccountTransactions(String account_id, String date_from) {
+        MutableLiveData<TransactionsResponse> accountTransactionsLiveData = new MutableLiveData<>();
         service.getAccountTransactions(account_id, date_from)
                 .enqueue(new Callback<TransactionsResponse>() {
                     @Override
