@@ -140,5 +140,8 @@
         <argument
             android:name="bAccount"
             app:argType="com.rokudo.xpense.models.BAccount" />
+        <action
+            android:id="@+id/action_BAccountDetailsFragment_to_addTransactionFragment"
+            app:destination="@id/addTransactionFragment" />
     </fragment>
 </navigation>

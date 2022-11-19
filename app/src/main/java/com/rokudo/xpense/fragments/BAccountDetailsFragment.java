@@ -46,6 +46,7 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
 
     BankApiViewModel bankApiViewModel;
     FragmentBAccountDetailsBinding binding;
+    BAccount bAccount;
 
     private TransactionsAdapter adapter;
     private final List<BankTransaction> bankTransactionList = new ArrayList<>();
@@ -77,6 +78,7 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
 
     private void getArgsPassed() {
         BAccountDetailsFragmentArgs args = BAccountDetailsFragmentArgs.fromBundle(requireArguments());
+        bAccount = args.getBAccount();
         updateBankAccDetailsUI(args.getBAccount());
     }
 
@@ -226,6 +228,17 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
 
     @Override
     public void onClick(Transaction transaction) {
+        if (transaction.getAmount().toString().startsWith("-")) {
+            transaction.setType(Transaction.EXPENSE_TYPE);
+        } else {
+            transaction.setType(Transaction.INCOME_TYPE);
+        }
+        transaction.setAmount(Math.abs(transaction.getAmount()));
 
+        Navigation.findNavController(binding.getRoot())
+                .navigate(BAccountDetailsFragmentDirections
+                        .actionBAccountDetailsFragmentToAddTransactionFragment(bAccount.getWalletIds().get(0),
+                                bAccount.getLinked_acc_currency(),
+                                transaction));
     }
 }

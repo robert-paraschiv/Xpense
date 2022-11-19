@@ -243,7 +243,8 @@ public class AddTransactionFragment extends Fragment {
             viewModel.addTransaction(transaction).observe(getViewLifecycleOwner(), result -> {
                 if (result != null && result.equals("Success")) {
                     uploadingDialog.dismiss();
-                    Navigation.findNavController(binding.getRoot()).popBackStack();
+                    Navigation.findNavController(binding.getRoot())
+                            .popBackStack(R.id.homeFragment, false);
                 }
             });
         } else {
@@ -258,7 +259,8 @@ public class AddTransactionFragment extends Fragment {
             viewModel.updateTransaction(transaction).observe(getViewLifecycleOwner(), result -> {
                 if (result.equals("Success")) {
                     uploadingDialog.dismiss();
-                    Navigation.findNavController(binding.getRoot()).popBackStack();
+                    Navigation.findNavController(binding.getRoot())
+                            .popBackStack(R.id.homeFragment, false);
                 }
             });
         }
