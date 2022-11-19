@@ -14,7 +14,7 @@
         android:layout_height="40dp"
         android:orientation="horizontal"
         app:strokeWidth="0dp"
-        tools:cardBackgroundColor="@color/black"
+        tools:cardBackgroundColor="@color/sharedIconTintColor"
         tools:ignore="UseCompoundDrawables" />
 
     <com.google.android.material.card.MaterialCardView
@@ -23,7 +23,7 @@
         android:layout_marginTop="8dp"
         android:background="@color/white"
         app:strokeWidth="0dp"
-        tools:cardBackgroundColor="@color/black" />
+        tools:cardBackgroundColor="@color/sharedIconTintColor" />
 
     <LinearLayout
         android:layout_marginTop="4dp"
@@ -35,14 +35,14 @@
             android:layout_width="40dp"
             android:layout_height="26dp"
             app:strokeWidth="0dp"
-            tools:cardBackgroundColor="@color/black" />
+            tools:cardBackgroundColor="@color/sharedIconTintColor" />
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="100dp"
             android:layout_height="26dp"
             android:layout_marginStart="8dp"
             app:strokeWidth="0dp"
-            tools:cardBackgroundColor="@color/black" />
+            tools:cardBackgroundColor="@color/sharedIconTintColor" />
     </LinearLayout>
 
 </LinearLayout>

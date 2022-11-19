@@ -134,10 +134,43 @@
 
     </com.google.android.material.appbar.MaterialToolbar>
 
-    <androidx.core.widget.NestedScrollView
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/transShimmerLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <include layout="@layout/placeholder_transaction_shimmer" />
+
+            <include layout="@layout/placeholder_transaction_shimmer" />
+
+            <include layout="@layout/placeholder_transaction_shimmer" />
+
+            <include layout="@layout/placeholder_transaction_shimmer" />
+
+            <include layout="@layout/placeholder_transaction_shimmer" />
+
+            <include layout="@layout/placeholder_transaction_shimmer" />
+
+            <include layout="@layout/placeholder_transaction_shimmer" />
+
+            <include layout="@layout/placeholder_transaction_shimmer" />
+        </LinearLayout>
+
+    </com.facebook.shimmer.ShimmerFrameLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/transactionNested"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/toolbar"
+        android:visibility="invisible"
+        tools:visibility="visible">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -154,16 +187,16 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/progressIndicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="60dp"
-        android:indeterminate="true"
-        app:indicatorSize="80dp"
-        tools:progress="80" />
+<!--    <com.google.android.material.progressindicator.CircularProgressIndicator-->
+<!--        android:id="@+id/progressIndicator"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_centerInParent="true"-->
+<!--        android:layout_marginTop="20dp"-->
+<!--        android:layout_marginBottom="60dp"-->
+<!--        android:indeterminate="true"-->
+<!--        app:indicatorSize="80dp"-->
+<!--        tools:progress="80" />-->
 
 
 </RelativeLayout>

@@ -62,6 +62,7 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
         initOnClicks();
 
         binding.detailsShimer.startShimmer();
+        binding.transShimmerLayout.startShimmer();
 
         buildRecyclerView();
         getArgsPassed();
@@ -138,7 +139,6 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
                         Log.e(TAG, "onResponse: null trans response");
                     } else {
 
-                        binding.progressIndicator.setVisibility(View.GONE);
                         transactionList.clear();
                         bankTransactionList.clear();
                         adapter.notifyDataSetChanged();
@@ -176,6 +176,11 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
                             transactionList.add(transaction);
                             adapter.notifyItemInserted(transactionList.indexOf(transaction));
                         }
+
+
+                        binding.transactionNested.setVisibility(View.VISIBLE);
+                        binding.transShimmerLayout.stopShimmer();
+                        binding.transShimmerLayout.setVisibility(View.INVISIBLE);
                     }
                 });
     }
