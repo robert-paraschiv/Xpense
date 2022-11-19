@@ -80,23 +80,32 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             accountDetailsList.add(accountDetails);
                             if (accountDetailsList.size() == requisition.getAccounts().length) {
-                                BankAccsListDialog bankAccsListDialog = new BankAccsListDialog(accountDetailsList);
-                                bankAccsListDialog.show(getSupportFragmentManager(), "BankAccountListDialog");
-                                bankAccsListDialog.setClickListener(position -> {
-                                    Log.d(TAG, "getAccountsDetails: " + requisition.getAccounts()[position]);
-                                    bAccount.setAccounts(new ArrayList<>(Collections.singletonList(requisition.getAccounts()[position])));
-
-                                    DatabaseUtils.walletsRef.document(bAccount.getWalletIds().get(0))
-                                            .update("bAccount", bAccount)
-                                            .addOnSuccessListener(unused -> {
-                                                Log.d(TAG, "getAccountsDetails: updated wallet with bank account");
-                                                bankAccsListDialog.dismiss();
-                                            });
-                                });
+                                showAccountsListDialog(requisition, bAccount, accountDetailsList);
                             }
                         }
                     });
         }
+    }
+
+    private void showAccountsListDialog(Requisition requisition, BAccount bAccount,
+                                        List<AccountDetails> accountDetailsList) {
+        BankAccsListDialog bankAccsListDialog = new BankAccsListDialog(accountDetailsList);
+        bankAccsListDialog.show(getSupportFragmentManager(), "BankAccountListDialog");
+        bankAccsListDialog.setClickListener(position -> {
+            Log.d(TAG, "getAccountsDetails: " + requisition.getAccounts()[position]);
+            bAccount.setAccounts(new ArrayList<>(
+                    Collections.singletonList(accountDetailsList.get(position).getAccount_id())));
+            bAccount.setLinked_acc_id(accountDetailsList.get(position).getAccount_id());
+            bAccount.setLinked_acc_currency(accountDetailsList.get(position).getAccount().getCurrency());
+            bAccount.setLinked_acc_iban(accountDetailsList.get(position).getAccount().getIban());
+
+            DatabaseUtils.walletsRef.document(bAccount.getWalletIds().get(0))
+                    .update("bAccount", bAccount)
+                    .addOnSuccessListener(unused -> {
+                        Log.d(TAG, "getAccountsDetails: updated wallet with bank account");
+                        bankAccsListDialog.dismiss();
+                    });
+        });
     }
 
     @Override

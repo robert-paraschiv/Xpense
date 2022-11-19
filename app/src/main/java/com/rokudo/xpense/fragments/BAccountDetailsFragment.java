@@ -88,6 +88,8 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
 
     private void updateBankAccDetailsUI(BAccount bAccount) {
         binding.accBankName.setText(bAccount.getBankName());
+        binding.accIBAN.setText(bAccount.getLinked_acc_iban());
+        binding.accCurrency.setText(bAccount.getLinked_acc_currency());
 
         Glide.with(binding.accBankImage)
                 .load(bAccount.getBankPic())
@@ -122,7 +124,6 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
             if (s.contains("Token is invalid or expired")) {
                 getToken(bAccount);
             } else {
-                getAccountDetails(bAccount);
                 getAccountBalances(bAccount);
                 getAccountTransactions(bAccount);
             }
@@ -194,18 +195,6 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
                 });
     }
 
-    private void getAccountDetails(BAccount bAccount) {
-        bankApiViewModel.getAccountDetails(bAccount.getAccounts().get(0))
-                .observe(getViewLifecycleOwner(), accountDetails -> {
-                    if (accountDetails == null || accountDetails.getAccount() == null) {
-                        Log.e(TAG, "getBankAccountDetails: null acc details");
-                    } else {
-                        Log.d(TAG, "getBankAccountDetails: on change ");
-                        binding.accIBAN.setText(accountDetails.getAccount().getIban());
-                        binding.accCurrency.setText(accountDetails.getAccount().getCurrency());
-                    }
-                });
-    }
 
     private void getToken(BAccount bAccount) {
         bankApiViewModel.getToken().observe(getViewLifecycleOwner(), token -> {

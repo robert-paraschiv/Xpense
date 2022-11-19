@@ -255,8 +255,11 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
                             bankAccsListDialog.show(getParentFragmentManager(), "BankAccountListDialog");
                             bankAccsListDialog.setClickListener(position -> {
                                 Log.d(TAG, "getAccountsDetails: " + accounts.get(position));
-                                bAccount.setAccounts(new ArrayList<>(Collections.singletonList(accounts.get(position))));
-
+                                bAccount.setAccounts(new ArrayList<>(
+                                        Collections.singletonList(accountDetailsList.get(position).getAccount_id())));
+                                bAccount.setLinked_acc_id(accountDetailsList.get(position).getAccount_id());
+                                bAccount.setLinked_acc_currency(accountDetailsList.get(position).getAccount().getCurrency());
+                                bAccount.setLinked_acc_iban(accountDetailsList.get(position).getAccount().getIban());
                                 DatabaseUtils.walletsRef.document(bAccount.getWalletIds().get(0))
                                         .update("bAccount", bAccount)
                                         .addOnSuccessListener(unused -> {

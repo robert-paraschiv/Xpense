@@ -237,7 +237,11 @@ public class BankApiRepo {
             public void onResponse(@NonNull Call<AccountDetails> call, @NonNull Response<AccountDetails> response) {
                 Log.d(TAG, "onResponse: ");
                 if (response.isSuccessful()) {
-                    accountDetailsMutableLiveData.setValue(response.body());
+                    AccountDetails accountDetails = response.body();
+                    if (accountDetails != null) {
+                        accountDetails.setAccount_id(account_id);
+                    }
+                    accountDetailsMutableLiveData.setValue(accountDetails);
                 } else {
                     Log.e(TAG, "onResponse: " + getErrorMessage(response.errorBody()));
                     accountDetailsMutableLiveData.setValue(null);

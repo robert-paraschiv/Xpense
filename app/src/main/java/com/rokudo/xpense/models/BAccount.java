@@ -1,5 +1,7 @@
 package com.rokudo.xpense.models;
 
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -7,15 +9,18 @@ import java.util.Map;
 import java.util.Objects;
 
 public class BAccount implements Serializable {
-    String id;
-    String owner_id;
-    String EUA_id;
-    String requisition_id;
-    String institutionId;
-    String bankName;
-    String bankPic;
-    List<String> accounts;
-    List<String> walletIds;
+    private String id;
+    private String owner_id;
+    private String EUA_id;
+    private String requisition_id;
+    private String institutionId;
+    private String bankName;
+    private String bankPic;
+    private List<String> accounts;
+    private List<String> walletIds;
+    private String linked_acc_id;
+    private String linked_acc_iban;
+    private String linked_acc_currency;
     private Date EUA_EndDate;
 
     public String getId() {
@@ -50,11 +55,11 @@ public class BAccount implements Serializable {
         this.requisition_id = requisition_id;
     }
 
-    public  List<String> getAccounts() {
+    public List<String> getAccounts() {
         return accounts;
     }
 
-    public void setAccounts( List<String> accounts) {
+    public void setAccounts(List<String> accounts) {
         this.accounts = accounts;
     }
 
@@ -90,6 +95,30 @@ public class BAccount implements Serializable {
         this.bankPic = bankPic;
     }
 
+    public String getLinked_acc_id() {
+        return linked_acc_id;
+    }
+
+    public void setLinked_acc_id(String linked_acc_id) {
+        this.linked_acc_id = linked_acc_id;
+    }
+
+    public String getLinked_acc_iban() {
+        return linked_acc_iban;
+    }
+
+    public void setLinked_acc_iban(String linked_acc_iban) {
+        this.linked_acc_iban = linked_acc_iban;
+    }
+
+    public String getLinked_acc_currency() {
+        return linked_acc_currency;
+    }
+
+    public void setLinked_acc_currency(String linked_acc_currency) {
+        this.linked_acc_currency = linked_acc_currency;
+    }
+
     public Date getEUA_EndDate() {
         return EUA_EndDate;
     }
@@ -98,6 +127,7 @@ public class BAccount implements Serializable {
         this.EUA_EndDate = EUA_EndDate;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "BAccount{" +
@@ -110,6 +140,9 @@ public class BAccount implements Serializable {
                 ", bankPic='" + bankPic + '\'' +
                 ", accounts=" + accounts +
                 ", walletIds=" + walletIds +
+                ", linked_acc_id='" + linked_acc_id + '\'' +
+                ", linked_acc_iban='" + linked_acc_iban + '\'' +
+                ", linked_acc_currency='" + linked_acc_currency + '\'' +
                 ", EUA_EndDate=" + EUA_EndDate +
                 '}';
     }

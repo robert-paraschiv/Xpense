@@ -14,6 +14,7 @@ import static com.rokudo.xpense.utils.dialogs.DialogUtils.getCircularProgressDra
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,6 +25,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -278,7 +280,16 @@ public class HomeFragment extends Fragment {
                     .into(binding.sharedWithIcon);
         }
 
-        if (wallet.getbAccount() != null) {
+        if (wallet.getbAccount() == null) {
+            binding.bankAccountChip.setText("+ Bank Account");
+            binding.bankAccountChip
+                    .setChipIconTint(ColorStateList.valueOf(
+                            getResources().
+                                    getColor(R.color.sharedIconTintColor, requireContext().getTheme())));
+            binding.bankAccountChip
+                    .setChipIcon(AppCompatResources
+                            .getDrawable(requireContext(), R.drawable.ic_baseline_local_atm_24));
+        } else {
             binding.bankAccountChip.setText(wallet.getbAccount().getBankName());
             Glide.with(binding.bankAccountChip)
                     .asDrawable()
