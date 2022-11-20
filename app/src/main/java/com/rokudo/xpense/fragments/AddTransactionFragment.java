@@ -137,16 +137,22 @@ public class AddTransactionFragment extends Fragment {
                     return;
                 }
 
-                selectedCategory = CategoriesUtil.expenseCategoryList.get(
-                        CategoriesUtil.expenseCategoryList
-                                .indexOf(new ExpenseCategory(mTransaction.getCategory(), null, null)));
+                ExpenseCategory transactionExpenseCategory = new ExpenseCategory(mTransaction.getCategory(), null, null);
+                try {
+                    selectedCategory = CategoriesUtil.expenseCategoryList.get(
+                            CategoriesUtil.expenseCategoryList
+                                    .indexOf(transactionExpenseCategory));
+                } catch (ArrayIndexOutOfBoundsException ignored) {
+                }
 
 
-                for (int i = 0; i < binding.categoryChipGroup.getChildCount(); i++) {
-                    Chip chip = (Chip) binding.categoryChipGroup.getChildAt(i);
-                    if (i == CategoriesUtil.expenseCategoryList.indexOf(
-                            new ExpenseCategory(mTransaction.getCategory(), null, null))) {
-                        chip.setChecked(true);
+                if (selectedCategory != null) {
+                    for (int i = 0; i < binding.categoryChipGroup.getChildCount(); i++) {
+                        Chip chip = (Chip) binding.categoryChipGroup.getChildAt(i);
+                        if (i == CategoriesUtil.expenseCategoryList.indexOf(
+                                transactionExpenseCategory)) {
+                            chip.setChecked(true);
+                        }
                     }
                 }
 

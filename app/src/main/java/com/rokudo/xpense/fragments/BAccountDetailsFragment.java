@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
+import java.util.Locale;
 
 public class BAccountDetailsFragment extends Fragment implements TransactionsAdapter.OnTransactionClickListener {
     private static final String TAG = "BAccountDetailsFragment";
@@ -50,8 +50,8 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
     BAccount bAccount;
 
     private TransactionsAdapter adapter;
-    private final List<BankTransaction> bankTransactionList = new ArrayList<>();
     private final List<Transaction> transactionList = new ArrayList<>();
+    private final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -141,29 +141,13 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
                     if (transactionsResponse == null || transactionsResponse.getTransactions() == null) {
                         Log.e(TAG, "onResponse: null trans response");
                     } else {
+                        List<BankTransaction> bankTransactionList = new ArrayList<>(Arrays.asList(transactionsResponse.getTransactions().getBooked()));
 
-                        transactionList.clear();
-                        bankTransactionList.clear();
-                        adapter.notifyDataSetChanged();
-                        bankTransactionList.addAll(Arrays.asList(transactionsResponse.getTransactions().getBooked()));
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                        bankTransactionList.sort((o1, o2) -> {
-                            if (o1.getBookingDate() != null && o2.getBookingDate() != null) {
-                                try {
-                                    return Objects.requireNonNull(simpleDateFormat.parse(o1.getBookingDate()))
-                                            .compareTo(simpleDateFormat.parse(o2.getBookingDate()));
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            if (o1.getBookingDate() == null && o2.getBookingDate() != null) {
-                                return 1;
-                            } else {
-                                return -1;
-                            }
-                        });
+                        sortBankTransactionListByDate(bankTransactionList, simpleDateFormat);
 
+                        int pendingTransCounter = 0;
                         for (BankTransaction bankTransaction : transactionsResponse.getTransactions().getPending()) {
+                            bankTransaction.setInternalTransactionId("" + pendingTransCounter++);
                             bankTransactionList.add(0, bankTransaction);
                         }
 
@@ -180,21 +164,50 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
                                     e.printStackTrace();
                                 }
                             }
-                            transaction.setId(bankTransaction.getTransactionId());
+                            transaction.setId(bankTransaction.getInternalTransactionId());
                             transaction.setAmount(bankTransaction.getTransactionAmount().getAmount().doubleValue());
+                            transaction.setCategory(bankTransaction.getProprietaryBankTransactionCode());
                             transaction.setCurrency(bankTransaction.getTransactionAmount().getCurrency());
                             transaction.setTitle(bankTransaction.getRemittanceInformationUnstructured());
 
-                            transactionList.add(transaction);
-                            adapter.notifyItemInserted(transactionList.indexOf(transaction));
+                            if (transactionList.contains(transaction)) {
+                                transactionList.set(transactionList.indexOf(transaction), transaction);
+                                adapter.notifyItemChanged(transactionList.indexOf(transaction));
+                            } else {
+                                transactionList.add(transaction);
+                                adapter.notifyItemInserted(transactionList.indexOf(transaction));
+                            }
                         }
 
 
-                        binding.transactionNested.setVisibility(View.VISIBLE);
-                        binding.transShimmerLayout.stopShimmer();
-                        binding.transShimmerLayout.setVisibility(View.INVISIBLE);
+                        if (binding.transactionNested.getVisibility() == View.INVISIBLE) {
+                            binding.transactionNested.setVisibility(View.VISIBLE);
+                            binding.transShimmerLayout.stopShimmer();
+                            binding.transShimmerLayout.setVisibility(View.INVISIBLE);
+                        }
                     }
                 });
+    }
+
+    private void sortBankTransactionListByDate(List<BankTransaction> bankTransactionList, SimpleDateFormat simpleDateFormat) {
+        bankTransactionList.sort((o1, o2) -> {
+            Date trans1_date = null;
+            Date trans2_date = null;
+            try {
+                trans1_date = simpleDateFormat.parse(o1.getBookingDate());
+                trans2_date = simpleDateFormat.parse(o2.getBookingDate());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            if (trans1_date == null) {
+                trans1_date = new Date();
+            }
+            if (trans2_date == null) {
+                trans2_date = new Date();
+            }
+
+            return trans2_date.compareTo(trans1_date);
+        });
     }
 
     private void getAccountBalances(BAccount bAccount) {
@@ -243,6 +256,14 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
         } else {
             transaction.setType(Transaction.INCOME_TYPE);
         }
+
+        //Check if id is one assigned manually
+        try {
+            Integer.parseInt(transaction.getId());
+            transaction.setId(null);
+        } catch (NumberFormatException ignored) {
+        }
+
         transaction.setAmount(Math.abs(transaction.getAmount()));
 
         Navigation.findNavController(binding.getRoot())
