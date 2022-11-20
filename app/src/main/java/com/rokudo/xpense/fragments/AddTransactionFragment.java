@@ -248,7 +248,7 @@ public class AddTransactionFragment extends Fragment {
                 }
             });
         } else {
-            if (mTransaction.getId() == null) {
+            if (mTransaction.getId() == null || mTransaction.getId().equals("NOTPROVIDED")) {
                 DocumentReference documentReference = DatabaseUtils.transactionsRef.document();
                 transaction.setId(documentReference.getId());
             } else {

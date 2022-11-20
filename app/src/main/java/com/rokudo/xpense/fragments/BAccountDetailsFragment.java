@@ -38,6 +38,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -145,7 +146,7 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
                         bankTransactionList.clear();
                         adapter.notifyDataSetChanged();
                         bankTransactionList.addAll(Arrays.asList(transactionsResponse.getTransactions().getBooked()));
-                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd");
+                        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
                         bankTransactionList.sort((o1, o2) -> {
                             if (o1.getBookingDate() != null && o2.getBookingDate() != null) {
                                 try {
@@ -170,6 +171,15 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
                             BankTransaction bankTransaction = bankTransactionList.get(i);
 
                             Transaction transaction = new Transaction();
+                            if (bankTransaction.getBookingDate() != null &&
+                                    !bankTransaction.getBookingDate().isEmpty()) {
+                                try {
+                                    Date transDate = simpleDateFormat.parse(bankTransaction.getBookingDate());
+                                    transaction.setDate(transDate);
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                }
+                            }
                             transaction.setId(bankTransaction.getTransactionId());
                             transaction.setAmount(bankTransaction.getTransactionAmount().getAmount().doubleValue());
                             transaction.setCurrency(bankTransaction.getTransactionAmount().getCurrency());
