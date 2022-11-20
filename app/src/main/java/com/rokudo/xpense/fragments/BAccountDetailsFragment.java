@@ -10,6 +10,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -45,9 +48,9 @@ import java.util.Locale;
 public class BAccountDetailsFragment extends Fragment implements TransactionsAdapter.OnTransactionClickListener {
     private static final String TAG = "BAccountDetailsFragment";
 
-    BankApiViewModel bankApiViewModel;
-    FragmentBAccountDetailsBinding binding;
-    BAccount bAccount;
+    private BankApiViewModel bankApiViewModel;
+    private FragmentBAccountDetailsBinding binding;
+    private BAccount bAccount;
 
     private TransactionsAdapter adapter;
     private final List<Transaction> transactionList = new ArrayList<>();
@@ -181,9 +184,32 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
 
 
                         if (binding.transactionNested.getVisibility() == View.INVISIBLE) {
-                            binding.transactionNested.setVisibility(View.VISIBLE);
-                            binding.transShimmerLayout.stopShimmer();
-                            binding.transShimmerLayout.setVisibility(View.INVISIBLE);
+
+                            AlphaAnimation shimmerLayoutFadeAnimation = new AlphaAnimation(1.0f, 0.0f);
+                            shimmerLayoutFadeAnimation.setDuration(500);
+                            shimmerLayoutFadeAnimation.setRepeatCount(0);
+
+                            shimmerLayoutFadeAnimation.setAnimationListener(new Animation.AnimationListener() {
+                                @Override
+                                public void onAnimationStart(Animation animation) {
+                                    binding.transShimmerLayout.hideShimmer();
+                                }
+
+                                @Override
+                                public void onAnimationEnd(Animation animation) {
+                                    binding.transShimmerLayout.setVisibility(View.INVISIBLE);
+                                    binding.transactionNested.setVisibility(View.VISIBLE);
+                                    binding.transactionNested.startAnimation(
+                                            AnimationUtils
+                                                    .loadAnimation(requireContext(), R.anim.item_animation_fade_in));
+                                }
+
+                                @Override
+                                public void onAnimationRepeat(Animation animation) {
+                                }
+                            });
+
+                            binding.transShimmerLayout.startAnimation(shimmerLayoutFadeAnimation);
                         }
                     }
                 });
@@ -218,9 +244,32 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
                     } else {
                         Log.d(TAG, "onChanged: " + balances);
                         binding.accAmount.setText(balances.getBalances()[0].getBalanceAmount().get("amount"));
-                        binding.accDetails.setVisibility(View.VISIBLE);
-                        binding.detailsShimer.stopShimmer();
-                        binding.detailsShimer.setVisibility(View.INVISIBLE);
+
+
+                        AlphaAnimation shimmerLayoutFadeAnimation = new AlphaAnimation(1.0f, 0.0f);
+                        shimmerLayoutFadeAnimation.setDuration(500);
+                        shimmerLayoutFadeAnimation.setRepeatCount(0);
+
+                        shimmerLayoutFadeAnimation.setAnimationListener(new Animation.AnimationListener() {
+                            @Override
+                            public void onAnimationStart(Animation animation) {
+                                binding.detailsShimer.hideShimmer();
+                            }
+
+                            @Override
+                            public void onAnimationEnd(Animation animation) {
+                                binding.accDetails.setVisibility(View.VISIBLE);
+                                binding.detailsShimer.setVisibility(View.INVISIBLE);
+                                binding.accDetails.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.item_animation_fade_in));
+                            }
+
+                            @Override
+                            public void onAnimationRepeat(Animation animation) {
+                            }
+                        });
+
+                        binding.detailsShimer.startAnimation(shimmerLayoutFadeAnimation);
+
                     }
                 });
     }
