@@ -1,5 +1,7 @@
 package com.rokudo.xpense.fragments;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 import static androidx.recyclerview.widget.RecyclerView.VERTICAL;
 
 import android.annotation.SuppressLint;
@@ -35,6 +37,7 @@ import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.MapUtil;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -44,6 +47,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -57,6 +61,7 @@ public class BarDetailsFragment extends Fragment {
     private List<ExpenseCategory> categoryList = new ArrayList<>();
     private List<TransEntry> transEntryList = new ArrayList<>();
     private boolean firstLoad = true;
+    private Integer monthMinusCounter = 0;
     Double sum = 0.0;
 
     @Override
@@ -105,6 +110,25 @@ public class BarDetailsFragment extends Fragment {
             resetCategoriesRv();
             loadLast7DaysTransactions();
         });
+        binding.previousMonthBtn.setOnClickListener(v -> {
+            binding.periodCard.setVisibility(View.GONE);
+            if (binding.nextMonthBtn.getVisibility() == GONE) {
+                binding.nextMonthBtn.setVisibility(View.VISIBLE);
+            }
+            monthMinusCounter++;
+            resetCategoriesRv();
+            loadPreviousMonthTransactions();
+        });
+        binding.nextMonthBtn.setOnClickListener(v -> {
+            monthMinusCounter--;
+            if (monthMinusCounter <= 0) {
+                if (binding.nextMonthBtn.getVisibility() == VISIBLE) {
+                    binding.nextMonthBtn.setVisibility(GONE);
+                }
+            }
+            resetCategoriesRv();
+            loadPreviousMonthTransactions();
+        });
         binding.barChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
@@ -143,6 +167,29 @@ public class BarDetailsFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void loadPreviousMonthTransactions() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH) - monthMinusCounter,
+                calendar.getActualMaximum(Calendar.DAY_OF_MONTH),
+                23, 59);
+        Date end = calendar.getTime();
+
+        calendar.set(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH) - monthMinusCounter,
+                calendar.getActualMinimum(Calendar.DAY_OF_MONTH),
+                0, 0);
+        Date start = calendar.getTime();
+
+        SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMM, yyyy", Locale.getDefault());
+        binding.dateChip.setText(monthYearFormat.format(start));
+        if (monthYearFormat.format(start).equals(monthYearFormat.format(new Date()))) {
+            binding.periodCard.setVisibility(VISIBLE);
+        }
+
+        loadTransactions(start, end, true, false);
     }
 
     @SuppressLint("NotifyDataSetChanged")
