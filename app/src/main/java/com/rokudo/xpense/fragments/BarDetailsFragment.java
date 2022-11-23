@@ -1,8 +1,8 @@
 package com.rokudo.xpense.fragments;
 
-import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static androidx.recyclerview.widget.RecyclerView.VERTICAL;
+import static com.rokudo.xpense.utils.DateUtils.monthYearFormat;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -35,9 +35,9 @@ import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.BarDetailsUtils;
 import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.MapUtil;
+import com.rokudo.xpense.utils.dialogs.SelectMonthDialog;
 
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -47,7 +47,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -61,8 +60,8 @@ public class BarDetailsFragment extends Fragment {
     private List<ExpenseCategory> categoryList = new ArrayList<>();
     private List<TransEntry> transEntryList = new ArrayList<>();
     private boolean firstLoad = true;
-    private Integer monthMinusCounter = 0;
-    Double sum = 0.0;
+    private Date selectedDate;
+    private Double sum = 0.0;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -84,9 +83,8 @@ public class BarDetailsFragment extends Fragment {
         return binding.getRoot();
     }
 
-    @SuppressLint({"SimpleDateFormat", "SetTextI18n"})
     private void initDateChip() {
-        binding.dateChip.setText("This month");
+        binding.dateChip.setText(monthYearFormat.format(new Date()));
     }
 
     @Override
@@ -101,6 +99,17 @@ public class BarDetailsFragment extends Fragment {
     }
 
     private void initOnClicks() {
+        binding.dateChip.setOnClickListener(v -> {
+            SelectMonthDialog selectMonthDialog = new SelectMonthDialog(selectedDate == null ? new Date() : selectedDate);
+            selectMonthDialog.show(getParentFragmentManager(), "selectMonth");
+            selectMonthDialog.setOnApplySelectedMonth(dateSelected -> {
+                selectedDate = dateSelected;
+                resetCategoriesRv();
+                loadMonthTransactions(dateSelected);
+                binding.dateChip.setText(monthYearFormat.format(dateSelected));
+                selectMonthDialog.dismiss();
+            });
+        });
         binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.backBtn).popBackStack());
         binding.allMonthChip.setOnClickListener(v -> {
             resetCategoriesRv();
@@ -109,25 +118,6 @@ public class BarDetailsFragment extends Fragment {
         binding.last7DaysChip.setOnClickListener(v -> {
             resetCategoriesRv();
             loadLast7DaysTransactions();
-        });
-        binding.previousMonthBtn.setOnClickListener(v -> {
-            binding.periodCard.setVisibility(View.GONE);
-            if (binding.nextMonthBtn.getVisibility() == GONE) {
-                binding.nextMonthBtn.setVisibility(View.VISIBLE);
-            }
-            monthMinusCounter++;
-            resetCategoriesRv();
-            loadPreviousMonthTransactions();
-        });
-        binding.nextMonthBtn.setOnClickListener(v -> {
-            monthMinusCounter--;
-            if (monthMinusCounter <= 0) {
-                if (binding.nextMonthBtn.getVisibility() == VISIBLE) {
-                    binding.nextMonthBtn.setVisibility(GONE);
-                }
-            }
-            resetCategoriesRv();
-            loadPreviousMonthTransactions();
         });
         binding.barChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
             @SuppressLint("NotifyDataSetChanged")
@@ -169,10 +159,11 @@ public class BarDetailsFragment extends Fragment {
         });
     }
 
-    private void loadPreviousMonthTransactions() {
+    private void loadMonthTransactions(Date date) {
         Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
         calendar.set(calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH) - monthMinusCounter,
+                calendar.get(Calendar.MONTH),
                 calendar.getActualMaximum(Calendar.DAY_OF_MONTH),
                 23, 59);
         Date end = calendar.getTime();
@@ -183,7 +174,6 @@ public class BarDetailsFragment extends Fragment {
                 0, 0);
         Date start = calendar.getTime();
 
-        SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMM, yyyy", Locale.getDefault());
         binding.dateChip.setText(monthYearFormat.format(start));
         if (monthYearFormat.format(start).equals(monthYearFormat.format(new Date()))) {
             binding.periodCard.setVisibility(VISIBLE);

@@ -1,6 +1,7 @@
 package com.rokudo.xpense.fragments;
 
 import static androidx.recyclerview.widget.RecyclerView.VERTICAL;
+import static com.rokudo.xpense.utils.DateUtils.monthYearFormat;
 import static com.rokudo.xpense.utils.PieChartUtils.setupPieChart;
 
 import android.annotation.SuppressLint;
@@ -34,6 +35,7 @@ import com.rokudo.xpense.utils.PieChartUtils;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,10 +65,8 @@ public class PieDetailsFragment extends Fragment {
         return binding.getRoot();
     }
 
-    @SuppressLint({"SimpleDateFormat", "SetTextI18n"})
     private void initDateChip() {
-        binding.dateChip.setText("This month");
-//        binding.dateChip.setText(new SimpleDateFormat("MMMM yyyy").format(new Date()));
+        binding.dateChip.setText(monthYearFormat.format(new Date()));
     }
 
     @Override

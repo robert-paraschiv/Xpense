@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/walletListDialogRootId"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_person_info_background"
+    android:orientation="vertical"
+    app:layout_behavior="@string/bottom_sheet_behavior">
+
+    <ImageView
+        android:id="@+id/dialogHandle"
+        android:layout_width="48dp"
+        android:layout_height="8dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:contentDescription="@string/dialog_handle"
+        android:src="@drawable/dialog_handle" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="18dp"
+        android:gravity="center_horizontal"
+        android:text="@string/show_data_for_selected_month"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <DatePicker
+        android:id="@+id/simpleDatePicker"
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="18dp"
+        android:layout_marginBottom="18dp"
+        android:calendarViewShown="false"
+        android:datePickerMode="spinner"
+        android:theme="@style/DialogTheme" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/applySelectedBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="48dp"
+        android:text="@string/apply"
+        app:cornerRadius="10dp" />
+
+</LinearLayout>

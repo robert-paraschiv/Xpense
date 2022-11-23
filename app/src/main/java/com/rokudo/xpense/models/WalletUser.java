@@ -2,10 +2,11 @@ package com.rokudo.xpense.models;
 
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-public class WalletUser {
+public class WalletUser implements Serializable {
     private String userId;
     private String userPic;
     private String userName;

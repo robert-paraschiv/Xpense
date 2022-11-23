@@ -36,7 +36,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginStart="16dp"
                 android:layout_toEndOf="@id/backBtn"
-                android:text="Analytics"
+                android:text="@string/analytics"
                 android:textSize="24sp"
                 android:textStyle="bold" />
         </RelativeLayout>
@@ -50,77 +50,34 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp">
 
-            <LinearLayout
-                android:id="@+id/dateLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:orientation="horizontal">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/previousMonthBtn"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="16dp"
-                    android:insetLeft="0dp"
-                    android:insetTop="0dp"
-                    android:insetRight="0dp"
-                    android:insetBottom="0dp"
-                    app:backgroundTint="@color/cards_bg_color"
-                    app:icon="@drawable/ic_round_arrow_left_24"
-                    app:iconGravity="textStart"
-                    app:iconPadding="0dp"
-                    app:iconSize="28dp"
-                    app:iconTint="@color/sharedIconTintColor" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/dateChip"
-                    style="@style/Widget.Material3.Chip.Suggestion.Elevated"
-                    android:layout_width="wrap_content"
-                    android:layout_height="50dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="16dp"
-                    android:checkable="false"
-                    android:elevation="0dp"
-                    android:textSize="14sp"
-                    app:chipBackgroundColor="@color/cards_bg_color"
-                    app:chipIcon="@drawable/ic_round_date_range_24"
-                    app:chipIconEnabled="true"
-                    app:chipIconTint="@color/sharedIconTintColor"
-                    app:iconEndPadding="8dp"
-                    app:iconStartPadding="8dp"
-                    tools:text="August 2022" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/nextMonthBtn"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="16dp"
-                    android:insetLeft="0dp"
-                    android:insetTop="0dp"
-                    android:insetRight="0dp"
-                    android:insetBottom="0dp"
-                    android:visibility="gone"
-                    app:backgroundTint="@color/cards_bg_color"
-                    app:icon="@drawable/ic_round_arrow_right_24"
-                    app:iconGravity="textStart"
-                    app:iconPadding="0dp"
-                    app:iconSize="28dp"
-                    app:iconTint="@color/sharedIconTintColor"
-                    tools:visibility="visible" />
-            </LinearLayout>
-
+            <com.google.android.material.chip.Chip
+                android:id="@+id/dateChip"
+                style="@style/Widget.Material3.Chip.Suggestion.Elevated"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="16dp"
+                android:checkable="false"
+                android:elevation="0dp"
+                android:textSize="14sp"
+                app:chipBackgroundColor="@color/cards_bg_color"
+                app:chipIcon="@drawable/ic_round_date_range_24"
+                app:chipIconEnabled="true"
+                app:chipIconTint="@color/sharedIconTintColor"
+                app:iconEndPadding="8dp"
+                app:iconStartPadding="8dp"
+                tools:text="August 2022" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/pieChartCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/dateLayout"
+                android:layout_below="@id/dateChip"
                 android:layout_marginStart="12dp"
+                android:layout_marginTop="12dp"
                 android:layout_marginEnd="12dp"
                 android:clickable="false"
                 app:cardBackgroundColor="@color/cards_bg_color"
