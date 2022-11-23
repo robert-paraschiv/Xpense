@@ -1,15 +1,18 @@
 package com.rokudo.xpense.fragments;
 
+import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static androidx.recyclerview.widget.RecyclerView.VERTICAL;
 import static com.rokudo.xpense.utils.DateUtils.monthYearFormat;
 
+import android.animation.LayoutTransition;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.HorizontalScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,6 +25,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.shape.ShapeAppearanceModel;
 import com.google.android.material.transition.MaterialContainerTransform;
 import com.rokudo.xpense.R;
@@ -35,10 +40,11 @@ import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.BarDetailsUtils;
 import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.MapUtil;
-import com.rokudo.xpense.utils.dialogs.SelectMonthDialog;
 
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -60,7 +66,6 @@ public class BarDetailsFragment extends Fragment {
     private List<ExpenseCategory> categoryList = new ArrayList<>();
     private List<TransEntry> transEntryList = new ArrayList<>();
     private boolean firstLoad = true;
-    private Date selectedDate;
     private Double sum = 0.0;
 
     @Override
@@ -71,6 +76,7 @@ public class BarDetailsFragment extends Fragment {
 
         initOnClicks();
         initDateChip();
+        buildDatePickerRv();
 
         transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
 
@@ -83,7 +89,46 @@ public class BarDetailsFragment extends Fragment {
         return binding.getRoot();
     }
 
+    private void buildDatePickerRv() {
+
+        Calendar calendar = Calendar.getInstance();
+
+        int yearNow = calendar.get(Calendar.YEAR);
+
+        LocalDate localDate = LocalDate.of(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH) + 1,
+                1);
+
+        calendar.set(Calendar.YEAR, 2022);
+        calendar.set(Calendar.MONTH, 0);
+
+        do {
+            for (int i = 0; i < 12; i++) {
+                calendar.set(Calendar.MONTH, i);
+
+                LocalDate innerLocalDate = LocalDate.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, 1);
+                if (innerLocalDate.isAfter(localDate)) {
+                    break;
+                }
+
+                Chip chip = (Chip) getLayoutInflater().inflate(R.layout.item_month_picker, binding.monthChipGroup, false);
+                chip.setText(monthYearFormat.format(calendar.getTime()));
+                if (monthYearFormat.format(calendar.getTime()).equals(monthYearFormat.format(new Date()))) {
+                    chip.setChecked(true);
+                }
+                binding.monthChipGroup.addView(chip);
+            }
+
+            calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR) + 1);
+
+        } while (calendar.get(Calendar.YEAR) < yearNow);
+    }
+
     private void initDateChip() {
+//        LayoutTransition layoutTransition = new LayoutTransition();
+//        layoutTransition.disableTransitionType(LayoutTransition.DISAPPEARING);
+//        layoutTransition.setDuration(1000);
+//        binding.monthLayout.setLayoutTransition(layoutTransition);
         binding.dateChip.setText(monthYearFormat.format(new Date()));
     }
 
@@ -99,16 +144,22 @@ public class BarDetailsFragment extends Fragment {
     }
 
     private void initOnClicks() {
+        binding.monthChipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            Chip chip = group.findViewById(checkedIds.get(0));
+            if (chip != null) {
+                try {
+                    Date date = monthYearFormat.parse(chip.getText().toString());
+                    resetCategoriesRv();
+                    loadMonthTransactions(date);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         binding.dateChip.setOnClickListener(v -> {
-            SelectMonthDialog selectMonthDialog = new SelectMonthDialog(selectedDate == null ? new Date() : selectedDate);
-            selectMonthDialog.show(getParentFragmentManager(), "selectMonth");
-            selectMonthDialog.setOnApplySelectedMonth(dateSelected -> {
-                selectedDate = dateSelected;
-                resetCategoriesRv();
-                loadMonthTransactions(dateSelected);
-                binding.dateChip.setText(monthYearFormat.format(dateSelected));
-                selectMonthDialog.dismiss();
-            });
+            binding.monthCard.setVisibility(VISIBLE);
+            binding.dateChip.setVisibility(GONE);
+            binding.monthHorizontalScroll.postDelayed(() -> binding.monthHorizontalScroll.fullScroll(HorizontalScrollView.FOCUS_RIGHT), 30);
         });
         binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.backBtn).popBackStack());
         binding.allMonthChip.setOnClickListener(v -> {
@@ -177,7 +228,12 @@ public class BarDetailsFragment extends Fragment {
         binding.dateChip.setText(monthYearFormat.format(start));
         if (monthYearFormat.format(start).equals(monthYearFormat.format(new Date()))) {
             binding.periodCard.setVisibility(VISIBLE);
+            binding.allMonthChip.setChecked(true);
+        } else {
+            binding.periodCard.setVisibility(GONE);
         }
+        binding.monthCard.setVisibility(GONE);
+        binding.dateChip.setVisibility(VISIBLE);
 
         loadTransactions(start, end, true, false);
     }
