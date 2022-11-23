@@ -36,7 +36,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginStart="16dp"
                 android:layout_toEndOf="@id/backBtn"
-                android:text="Analysis"
+                android:text="Analytics"
                 android:textSize="24sp"
                 android:textStyle="bold" />
         </RelativeLayout>

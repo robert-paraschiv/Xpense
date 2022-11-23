@@ -178,7 +178,7 @@ public class BarDetailsFragment extends Fragment {
         Date end = calendar.getTime();
 
         calendar.set(calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH) - monthMinusCounter,
+                calendar.get(Calendar.MONTH),
                 calendar.getActualMinimum(Calendar.DAY_OF_MONTH),
                 0, 0);
         Date start = calendar.getTime();
@@ -255,6 +255,10 @@ public class BarDetailsFragment extends Fragment {
                 .observe(getViewLifecycleOwner(), values -> {
                     if (values == null || values.isEmpty()) {
                         Log.e(TAG, "loadTransactions: empty");
+                        BarDetailsUtils.updateBarchartData(binding.barChart,
+                                new ArrayList<>(),
+                                new TextView(requireContext()).getCurrentTextColor(), last7Days);
+                        binding.totalAmountTv.setText(R.string.no_data_provided);
                     } else {
                         sortTransactions(values);
                         if (updateBar) {
