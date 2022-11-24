@@ -5,8 +5,8 @@ import static android.view.View.VISIBLE;
 import static androidx.recyclerview.widget.RecyclerView.VERTICAL;
 import static com.rokudo.xpense.utils.DateUtils.monthYearFormat;
 
-import android.animation.LayoutTransition;
 import android.annotation.SuppressLint;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,14 +21,16 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.transition.TransitionManager;
 
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.shape.ShapeAppearanceModel;
+import com.google.android.material.transition.MaterialArcMotion;
 import com.google.android.material.transition.MaterialContainerTransform;
+import com.google.android.material.transition.MaterialSharedAxis;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.ExpenseCategoryAdapter;
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
@@ -125,10 +127,6 @@ public class BarDetailsFragment extends Fragment {
     }
 
     private void initDateChip() {
-//        LayoutTransition layoutTransition = new LayoutTransition();
-//        layoutTransition.disableTransitionType(LayoutTransition.DISAPPEARING);
-//        layoutTransition.setDuration(1000);
-//        binding.monthLayout.setLayoutTransition(layoutTransition);
         binding.dateChip.setText(monthYearFormat.format(new Date()));
     }
 
@@ -157,8 +155,19 @@ public class BarDetailsFragment extends Fragment {
             }
         });
         binding.dateChip.setOnClickListener(v -> {
+            MaterialSharedAxis materialContainerTransform = new MaterialSharedAxis(MaterialSharedAxis.X,false);
+//            materialContainerTransform.setStartView(binding.dateChipCard);
+//            materialContainerTransform.setEndView(binding.monthCard);
+            materialContainerTransform.setPathMotion(new MaterialArcMotion());
+//            materialContainerTransform.setScrimColor(Color.TRANSPARENT);
+            materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+//            materialContainerTransform.setStartDelay(200);
+
+            TransitionManager.beginDelayedTransition(binding.monthLayout, materialContainerTransform);
+
+            binding.dateChipCard.setVisibility(GONE);
             binding.monthCard.setVisibility(VISIBLE);
-            binding.dateChip.setVisibility(GONE);
+
             binding.monthHorizontalScroll.postDelayed(() -> binding.monthHorizontalScroll.fullScroll(HorizontalScrollView.FOCUS_RIGHT), 30);
         });
         binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.backBtn).popBackStack());
@@ -232,8 +241,19 @@ public class BarDetailsFragment extends Fragment {
         } else {
             binding.periodCard.setVisibility(GONE);
         }
+
+        MaterialSharedAxis materialContainerTransform = new MaterialSharedAxis(MaterialSharedAxis.X,true);
+//        materialContainerTransform.setStartView(binding.monthCard);
+//        materialContainerTransform.setEndView(binding.dateChipCard);
+        materialContainerTransform.setPathMotion(new MaterialArcMotion());
+//        materialContainerTransform.setScrimColor(Color.TRANSPARENT);
+        materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+//        materialContainerTransform.setStartDelay(200);
+
+        TransitionManager.beginDelayedTransition(binding.monthLayout, materialContainerTransform);
+
         binding.monthCard.setVisibility(GONE);
-        binding.dateChip.setVisibility(VISIBLE);
+        binding.dateChipCard.setVisibility(VISIBLE);
 
         loadTransactions(start, end, true, false);
     }
