@@ -53,31 +53,80 @@
             android:layout_height="match_parent"
             android:layout_marginTop="8dp">
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/dateChip"
-                style="@style/Widget.Material3.Chip.Suggestion.Elevated"
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="16dp"
-                android:checkable="false"
-                android:elevation="0dp"
-                android:textSize="14sp"
-                app:chipBackgroundColor="@color/cards_bg_color"
-                app:chipIcon="@drawable/ic_round_date_range_24"
-                app:chipIconEnabled="true"
-                app:chipIconTint="@color/sharedIconTintColor"
-                app:iconEndPadding="8dp"
-                app:iconStartPadding="8dp"
-                tools:text="August 2022" />
+            <RelativeLayout
+                android:id="@+id/monthLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/dateChipCard"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/dateChip"
+                        style="@style/Widget.Material3.Chip.Suggestion.Elevated"
+                        android:layout_width="wrap_content"
+                        android:layout_height="38dp"
+                        android:layout_gravity="center_vertical"
+                        android:checkable="false"
+                        android:elevation="0dp"
+                        android:minHeight="0dp"
+                        android:textSize="14sp"
+                        app:chipBackgroundColor="@color/cards_bg_color"
+                        app:chipIcon="@drawable/ic_round_date_range_24"
+                        app:chipIconEnabled="true"
+                        app:chipIconTint="@color/sharedIconTintColor"
+                        app:chipMinTouchTargetSize="0dp"
+                        app:iconEndPadding="8dp"
+                        app:iconStartPadding="8dp"
+                        tools:text="August 2022" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/monthCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="38dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:elevation="0dp"
+                    android:visibility="gone"
+                    app:cardBackgroundColor="@color/chip_card_bg_color"
+                    app:strokeWidth="0dp"
+                    tools:visibility="visible">
+
+                    <HorizontalScrollView
+                        android:id="@+id/monthHorizontalScroll"
+                        android:layout_width="match_parent"
+                        android:layout_height="38dp"
+                        android:layout_gravity="center_vertical"
+                        android:scrollbarSize="0dp">
+
+                        <com.google.android.material.chip.ChipGroup
+                            android:id="@+id/monthChipGroup"
+                            android:layout_width="wrap_content"
+                            android:layout_height="32dp"
+                            android:layout_gravity="center_vertical"
+                            app:chipSpacing="2dp"
+                            app:selectionRequired="true"
+                            app:singleSelection="true" />
+
+                    </HorizontalScrollView>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </RelativeLayout>
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/pieChartCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/dateChip"
+                android:layout_below="@id/monthLayout"
                 android:layout_marginStart="12dp"
-                android:layout_marginTop="12dp"
                 android:layout_marginEnd="12dp"
                 android:clickable="false"
                 app:cardBackgroundColor="@color/cards_bg_color"

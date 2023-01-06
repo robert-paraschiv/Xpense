@@ -6,7 +6,6 @@ import static androidx.recyclerview.widget.RecyclerView.VERTICAL;
 import static com.rokudo.xpense.utils.DateUtils.monthYearFormat;
 
 import android.annotation.SuppressLint;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -123,7 +122,7 @@ public class BarDetailsFragment extends Fragment {
 
             calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR) + 1);
 
-        } while (calendar.get(Calendar.YEAR) < yearNow);
+        } while (calendar.get(Calendar.YEAR) <= yearNow);
     }
 
     private void initDateChip() {
@@ -156,12 +155,8 @@ public class BarDetailsFragment extends Fragment {
         });
         binding.dateChip.setOnClickListener(v -> {
             MaterialSharedAxis materialContainerTransform = new MaterialSharedAxis(MaterialSharedAxis.X,false);
-//            materialContainerTransform.setStartView(binding.dateChipCard);
-//            materialContainerTransform.setEndView(binding.monthCard);
             materialContainerTransform.setPathMotion(new MaterialArcMotion());
-//            materialContainerTransform.setScrimColor(Color.TRANSPARENT);
             materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
-//            materialContainerTransform.setStartDelay(200);
 
             TransitionManager.beginDelayedTransition(binding.monthLayout, materialContainerTransform);
 
@@ -172,10 +167,12 @@ public class BarDetailsFragment extends Fragment {
         });
         binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.backBtn).popBackStack());
         binding.allMonthChip.setOnClickListener(v -> {
+            BarDetailsUtils.setBarLabelRotation(binding.barChart,true);
             resetCategoriesRv();
             loadThisMonthTransactions();
         });
         binding.last7DaysChip.setOnClickListener(v -> {
+            BarDetailsUtils.setBarLabelRotation(binding.barChart,false);
             resetCategoriesRv();
             loadLast7DaysTransactions();
         });
@@ -243,12 +240,8 @@ public class BarDetailsFragment extends Fragment {
         }
 
         MaterialSharedAxis materialContainerTransform = new MaterialSharedAxis(MaterialSharedAxis.X,true);
-//        materialContainerTransform.setStartView(binding.monthCard);
-//        materialContainerTransform.setEndView(binding.dateChipCard);
         materialContainerTransform.setPathMotion(new MaterialArcMotion());
-//        materialContainerTransform.setScrimColor(Color.TRANSPARENT);
         materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
-//        materialContainerTransform.setStartDelay(200);
 
         TransitionManager.beginDelayedTransition(binding.monthLayout, materialContainerTransform);
 

@@ -59,18 +59,21 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        binding = FragmentBAccountDetailsBinding.inflate(inflater, container, false);
+        if (binding == null) {
 
-        bankApiViewModel = new ViewModelProvider(requireActivity()).get(BankApiViewModel.class);
+            // Inflate the layout for this fragment
+            binding = FragmentBAccountDetailsBinding.inflate(inflater, container, false);
 
-        initOnClicks();
+            bankApiViewModel = new ViewModelProvider(requireActivity()).get(BankApiViewModel.class);
 
-        binding.detailsShimer.startShimmer();
-        binding.transShimmerLayout.startShimmer();
+            initOnClicks();
 
-        buildRecyclerView();
-        getArgsPassed();
+            binding.detailsShimer.startShimmer();
+            binding.transShimmerLayout.startShimmer();
+
+            buildRecyclerView();
+            getArgsPassed();
+        }
 
         return binding.getRoot();
     }

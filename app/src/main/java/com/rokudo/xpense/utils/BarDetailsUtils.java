@@ -24,7 +24,7 @@ public class BarDetailsUtils {
     private static final String TAG = "BarChartUtils";
 
     @SuppressLint("SimpleDateFormat")
-    static SimpleDateFormat dayOfMonthFormat = new SimpleDateFormat("d MMM");
+    static SimpleDateFormat dayOfMonthFormat = new SimpleDateFormat("EEE dd");
 
     public static void setupBarChart(BarChart barChart, int textColor) {
         barChart.setPinchZoom(false);
@@ -47,8 +47,12 @@ public class BarDetailsUtils {
 
         barChart.getDescription().setEnabled(false);
         barChart.getXAxis().setGranularity(1f);
-        barChart.getXAxis().setLabelRotationAngle(-45);
+//        barChart.getXAxis().setLabelRotationAngle(-45);
         barChart.getXAxis().setTextSize(8f);
+    }
+
+    public static void setBarLabelRotation(BarChart barChart, boolean rotated) {
+        barChart.getXAxis().setLabelRotationAngle(rotated ? -45 : 0);
     }
 
     public static void updateBarchartData(BarChart barChart, List<Transaction> transactionList, int textColor, Boolean last7days) {

@@ -128,7 +128,6 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/monthLayout"
                 android:layout_marginStart="12dp"
-                android:layout_marginTop="1dp"
                 android:layout_marginEnd="12dp"
                 app:cardBackgroundColor="@color/cards_bg_color"
                 app:cardCornerRadius="@dimen/main_cards_corner_radius"
