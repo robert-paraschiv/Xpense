@@ -68,6 +68,7 @@ public class BarDetailsFragment extends Fragment {
     private List<TransEntry> transEntryList = new ArrayList<>();
     private boolean firstLoad = true;
     private Double sum = 0.0;
+    Date selectedDate = new Date();
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -114,6 +115,7 @@ public class BarDetailsFragment extends Fragment {
 
                 Chip chip = (Chip) getLayoutInflater().inflate(R.layout.item_month_picker, binding.monthChipGroup, false);
                 chip.setText(monthYearFormat.format(calendar.getTime()));
+                chip.setTag(monthYearFormat.format(calendar.getTime()));
                 if (monthYearFormat.format(calendar.getTime()).equals(monthYearFormat.format(new Date()))) {
                     chip.setChecked(true);
                 }
@@ -145,16 +147,16 @@ public class BarDetailsFragment extends Fragment {
             Chip chip = group.findViewById(checkedIds.get(0));
             if (chip != null) {
                 try {
-                    Date date = monthYearFormat.parse(chip.getText().toString());
+                    selectedDate = monthYearFormat.parse(chip.getText().toString());
                     resetCategoriesRv();
-                    loadMonthTransactions(date);
+                    loadMonthTransactions(selectedDate);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
             }
         });
         binding.dateChip.setOnClickListener(v -> {
-            MaterialSharedAxis materialContainerTransform = new MaterialSharedAxis(MaterialSharedAxis.X,false);
+            MaterialSharedAxis materialContainerTransform = new MaterialSharedAxis(MaterialSharedAxis.X, false);
             materialContainerTransform.setPathMotion(new MaterialArcMotion());
             materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
 
@@ -163,16 +165,19 @@ public class BarDetailsFragment extends Fragment {
             binding.dateChipCard.setVisibility(GONE);
             binding.monthCard.setVisibility(VISIBLE);
 
-            binding.monthHorizontalScroll.postDelayed(() -> binding.monthHorizontalScroll.fullScroll(HorizontalScrollView.FOCUS_RIGHT), 30);
+            binding.monthHorizontalScroll.postDelayed(() -> {
+                Chip chip = binding.monthChipGroup.findViewWithTag(monthYearFormat.format(selectedDate.getTime()));
+                binding.monthHorizontalScroll.smoothScrollTo(chip.getLeft() - chip.getPaddingLeft(), chip.getTop());
+            }, 30);
         });
         binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.backBtn).popBackStack());
         binding.allMonthChip.setOnClickListener(v -> {
-            BarDetailsUtils.setBarLabelRotation(binding.barChart,true);
+            BarDetailsUtils.setBarLabelRotation(binding.barChart, true);
             resetCategoriesRv();
             loadThisMonthTransactions();
         });
         binding.last7DaysChip.setOnClickListener(v -> {
-            BarDetailsUtils.setBarLabelRotation(binding.barChart,false);
+            BarDetailsUtils.setBarLabelRotation(binding.barChart, false);
             resetCategoriesRv();
             loadLast7DaysTransactions();
         });
@@ -239,7 +244,7 @@ public class BarDetailsFragment extends Fragment {
             binding.periodCard.setVisibility(GONE);
         }
 
-        MaterialSharedAxis materialContainerTransform = new MaterialSharedAxis(MaterialSharedAxis.X,true);
+        MaterialSharedAxis materialContainerTransform = new MaterialSharedAxis(MaterialSharedAxis.X, true);
         materialContainerTransform.setPathMotion(new MaterialArcMotion());
         materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
 
