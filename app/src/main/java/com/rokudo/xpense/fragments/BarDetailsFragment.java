@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.HorizontalScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -148,6 +147,7 @@ public class BarDetailsFragment extends Fragment {
             if (chip != null) {
                 try {
                     selectedDate = monthYearFormat.parse(chip.getText().toString());
+                    BarDetailsUtils.setBarLabelRotation(binding.barChart, true);
                     resetCategoriesRv();
                     loadMonthTransactions(selectedDate);
                 } catch (ParseException e) {
@@ -160,6 +160,7 @@ public class BarDetailsFragment extends Fragment {
             materialContainerTransform.setPathMotion(new MaterialArcMotion());
             materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
 
+            BarDetailsUtils.setBarLabelRotation(binding.barChart, true);
             TransitionManager.beginDelayedTransition(binding.monthLayout, materialContainerTransform);
 
             binding.dateChipCard.setVisibility(GONE);
