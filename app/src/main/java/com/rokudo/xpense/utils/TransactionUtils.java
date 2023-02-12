@@ -22,15 +22,13 @@ import java.util.Date;
 
 @SuppressLint("SimpleDateFormat")
 public class TransactionUtils {
-    static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("E, MMM d, HH:mm");
-    static SimpleDateFormat todayDateFormat = new SimpleDateFormat("HH:mm");
+    static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("E, MMM d");
     static SimpleDateFormat checkDateFormat = new SimpleDateFormat("dd MMMM yyyy");
 
     @NonNull
     public static String getTransactionDateString(Transaction transaction) {
         return isTransactionDoneToday(transaction) ?
-                "Today, " + todayDateFormat.format(transaction.getDate())
-                : simpleDateFormat.format(transaction.getDate());
+                "Today" : simpleDateFormat.format(transaction.getDate());
     }
 
     private static boolean isTransactionDoneToday(Transaction transaction) {

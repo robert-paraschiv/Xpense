@@ -1,6 +1,8 @@
 package com.rokudo.xpense.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -8,6 +10,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -19,10 +24,12 @@ import com.rokudo.xpense.models.BAccount;
 import com.rokudo.xpense.utils.DatabaseUtils;
 import com.rokudo.xpense.utils.PrefsUtils;
 import com.rokudo.xpense.utils.dialogs.BankAccsListDialog;
+import com.rokudo.xpense.workmanager.ApiSyncWorker;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -34,6 +41,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest
+                .Builder(ApiSyncWorker.class, 15, TimeUnit.MINUTES)
+                .build();
+
+        WorkManager.getInstance(this)
+                .enqueueUniquePeriodicWork("workieworkie", ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest);
+
+        SharedPreferences sharedPreferences = getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE);
+        Toast.makeText(this, "" + sharedPreferences.getInt("work", 0), Toast.LENGTH_SHORT).show();
 
         bankApiViewModel = new ViewModelProvider(this).get(BankApiViewModel.class);
 //        findViewById(R.id.nav_host_fragment).setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
@@ -73,38 +90,33 @@ public class MainActivity extends AppCompatActivity {
     private void getAccountsDetails(BankApiViewModel viewModel, Requisition requisition, BAccount bAccount) {
         List<AccountDetails> accountDetailsList = new ArrayList<>();
         for (int i = 0; i < requisition.getAccounts().length; i++) {
-            viewModel.getAccountDetails(requisition.getAccounts()[i])
-                    .observe(this, accountDetails -> {
-                        if (accountDetails == null || accountDetails.getAccount() == null) {
-                            Log.e(TAG, "handleIntent: could not get account details ");
-                        } else {
-                            accountDetailsList.add(accountDetails);
-                            if (accountDetailsList.size() == requisition.getAccounts().length) {
-                                showAccountsListDialog(requisition, bAccount, accountDetailsList);
-                            }
-                        }
-                    });
+            viewModel.getAccountDetails(requisition.getAccounts()[i]).observe(this, accountDetails -> {
+                if (accountDetails == null || accountDetails.getAccount() == null) {
+                    Log.e(TAG, "handleIntent: could not get account details ");
+                } else {
+                    accountDetailsList.add(accountDetails);
+                    if (accountDetailsList.size() == requisition.getAccounts().length) {
+                        showAccountsListDialog(requisition, bAccount, accountDetailsList);
+                    }
+                }
+            });
         }
     }
 
-    private void showAccountsListDialog(Requisition requisition, BAccount bAccount,
-                                        List<AccountDetails> accountDetailsList) {
+    private void showAccountsListDialog(Requisition requisition, BAccount bAccount, List<AccountDetails> accountDetailsList) {
         BankAccsListDialog bankAccsListDialog = new BankAccsListDialog(accountDetailsList);
         bankAccsListDialog.show(getSupportFragmentManager(), "BankAccountListDialog");
         bankAccsListDialog.setClickListener(position -> {
             Log.d(TAG, "getAccountsDetails: " + requisition.getAccounts()[position]);
-            bAccount.setAccounts(new ArrayList<>(
-                    Collections.singletonList(accountDetailsList.get(position).getAccount_id())));
+            bAccount.setAccounts(new ArrayList<>(Collections.singletonList(accountDetailsList.get(position).getAccount_id())));
             bAccount.setLinked_acc_id(accountDetailsList.get(position).getAccount_id());
             bAccount.setLinked_acc_currency(accountDetailsList.get(position).getAccount().getCurrency());
             bAccount.setLinked_acc_iban(accountDetailsList.get(position).getAccount().getIban());
 
-            DatabaseUtils.walletsRef.document(bAccount.getWalletIds().get(0))
-                    .update("bAccount", bAccount)
-                    .addOnSuccessListener(unused -> {
-                        Log.d(TAG, "getAccountsDetails: updated wallet with bank account");
-                        bankAccsListDialog.dismiss();
-                    });
+            DatabaseUtils.walletsRef.document(bAccount.getWalletIds().get(0)).update("bAccount", bAccount).addOnSuccessListener(unused -> {
+                Log.d(TAG, "getAccountsDetails: updated wallet with bank account");
+                bankAccsListDialog.dismiss();
+            });
         });
     }
 

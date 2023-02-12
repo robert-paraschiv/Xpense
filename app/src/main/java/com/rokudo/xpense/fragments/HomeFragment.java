@@ -607,6 +607,7 @@ public class HomeFragment extends Fragment {
                         walletListDialog.dismiss();
                         mWallet = wallet;
                         PrefsUtils.setSelectedWalletId(requireContext(), wallet.getId());
+                        PrefsUtils.saveBAccountToPrefs(requireContext(), wallet.getbAccount());
                         transactionList.clear();
                         binding.barChart.clear();
                         binding.pieChart.clear();

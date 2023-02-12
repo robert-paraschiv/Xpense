@@ -52,4 +52,11 @@ public class PrefsUtils {
         editor.putString(id, value);
         editor.apply();
     }
+    public static void setInt(Context context, String id, int value) {
+        SharedPreferences settings = context
+                .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putInt(id, value);
+        editor.apply();
+    }
 }

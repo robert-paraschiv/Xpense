@@ -41,6 +41,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -141,7 +142,9 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
     }
 
     private void getAccountTransactions(BAccount bAccount) {
-        String date_from = "2022-11-10";
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        String date_from = simpleDateFormat.format(calendar.getTime());
         bankApiViewModel.getAccountTransactions(bAccount.getAccounts().get(0), date_from)
                 .observe(getViewLifecycleOwner(), transactionsResponse -> {
                     if (transactionsResponse == null || transactionsResponse.getTransactions() == null) {
