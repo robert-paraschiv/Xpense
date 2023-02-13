@@ -58,6 +58,10 @@ public class BankApiViewModel extends AndroidViewModel {
         return repo.getAccountBalances(account_id);
     }
 
+    public void setBalances(Balances balances){
+        repo.setBalances(balances);
+    }
+
     public MutableLiveData<TransactionsResponse> getAccountTransactions(String account_id, String date_from) {
         return repo.getAccountTransactions(account_id, date_from);
     }

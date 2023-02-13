@@ -39,14 +39,14 @@ public class BankApiRepo {
     GetDataService service = RetrofitClientInstance.geInstance().create(GetDataService.class);
     private final MutableLiveData<Token> tokenMutableLiveData = new MutableLiveData<>();
     private String requisitionError;
-//    private final MutableLiveData<List<Institution>> institutionLiveData;
+    //    private final MutableLiveData<List<Institution>> institutionLiveData;
 //    private final MutableLiveData<AccountDetails> accountDetailsMutableLiveData;
-//    private final MutableLiveData<Balances> balancesMutableLiveData;
+    private final MutableLiveData<Balances> balancesMutableLiveData;
 //    private final MutableLiveData<TransactionsResponse> accountTransactionsLiveData;
 
     public BankApiRepo() {
 //        this.institutionLiveData = new MutableLiveData<>();
-//        this.balancesMutableLiveData = new MutableLiveData<>();
+        this.balancesMutableLiveData = new MutableLiveData<>();
 //        this.accountTransactionsLiveData = new MutableLiveData<>();
 //        this.accountDetailsMutableLiveData = new MutableLiveData<>();
     }
@@ -259,7 +259,7 @@ public class BankApiRepo {
     }
 
     public MutableLiveData<Balances> getAccountBalances(String account_id) {
-        MutableLiveData<Balances> balancesMutableLiveData = new MutableLiveData<>();
+//        MutableLiveData<Balances> balancesMutableLiveData = new MutableLiveData<>();
 
         service.getAccountBalances(account_id).enqueue(new Callback<Balances>() {
             @Override
@@ -280,6 +280,10 @@ public class BankApiRepo {
         });
 
         return balancesMutableLiveData;
+    }
+
+    public void setBalances(Balances balances) {
+        balancesMutableLiveData.setValue(balances);
     }
 
     public MutableLiveData<TransactionsResponse> getAccountTransactions(String account_id, String date_from) {
@@ -360,5 +364,4 @@ public class BankApiRepo {
             }
         });
     }
-
 }

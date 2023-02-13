@@ -132,7 +132,7 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
     private void checkToken(BAccount bAccount, String token) {
         bankApiViewModel.refreshToken(token).observe(getViewLifecycleOwner(), s -> {
             Log.d(TAG, "getBankAccountDetails: " + s);
-            if (s.contains("Token is invalid or expired")) {
+            if (s == null || s.contains("Token is invalid or expired")) {
                 getToken(bAccount);
             } else {
                 getAccountBalances(bAccount);

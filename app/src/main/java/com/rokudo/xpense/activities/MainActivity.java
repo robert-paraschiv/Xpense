@@ -8,10 +8,12 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,6 +24,7 @@ import com.rokudo.xpense.data.retrofit.models.Requisition;
 import com.rokudo.xpense.data.viewmodels.BankApiViewModel;
 import com.rokudo.xpense.models.BAccount;
 import com.rokudo.xpense.utils.DatabaseUtils;
+import com.rokudo.xpense.utils.GsonHelper;
 import com.rokudo.xpense.utils.PrefsUtils;
 import com.rokudo.xpense.utils.dialogs.BankAccsListDialog;
 import com.rokudo.xpense.workmanager.ApiSyncWorker;
@@ -29,6 +32,7 @@ import com.rokudo.xpense.workmanager.ApiSyncWorker;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
@@ -48,6 +52,11 @@ public class MainActivity extends AppCompatActivity {
 
         WorkManager.getInstance(this)
                 .enqueueUniquePeriodicWork("workieworkie", ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest);
+        WorkManager.getInstance(this).getWorkInfoByIdLiveData(periodicWorkRequest.getId()).observe(this, workInfo -> {
+            if (workInfo != null) {
+                bankApiViewModel.setBalances(GsonHelper.deserializeBalancesFromJson(workInfo.getOutputData().getString("response")));
+            }
+        });
 
         SharedPreferences sharedPreferences = getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE);
         Toast.makeText(this, "" + sharedPreferences.getInt("work", 0), Toast.LENGTH_SHORT).show();

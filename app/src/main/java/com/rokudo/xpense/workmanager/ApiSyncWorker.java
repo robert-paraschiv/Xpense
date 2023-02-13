@@ -6,6 +6,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -14,6 +15,7 @@ import com.rokudo.xpense.data.retrofit.RetrofitClientInstance;
 import com.rokudo.xpense.data.retrofit.models.Balances;
 import com.rokudo.xpense.data.viewmodels.BankApiViewModel;
 import com.rokudo.xpense.models.BAccount;
+import com.rokudo.xpense.utils.GsonHelper;
 import com.rokudo.xpense.utils.PrefsUtils;
 
 import retrofit2.Call;
@@ -37,8 +39,11 @@ public class ApiSyncWorker extends Worker {
                 @Override
                 public void onResponse(@NonNull Call<Balances> call, @NonNull Response<Balances> response) {
                     if (response.isSuccessful()) {
+                        Data output = new Data.Builder()
+                                .putString("response", GsonHelper.serializeBalancesToJson(response.body()))
+                                .build();
 //                        setProgressAsync(response);
-//                        Result.success(response.body());
+                        Result.success(output);
                     } else {
 //                        Log.e(TAG, "onResponse: " + getErrorMessage(response.errorBody()));
                     }
