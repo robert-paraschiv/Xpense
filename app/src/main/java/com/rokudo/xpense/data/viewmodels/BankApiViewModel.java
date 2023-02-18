@@ -58,7 +58,7 @@ public class BankApiViewModel extends AndroidViewModel {
         return repo.getAccountBalances(account_id);
     }
 
-    public void setBalances(Balances balances){
+    public void setBalances(Balances balances) {
         repo.setBalances(balances);
     }
 
@@ -70,11 +70,19 @@ public class BankApiViewModel extends AndroidViewModel {
         return repo.getRequisitionError();
     }
 
+    public boolean isEUAExpired() {
+        return repo.isEUA_expired();
+    }
+
     public MutableLiveData<RequisitionsResult> getAllRequisitions() {
         return repo.getAllRequisitions();
     }
 
     public void deleteRequisition(String requisition_ID) {
         repo.deleteRequisition(requisition_ID);
+    }
+
+    public void deleteEUA(String eua_id) {
+        repo.deleteEua(eua_id);
     }
 }

@@ -5,6 +5,8 @@ import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOption
 import static com.rokudo.xpense.utils.NordigenUtils.TOKEN_PREFS_NAME;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +15,7 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,20 +31,29 @@ import com.google.android.material.shape.ShapeAppearanceModel;
 import com.google.android.material.transition.MaterialContainerTransform;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.TransactionsAdapter;
+import com.rokudo.xpense.data.retrofit.models.AccountDetails;
 import com.rokudo.xpense.data.retrofit.models.BankTransaction;
+import com.rokudo.xpense.data.retrofit.models.EndUserAgreement;
+import com.rokudo.xpense.data.retrofit.models.Requisition;
 import com.rokudo.xpense.data.viewmodels.BankApiViewModel;
 import com.rokudo.xpense.databinding.FragmentBAccountDetailsBinding;
 import com.rokudo.xpense.models.BAccount;
 import com.rokudo.xpense.models.Transaction;
+import com.rokudo.xpense.utils.DatabaseUtils;
 import com.rokudo.xpense.utils.NordigenUtils;
 import com.rokudo.xpense.utils.PrefsUtils;
+import com.rokudo.xpense.utils.dialogs.AgreementExpiredDialog;
+import com.rokudo.xpense.utils.dialogs.BankAccsListDialog;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
+import com.rokudo.xpense.utils.dialogs.UploadingDialog;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -135,10 +147,140 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
             if (s == null || s.contains("Token is invalid or expired")) {
                 getToken(bAccount);
             } else {
-                getAccountBalances(bAccount);
-                getAccountTransactions(bAccount);
+                if (bAccount.getEUA_EndDate().before(new Date()) || bankApiViewModel.isEUAExpired()) {
+
+                    binding.detailsShimer.hideShimmer();
+                    binding.transShimmerLayout.hideShimmer();
+                    AgreementExpiredDialog dialog =
+                            new AgreementExpiredDialog(getCreationDate(bAccount), bAccount.getEUA_EndDate());
+                    dialog.show(getParentFragmentManager(), "agreement_expired_dialog");
+                    dialog.setOnBtnClickListener(new AgreementExpiredDialog.onBtnClickListener() {
+                        @Override
+                        public void onYesClick() {
+                            bankApiViewModel.deleteRequisition(bAccount.getRequisition_id());
+                            bankApiViewModel.deleteEUA(bAccount.getEUA_id());
+                            createEUA();
+                        }
+
+                        @Override
+                        public void onNoClick() {
+                            dialog.dismiss();
+                            Navigation.findNavController(binding.getRoot()).popBackStack();
+                        }
+                    });
+
+                } else {
+                    getAccountBalances(bAccount);
+                    getAccountTransactions(bAccount);
+                }
             }
         });
+    }
+
+    private void createEUA() {
+        bankApiViewModel.createEUA(bAccount.getInstitutionId()).observe(getViewLifecycleOwner(), endUserAgreement -> {
+            if (endUserAgreement == null || endUserAgreement.getId() == null) {
+                Log.d(TAG, "onClick: EUA Null");
+            } else {
+                PrefsUtils.setString(requireContext(),
+                        "EUA" + bAccount.getInstitutionId(),
+                        endUserAgreement.getId());
+                bAccount.setEUA_id(endUserAgreement.getId());
+                bAccount.setEUA_EndDate(getEuaEndDate(endUserAgreement));
+                createRequisition(bAccount.getInstitutionId(), endUserAgreement.getId(), true);
+            }
+        });
+    }
+
+    private void createRequisition(String institutionId, String id, boolean accountSelection) {
+        bankApiViewModel.createRequisition(institutionId, id, accountSelection)
+                .observe(getViewLifecycleOwner(), requisition -> {
+                    if (requisition == null || requisition.getId() == null) {
+                        Log.e(TAG, "onResponse: requisition null ");
+                        if (bankApiViewModel.getRequisitionError() != null && !bankApiViewModel.getRequisitionError().isEmpty()) {
+                            Log.e(TAG, "getRequisition: " + bankApiViewModel.getRequisitionError());
+                            if (bankApiViewModel.getRequisitionError().contains("Account selection not supported")) {
+                                createRequisition(institutionId, id, false);
+                            }
+                        }
+                    } else {
+                        PrefsUtils.setString(requireContext(), "REQUISITION" + institutionId,
+                                requisition.getId());
+                        bAccount.setRequisition_id(requisition.getId());
+                        getAccounts(requisition);
+                    }
+                });
+
+    }
+
+    private void getAccounts(Requisition requisition) {
+        if (requisition.getAccounts() != null && requisition.getAccounts().length > 0) {
+            Log.d(TAG, "getAccounts: length > 0");
+            PrefsUtils.setString(requireContext(), "ACC_ID" + requisition.getId(), requisition.getAccounts()[0]);
+            List<String> accounts = new ArrayList<>(Arrays.asList(requisition.getAccounts()));
+            bAccount.setAccounts(accounts);
+            getAccountsDetails(Arrays.asList(requisition.getAccounts()));
+        } else {
+            if (requisition.getLink() == null) {
+                Log.e(TAG, "getAccounts: requisition link null");
+            } else {
+                PrefsUtils.saveBAccountToPrefs(requireContext(), bAccount);
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(requisition.getLink())));
+            }
+            Log.e(TAG, "getAccounts: no accounts");
+            Toast.makeText(requireContext(), "No accounts", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void getAccountsDetails(List<String> accounts) {
+        UploadingDialog dialog = new UploadingDialog("Retrieving Data...");
+        dialog.show(getParentFragmentManager(), "wait");
+
+        //show dialog with accounts
+        List<AccountDetails> accountDetailsList = new ArrayList<>();
+        for (String acc : accounts) {
+            bankApiViewModel.getAccountDetails(acc)
+                    .observe(getViewLifecycleOwner(), accountDetails -> {
+                        if (accountDetails == null || accountDetails.getAccount() == null) {
+                            Log.e(TAG, "getAccountsDetails: empty account or null");
+                        } else {
+                            accountDetailsList.add(accountDetails);
+                            Log.d(TAG, "getAccountsDetails: ");
+                        }
+                        if (accountDetailsList.size() == accounts.size()) {
+                            dialog.dismiss();
+                            BankAccsListDialog bankAccsListDialog = new BankAccsListDialog(accountDetailsList);
+                            bankAccsListDialog.show(getParentFragmentManager(), "BankAccountListDialog");
+                            bankAccsListDialog.setClickListener(position -> {
+                                Log.d(TAG, "getAccountsDetails: " + accounts.get(position));
+                                bAccount.setAccounts(new ArrayList<>(
+                                        Collections.singletonList(accountDetailsList.get(position).getAccount_id())));
+                                bAccount.setLinked_acc_id(accountDetailsList.get(position).getAccount_id());
+                                bAccount.setLinked_acc_currency(accountDetailsList.get(position).getAccount().getCurrency());
+                                bAccount.setLinked_acc_iban(accountDetailsList.get(position).getAccount().getIban());
+                                DatabaseUtils.walletsRef.document(bAccount.getWalletIds().get(0))
+                                        .update("bAccount", bAccount)
+                                        .addOnSuccessListener(unused -> {
+                                            Log.d(TAG, "getAccountsDetails: updated wallet with bank account");
+                                            bankAccsListDialog.dismiss();
+                                            Navigation.findNavController(binding.getRoot())
+                                                    .popBackStack();
+                                        });
+                            });
+                        }
+                    });
+        }
+    }
+
+
+    @NonNull
+    private Date getCreationDate(BAccount bAccount) {
+        return new Date(bAccount.getEUA_EndDate().getTime() - Duration.ofDays(90).toMillis());
+    }
+
+    @NonNull
+    private Date getEuaEndDate(EndUserAgreement endUserAgreement) {
+        return new Date(new Date().getTime() + Duration.ofDays(endUserAgreement.getAccess_valid_for_days()).toMillis());
     }
 
     private void getAccountTransactions(BAccount bAccount) {
@@ -150,7 +292,8 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
                     if (transactionsResponse == null || transactionsResponse.getTransactions() == null) {
                         Log.e(TAG, "onResponse: null trans response");
                     } else {
-                        List<BankTransaction> bankTransactionList = new ArrayList<>(Arrays.asList(transactionsResponse.getTransactions().getBooked()));
+                        List<BankTransaction> bankTransactionList =
+                                new ArrayList<>(Arrays.asList(transactionsResponse.getTransactions().getBooked()));
 
                         sortBankTransactionListByDate(bankTransactionList, simpleDateFormat);
 
@@ -266,7 +409,8 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
                             public void onAnimationEnd(Animation animation) {
                                 binding.accDetails.setVisibility(View.VISIBLE);
                                 binding.detailsShimer.setVisibility(View.INVISIBLE);
-                                binding.accDetails.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.item_animation_fade_in));
+                                binding.accDetails.startAnimation(AnimationUtils.loadAnimation(requireContext(),
+                                        R.anim.item_animation_fade_in));
                             }
 
                             @Override
@@ -280,7 +424,6 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
                 });
     }
 
-
     private void getToken(BAccount bAccount) {
         bankApiViewModel.getToken().observe(getViewLifecycleOwner(), token -> {
             if (token == null) {
@@ -292,7 +435,6 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
             }
         });
     }
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {

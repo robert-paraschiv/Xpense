@@ -58,9 +58,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        SharedPreferences sharedPreferences = getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE);
-        Toast.makeText(this, "" + sharedPreferences.getInt("work", 0), Toast.LENGTH_SHORT).show();
-
         bankApiViewModel = new ViewModelProvider(this).get(BankApiViewModel.class);
 //        findViewById(R.id.nav_host_fragment).setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
 //                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |

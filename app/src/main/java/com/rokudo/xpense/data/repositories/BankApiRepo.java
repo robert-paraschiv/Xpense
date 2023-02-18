@@ -39,6 +39,7 @@ public class BankApiRepo {
     GetDataService service = RetrofitClientInstance.geInstance().create(GetDataService.class);
     private final MutableLiveData<Token> tokenMutableLiveData = new MutableLiveData<>();
     private String requisitionError;
+    private boolean EUA_expired = false;
     //    private final MutableLiveData<List<Institution>> institutionLiveData;
 //    private final MutableLiveData<AccountDetails> accountDetailsMutableLiveData;
     private final MutableLiveData<Balances> balancesMutableLiveData;
@@ -53,6 +54,10 @@ public class BankApiRepo {
 
     public String getRequisitionError() {
         return requisitionError;
+    }
+
+    public boolean isEUA_expired() {
+        return EUA_expired;
     }
 
     public static BankApiRepo getInstance() {
@@ -269,6 +274,9 @@ public class BankApiRepo {
                 } else {
                     balancesMutableLiveData.setValue(null);
                     Log.e(TAG, "onResponse: " + getErrorMessage(response.errorBody()));
+                    if (response.code() == 409) {
+                        EUA_expired = true;
+                    }
                 }
             }
 
@@ -300,12 +308,15 @@ public class BankApiRepo {
                             Log.e(TAG, "onResponse: " + response.message());
                             requisitionError = getErrorMessage(response.errorBody());
                             accountTransactionsLiveData.setValue(null);
+                            if (response.code() == 409) {
+                                EUA_expired = true;
+                            }
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<TransactionsResponse> call, @NonNull Throwable t) {
-                        Log.e(TAG, "onResponse: " + t.getMessage());
+                        Log.e(TAG, "onFailure: ", t);
                         requisitionError = t.getMessage();
                         accountTransactionsLiveData.setValue(null);
                     }
@@ -353,6 +364,20 @@ public class BankApiRepo {
 
     public void deleteRequisition(String requisition_id) {
         service.deleteRequisition(requisition_id).enqueue(new Callback<DeleteResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<DeleteResponse> call, @NonNull Response<DeleteResponse> response) {
+                Log.d(TAG, "onResponse: " + response.message());
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<DeleteResponse> call, @NonNull Throwable t) {
+                Log.e(TAG, "onFailure: ", t);
+            }
+        });
+    }
+
+    public void deleteEua(String eua_id) {
+        service.deleteEua(eua_id).enqueue(new Callback<DeleteResponse>() {
             @Override
             public void onResponse(@NonNull Call<DeleteResponse> call, @NonNull Response<DeleteResponse> response) {
                 Log.d(TAG, "onResponse: " + response.message());

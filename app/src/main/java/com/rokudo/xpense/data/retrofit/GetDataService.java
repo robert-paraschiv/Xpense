@@ -60,6 +60,10 @@ public interface GetDataService {
     @DELETE("/api/v2/requisitions/{id}/")
     Call<DeleteResponse> deleteRequisition(@Path("id") String id);
 
+
+    @DELETE("/api/v2/agreements/enduser/{id}/")
+    Call<DeleteResponse> deleteEua(@Path("id") String id);
+
     @GET("/api/v2/accounts/{id}/transactions/")
     Call<TransactionsResponse> getAccountTransactions(@Path("id") String id, @Query("date_from") String date_from);
 
