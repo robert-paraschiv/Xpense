@@ -149,30 +149,34 @@ public class BAccountDetailsFragment extends Fragment implements TransactionsAda
             } else {
                 if (bAccount.getEUA_EndDate().before(new Date()) || bankApiViewModel.isEUAExpired()) {
 
-                    binding.detailsShimer.hideShimmer();
-                    binding.transShimmerLayout.hideShimmer();
-                    AgreementExpiredDialog dialog =
-                            new AgreementExpiredDialog(getCreationDate(bAccount), bAccount.getEUA_EndDate());
-                    dialog.show(getParentFragmentManager(), "agreement_expired_dialog");
-                    dialog.setOnBtnClickListener(new AgreementExpiredDialog.onBtnClickListener() {
-                        @Override
-                        public void onYesClick() {
-                            bankApiViewModel.deleteRequisition(bAccount.getRequisition_id());
-                            bankApiViewModel.deleteEUA(bAccount.getEUA_id());
-                            createEUA();
-                        }
-
-                        @Override
-                        public void onNoClick() {
-                            dialog.dismiss();
-                            Navigation.findNavController(binding.getRoot()).popBackStack();
-                        }
-                    });
+                    showExpiredEUADialog(bAccount);
 
                 } else {
                     getAccountBalances(bAccount);
                     getAccountTransactions(bAccount);
                 }
+            }
+        });
+    }
+
+    private void showExpiredEUADialog(BAccount bAccount) {
+        binding.detailsShimer.hideShimmer();
+        binding.transShimmerLayout.hideShimmer();
+        AgreementExpiredDialog dialog =
+                new AgreementExpiredDialog(getCreationDate(bAccount), bAccount.getEUA_EndDate());
+        dialog.show(getParentFragmentManager(), "agreement_expired_dialog");
+        dialog.setOnBtnClickListener(new AgreementExpiredDialog.onBtnClickListener() {
+            @Override
+            public void onYesClick() {
+                bankApiViewModel.deleteRequisition(bAccount.getRequisition_id());
+                bankApiViewModel.deleteEUA(bAccount.getEUA_id());
+                createEUA();
+            }
+
+            @Override
+            public void onNoClick() {
+                dialog.dismiss();
+                Navigation.findNavController(binding.getRoot()).popBackStack();
             }
         });
     }

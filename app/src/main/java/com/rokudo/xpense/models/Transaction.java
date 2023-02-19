@@ -17,6 +17,7 @@ public class Transaction implements Serializable {
     private String currency;
     private Date date;
     private String picUrl;
+    private Boolean isCashTransaction;
 
 
     public static final String INCOME_TYPE = "Income";
@@ -118,6 +119,14 @@ public class Transaction implements Serializable {
 
     public void setPicUrl(String picUrl) {
         this.picUrl = picUrl;
+    }
+
+    public Boolean getCashTransaction() {
+        return isCashTransaction;
+    }
+
+    public void setCashTransaction(Boolean cashTransaction) {
+        isCashTransaction = cashTransaction;
     }
 
     @Override

@@ -88,11 +88,16 @@ exports.invitesListener = functions.firestore.document("Invitations/{invitationI
 });
 
 exports.transactionInsertionListener = functions.firestore.document("Transactions/{transactionID}").onWrite((snap, context) => {
+    //Don't do anything if it is a cash transaction
+    if (snap.after.data().cashTransaction == true) {
+        return 0;
+    }
 
     var isNewTrans = true;
     if (snap.before.exists) {
         isNewTrans = false;
     }
+
 
 
     if (isNewTrans) {

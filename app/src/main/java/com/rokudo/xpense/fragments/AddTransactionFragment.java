@@ -236,6 +236,7 @@ public class AddTransactionFragment extends Fragment {
         transaction.setUserName(DatabaseUtils.getCurrentUser().getName());
         transaction.setCategory(selectedCategory.getName());
         transaction.setTitle(Objects.requireNonNull(binding.transactionTitle.getText()).toString());
+        transaction.setCashTransaction(binding.cashSwitch.isChecked());
         transaction.setType(binding.incomeChip.isChecked() ? INCOME_TYPE : EXPENSE_TYPE);
         TransactionViewModel viewModel =
                 new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
