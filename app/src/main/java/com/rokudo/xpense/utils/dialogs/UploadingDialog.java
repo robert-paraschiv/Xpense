@@ -13,7 +13,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.rokudo.xpense.R;
 
 public class UploadingDialog extends BottomSheetDialogFragment {
-    private String title;
+    private final String title;
 
     public UploadingDialog(String title) {
         this.title = title;

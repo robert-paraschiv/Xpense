@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:clickable="true"
+    app:cardBackgroundColor="@color/cards_bg_color"
+    app:cardCornerRadius="@dimen/main_cards_corner_radius"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/bankAccType"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="18dp"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            tools:text="Savings Account" />
+
+        <TextView
+            android:id="@+id/bankAccIban"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="18dp"
+            android:textSize="14sp"
+            tools:text="RO06INGB00000999999910531414" />
+
+        <TextView
+            android:id="@+id/bankAccCurrency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="18dp"
+            android:textSize="12sp"
+            tools:text="RON" />
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

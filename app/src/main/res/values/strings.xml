@@ -9,6 +9,14 @@
     <string name="user_profile_picture">User profile picture</string>
     <string name="transition_name_add_transaction">addTransaction</string>
     <string name="pie_details">Pie Details</string>
+    <string name="bank_logo">Bank logo</string>
+    <string name="no_data_provided">No data provided</string>
+    <string name="analytics">Analytics</string>
+    <string name="total_spent">Total spent</string>
+    <string name="last_7_days">Last 7 days</string>
+    <string name="all_month">All month</string>
+    <string name="show_data_for_selected_month">Show data for selected month</string>
+    <string name="apply">Apply</string>
     <integer name="transition_duration_millis">600</integer>
     <integer name="categories_insert_animation_duration">200</integer>
     <integer name="categories_insert_slide_right_animation_duration">250</integer>

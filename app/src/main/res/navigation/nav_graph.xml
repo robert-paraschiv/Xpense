@@ -28,6 +28,12 @@
         <action
             android:id="@+id/action_homeFragment_to_barDetailsFragment"
             app:destination="@id/barDetailsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_connectToBankFragment"
+            app:destination="@id/connectToBankFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_BAccountDetailsFragment"
+            app:destination="@id/BAccountDetailsFragment" />
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
@@ -104,5 +110,38 @@
         <argument
             android:name="wallet"
             app:argType="com.rokudo.xpense.models.Wallet" />
+    </fragment>
+    <fragment
+        android:id="@+id/connectToBankFragment"
+        android:name="com.rokudo.xpense.fragments.SelectBankFragment"
+        android:label="fragment_connect_to_bank"
+        tools:layout="@layout/fragment_connect_to_bank" >
+        <action
+            android:id="@+id/action_connectToBankFragment_to_accTransListFragment"
+            app:destination="@id/accTransListFragment" />
+        <argument
+            android:name="walletId"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/accTransListFragment"
+        android:name="com.rokudo.xpense.fragments.AccTransListFragment"
+        android:label="fragment_acc_trans_list"
+        tools:layout="@layout/fragment_acc_trans_list" >
+        <argument
+            android:name="acc_id"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/BAccountDetailsFragment"
+        android:name="com.rokudo.xpense.fragments.BAccountDetailsFragment"
+        android:label="fragment_b_account_details"
+        tools:layout="@layout/fragment_b_account_details" >
+        <argument
+            android:name="bAccount"
+            app:argType="com.rokudo.xpense.models.BAccount" />
+        <action
+            android:id="@+id/action_BAccountDetailsFragment_to_addTransactionFragment"
+            app:destination="@id/addTransactionFragment" />
     </fragment>
 </navigation>

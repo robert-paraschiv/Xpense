@@ -88,11 +88,16 @@ exports.invitesListener = functions.firestore.document("Invitations/{invitationI
 });
 
 exports.transactionInsertionListener = functions.firestore.document("Transactions/{transactionID}").onWrite((snap, context) => {
+    //Don't do anything if it is a cash transaction
+    if (snap.after.data().cashTransaction == true) {
+        return 0;
+    }
 
     var isNewTrans = true;
     if (snap.before.exists) {
         isNewTrans = false;
     }
+
 
 
     if (isNewTrans) {
@@ -147,8 +152,6 @@ exports.transactionInsertionListener = functions.firestore.document("Transaction
 
 exports.profilePictureChangeListener = functions.firestore.document("Users/{userPhoneNumber}").onWrite((snap, context) => {
 
-    const userPhoneNumber = context.params.userPhoneNumber;
-
     const documentAfter = snap.after.exists ? snap.after.data() : null;
     const documentBefore = snap.before.exists ? snap.before.data() : null;
 
@@ -181,20 +184,9 @@ exports.profilePictureChangeListener = functions.firestore.document("Users/{user
                 });
 
             }).then(() => {
-                return admin.firestore().collection("Transactions").where("user_id", "==", userID).get()
-                    .then(querySnapshot => {
-
-                        querySnapshot.forEach(doc => {
-                            batch.update(doc.ref, { "picUrl": picAfter });
-                        });
-
-                    }).then(() => {
-                        batch.commit();
-                        return console.log("Successfully updated wallets and transactions for user " + userID);
-                    });
-
+                batch.commit();
+                return console.log("Successfully updated wallets and transactions for user " + userID);
             });
-
 
     } else {
         return console.log("Nothing to change for user");

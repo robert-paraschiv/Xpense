@@ -137,16 +137,22 @@ public class AddTransactionFragment extends Fragment {
                     return;
                 }
 
-                selectedCategory = CategoriesUtil.expenseCategoryList.get(
-                        CategoriesUtil.expenseCategoryList
-                                .indexOf(new ExpenseCategory(mTransaction.getCategory(), null, null)));
+                ExpenseCategory transactionExpenseCategory = new ExpenseCategory(mTransaction.getCategory(), null, null);
+                try {
+                    selectedCategory = CategoriesUtil.expenseCategoryList.get(
+                            CategoriesUtil.expenseCategoryList
+                                    .indexOf(transactionExpenseCategory));
+                } catch (ArrayIndexOutOfBoundsException ignored) {
+                }
 
 
-                for (int i = 0; i < binding.categoryChipGroup.getChildCount(); i++) {
-                    Chip chip = (Chip) binding.categoryChipGroup.getChildAt(i);
-                    if (i == CategoriesUtil.expenseCategoryList.indexOf(
-                            new ExpenseCategory(mTransaction.getCategory(), null, null))) {
-                        chip.setChecked(true);
+                if (selectedCategory != null) {
+                    for (int i = 0; i < binding.categoryChipGroup.getChildCount(); i++) {
+                        Chip chip = (Chip) binding.categoryChipGroup.getChildAt(i);
+                        if (i == CategoriesUtil.expenseCategoryList.indexOf(
+                                transactionExpenseCategory)) {
+                            chip.setChecked(true);
+                        }
                     }
                 }
 
@@ -230,6 +236,7 @@ public class AddTransactionFragment extends Fragment {
         transaction.setUserName(DatabaseUtils.getCurrentUser().getName());
         transaction.setCategory(selectedCategory.getName());
         transaction.setTitle(Objects.requireNonNull(binding.transactionTitle.getText()).toString());
+        transaction.setCashTransaction(binding.cashSwitch.isChecked());
         transaction.setType(binding.incomeChip.isChecked() ? INCOME_TYPE : EXPENSE_TYPE);
         TransactionViewModel viewModel =
                 new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
@@ -243,11 +250,12 @@ public class AddTransactionFragment extends Fragment {
             viewModel.addTransaction(transaction).observe(getViewLifecycleOwner(), result -> {
                 if (result != null && result.equals("Success")) {
                     uploadingDialog.dismiss();
-                    Navigation.findNavController(binding.getRoot()).popBackStack();
+                    Navigation.findNavController(binding.getRoot())
+                            .popBackStack(R.id.homeFragment, false);
                 }
             });
         } else {
-            if (mTransaction.getId() == null) {
+            if (mTransaction.getId() == null || mTransaction.getId().equals("NOTPROVIDED")) {
                 DocumentReference documentReference = DatabaseUtils.transactionsRef.document();
                 transaction.setId(documentReference.getId());
             } else {
@@ -258,7 +266,8 @@ public class AddTransactionFragment extends Fragment {
             viewModel.updateTransaction(transaction).observe(getViewLifecycleOwner(), result -> {
                 if (result.equals("Success")) {
                     uploadingDialog.dismiss();
-                    Navigation.findNavController(binding.getRoot()).popBackStack();
+                    Navigation.findNavController(binding.getRoot())
+                            .popBackStack(R.id.homeFragment, false);
                 }
             });
         }

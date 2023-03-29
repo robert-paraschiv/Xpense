@@ -189,14 +189,23 @@
 
         </RelativeLayout>
 
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/cashSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/transactionCategoryLayout"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
+            android:text="Cash transaction" />
+
         <DatePicker
             android:id="@+id/simpleDatePicker"
             android:layout_width="match_parent"
             android:layout_height="140dp"
-            android:layout_below="@id/transactionCategoryLayout"
+            android:layout_below="@id/cashSwitch"
             android:layout_centerHorizontal="true"
             android:layout_marginStart="18dp"
-            android:layout_marginTop="18dp"
             android:layout_marginEnd="18dp"
             android:calendarViewShown="false"
             android:datePickerMode="spinner"

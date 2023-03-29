@@ -1,6 +1,9 @@
 package com.rokudo.xpense.fragments;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 import static androidx.recyclerview.widget.RecyclerView.VERTICAL;
+import static com.rokudo.xpense.utils.DateUtils.monthYearFormat;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -16,12 +19,16 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.transition.TransitionManager;
 
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
+import com.google.android.material.chip.Chip;
 import com.google.android.material.shape.ShapeAppearanceModel;
+import com.google.android.material.transition.MaterialArcMotion;
 import com.google.android.material.transition.MaterialContainerTransform;
+import com.google.android.material.transition.MaterialSharedAxis;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.ExpenseCategoryAdapter;
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
@@ -35,7 +42,9 @@ import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.MapUtil;
 
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -57,7 +66,8 @@ public class BarDetailsFragment extends Fragment {
     private List<ExpenseCategory> categoryList = new ArrayList<>();
     private List<TransEntry> transEntryList = new ArrayList<>();
     private boolean firstLoad = true;
-    Double sum = 0.0;
+    private Double sum = 0.0;
+    Date selectedDate = new Date();
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -67,6 +77,7 @@ public class BarDetailsFragment extends Fragment {
 
         initOnClicks();
         initDateChip();
+        buildDatePickerRv();
 
         transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
 
@@ -79,9 +90,44 @@ public class BarDetailsFragment extends Fragment {
         return binding.getRoot();
     }
 
-    @SuppressLint({"SimpleDateFormat", "SetTextI18n"})
+    private void buildDatePickerRv() {
+
+        Calendar calendar = Calendar.getInstance();
+
+        int yearNow = calendar.get(Calendar.YEAR);
+
+        LocalDate localDate = LocalDate.of(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH) + 1,
+                1);
+
+        calendar.set(Calendar.YEAR, 2022);
+        calendar.set(Calendar.MONTH, 0);
+
+        do {
+            for (int i = 0; i < 12; i++) {
+                calendar.set(Calendar.MONTH, i);
+
+                LocalDate innerLocalDate = LocalDate.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, 1);
+                if (innerLocalDate.isAfter(localDate)) {
+                    break;
+                }
+
+                Chip chip = (Chip) getLayoutInflater().inflate(R.layout.item_month_picker, binding.monthChipGroup, false);
+                chip.setText(monthYearFormat.format(calendar.getTime()));
+                chip.setTag(monthYearFormat.format(calendar.getTime()));
+                if (monthYearFormat.format(calendar.getTime()).equals(monthYearFormat.format(new Date()))) {
+                    chip.setChecked(true);
+                }
+                binding.monthChipGroup.addView(chip);
+            }
+
+            calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR) + 1);
+
+        } while (calendar.get(Calendar.YEAR) <= yearNow);
+    }
+
     private void initDateChip() {
-        binding.dateChip.setText("This month");
+        binding.dateChip.setText(monthYearFormat.format(new Date()));
     }
 
     @Override
@@ -96,12 +142,43 @@ public class BarDetailsFragment extends Fragment {
     }
 
     private void initOnClicks() {
+        binding.monthChipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            Chip chip = group.findViewById(checkedIds.get(0));
+            if (chip != null) {
+                try {
+                    selectedDate = monthYearFormat.parse(chip.getText().toString());
+                    BarDetailsUtils.setBarLabelRotation(binding.barChart, true);
+                    resetCategoriesRv();
+                    loadMonthTransactions(selectedDate);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        binding.dateChip.setOnClickListener(v -> {
+            MaterialSharedAxis materialContainerTransform = new MaterialSharedAxis(MaterialSharedAxis.X, false);
+            materialContainerTransform.setPathMotion(new MaterialArcMotion());
+            materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+
+            BarDetailsUtils.setBarLabelRotation(binding.barChart, true);
+            TransitionManager.beginDelayedTransition(binding.monthLayout, materialContainerTransform);
+
+            binding.dateChipCard.setVisibility(GONE);
+            binding.monthCard.setVisibility(VISIBLE);
+
+            binding.monthHorizontalScroll.postDelayed(() -> {
+                Chip chip = binding.monthChipGroup.findViewWithTag(monthYearFormat.format(selectedDate.getTime()));
+                binding.monthHorizontalScroll.smoothScrollTo(chip.getLeft() - chip.getPaddingLeft(), chip.getTop());
+            }, 30);
+        });
         binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.backBtn).popBackStack());
         binding.allMonthChip.setOnClickListener(v -> {
+            BarDetailsUtils.setBarLabelRotation(binding.barChart, true);
             resetCategoriesRv();
             loadThisMonthTransactions();
         });
         binding.last7DaysChip.setOnClickListener(v -> {
+            BarDetailsUtils.setBarLabelRotation(binding.barChart, false);
             resetCategoriesRv();
             loadLast7DaysTransactions();
         });
@@ -143,6 +220,41 @@ public class BarDetailsFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void loadMonthTransactions(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.getActualMaximum(Calendar.DAY_OF_MONTH),
+                23, 59);
+        Date end = calendar.getTime();
+
+        calendar.set(calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.getActualMinimum(Calendar.DAY_OF_MONTH),
+                0, 0);
+        Date start = calendar.getTime();
+
+        binding.dateChip.setText(monthYearFormat.format(start));
+        if (monthYearFormat.format(start).equals(monthYearFormat.format(new Date()))) {
+            binding.periodCard.setVisibility(VISIBLE);
+            binding.allMonthChip.setChecked(true);
+        } else {
+            binding.periodCard.setVisibility(GONE);
+        }
+
+        MaterialSharedAxis materialContainerTransform = new MaterialSharedAxis(MaterialSharedAxis.X, true);
+        materialContainerTransform.setPathMotion(new MaterialArcMotion());
+        materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+
+        TransitionManager.beginDelayedTransition(binding.monthLayout, materialContainerTransform);
+
+        binding.monthCard.setVisibility(GONE);
+        binding.dateChipCard.setVisibility(VISIBLE);
+
+        loadTransactions(start, end, true, false);
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -208,6 +320,10 @@ public class BarDetailsFragment extends Fragment {
                 .observe(getViewLifecycleOwner(), values -> {
                     if (values == null || values.isEmpty()) {
                         Log.e(TAG, "loadTransactions: empty");
+                        BarDetailsUtils.updateBarchartData(binding.barChart,
+                                new ArrayList<>(),
+                                new TextView(requireContext()).getCurrentTextColor(), last7Days);
+                        binding.totalAmountTv.setText(R.string.no_data_provided);
                     } else {
                         sortTransactions(values);
                         if (updateBar) {

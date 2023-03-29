@@ -134,7 +134,7 @@ public class LoginFragment extends Fragment {
                                 FirebaseMessaging.getInstance().getToken().addOnSuccessListener(token ->
                                         usersRef.document(Objects.requireNonNull(edtPhone.getText()).toString())
                                                 .update("token", token)
-                                                .addOnSuccessListener(unused -> Log.d(TAG, "signInWithCredential: added user to db")));
+                                                .addOnSuccessListener(unused -> Log.d(TAG, "signInWithCredential: updated token for existing user")));
 
                                 Intent i = new Intent(requireActivity(), MainActivity.class);
                                 startActivity(i);
