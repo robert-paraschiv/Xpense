@@ -11,13 +11,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.rokudo.xpense.R;
+import com.rokudo.xpense.models.ExpenseCategory;
 import com.rokudo.xpense.models.Transaction;
+import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
 
 import java.util.List;
@@ -39,6 +42,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final ImageView transactionImage;
+        final ImageView transactionCategoryImage;
         final TextView transactionPersonName;
         final TextView transactionAmount;
         final TextView transactionDate;
@@ -53,6 +57,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
             transactionAmount = itemView.findViewById(R.id.transactionAmount);
             transactionDate = itemView.findViewById(R.id.transactionDate);
             transactionCategory = itemView.findViewById(R.id.transactionCategory);
+            transactionCategoryImage = itemView.findViewById(R.id.transactionCategoryImage);
             transactionTitle = itemView.findViewById(R.id.transactionTitle);
             itemView.setOnClickListener(this);
 
@@ -114,8 +119,18 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
                 holder.transactionTitle.setText(transaction.getTitle());
             if (transaction.getDate() != null)
                 holder.transactionDate.setText(getTransactionDateString(transaction));
-            if (transaction.getCategory() != null)
+            if (transaction.getCategory() != null) {
                 holder.transactionCategory.setText(transaction.getCategory());
+                ExpenseCategory expenseCategory = new ExpenseCategory(transaction.getCategory(), 0, 0);
+                int i = CategoriesUtil.expenseCategoryList.indexOf(expenseCategory);
+                if (i >= 0) {
+                    holder.transactionCategoryImage.setImageDrawable(
+                            AppCompatResources.getDrawable(holder.transactionCategoryImage.getContext(),
+                                    CategoriesUtil.expenseCategoryList.get(i).getResourceId()));
+                    Integer color = CategoriesUtil.expenseCategoryList.get(i).getColor();
+                    holder.transactionCategoryImage.setColorFilter(color);
+                }
+            }
 
             holder.transactionImage.setVisibility(transaction.getPicUrl() == null ? View.GONE : View.VISIBLE);
 

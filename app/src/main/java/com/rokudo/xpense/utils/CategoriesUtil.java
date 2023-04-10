@@ -39,6 +39,9 @@ public class CategoriesUtil {
         expenseCategoryList.add(new ExpenseCategory("Others",
                 R.drawable.ic_round_category_24,
                 rgb("#e74c3c")));
+        expenseCategoryList.add(new ExpenseCategory("Income",
+                R.drawable.round_monetization_on_24,
+                Color.rgb(192, 255, 140)));
     }
 
 }
