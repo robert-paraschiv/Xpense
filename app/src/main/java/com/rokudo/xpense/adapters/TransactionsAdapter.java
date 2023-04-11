@@ -30,7 +30,8 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
     private final OnTransactionClickListener onTransactionClickListener;
     Boolean smallLayout;
 
-    public TransactionsAdapter(List<Transaction> transactionList, Boolean smallLayout, OnTransactionClickListener onTransactionClickListener) {
+    public TransactionsAdapter(List<Transaction> transactionList, Boolean smallLayout,
+                               OnTransactionClickListener onTransactionClickListener) {
         this.transactionList = transactionList;
         this.smallLayout = smallLayout;
         this.onTransactionClickListener = onTransactionClickListener;
@@ -104,17 +105,21 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
             } else {
                 if (transaction.getAmount() != null) {
                     if (transaction.getAmount() < 0) {
-                        holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_red_dark
-                                , holder.transactionAmount.getContext().getTheme()));
+                        holder.transactionAmount
+                                .setTextColor(holder.transactionAmount.getContext().getResources()
+                                        .getColor(android.R.color.holo_red_dark
+                                                , holder.transactionAmount.getContext().getTheme()));
                     } else {
                         transAmountPrefix = "+ ";
-                        holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_green_dark
-                                , holder.transactionAmount.getContext().getTheme()));
+                        holder.transactionAmount.setTextColor(holder.transactionAmount.getContext()
+                                .getResources().getColor(android.R.color.holo_green_dark
+                                        , holder.transactionAmount.getContext().getTheme()));
                     }
                 }
             }
             if (transaction.getAmount() != null)
-                holder.transactionAmount.setText(transAmountPrefix + transaction.getAmount().toString() + " " + transaction.getCurrency());
+                holder.transactionAmount.setText(transAmountPrefix + transaction.getAmount().toString()
+                        + " " + transaction.getCurrency());
             if (transaction.getTitle() != null)
                 holder.transactionTitle.setText(transaction.getTitle());
             if (transaction.getDate() != null)
