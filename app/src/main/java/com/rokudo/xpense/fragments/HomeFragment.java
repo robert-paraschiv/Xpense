@@ -39,9 +39,13 @@ import androidx.recyclerview.widget.SnapHelper;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialFadeThrough;
@@ -85,6 +89,7 @@ public class HomeFragment extends Fragment {
     private TransactionViewModel transactionViewModel;
     private SpentMostAdapter adapter;
     private Boolean gotTransactionsOnce = false;
+    boolean firstPictureLoad = false;
     private final List<SpentMostItem> spentMostItems = new ArrayList<>();
 
     @Override
@@ -355,10 +360,9 @@ public class HomeFragment extends Fragment {
     };
 
     private void updateUserDetailsUI(User user) {
-        binding.welcomeTv.setText(String.format("Welcome, %s", user.getName()));
+//        binding.welcomeTv.setText(String.format("Welcome, %s", user.getName()));
 
-        if (binding.profileImage.getDrawable() == null
-                || checkIfUserPicIsDifferent(user, DatabaseUtils.getCurrentUser())) {
+        if (firstPictureLoad || checkIfUserPicIsDifferent(user, DatabaseUtils.getCurrentUser())) {
             CircularProgressDrawable circularProgressDrawable = getCircularProgressDrawable(requireContext());
             Glide.with(requireContext())
                     .load(user.getPictureUrl())
@@ -367,12 +371,23 @@ public class HomeFragment extends Fragment {
                     .placeholder(circularProgressDrawable)
                     .fallback(R.drawable.ic_baseline_person_24)
                     .transition(withCrossFade())
-                    .into(binding.profileImage);
+                    .into(new CustomTarget<Drawable>() {
+                        @Override
+                        public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                            binding.bottomNavView.getMenu().getItem(2).setIcon(resource);
+                            firstPictureLoad = false;
+                        }
+
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                        }
+                    });
         }
     }
 
     private void initOnClicks() {
-        binding.profileImage.setOnClickListener(view -> navigateToSettings());
+//        binding.profileImage.setOnClickListener(view -> navigateToSettings());
         binding.addWalletBtn.setOnClickListener(view -> handleAddWalletBtnClick());
         binding.walletDropDownBtn.setOnClickListener(view -> showWalletList());
         binding.walletTitle.setOnClickListener(view -> showWalletList());
@@ -541,9 +556,11 @@ public class HomeFragment extends Fragment {
     }
 
     private void navigateToSettings() {
-        binding.profileImage.setTransitionName("settingsTransition");
+//        binding.profileImage.setTransitionName("settingsTransition");
 
-        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder().addSharedElement(binding.profileImage, "settingsTransition").build();
+        FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
+//                .addSharedElement(binding.profileImage, "settingsTransition")
+                .build();
 
         NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToSettingsFragment();
 

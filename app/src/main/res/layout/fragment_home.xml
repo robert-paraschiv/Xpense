@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -9,47 +9,10 @@
     tools:context=".fragments.HomeFragment"
     tools:ignore="HardcodedText">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/home_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/fragments_bg_color"
-        app:contentInsetStart="0dp">
-
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:layout_marginBottom="24dp"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:id="@+id/profileImage"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="18dp"
-                android:contentDescription="@string/user_profile_picture"
-                tools:src="@color/black" />
-
-            <TextView
-                android:id="@+id/welcomeTv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="18dp"
-                android:layout_marginEnd="18dp"
-                android:layout_toEndOf="@id/profileImage"
-                android:textSize="20sp"
-                tools:text="Welcome, Robert" />
-
-        </RelativeLayout>
-    </com.google.android.material.appbar.MaterialToolbar>
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/home_toolbar">
+        android:layout_marginTop="18dp">
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/walletsCard"
@@ -550,21 +513,40 @@
 
     </RelativeLayout>
 
+
+    <com.google.android.material.bottomappbar.BottomAppBar
+        android:id="@+id/bottomAppBar"
+        style="@style/Widget.Material3.BottomAppBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:fabAlignmentMode="end"
+        app:fabAnchorMode="cradle"
+        app:fabAnimationMode="slide"
+        app:fabCradleMargin="8dp"
+        app:fabCradleRoundedCornerRadius="18dp"
+        app:fabCradleVerticalOffset="8dp"
+        app:menuAlignmentMode="start"
+        app:removeEmbeddedFabElevation="false" >
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNavView"
+            android:layout_marginEnd="88dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:menu="@menu/menu"/>
+    </com.google.android.material.bottomappbar.BottomAppBar>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addTransactionBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="18dp"
-        android:layout_marginBottom="22dp"
         android:contentDescription="@string/add_conversation_button"
         android:src="@drawable/ic_round_add_24"
         android:transitionName="@string/transition_name_add_transaction"
         app:fabSize="normal"
-        app:layout_anchorGravity="bottom|end"
-        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
+        app:layout_anchor="@id/bottomAppBar" />
+
 
     <!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
     <!--        android:id="@+id/openBankFab"-->
@@ -582,4 +564,4 @@
     <!--        app:layout_anchorGravity="bottom|start"-->
     <!--        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />-->
 
-</RelativeLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

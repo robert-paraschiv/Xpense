@@ -44,21 +44,21 @@
 
 
             <RelativeLayout
-                android:layout_alignParentEnd="true"
-                android:layout_toEndOf="@id/backBtn"
-                android:layout_centerVertical="true"
                 android:id="@+id/monthLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp">
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginBottom="12dp"
+                android:layout_toEndOf="@id/backBtn">
 
                 <com.google.android.material.card.MaterialCardView
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginEnd="18dp"
                     android:id="@+id/dateChipCard"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
                     android:layout_marginStart="16dp"
+                    android:layout_marginEnd="18dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="0dp">
 
@@ -162,12 +162,12 @@
                             tools:text="RON 3009" />
 
                         <ImageView
-                            android:layout_marginTop="8dp"
                             android:id="@+id/analyticsTypeImage"
                             android:layout_width="30dp"
                             android:layout_height="30dp"
                             android:layout_alignParentEnd="true"
                             android:layout_alignParentBottom="true"
+                            android:layout_marginTop="8dp"
                             android:layout_marginEnd="18dp"
                             android:contentDescription="@string/analytics_type"
                             android:src="@drawable/baseline_bar_chart_24" />
@@ -183,16 +183,15 @@
                         android:textSize="12sp" />
 
                     <RelativeLayout
-                        android:layout_marginBottom="12dp"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp">
 
                         <com.github.mikephil.charting.charts.PieChart
                             android:id="@+id/pieChart"
                             android:layout_width="match_parent"
-                            android:layout_height="280dp"
+                            android:layout_height="300dp"
                             android:layout_marginStart="12dp"
-                            android:layout_marginTop="4dp"
                             android:layout_marginEnd="12dp"
                             android:layout_marginBottom="12dp"
                             android:transitionName="pieChart" />
@@ -200,7 +199,7 @@
                         <com.github.mikephil.charting.charts.BarChart
                             android:id="@+id/barChart"
                             android:layout_width="match_parent"
-                            android:layout_height="280dp"
+                            android:layout_height="300dp"
                             android:layout_marginBottom="12dp"
                             android:transitionName="pieChart" />
 
