@@ -34,6 +34,9 @@
         <action
             android:id="@+id/action_homeFragment_to_BAccountDetailsFragment"
             app:destination="@id/BAccountDetailsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_analyticsFragment"
+            app:destination="@id/analyticsFragment" />
     </fragment>
     <fragment
         android:id="@+id/settingsFragment"
@@ -143,5 +146,17 @@
         <action
             android:id="@+id/action_BAccountDetailsFragment_to_addTransactionFragment"
             app:destination="@id/addTransactionFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/analyticsFragment"
+        android:name="com.rokudo.xpense.fragments.AnalyticsFragment"
+        android:label="fragment_analytics"
+        tools:layout="@layout/fragment_analytics" >
+        <argument
+            android:name="type"
+            app:argType="string" />
+        <argument
+            android:name="wallet"
+            app:argType="com.rokudo.xpense.models.Wallet" />
     </fragment>
 </navigation>

@@ -426,7 +426,7 @@ public class HomeFragment extends Fragment {
                 .build();
 
         NavDirections navDirections = HomeFragmentDirections
-                .actionHomeFragmentToBarDetailsFragment(mWallet);
+                .actionHomeFragmentToAnalyticsFragment("bar", mWallet);
 
         Hold hold = new Hold();
         hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
@@ -442,7 +442,7 @@ public class HomeFragment extends Fragment {
                 .addSharedElement(binding.pieChartCard, "pieChartCard").build();
 
         NavDirections navDirections = HomeFragmentDirections
-                .actionHomeFragmentToPieDetailsFragment(mWallet);
+                .actionHomeFragmentToAnalyticsFragment("pie", mWallet);
 
         Hold hold = new Hold();
         hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));

@@ -41,6 +41,9 @@ public class TransactionViewModel extends AndroidViewModel {
         return repo.loadLatestTransaction();
     }
 
+    public List<Transaction> getStoredTransactionList() {
+        return repo.getStoredTransactionList();
+    }
 
     public MutableLiveData<String> updateTransaction(Transaction transaction) {
         return repo.updateTransaction(transaction);

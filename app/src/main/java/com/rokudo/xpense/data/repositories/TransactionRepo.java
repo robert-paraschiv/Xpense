@@ -23,6 +23,7 @@ public class TransactionRepo {
     private ListenerRegistration transactionListener;
 
     private final MutableLiveData<List<Transaction>> allTransactionList;
+    private final List<Transaction> storedTransactionList;
     private final MutableLiveData<Transaction> latestTransaction;
     private final MutableLiveData<String> addTransactionStatus;
     private final MutableLiveData<String> updateTransactionStatus;
@@ -36,6 +37,7 @@ public class TransactionRepo {
 
     public TransactionRepo() {
         this.allTransactionList = new MutableLiveData<>();
+        this.storedTransactionList = new ArrayList<>();
         this.addTransactionStatus = new MutableLiveData<>();
         this.latestTransaction = new MutableLiveData<>();
         this.updateTransactionStatus = new MutableLiveData<>();
@@ -46,6 +48,7 @@ public class TransactionRepo {
             transactionListener.remove();
         }
         allTransactionList.setValue(null);
+        storedTransactionList.clear();
         addTransactionStatus.setValue(null);
         latestTransaction.setValue(null);
         updateTransactionStatus.setValue(null);
@@ -75,6 +78,7 @@ public class TransactionRepo {
                     if (error != null || value == null || value.isEmpty()) {
                         Log.e(TAG, "loadTransactions: null or error: ", error);
                         allTransactionList.setValue(new ArrayList<>());
+                        storedTransactionList.clear();
                         latestTransaction.setValue(new Transaction());
                     } else {
                         List<Transaction> transactionList = new ArrayList<>();
@@ -87,6 +91,8 @@ public class TransactionRepo {
                         }
                         latestTransaction.setValue(transactionList.size() == 0 ? new Transaction() : transactionList.get(0));
                         allTransactionList.setValue(transactionList);
+                        storedTransactionList.clear();
+                        storedTransactionList.addAll(transactionList);
                     }
                 });
 
@@ -130,6 +136,10 @@ public class TransactionRepo {
                 });
 
         return data;
+    }
+
+    public List<Transaction> getStoredTransactionList() {
+        return storedTransactionList;
     }
 
     public MutableLiveData<String> updateTransaction(Transaction transaction) {
