@@ -249,19 +249,6 @@
                                 app:chipMinTouchTargetSize="0dp"
                                 app:chipStrokeWidth="0dp" />
 
-                            <com.google.android.material.chip.Chip
-                                android:id="@+id/yearlyChip"
-                                style="@style/Widget.Material3.Chip.Assist"
-                                android:layout_width="wrap_content"
-                                android:layout_height="32dp"
-                                android:checkable="true"
-                                android:clickable="true"
-                                android:focusable="true"
-                                android:text="@string/yearly"
-                                app:chipBackgroundColor="@color/bar_details_chip_state_list"
-                                app:chipMinTouchTargetSize="0dp"
-                                app:chipStrokeWidth="0dp" />
-
                         </com.google.android.material.chip.ChipGroup>
 
                     </com.google.android.material.card.MaterialCardView>
