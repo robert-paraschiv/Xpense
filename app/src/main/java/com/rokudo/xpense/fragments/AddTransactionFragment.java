@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,6 +31,7 @@ import com.rokudo.xpense.models.ExpenseCategory;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.DatabaseUtils;
+import com.rokudo.xpense.utils.dialogs.ConfirmationDialog;
 import com.rokudo.xpense.utils.dialogs.UploadingDialog;
 
 import java.time.LocalDate;
@@ -45,6 +47,7 @@ public class AddTransactionFragment extends Fragment {
     private String currency;
     private ExpenseCategory selectedCategory;
     private Transaction mTransaction;
+    private TransactionViewModel viewModel;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -53,6 +56,7 @@ public class AddTransactionFragment extends Fragment {
         // Inflate the layout for this fragment
         binding = FragmentAddTransactionBinding.inflate(inflater, container, false);
 
+        viewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
         buildCategoriesRv();
         handleArgs();
 
@@ -106,6 +110,7 @@ public class AddTransactionFragment extends Fragment {
             if (args.getTransaction() == null) {
                 return;
             }
+            binding.deleteTransBtn.setVisibility(View.VISIBLE);
             mTransaction = args.getTransaction();
             binding.getRoot().setTransitionName("adjustBalance");
             binding.transactionAmount.setText(mTransaction.getAmount().toString());
@@ -177,6 +182,21 @@ public class AddTransactionFragment extends Fragment {
             hideKeyboard(view);
             Navigation.findNavController(binding.getRoot()).popBackStack();
         });
+        binding.deleteTransBtn.setOnClickListener(v -> {
+            ConfirmationDialog confirmationDialog = new ConfirmationDialog("Are you sure you want to delete this transaction ?");
+            confirmationDialog.show(getParentFragmentManager(), "ConfirmationDialog");
+            confirmationDialog.setOnClickListener(() -> {
+                confirmationDialog.dismiss();
+                viewModel
+                        .deleteTransaction(mTransaction.getId())
+                        .observe(getViewLifecycleOwner(), result -> {
+                            if (result != null && result) {
+                                Toast.makeText(requireContext(), "Deleted Successfully", Toast.LENGTH_SHORT).show();
+                                Navigation.findNavController(binding.getRoot()).popBackStack();
+                            }
+                        });
+            });
+        });
         binding.saveTransactionBtn.setOnClickListener(v -> addTransactionToDb());
         binding.categoryChipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
             Chip chip = group.findViewById(checkedIds.get(0));
@@ -221,6 +241,13 @@ public class AddTransactionFragment extends Fragment {
             return;
         }
 
+        if (Double.parseDouble(binding.transactionAmount.getText().toString()) <= 0d) {
+            binding.amountInputLayout.setError("Amount must be greater than zero");
+            binding.amountInputLayout.postDelayed(() ->
+                    binding.amountInputLayout.setError(null), 1500);
+            return;
+        }
+
         Transaction transaction = new Transaction();
 
         transaction.setWalletId(walletId);
@@ -238,8 +265,6 @@ public class AddTransactionFragment extends Fragment {
         transaction.setTitle(Objects.requireNonNull(binding.transactionTitle.getText()).toString());
         transaction.setCashTransaction(binding.cashSwitch.isChecked());
         transaction.setType(binding.incomeChip.isChecked() ? INCOME_TYPE : EXPENSE_TYPE);
-        TransactionViewModel viewModel =
-                new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
 
         if (mTransaction == null) {
             DocumentReference documentReference = DatabaseUtils.transactionsRef.document();

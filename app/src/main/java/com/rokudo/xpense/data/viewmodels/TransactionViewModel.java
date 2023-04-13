@@ -49,6 +49,10 @@ public class TransactionViewModel extends AndroidViewModel {
         return repo.updateTransaction(transaction);
     }
 
+    public MutableLiveData<Boolean> deleteTransaction(String transactionId) {
+        return repo.deleteTransaction(transactionId);
+    }
+
     public void removeAllData() {
         repo.removeAllTransactionsData();
     }

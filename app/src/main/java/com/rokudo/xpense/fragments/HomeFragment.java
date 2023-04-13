@@ -26,6 +26,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -89,7 +90,7 @@ public class HomeFragment extends Fragment {
     private TransactionViewModel transactionViewModel;
     private SpentMostAdapter adapter;
     private Boolean gotTransactionsOnce = false;
-    boolean firstPictureLoad = false;
+    boolean firstPictureLoad = true;
     private final List<SpentMostItem> spentMostItems = new ArrayList<>();
 
     @Override
@@ -97,6 +98,7 @@ public class HomeFragment extends Fragment {
 
         if (binding == null) {
             binding = FragmentHomeBinding.inflate(inflater, container, false);
+            binding.bottomNavView.setItemIconTintList(null);
             walletsViewModel = new ViewModelProvider(requireActivity()).get(WalletsViewModel.class);
             transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
             initOnClicks();
@@ -106,6 +108,7 @@ public class HomeFragment extends Fragment {
 
             initSpentMostOn();
         }
+
 
         loadWalletDetails();
 
@@ -380,7 +383,8 @@ public class HomeFragment extends Fragment {
 
                         @Override
                         public void onLoadCleared(@Nullable Drawable placeholder) {
-
+                            binding.bottomNavView.getMenu().getItem(2).setIcon(placeholder);
+                            firstPictureLoad = false;
                         }
                     });
         }

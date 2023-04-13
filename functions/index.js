@@ -89,7 +89,7 @@ exports.invitesListener = functions.firestore.document("Invitations/{invitationI
 
 exports.transactionInsertionListener = functions.firestore.document("Transactions/{transactionID}").onWrite((snap, context) => {
     //Don't do anything if it is a cash transaction
-    if (snap.after.data().cashTransaction == true) {
+    if (snap.after.exists && snap.after.data().cashTransaction == true) {
         return 0;
     }
 
@@ -97,8 +97,6 @@ exports.transactionInsertionListener = functions.firestore.document("Transaction
     if (snap.before.exists) {
         isNewTrans = false;
     }
-
-
 
     if (isNewTrans) {
         const transaction = snap.after.exists ? snap.after.data() : null;
@@ -119,32 +117,71 @@ exports.transactionInsertionListener = functions.firestore.document("Transaction
         const transBefore = snap.before.exists ? snap.before.data() : null;
         const transAfter = snap.after.exists ? snap.after.data() : null;
 
-        if (transBefore.type == transAfter.type) {
-
-            if (transBefore != null && transAfter != null) {
-                if (transAfter.amount != transBefore.amount) {
-
-                    if (transAfter.type == "Expense") {
-
-                        if (transBefore.amount < transAfter.amount) {
-                            var decrement = transAfter.amount - transBefore.amount;
-
-                            return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
-                                amount: admin.firestore.FieldValue.increment(-decrement)
-                            });
-                        } else {
-                            var increment = transBefore.amount - transAfter.amount;
-
-                            return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
-                                amount: admin.firestore.FieldValue.increment(increment)
-                            });
-                        }
-                    }
-                }
+        if (transAfter == null) {
+            //Transaction was deleted
+            if (transBefore.type == "Expense") {
+                return admin.firestore().collection("Wallets").doc(transBefore.walletId).update({
+                    amount: admin.firestore.FieldValue.increment(transBefore.amount)
+                });
+            } else {
+                return admin.firestore().collection("Wallets").doc(transBefore.walletId).update({
+                    amount: admin.firestore.FieldValue.increment(-transBefore.amount)
+                });
             }
 
         }
 
+        if (transAfter.amount == transBefore.amount) {
+            if (transBefore.type == transAfter.type) {
+                return 0;
+            } else {
+                if (transAfter.type == "Expense") {
+                    return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
+                        amount: admin.firestore.FieldValue.increment(-transAfter.amount)
+                    });
+                } else {
+                    return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
+                        amount: admin.firestore.FieldValue.increment(transAfter.amount)
+                    });
+                }
+            }
+
+        } else {
+
+            if (transBefore.type == transAfter.type) {
+
+                if (transBefore.type == "Expense") {
+                    if (transBefore.amount < transAfter.amount) {
+                        var decrement = transAfter.amount - transBefore.amount;
+
+                        return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
+                            amount: admin.firestore.FieldValue.increment(-decrement)
+                        });
+                    } else {
+                        var increment = transBefore.amount - transAfter.amount;
+
+                        return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
+                            amount: admin.firestore.FieldValue.increment(increment)
+                        });
+                    }
+
+                } else {
+                    if (transBefore.amount < transAfter.amount) {
+                        var increment = transAfter.amount - transBefore.amount;
+
+                        return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
+                            amount: admin.firestore.FieldValue.increment(increment)
+                        });
+                    } else {
+                        var decrement = transBefore.amount - transAfter.amount;
+
+                        return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
+                            amount: admin.firestore.FieldValue.increment(-decrement)
+                        });
+                    }
+                }
+            }
+        }
         return 0;
     }
 

@@ -77,24 +77,20 @@ public class ListTransactionsFragment extends Fragment implements TransactionsAd
         TransactionViewModel transactionViewModel = new ViewModelProvider(requireActivity())
                 .get(TransactionViewModel.class);
 
-        transactionViewModel.loadTransactions(id, getCurrentSelectedMonth())
-                .observe(getViewLifecycleOwner(), values -> {
-                    for (Transaction transaction : values) {
-                        if (transactionList.contains(transaction)) {
-                            transactionList.set(transactionList.indexOf(transaction), transaction);
-                            adapter.notifyItemChanged(transactionList.indexOf(transaction));
-                        } else {
-                            if (gotTransactionsOnce) {
-                                transactionList.add(0, transaction);
-                                adapter.notifyItemInserted(0);
-                            } else {
-                                transactionList.add(transaction);
-                                adapter.notifyItemInserted(transactionList.size() - 1);
-                            }
-                        }
-                    }
-                    gotTransactionsOnce = true;
-                });
+        transactionViewModel.getStoredTransactionList().forEach(transaction -> {
+            if (transactionList.contains(transaction)) {
+                transactionList.set(transactionList.indexOf(transaction), transaction);
+                adapter.notifyItemChanged(transactionList.indexOf(transaction));
+            } else {
+                if (gotTransactionsOnce) {
+                    transactionList.add(0, transaction);
+                    adapter.notifyItemInserted(0);
+                } else {
+                    transactionList.add(transaction);
+                    adapter.notifyItemInserted(transactionList.size() - 1);
+                }
+            }
+        });
     }
 
     private Date getCurrentSelectedMonth() {

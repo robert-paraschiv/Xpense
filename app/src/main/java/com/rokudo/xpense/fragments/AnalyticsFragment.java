@@ -56,14 +56,11 @@ import java.util.Objects;
 public class AnalyticsFragment extends Fragment {
     private static final String TAG = "AnalyticsFragment";
 
-    FragmentAnalyticsBinding binding;
-    TransactionViewModel transactionViewModel;
+    private FragmentAnalyticsBinding binding;
+    private TransactionViewModel transactionViewModel;
     private Double sum = 0.0;
-    Date selectedDate = new Date();
-
-
-    Wallet wallet;
-
+    private Date selectedDate = new Date();
+    private Wallet wallet;
     private ExpenseCategoryAdapter adapter;
     private List<ExpenseCategory> categoryList = new ArrayList<>();
 
@@ -72,7 +69,6 @@ public class AnalyticsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = FragmentAnalyticsBinding.inflate(inflater);
-
 
         transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
 
@@ -161,6 +157,8 @@ public class AnalyticsFragment extends Fragment {
             if (transaction.getType().equals(Transaction.INCOME_TYPE))
                 continue;
 
+            sum += transaction.getAmount();
+
             if (transactionsByCategory.containsKey(transaction.getCategory())) {
                 Objects.requireNonNull(transactionsByCategory
                                 .get(transaction.getCategory()))
@@ -180,9 +178,7 @@ public class AnalyticsFragment extends Fragment {
         }
         categories = MapUtil.sortByValue(categories);
 
-        sum = 0.0;
         categories.forEach((key, value) -> {
-            sum += value;
             ExpenseCategory expenseCategory = new ExpenseCategory(key,
                     transactionsByCategory.get(key),
                     null,

@@ -2,8 +2,11 @@ package com.rokudo.xpense.data.repositories;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
@@ -148,5 +151,16 @@ public class TransactionRepo {
                 .addOnSuccessListener(result -> updateTransactionStatus.setValue("Success"));
 
         return updateTransactionStatus;
+    }
+
+    public MutableLiveData<Boolean> deleteTransaction(String transactionId) {
+        MutableLiveData<Boolean> result = new MutableLiveData<>();
+
+        DatabaseUtils.transactionsRef
+                .document(transactionId)
+                .delete()
+                .addOnCompleteListener(task -> result.setValue(task.isSuccessful()));
+
+        return result;
     }
 }
