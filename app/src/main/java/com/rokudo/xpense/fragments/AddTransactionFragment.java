@@ -17,6 +17,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -57,11 +59,11 @@ public class AddTransactionFragment extends Fragment {
         binding = FragmentAddTransactionBinding.inflate(inflater, container, false);
 
         viewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
-        buildCategoriesRv();
-        handleArgs();
 
         getWalletId();
         initOnClicks();
+        buildCategoriesRv();
+        handleArgs();
 
         return binding.getRoot();
     }
@@ -82,17 +84,18 @@ public class AddTransactionFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables")
     private void buildCategoriesRv() {
         for (int i = 0; i < CategoriesUtil.expenseCategoryList.size(); i++) {
             ExpenseCategory category = CategoriesUtil.expenseCategoryList.get(i);
+            if (category.getName().equals("Income")) {
+                continue;
+            }
             Chip chip = (Chip) getLayoutInflater().inflate(R.layout.item_category, binding.categoryChipGroup, false);
             chip.setText(category.getName());
             chip.setChipIconTint(ColorStateList.valueOf(CategoriesUtil.expenseCategoryList.get(i).getColor()));
-            chip.setChipIcon(getResources().getDrawable(category.getResourceId(), requireContext().getTheme()));
+            chip.setChipIcon(ContextCompat.getDrawable(requireContext(), category.getResourceId()));
             chip.setChipBackgroundColor(ColorStateList.valueOf(getResources().getColor(R.color.cards_bg_color, requireActivity().getTheme())));
             chip.setElevation(0);
-
 
             binding.categoryChipGroup.addView(chip);
         }
