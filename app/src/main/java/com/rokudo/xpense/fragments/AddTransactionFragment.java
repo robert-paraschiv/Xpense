@@ -68,21 +68,6 @@ public class AddTransactionFragment extends Fragment {
         return binding.getRoot();
     }
 
-    @Override
-    public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
-        postponeEnterTransition();
-        final ViewGroup viewGroup = (ViewGroup) view.getParent();
-        viewGroup.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                viewGroup.getViewTreeObserver().removeOnPreDrawListener(this);
-                startPostponedEnterTransition();
-                return true;
-            }
-        });
-
-        super.onViewCreated(view, savedInstanceState);
-    }
 
     private void buildCategoriesRv() {
         for (int i = 0; i < CategoriesUtil.expenseCategoryList.size(); i++) {
