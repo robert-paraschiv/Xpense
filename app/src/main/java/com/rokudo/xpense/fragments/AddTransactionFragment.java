@@ -67,7 +67,7 @@ public class AddTransactionFragment extends Fragment {
 
         return binding.getRoot();
     }
-    
+
     @Override
     public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
         postponeEnterTransition();

@@ -37,7 +37,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_toEndOf="@id/backBtn"
                 android:text="Transactions"
-                android:textSize="18sp"
+                android:textSize="24sp"
                 android:textStyle="bold" />
         </RelativeLayout>
 

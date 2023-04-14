@@ -84,7 +84,7 @@
                         android:layout_height="wrap_content"
                         android:maxWidth="210dp"
                         android:maxLines="1"
-                        android:textSize="24sp"
+                        android:textSize="26sp"
                         android:textStyle="bold"
                         tools:text="Long Wallet Title" />
 
@@ -149,7 +149,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:maxLines="1"
-                        android:textSize="20sp"
+                        android:textSize="22sp"
                         tools:text="lei" />
 
                     <TextView
@@ -158,7 +158,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:maxLines="1"
-                        android:textSize="20sp"
+                        android:textSize="22sp"
                         tools:text="13020.00" />
                 </LinearLayout>
 
@@ -251,7 +251,7 @@
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="8dp"
                         android:layout_marginEnd="16dp"
-                        android:layout_marginBottom="16dp"
+                        android:layout_marginBottom="24dp"
                         android:clickable="true"
                         app:cardBackgroundColor="@color/cards_bg_color"
                         app:strokeWidth="0dp">
@@ -527,15 +527,15 @@
         app:fabCradleRoundedCornerRadius="18dp"
         app:fabCradleVerticalOffset="8dp"
         app:menuAlignmentMode="start"
-        app:removeEmbeddedFabElevation="false" >
+        app:removeEmbeddedFabElevation="false">
 
         <com.google.android.material.bottomnavigation.BottomNavigationView
-            app:labelVisibilityMode="unlabeled"
             android:id="@+id/bottomNavView"
-            android:layout_marginEnd="88dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:menu="@menu/menu"/>
+            android:layout_marginEnd="88dp"
+            app:labelVisibilityMode="unlabeled"
+            app:menu="@menu/menu" />
     </com.google.android.material.bottomappbar.BottomAppBar>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
