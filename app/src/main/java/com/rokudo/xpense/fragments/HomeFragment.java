@@ -68,6 +68,7 @@ import com.rokudo.xpense.utils.DatabaseUtils;
 import com.rokudo.xpense.utils.PrefsUtils;
 import com.rokudo.xpense.utils.dialogs.AdjustBalanceDialog;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
+import com.rokudo.xpense.utils.dialogs.PersonInfoDialogFragment;
 import com.rokudo.xpense.utils.dialogs.WalletListDialog;
 
 import java.time.Duration;
@@ -405,6 +406,20 @@ public class HomeFragment extends Fragment {
         binding.pieDetailsBtn.setOnClickListener(view -> navigateToPieDetails());
 //        binding.openBankFab.setOnClickListener(v -> navigateToBankFragment());
         binding.bankAccountChip.setOnClickListener(v -> handleBankChipClick());
+        binding.sharedWithIcon.setOnClickListener(v -> showPersonInfo());
+    }
+
+    private void showPersonInfo() {
+        User user = new User();
+        mWallet.getWalletUsers().forEach(walletUser -> {
+            if (!walletUser.getUserId().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+                user.setPictureUrl(walletUser.getUserPic());
+                user.setUid(walletUser.getUserId());
+                user.setName(walletUser.getUserName());
+            }
+        });
+        PersonInfoDialogFragment personInfoDialogFragment = new PersonInfoDialogFragment(user);
+        personInfoDialogFragment.show(getParentFragmentManager(),"SharedWithDialog");
     }
 
     private void handleBankChipClick() {
