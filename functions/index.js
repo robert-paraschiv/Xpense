@@ -95,15 +95,15 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
         return 0;
     }
 
+    const transactionDate = transaction.date.toDate();
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const doc = admin.firestore()
         .collection("Wallets")
         .doc(transaction.walletId)
         .collection("Statistics")
-        .doc("2023")
-        .collection("April")
-        .doc("17");
-
-
+        .doc('' + transactionDate.getFullYear())
+        .collection("Months")
+        .doc(months[transactionDate.getMonth()]);
 
     const titleField = `transactions.${transaction.id}.title`;
     const amountField = `transactions.${transaction.id}.amount`;
