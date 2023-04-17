@@ -87,6 +87,53 @@ exports.invitesListener = functions.firestore.document("Invitations/{invitationI
 
 });
 
+exports.testTransactionListener = functions.firestore.document("TestTransactions/{transactionID}").onWrite((snap, context) => {
+    const transaction = snap.after.exists ? snap.after.data() : null;
+
+    //Transaction was deleted
+    if (transaction == null) {
+        return 0;
+    }
+
+    const doc = admin.firestore()
+        .collection("Wallets")
+        .doc(transaction.walletId)
+        .collection("Statistics")
+        .doc("2023")
+        .collection("April")
+        .doc("17");
+
+
+
+    const titleField = `transactions.${transaction.id}.title`;
+    const amountField = `transactions.${transaction.id}.amount`;
+    const idField = `transactions.${transaction.id}.id`;
+
+
+    return doc.get().then((snap) => {
+        if (snap.exists) {
+            return doc.update({
+
+                [titleField]: transaction.title,
+                [amountField]: transaction.amount,
+                [idField]: transaction.id,
+            });
+        } else {
+            const transactionToAdd = {
+                id: transaction.id,
+                amount: transaction.amount,
+                title: transaction.title
+            };
+
+            return doc.set({
+                transactions: { [transaction.id]: transactionToAdd }
+            });
+        }
+    });
+
+
+});
+
 exports.transactionInsertionListener = functions.firestore.document("Transactions/{transactionID}").onWrite((snap, context) => {
     //Don't do anything if it is a cash transaction
     if (snap.after.exists && snap.after.data().cashTransaction == true) {

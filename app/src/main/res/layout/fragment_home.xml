@@ -14,11 +14,11 @@
         android:layout_height="match_parent">
 
         <com.google.android.material.card.MaterialCardView
-            android:layout_marginTop="18dp"
             android:id="@+id/walletsCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="18dp"
+            android:layout_marginTop="18dp"
             android:layout_marginEnd="18dp"
             android:layout_marginBottom="18dp"
             app:cardBackgroundColor="@color/cards_bg_color"
@@ -549,20 +549,19 @@
         app:layout_anchor="@id/bottomAppBar" />
 
 
-    <!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
-    <!--        android:id="@+id/openBankFab"-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_alignParentStart="true"-->
-    <!--        android:layout_alignParentBottom="true"-->
-    <!--        android:layout_gravity="bottom|end"-->
-    <!--        android:layout_marginStart="18dp"-->
-    <!--        android:layout_marginBottom="22dp"-->
-    <!--        android:contentDescription="@string/add_conversation_button"-->
-    <!--        android:src="@drawable/ic_baseline_local_atm_24"-->
-    <!--        android:visibility="visible"-->
-    <!--        app:fabSize="normal"-->
-    <!--        app:layout_anchorGravity="bottom|start"-->
-    <!--        app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />-->
+<!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
+<!--        android:id="@+id/deleteTransBtn"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_alignParentStart="true"-->
+<!--        android:layout_alignParentBottom="true"-->
+<!--        android:layout_gravity="bottom|end"-->
+<!--        android:layout_marginStart="18dp"-->
+<!--        android:layout_marginBottom="22dp"-->
+<!--        android:contentDescription="@string/add_conversation_button"-->
+<!--        android:src="@drawable/ic_baseline_local_atm_24"-->
+<!--        android:visibility="visible"-->
+<!--        app:fabSize="normal"-->
+<!--        app:layout_anchorGravity="bottom|start" />-->
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
