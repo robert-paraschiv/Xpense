@@ -149,10 +149,12 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
     return doc.get().then((snap) => {
         if (snap.exists) {
             return doc.update({
+                monthTotalAmount: admin.firestore.FieldValue.increment(transaction.amount),
                 [categoriesByAmountField]: admin.firestore.FieldValue.increment(transaction.amount),
+
+                [idField]: transaction.id,
                 [titleField]: transaction.title,
                 [amountField]: transaction.amount,
-                [idField]: transaction.id,
                 [currencyField]: transaction.currency,
                 [dateField]: transaction.date,
                 [dateLongField]: transaction.dateLong,
@@ -161,9 +163,10 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
                 [userNameField]: transaction.userName,
                 [user_idField]: transaction.user_id,
                 [walletIdField]: transaction.walletId,
+
+                [categoryIdField]: transaction.id,
                 [categoryTitleField]: transaction.title,
                 [categoryAmountField]: transaction.amount,
-                [categoryIdField]: transaction.id,
                 [categoryCurrencyField]: transaction.currency,
                 [categoryDateField]: transaction.date,
                 [categoryDateLongField]: transaction.dateLong,
@@ -172,9 +175,10 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
                 [categoryUserNameField]: transaction.userName,
                 [categoryUser_idField]: transaction.user_id,
                 [categoryWalletIdField]: transaction.walletId,
+
+                [dayIdField]: transaction.id,
                 [dayTitleField]: transaction.title,
                 [dayAmountField]: transaction.amount,
-                [dayIdField]: transaction.id,
                 [dayCurrencyField]: transaction.currency,
                 [dayDateField]: transaction.date,
                 [dayDateLongField]: transaction.dateLong,
@@ -203,7 +207,8 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
                 transactions: { [transaction.id]: transactionToAdd },
                 categories: { [transaction.category]: transactionToAdd },
                 amountByCategory: { [transaction.category]: transaction.amount },
-                transactionsByDay: { [transactionDay]: transactionToAdd }
+                transactionsByDay: { [transactionDay]: transactionToAdd },
+                monthTotalAmount: transaction.amount
             });
         }
     });
