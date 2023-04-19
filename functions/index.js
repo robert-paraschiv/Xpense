@@ -270,6 +270,7 @@ function createMonthDocument(transaction, doc, transactionDay) {
         amount: transaction.amount,
         title: transaction.title,
         currency: transaction.currency,
+        category: transaction.category,
         date: transaction.date,
         dateLong: transaction.dateLong,
         picUrl: transaction.picUrl,
@@ -293,6 +294,7 @@ function updateMonthDocument(transaction, transactionDay, doc) {
     const titleField = `transactions.${transaction.id}.title`;
     const amountField = `transactions.${transaction.id}.amount`;
     const currencyField = `transactions.${transaction.id}.currency`;
+    const categoryField = `transactions.${transaction.id}.category`;
     const dateField = `transactions.${transaction.id}.date`;
     const dateLongField = `transactions.${transaction.id}.dateLong`;
     const picUrlField = `transactions.${transaction.id}.picUrl`;
@@ -305,6 +307,7 @@ function updateMonthDocument(transaction, transactionDay, doc) {
     const dayTitleField = `transactionsByDay.${transactionDay}.${transaction.id}.title`;
     const dayAmountField = `transactionsByDay.${transactionDay}.${transaction.id}.amount`;
     const dayCurrencyField = `transactionsByDay.${transactionDay}.${transaction.id}.currency`;
+    const dayCategoryField = `transactionsByDay.${transactionDay}.${transaction.id}.category`;
     const dayDateField = `transactionsByDay.${transactionDay}.${transaction.id}.date`;
     const dayDateLongField = `transactionsByDay.${transactionDay}.${transaction.id}.dateLong`;
     const dayPicUrlField = `transactionsByDay.${transactionDay}.${transaction.id}.picUrl`;
@@ -317,6 +320,7 @@ function updateMonthDocument(transaction, transactionDay, doc) {
     const categoryTitleField = `categories.${transaction.category}.${transaction.id}.title`;
     const categoryAmountField = `categories.${transaction.category}.${transaction.id}.amount`;
     const categoryCurrencyField = `categories.${transaction.category}.${transaction.id}.currency`;
+    const categoryCategoryField = `categories.${transaction.category}.${transaction.id}.category`;
     const categoryDateField = `categories.${transaction.category}.${transaction.id}.date`;
     const categoryDateLongField = `categories.${transaction.category}.${transaction.id}.dateLong`;
     const categoryPicUrlField = `categories.${transaction.category}.${transaction.id}.picUrl`;
@@ -335,6 +339,7 @@ function updateMonthDocument(transaction, transactionDay, doc) {
         [titleField]: transaction.title,
         [amountField]: transaction.amount,
         [currencyField]: transaction.currency,
+        [categoryField]: transaction.category,
         [dateField]: transaction.date,
         [dateLongField]: transaction.dateLong,
         [picUrlField]: transaction.picUrl,
@@ -347,6 +352,7 @@ function updateMonthDocument(transaction, transactionDay, doc) {
         [categoryTitleField]: transaction.title,
         [categoryAmountField]: transaction.amount,
         [categoryCurrencyField]: transaction.currency,
+        [categoryCategoryField]: transaction.category,
         [categoryDateField]: transaction.date,
         [categoryDateLongField]: transaction.dateLong,
         [categoryPicUrlField]: transaction.picUrl,
@@ -359,6 +365,7 @@ function updateMonthDocument(transaction, transactionDay, doc) {
         [dayTitleField]: transaction.title,
         [dayAmountField]: transaction.amount,
         [dayCurrencyField]: transaction.currency,
+        [dayCategoryField]: transaction.category,
         [dayDateField]: transaction.date,
         [dayDateLongField]: transaction.dateLong,
         [dayPicUrlField]: transaction.picUrl,
