@@ -96,7 +96,8 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
     }
 
     const transactionDate = transaction.date.toDate();
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const months = ["January", "February", "March", "April", "May", "June", "July", "August",
+        "September", "October", "November", "December"];
     const doc = admin.firestore()
         .collection("Wallets")
         .doc(transaction.walletId)
@@ -108,25 +109,74 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
     const titleField = `transactions.${transaction.id}.title`;
     const amountField = `transactions.${transaction.id}.amount`;
     const idField = `transactions.${transaction.id}.id`;
+    const currencyField = `transactions.${transaction.id}.currency`;
+    const dateField = `transactions.${transaction.id}.date`;
+    const dateLongField = `transactions.${transaction.id}.dateLong`;
+    const picUrlField = `transactions.${transaction.id}.picUrl`;
+    const typeField = `transactions.${transaction.id}.type`;
+    const userNameField = `transactions.${transaction.id}.userName`;
+    const user_idField = `transactions.${transaction.id}.user_id`;
+    const walletIdField = `transactions.${transaction.id}.walletId`;
 
+    const categoryTitleField = `categories.${transaction.category}.${transaction.id}.title`
+    const categoryAmountField = `categories.${transaction.category}.${transaction.id}.amount`;
+    const categoryIdField = `categories.${transaction.category}.${transaction.id}.id`;
+    const categoryCurrencyField = `categories.${transaction.category}.${transaction.id}.currency`;
+    const categoryDateField = `categories.${transaction.category}.${transaction.id}.date`;
+    const categoryDateLongField = `categories.${transaction.category}.${transaction.id}.dateLong`;
+    const categoryPicUrlField = `categories.${transaction.category}.${transaction.id}.picUrl`;
+    const categoryTypeField = `categories.${transaction.category}.${transaction.id}.type`;
+    const categoryUserNameField = `categories.${transaction.category}.${transaction.id}.userName`;
+    const categoryUser_idField = `categories.${transaction.category}.${transaction.id}.user_id`;
+    const categoryWalletIdField = `categories.${transaction.category}.${transaction.id}.walletId`;
+    const categoriesByAmountField = `amountByCategory.${transaction.category}`;
 
     return doc.get().then((snap) => {
         if (snap.exists) {
             return doc.update({
-
+                [categoriesByAmountField]: admin.firestore.FieldValue.increment(transaction.amount),
                 [titleField]: transaction.title,
                 [amountField]: transaction.amount,
                 [idField]: transaction.id,
+                [currencyField]: transaction.currency,
+                [dateField]: transaction.date,
+                [dateLongField]: transaction.dateLong,
+                [picUrlField]: transaction.picUrl,
+                [typeField]: transaction.type,
+                [userNameField]: transaction.userName,
+                [user_idField]: transaction.user_id,
+                [walletIdField]: transaction.walletId,
+                [categoryTitleField]: transaction.title,
+                [categoryAmountField]: transaction.amount,
+                [categoryIdField]: transaction.id,
+                [categoryCurrencyField]: transaction.currency,
+                [categoryDateField]: transaction.date,
+                [categoryDateLongField]: transaction.dateLong,
+                [categoryPicUrlField]: transaction.picUrl,
+                [categoryTypeField]: transaction.type,
+                [categoryUserNameField]: transaction.userName,
+                [categoryUser_idField]: transaction.user_id,
+                [categoryWalletIdField]: transaction.walletId
             });
         } else {
             const transactionToAdd = {
                 id: transaction.id,
                 amount: transaction.amount,
-                title: transaction.title
+                title: transaction.title,
+                currency: transaction.currency,
+                date: transaction.date,
+                dateLong: transaction.dateLong,
+                picUrl: transaction.picUrl,
+                type: transaction.type,
+                userName: transaction.userName,
+                user_id: transaction.user_id,
+                walletId: transaction.walletId
             };
 
             return doc.set({
-                transactions: { [transaction.id]: transactionToAdd }
+                transactions: { [transaction.id]: transactionToAdd },
+                categories: { [transaction.category]: transactionToAdd },
+                amountByCategory: { [transaction.category]: transaction.amount }
             });
         }
     });
