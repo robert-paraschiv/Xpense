@@ -108,108 +108,12 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
 
     const transactionDay = transactionDate.getDate();
 
-    const titleField = `transactions.${transaction.id}.title`;
-    const amountField = `transactions.${transaction.id}.amount`;
-    const idField = `transactions.${transaction.id}.id`;
-    const currencyField = `transactions.${transaction.id}.currency`;
-    const dateField = `transactions.${transaction.id}.date`;
-    const dateLongField = `transactions.${transaction.id}.dateLong`;
-    const picUrlField = `transactions.${transaction.id}.picUrl`;
-    const typeField = `transactions.${transaction.id}.type`;
-    const userNameField = `transactions.${transaction.id}.userName`;
-    const user_idField = `transactions.${transaction.id}.user_id`;
-    const walletIdField = `transactions.${transaction.id}.walletId`;
-
-    const dayTitleField = `transactionsByDay.${transactionDay}.${transaction.id}.title`
-    const dayAmountField = `transactionsByDay.${transactionDay}.${transaction.id}.amount`;
-    const dayIdField = `transactionsByDay.${transactionDay}.${transaction.id}.id`;
-    const dayCurrencyField = `transactionsByDay.${transactionDay}.${transaction.id}.currency`;
-    const dayDateField = `transactionsByDay.${transactionDay}.${transaction.id}.date`;
-    const dayDateLongField = `transactionsByDay.${transactionDay}.${transaction.id}.dateLong`;
-    const dayPicUrlField = `transactionsByDay.${transactionDay}.${transaction.id}.picUrl`;
-    const dayTypeField = `transactionsByDay.${transactionDay}.${transaction.id}.type`;
-    const dayUserNameField = `transactionsByDay.${transactionDay}.${transaction.id}.userName`;
-    const dayUser_idField = `transactionsByDay.${transactionDay}.${transaction.id}.user_id`;
-    const dayWalletIdField = `transactionsByDay.${transactionDay}.${transaction.id}.walletId`;
-
-    const categoryTitleField = `categories.${transaction.category}.${transaction.id}.title`
-    const categoryAmountField = `categories.${transaction.category}.${transaction.id}.amount`;
-    const categoryIdField = `categories.${transaction.category}.${transaction.id}.id`;
-    const categoryCurrencyField = `categories.${transaction.category}.${transaction.id}.currency`;
-    const categoryDateField = `categories.${transaction.category}.${transaction.id}.date`;
-    const categoryDateLongField = `categories.${transaction.category}.${transaction.id}.dateLong`;
-    const categoryPicUrlField = `categories.${transaction.category}.${transaction.id}.picUrl`;
-    const categoryTypeField = `categories.${transaction.category}.${transaction.id}.type`;
-    const categoryUserNameField = `categories.${transaction.category}.${transaction.id}.userName`;
-    const categoryUser_idField = `categories.${transaction.category}.${transaction.id}.user_id`;
-    const categoryWalletIdField = `categories.${transaction.category}.${transaction.id}.walletId`;
-
-    const categoriesByAmountField = `amountByCategory.${transaction.category}`;
 
     return doc.get().then((snap) => {
         if (snap.exists) {
-            return doc.update({
-                monthTotalAmount: admin.firestore.FieldValue.increment(transaction.amount),
-                [categoriesByAmountField]: admin.firestore.FieldValue.increment(transaction.amount),
-
-                [idField]: transaction.id,
-                [titleField]: transaction.title,
-                [amountField]: transaction.amount,
-                [currencyField]: transaction.currency,
-                [dateField]: transaction.date,
-                [dateLongField]: transaction.dateLong,
-                [picUrlField]: transaction.picUrl,
-                [typeField]: transaction.type,
-                [userNameField]: transaction.userName,
-                [user_idField]: transaction.user_id,
-                [walletIdField]: transaction.walletId,
-
-                [categoryIdField]: transaction.id,
-                [categoryTitleField]: transaction.title,
-                [categoryAmountField]: transaction.amount,
-                [categoryCurrencyField]: transaction.currency,
-                [categoryDateField]: transaction.date,
-                [categoryDateLongField]: transaction.dateLong,
-                [categoryPicUrlField]: transaction.picUrl,
-                [categoryTypeField]: transaction.type,
-                [categoryUserNameField]: transaction.userName,
-                [categoryUser_idField]: transaction.user_id,
-                [categoryWalletIdField]: transaction.walletId,
-
-                [dayIdField]: transaction.id,
-                [dayTitleField]: transaction.title,
-                [dayAmountField]: transaction.amount,
-                [dayCurrencyField]: transaction.currency,
-                [dayDateField]: transaction.date,
-                [dayDateLongField]: transaction.dateLong,
-                [dayPicUrlField]: transaction.picUrl,
-                [dayTypeField]: transaction.type,
-                [dayUserNameField]: transaction.userName,
-                [dayUser_idField]: transaction.user_id,
-                [dayWalletIdField]: transaction.walletId
-            });
+            return updateMonthDocument(transaction, transactionDay, doc);
         } else {
-            const transactionToAdd = {
-                id: transaction.id,
-                amount: transaction.amount,
-                title: transaction.title,
-                currency: transaction.currency,
-                date: transaction.date,
-                dateLong: transaction.dateLong,
-                picUrl: transaction.picUrl,
-                type: transaction.type,
-                userName: transaction.userName,
-                user_id: transaction.user_id,
-                walletId: transaction.walletId
-            };
-
-            return doc.set({
-                transactions: { [transaction.id]: transactionToAdd },
-                categories: { [transaction.category]: transactionToAdd },
-                amountByCategory: { [transaction.category]: transaction.amount },
-                transactionsByDay: { [transactionDay]: transactionToAdd },
-                monthTotalAmount: transaction.amount
-            });
+            return createMonthDocument(transaction, doc, transactionDay);
         }
     });
 
@@ -359,3 +263,108 @@ exports.profilePictureChangeListener = functions.firestore.document("Users/{user
     }
 
 });
+
+function createMonthDocument(transaction, doc, transactionDay) {
+    const transactionToAdd = {
+        id: transaction.id,
+        amount: transaction.amount,
+        title: transaction.title,
+        currency: transaction.currency,
+        date: transaction.date,
+        dateLong: transaction.dateLong,
+        picUrl: transaction.picUrl,
+        type: transaction.type,
+        userName: transaction.userName,
+        user_id: transaction.user_id,
+        walletId: transaction.walletId
+    };
+
+    return doc.set({
+        transactions: { [transaction.id]: transactionToAdd },
+        categories: { [transaction.category]: transactionToAdd },
+        amountByCategory: { [transaction.category]: transaction.amount },
+        transactionsByDay: { [transactionDay]: transactionToAdd },
+        monthTotalAmount: transaction.amount
+    });
+}
+
+function updateMonthDocument(transaction, transactionDay, doc) {
+    const idField = `transactions.${transaction.id}.id`;
+    const titleField = `transactions.${transaction.id}.title`;
+    const amountField = `transactions.${transaction.id}.amount`;
+    const currencyField = `transactions.${transaction.id}.currency`;
+    const dateField = `transactions.${transaction.id}.date`;
+    const dateLongField = `transactions.${transaction.id}.dateLong`;
+    const picUrlField = `transactions.${transaction.id}.picUrl`;
+    const typeField = `transactions.${transaction.id}.type`;
+    const userNameField = `transactions.${transaction.id}.userName`;
+    const user_idField = `transactions.${transaction.id}.user_id`;
+    const walletIdField = `transactions.${transaction.id}.walletId`;
+
+    const dayIdField = `transactionsByDay.${transactionDay}.${transaction.id}.id`;
+    const dayTitleField = `transactionsByDay.${transactionDay}.${transaction.id}.title`;
+    const dayAmountField = `transactionsByDay.${transactionDay}.${transaction.id}.amount`;
+    const dayCurrencyField = `transactionsByDay.${transactionDay}.${transaction.id}.currency`;
+    const dayDateField = `transactionsByDay.${transactionDay}.${transaction.id}.date`;
+    const dayDateLongField = `transactionsByDay.${transactionDay}.${transaction.id}.dateLong`;
+    const dayPicUrlField = `transactionsByDay.${transactionDay}.${transaction.id}.picUrl`;
+    const dayTypeField = `transactionsByDay.${transactionDay}.${transaction.id}.type`;
+    const dayUserNameField = `transactionsByDay.${transactionDay}.${transaction.id}.userName`;
+    const dayUser_idField = `transactionsByDay.${transactionDay}.${transaction.id}.user_id`;
+    const dayWalletIdField = `transactionsByDay.${transactionDay}.${transaction.id}.walletId`;
+
+    const categoryIdField = `categories.${transaction.category}.${transaction.id}.id`;
+    const categoryTitleField = `categories.${transaction.category}.${transaction.id}.title`;
+    const categoryAmountField = `categories.${transaction.category}.${transaction.id}.amount`;
+    const categoryCurrencyField = `categories.${transaction.category}.${transaction.id}.currency`;
+    const categoryDateField = `categories.${transaction.category}.${transaction.id}.date`;
+    const categoryDateLongField = `categories.${transaction.category}.${transaction.id}.dateLong`;
+    const categoryPicUrlField = `categories.${transaction.category}.${transaction.id}.picUrl`;
+    const categoryTypeField = `categories.${transaction.category}.${transaction.id}.type`;
+    const categoryUserNameField = `categories.${transaction.category}.${transaction.id}.userName`;
+    const categoryUser_idField = `categories.${transaction.category}.${transaction.id}.user_id`;
+    const categoryWalletIdField = `categories.${transaction.category}.${transaction.id}.walletId`;
+
+    const categoriesByAmountField = `amountByCategory.${transaction.category}`;
+
+    return doc.update({
+        monthTotalAmount: admin.firestore.FieldValue.increment(transaction.amount),
+        [categoriesByAmountField]: admin.firestore.FieldValue.increment(transaction.amount),
+
+        [idField]: transaction.id,
+        [titleField]: transaction.title,
+        [amountField]: transaction.amount,
+        [currencyField]: transaction.currency,
+        [dateField]: transaction.date,
+        [dateLongField]: transaction.dateLong,
+        [picUrlField]: transaction.picUrl,
+        [typeField]: transaction.type,
+        [userNameField]: transaction.userName,
+        [user_idField]: transaction.user_id,
+        [walletIdField]: transaction.walletId,
+
+        [categoryIdField]: transaction.id,
+        [categoryTitleField]: transaction.title,
+        [categoryAmountField]: transaction.amount,
+        [categoryCurrencyField]: transaction.currency,
+        [categoryDateField]: transaction.date,
+        [categoryDateLongField]: transaction.dateLong,
+        [categoryPicUrlField]: transaction.picUrl,
+        [categoryTypeField]: transaction.type,
+        [categoryUserNameField]: transaction.userName,
+        [categoryUser_idField]: transaction.user_id,
+        [categoryWalletIdField]: transaction.walletId,
+
+        [dayIdField]: transaction.id,
+        [dayTitleField]: transaction.title,
+        [dayAmountField]: transaction.amount,
+        [dayCurrencyField]: transaction.currency,
+        [dayDateField]: transaction.date,
+        [dayDateLongField]: transaction.dateLong,
+        [dayPicUrlField]: transaction.picUrl,
+        [dayTypeField]: transaction.type,
+        [dayUserNameField]: transaction.userName,
+        [dayUser_idField]: transaction.user_id,
+        [dayWalletIdField]: transaction.walletId
+    });
+}
