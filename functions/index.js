@@ -106,6 +106,8 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
         .collection("Months")
         .doc(months[transactionDate.getMonth()]);
 
+    const transactionDay = transactionDate.getDate();
+
     const titleField = `transactions.${transaction.id}.title`;
     const amountField = `transactions.${transaction.id}.amount`;
     const idField = `transactions.${transaction.id}.id`;
@@ -118,6 +120,18 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
     const user_idField = `transactions.${transaction.id}.user_id`;
     const walletIdField = `transactions.${transaction.id}.walletId`;
 
+    const dayTitleField = `transactionsByDay.${transactionDay}.${transaction.id}.title`
+    const dayAmountField = `transactionsByDay.${transactionDay}.${transaction.id}.amount`;
+    const dayIdField = `transactionsByDay.${transactionDay}.${transaction.id}.id`;
+    const dayCurrencyField = `transactionsByDay.${transactionDay}.${transaction.id}.currency`;
+    const dayDateField = `transactionsByDay.${transactionDay}.${transaction.id}.date`;
+    const dayDateLongField = `transactionsByDay.${transactionDay}.${transaction.id}.dateLong`;
+    const dayPicUrlField = `transactionsByDay.${transactionDay}.${transaction.id}.picUrl`;
+    const dayTypeField = `transactionsByDay.${transactionDay}.${transaction.id}.type`;
+    const dayUserNameField = `transactionsByDay.${transactionDay}.${transaction.id}.userName`;
+    const dayUser_idField = `transactionsByDay.${transactionDay}.${transaction.id}.user_id`;
+    const dayWalletIdField = `transactionsByDay.${transactionDay}.${transaction.id}.walletId`;
+
     const categoryTitleField = `categories.${transaction.category}.${transaction.id}.title`
     const categoryAmountField = `categories.${transaction.category}.${transaction.id}.amount`;
     const categoryIdField = `categories.${transaction.category}.${transaction.id}.id`;
@@ -129,6 +143,7 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
     const categoryUserNameField = `categories.${transaction.category}.${transaction.id}.userName`;
     const categoryUser_idField = `categories.${transaction.category}.${transaction.id}.user_id`;
     const categoryWalletIdField = `categories.${transaction.category}.${transaction.id}.walletId`;
+
     const categoriesByAmountField = `amountByCategory.${transaction.category}`;
 
     return doc.get().then((snap) => {
@@ -156,7 +171,18 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
                 [categoryTypeField]: transaction.type,
                 [categoryUserNameField]: transaction.userName,
                 [categoryUser_idField]: transaction.user_id,
-                [categoryWalletIdField]: transaction.walletId
+                [categoryWalletIdField]: transaction.walletId,
+                [dayTitleField]: transaction.title,
+                [dayAmountField]: transaction.amount,
+                [dayIdField]: transaction.id,
+                [dayCurrencyField]: transaction.currency,
+                [dayDateField]: transaction.date,
+                [dayDateLongField]: transaction.dateLong,
+                [dayPicUrlField]: transaction.picUrl,
+                [dayTypeField]: transaction.type,
+                [dayUserNameField]: transaction.userName,
+                [dayUser_idField]: transaction.user_id,
+                [dayWalletIdField]: transaction.walletId
             });
         } else {
             const transactionToAdd = {
@@ -176,7 +202,8 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
             return doc.set({
                 transactions: { [transaction.id]: transactionToAdd },
                 categories: { [transaction.category]: transactionToAdd },
-                amountByCategory: { [transaction.category]: transaction.amount }
+                amountByCategory: { [transaction.category]: transaction.amount },
+                transactionsByDay: { [transactionDay]: transactionToAdd }
             });
         }
     });
