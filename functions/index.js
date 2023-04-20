@@ -1,6 +1,8 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const { firestore } = require('firebase-admin');
+const months = ["January", "February", "March", "April", "May", "June", "July", "August",
+    "September", "October", "November", "December"];
 admin.initializeApp(functions.config().firebase)
 
 exports.invitesListener = functions.firestore.document("Invitations/{invitationID}").onWrite((snap, context) => {
@@ -90,14 +92,21 @@ exports.invitesListener = functions.firestore.document("Invitations/{invitationI
 exports.testTransactionListener = functions.firestore.document("TestTransactions/{transactionID}").onWrite((snap, context) => {
     const updatedTransaction = snap.after.exists ? snap.after.data() : null;
     const oldTransaction = snap.before.exists ? snap.before.data() : null;
-    //Transaction was deleted
+
     if (updatedTransaction == null) {
+        //Transaction was deleted
         return 0;
+    } else {
+        if (oldTransaction == null) {
+            //transaction is new
+
+        } else {
+            //transaction is updated
+
+        }
     }
 
     const transactionDate = updatedTransaction.date.toDate();
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August",
-        "September", "October", "November", "December"];
     const doc = admin.firestore()
         .collection("Wallets")
         .doc(updatedTransaction.walletId)
