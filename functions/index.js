@@ -102,12 +102,30 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
 
         } else {
             //transaction is updated
+            const oldCategory = oldTransaction.category;
+            const newCategory = updatedTransaction.category;
+            const oldAmount = oldTransaction.amount;
+            const newAmount = updatedTransaction.amount;
+            const oldDate = oldTransaction.date.toDate();
+            const newDate = updatedTransaction.date.toDate();
+
+            const categoryChanged = oldCategory !== newCategory;
+            const amountChanged = oldAmount !== newAmount;
+            const dateChanged = oldDate.getFullYear() !== newDate.getFullYear()
+                || oldDate.getMonth() !== newDate.getMonth()
+                || oldDate.getDate() !== newDate.getDate();
+
 
         }
     }
 
     const transactionDate = updatedTransaction.date.toDate();
-    const doc = admin.firestore()
+    const yearDocument = admin.firestore()
+        .collection("Wallets")
+        .doc(updatedTransaction.walletId)
+        .collection("Statistics")
+        .doc('' + transactionDate.getFullYear());
+    const monthDocument = admin.firestore()
         .collection("Wallets")
         .doc(updatedTransaction.walletId)
         .collection("Statistics")
@@ -118,13 +136,20 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
     const transactionDay = transactionDate.getDate();
 
 
-    return doc.get().then((snap) => {
-        if (snap.exists) {
-            return updateMonthDocument(updatedTransaction, transactionDay, doc);
-        } else {
-            return createMonthDocument(updatedTransaction, doc, transactionDay);
-        }
-    });
+    return yearDocument.get()
+        .then((snap) => {
+            
+        })
+        .then(() => {
+            monthDocument.get()
+                .then((snap) => {
+                    if (snap.exists) {
+                        return updateMonthDocument(updatedTransaction, transactionDay, monthDocument);
+                    } else {
+                        return createMonthDocument(updatedTransaction, monthDocument, transactionDay);
+                    }
+                });
+        });
 
 });
 
