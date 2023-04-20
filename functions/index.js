@@ -89,67 +89,47 @@ exports.invitesListener = functions.firestore.document("Invitations/{invitationI
 
 });
 
-exports.testTransactionListener = functions.firestore.document("TestTransactions/{transactionID}").onWrite((snap, context) => {
-    const updatedTransaction = snap.after.exists ? snap.after.data() : null;
-    const oldTransaction = snap.before.exists ? snap.before.data() : null;
+exports.profilePictureChangeListener = functions.firestore.document("Users/{userPhoneNumber}").onWrite((snap, context) => {
 
-    if (updatedTransaction == null) {
-        //Transaction was deleted
-        return 0;
-    } else {
-        if (oldTransaction == null) {
-            //transaction is new
+    const documentAfter = snap.after.exists ? snap.after.data() : null;
+    const documentBefore = snap.before.exists ? snap.before.data() : null;
 
-        } else {
-            //transaction is updated
-            const oldCategory = oldTransaction.category;
-            const newCategory = updatedTransaction.category;
-            const oldAmount = oldTransaction.amount;
-            const newAmount = updatedTransaction.amount;
-            const oldDate = oldTransaction.date.toDate();
-            const newDate = updatedTransaction.date.toDate();
+    const picBefore = documentBefore.pictureUrl;
+    const picAfter = documentAfter.pictureUrl;
+    const nameBefore = documentBefore.name;
+    const nameAfter = documentAfter.name;
 
-            const categoryChanged = oldCategory !== newCategory;
-            const amountChanged = oldAmount !== newAmount;
-            const dateChanged = oldDate.getFullYear() !== newDate.getFullYear()
-                || oldDate.getMonth() !== newDate.getMonth()
-                || oldDate.getDate() !== newDate.getDate();
+    const userID = documentBefore.uid;
 
+    if (picBefore != picAfter || nameBefore != nameAfter) {
+        const batch = admin.firestore().batch();
+        return admin.firestore().collection("Wallets").where("users", "array-contains", userID).get()
+            .then(querySnapshot => {
 
-        }
-    }
+                querySnapshot.forEach(doc => {
+                    let walletUsers = doc.data().walletUsers;
 
-    const transactionDate = updatedTransaction.date.toDate();
-    const yearDocument = admin.firestore()
-        .collection("Wallets")
-        .doc(updatedTransaction.walletId)
-        .collection("Statistics")
-        .doc('' + transactionDate.getFullYear());
-    const monthDocument = admin.firestore()
-        .collection("Wallets")
-        .doc(updatedTransaction.walletId)
-        .collection("Statistics")
-        .doc('' + transactionDate.getFullYear())
-        .collection("Months")
-        .doc(months[transactionDate.getMonth()]);
-
-    const transactionDay = transactionDate.getDate();
-
-
-    return yearDocument.get()
-        .then((snap) => {
-            
-        })
-        .then(() => {
-            monthDocument.get()
-                .then((snap) => {
-                    if (snap.exists) {
-                        return updateMonthDocument(updatedTransaction, transactionDay, monthDocument);
-                    } else {
-                        return createMonthDocument(updatedTransaction, monthDocument, transactionDay);
+                    if (walletUsers != null) {
+                        walletUsers.forEach(element => {
+                            if (element.userId === userID) {
+                                element.userPic = picAfter;
+                                element.userName = nameAfter;
+                            }
+                        });
                     }
+
+                    batch.update(doc.ref, { "walletUsers": walletUsers });
+
                 });
-        });
+
+            }).then(() => {
+                batch.commit();
+                return console.log("Successfully updated wallets and transactions for user " + userID);
+            });
+
+    } else {
+        return console.log("Nothing to change for user");
+    }
 
 });
 
@@ -253,51 +233,113 @@ exports.transactionInsertionListener = functions.firestore.document("Transaction
 
 });
 
-exports.profilePictureChangeListener = functions.firestore.document("Users/{userPhoneNumber}").onWrite((snap, context) => {
+exports.testTransactionListener = functions.firestore.document("TestTransactions/{transactionID}").onWrite((snap, context) => {
+    const updatedTransaction = snap.after.exists ? snap.after.data() : null;
+    const oldTransaction = snap.before.exists ? snap.before.data() : null;
 
-    const documentAfter = snap.after.exists ? snap.after.data() : null;
-    const documentBefore = snap.before.exists ? snap.before.data() : null;
 
-    const picBefore = documentBefore.pictureUrl;
-    const picAfter = documentAfter.pictureUrl;
-    const nameBefore = documentBefore.name;
-    const nameAfter = documentAfter.name;
 
-    const userID = documentBefore.uid;
+    if (updatedTransaction == null) {
+        const transactionDate = oldTransaction.date.toDate();
+        const transactionDay = transactionDate.getDate();
 
-    if (picBefore != picAfter || nameBefore != nameAfter) {
-        const batch = admin.firestore().batch();
-        return admin.firestore().collection("Wallets").where("users", "array-contains", userID).get()
-            .then(querySnapshot => {
+        const yearDocument = admin.firestore()
+            .collection("Wallets")
+            .doc(oldTransaction.walletId)
+            .collection("Statistics")
+            .doc('' + transactionDate.getFullYear());
+        const monthDocument = admin.firestore()
+            .collection("Wallets")
+            .doc(oldTransaction.walletId)
+            .collection("Statistics")
+            .doc('' + transactionDate.getFullYear())
+            .collection("Months")
+            .doc(months[transactionDate.getMonth()]);
 
-                querySnapshot.forEach(doc => {
-                    let walletUsers = doc.data().walletUsers;
+        //Transaction was deleted
+        return yearDocument.get()
+            .then((yearDocSnap) => {
+                if (yearDocSnap.exists) {
+                    // Update fields to remove transaction and amount           
+                    return console.log("year doc exists");
+                } else {
+                    return console.log("year doc did not exist");
+                }
+            })
+            .then(() => {
+                monthDocument.get()
+                    .then((monthDocSnap) => {
+                        if (monthDocSnap.exists) {
+                            // Update fields to remove transaction and amount      
+                            return console.log("month doc exists");
+                        } else {
+                            return console.log("month doc did not exist");
+                        }
+                    });
+            });
+    } else {
+        const transactionDate = updatedTransaction.date.toDate();
+        const transactionDay = transactionDate.getDate();
 
-                    if (walletUsers != null) {
-                        walletUsers.forEach(element => {
-                            if (element.userId === userID) {
-                                element.userPic = picAfter;
-                                element.userName = nameAfter;
+        const yearDocument = admin.firestore()
+            .collection("Wallets")
+            .doc(updatedTransaction.walletId)
+            .collection("Statistics")
+            .doc('' + transactionDate.getFullYear());
+        const monthDocument = admin.firestore()
+            .collection("Wallets")
+            .doc(updatedTransaction.walletId)
+            .collection("Statistics")
+            .doc('' + transactionDate.getFullYear())
+            .collection("Months")
+            .doc(months[transactionDate.getMonth()]);
+
+        if (oldTransaction == null) {
+            //transaction is new
+            return yearDocument.get()
+                .then((yearDocSnap) => {
+                    if (yearDocSnap.exists) {
+                        return updateStatisticsDocument(yearDocument, updatedTransaction, transactionDay, false);
+                    } else {
+                        return createStatisticsDocument(yearDocument, updatedTransaction, transactionDay, false);
+                    }
+                })
+                .then(() => {
+                    monthDocument.get()
+                        .then((monthDocSnap) => {
+                            if (monthDocSnap.exists) {
+                                return updateStatisticsDocument(monthDocument, updatedTransaction, transactionDay, true);
+                            } else {
+                                return createStatisticsDocument(monthDocument, updatedTransaction, transactionDay, true);
                             }
                         });
-                    }
-
-                    batch.update(doc.ref, { "walletUsers": walletUsers });
-
                 });
+        } else {
+            //transaction is updated
+            const oldCategory = oldTransaction.category;
+            const newCategory = updatedTransaction.category;
+            const oldAmount = oldTransaction.amount;
+            const newAmount = updatedTransaction.amount;
+            const oldDate = oldTransaction.date.toDate();
+            const newDate = updatedTransaction.date.toDate();
 
-            }).then(() => {
-                batch.commit();
-                return console.log("Successfully updated wallets and transactions for user " + userID);
-            });
+            const typeChanged = oldTransaction.type !== updatedTransaction.type;
+            const categoryChanged = oldCategory !== newCategory;
+            const amountChanged = oldAmount !== newAmount;
+            const dateChanged = (oldDate.getFullYear() !== newDate.getFullYear()
+                || oldDate.getMonth() !== newDate.getMonth()
+                || oldDate.getDate() !== newDate.getDate());
 
-    } else {
-        return console.log("Nothing to change for user");
+
+            return console.log("Transaction was updated");
+        }
     }
+
 
 });
 
-function createMonthDocument(transaction, doc, transactionDay) {
+
+function createStatisticsDocument(doc, transaction, transactionDay, byDay) {
     const transactionToAdd = {
         id: transaction.id,
         amount: transaction.amount,
@@ -312,17 +354,26 @@ function createMonthDocument(transaction, doc, transactionDay) {
         user_id: transaction.user_id,
         walletId: transaction.walletId
     };
+    if (byDay) {
+        return doc.set({
+            transactions: { [transaction.id]: transactionToAdd },
+            categories: { [transaction.category]: { [transaction.id]: transactionToAdd } },
+            amountByCategory: { [transaction.category]: transaction.amount },
+            transactionsByDay: { [transactionDay]: { [transaction.id]: transactionToAdd } },
+            totalAmountSpent: transaction.amount
+        });
+    } else {
+        return doc.set({
+            transactions: { [transaction.id]: transactionToAdd },
+            categories: { [transaction.category]: { [transaction.id]: transactionToAdd } },
+            amountByCategory: { [transaction.category]: transaction.amount },
+            totalAmountSpent: transaction.amount
+        });
+    }
 
-    return doc.set({
-        transactions: { [transaction.id]: transactionToAdd },
-        categories: { [transaction.category]: { [transaction.id]: transactionToAdd } },
-        amountByCategory: { [transaction.category]: transaction.amount },
-        transactionsByDay: { [transactionDay]: { [transaction.id]: transactionToAdd } },
-        monthTotalAmount: transaction.amount
-    });
 }
 
-function updateMonthDocument(transaction, transactionDay, doc) {
+function updateStatisticsDocument(doc, transaction, transactionDay, byDay) {
     const { idField, titleField, amountField, currencyField, categoryField,
         dateField, dateLongField, picUrlField, typeField, userNameField,
         user_idField, walletIdField
@@ -341,49 +392,83 @@ function updateMonthDocument(transaction, transactionDay, doc) {
 
     const categoriesByAmountField = `amountByCategory.${transaction.category}`;
 
-    return doc.update({
-        monthTotalAmount: admin.firestore.FieldValue.increment(transaction.amount),
-        [categoriesByAmountField]: admin.firestore.FieldValue.increment(transaction.amount),
+    if (byDay) {
+        return doc.update({
+            totalAmountSpent: admin.firestore.FieldValue.increment(transaction.amount),
+            [categoriesByAmountField]: admin.firestore.FieldValue.increment(transaction.amount),
 
-        [idField]: transaction.id,
-        [titleField]: transaction.title,
-        [amountField]: transaction.amount,
-        [currencyField]: transaction.currency,
-        [categoryField]: transaction.category,
-        [dateField]: transaction.date,
-        [dateLongField]: transaction.dateLong,
-        [picUrlField]: transaction.picUrl,
-        [typeField]: transaction.type,
-        [userNameField]: transaction.userName,
-        [user_idField]: transaction.user_id,
-        [walletIdField]: transaction.walletId,
+            [idField]: transaction.id,
+            [titleField]: transaction.title,
+            [amountField]: transaction.amount,
+            [currencyField]: transaction.currency,
+            [categoryField]: transaction.category,
+            [dateField]: transaction.date,
+            [dateLongField]: transaction.dateLong,
+            [picUrlField]: transaction.picUrl,
+            [typeField]: transaction.type,
+            [userNameField]: transaction.userName,
+            [user_idField]: transaction.user_id,
+            [walletIdField]: transaction.walletId,
 
-        [categoryIdField]: transaction.id,
-        [categoryTitleField]: transaction.title,
-        [categoryAmountField]: transaction.amount,
-        [categoryCurrencyField]: transaction.currency,
-        [categoryCategoryField]: transaction.category,
-        [categoryDateField]: transaction.date,
-        [categoryDateLongField]: transaction.dateLong,
-        [categoryPicUrlField]: transaction.picUrl,
-        [categoryTypeField]: transaction.type,
-        [categoryUserNameField]: transaction.userName,
-        [categoryUser_idField]: transaction.user_id,
-        [categoryWalletIdField]: transaction.walletId,
+            [categoryIdField]: transaction.id,
+            [categoryTitleField]: transaction.title,
+            [categoryAmountField]: transaction.amount,
+            [categoryCurrencyField]: transaction.currency,
+            [categoryCategoryField]: transaction.category,
+            [categoryDateField]: transaction.date,
+            [categoryDateLongField]: transaction.dateLong,
+            [categoryPicUrlField]: transaction.picUrl,
+            [categoryTypeField]: transaction.type,
+            [categoryUserNameField]: transaction.userName,
+            [categoryUser_idField]: transaction.user_id,
+            [categoryWalletIdField]: transaction.walletId,
 
-        [dayIdField]: transaction.id,
-        [dayTitleField]: transaction.title,
-        [dayAmountField]: transaction.amount,
-        [dayCurrencyField]: transaction.currency,
-        [dayCategoryField]: transaction.category,
-        [dayDateField]: transaction.date,
-        [dayDateLongField]: transaction.dateLong,
-        [dayPicUrlField]: transaction.picUrl,
-        [dayTypeField]: transaction.type,
-        [dayUserNameField]: transaction.userName,
-        [dayUser_idField]: transaction.user_id,
-        [dayWalletIdField]: transaction.walletId
-    });
+            [dayIdField]: transaction.id,
+            [dayTitleField]: transaction.title,
+            [dayAmountField]: transaction.amount,
+            [dayCurrencyField]: transaction.currency,
+            [dayCategoryField]: transaction.category,
+            [dayDateField]: transaction.date,
+            [dayDateLongField]: transaction.dateLong,
+            [dayPicUrlField]: transaction.picUrl,
+            [dayTypeField]: transaction.type,
+            [dayUserNameField]: transaction.userName,
+            [dayUser_idField]: transaction.user_id,
+            [dayWalletIdField]: transaction.walletId
+        });
+    } else {
+        return doc.update({
+            totalAmountSpent: admin.firestore.FieldValue.increment(transaction.amount),
+            [categoriesByAmountField]: admin.firestore.FieldValue.increment(transaction.amount),
+
+            [idField]: transaction.id,
+            [titleField]: transaction.title,
+            [amountField]: transaction.amount,
+            [currencyField]: transaction.currency,
+            [categoryField]: transaction.category,
+            [dateField]: transaction.date,
+            [dateLongField]: transaction.dateLong,
+            [picUrlField]: transaction.picUrl,
+            [typeField]: transaction.type,
+            [userNameField]: transaction.userName,
+            [user_idField]: transaction.user_id,
+            [walletIdField]: transaction.walletId,
+
+            [categoryIdField]: transaction.id,
+            [categoryTitleField]: transaction.title,
+            [categoryAmountField]: transaction.amount,
+            [categoryCurrencyField]: transaction.currency,
+            [categoryCategoryField]: transaction.category,
+            [categoryDateField]: transaction.date,
+            [categoryDateLongField]: transaction.dateLong,
+            [categoryPicUrlField]: transaction.picUrl,
+            [categoryTypeField]: transaction.type,
+            [categoryUserNameField]: transaction.userName,
+            [categoryUser_idField]: transaction.user_id,
+            [categoryWalletIdField]: transaction.walletId
+        });
+    }
+
 }
 function getCategoriesTransactionsFields(transaction) {
     const categoryIdField = `categories.${transaction.category}.${transaction.id}.id`;
