@@ -256,19 +256,11 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
             .collection("Months")
             .doc(months[transactionDate.getMonth()]);
 
-        const categoriesByAmountField = `amountByCategory.${oldTransaction.category}`;
-
         return yearDocument.get()
             .then((yearDocSnap) => {
                 if (yearDocSnap.exists) {
-                    // Update fields to remove transaction and amount
-                    return yearDocument.update({
-                        totalAmountSpent: admin.firestore.FieldValue.increment(-oldTransaction.amount),
-                        [categoriesByAmountField]: admin.firestore.FieldValue.increment(-oldTransaction.amount),
-
-                        [`transactions.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
-                        [`categories.${oldTransaction.category}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete()
-                    });
+                    // Update fields to remove transaction and amount                    
+                    return removeTransactionFromStatistics(yearDocument, oldTransaction, transactionDay, false);
 
                 } else {
                     return console.log("year doc did not exist");
@@ -279,14 +271,7 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
                     .then((monthDocSnap) => {
                         if (monthDocSnap.exists) {
                             // Update fields to remove transaction and amount      
-                            return monthDocument.update({
-                                totalAmountSpent: admin.firestore.FieldValue.increment(-oldTransaction.amount),
-                                [categoriesByAmountField]: admin.firestore.FieldValue.increment(-oldTransaction.amount),
-
-                                [`transactions.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
-                                [`categories.${oldTransaction.category}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
-                                [`transactionsByDay.${transactionDay}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete()
-                            });
+                            return removeTransactionFromStatistics(monthDocument, oldTransaction, transactionDay, true);
                         } else {
                             return console.log("month doc did not exist");
                         }
@@ -351,37 +336,45 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
         }
     }
 
-
 });
 
+function removeTransactionFromStatistics(doc, oldTransaction, transactionDay, byDay) {
+    const categoriesByAmountField = `amountByCategory.${oldTransaction.category}`;
+
+    if (byDay) {
+        return doc.update({
+            totalAmountSpent: admin.firestore.FieldValue.increment(-oldTransaction.amount),
+            [categoriesByAmountField]: admin.firestore.FieldValue.increment(-oldTransaction.amount),
+
+            [`transactions.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
+            [`categories.${oldTransaction.category}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
+            [`transactionsByDay.${transactionDay}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete()
+        });
+    } else {
+        return doc.update({
+            totalAmountSpent: admin.firestore.FieldValue.increment(-oldTransaction.amount),
+            [categoriesByAmountField]: admin.firestore.FieldValue.increment(-oldTransaction.amount),
+
+            [`transactions.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
+            [`categories.${oldTransaction.category}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete()
+        });
+    }
+
+}
 
 function createStatisticsDocument(doc, transaction, transactionDay, byDay) {
-    const transactionToAdd = {
-        id: transaction.id,
-        amount: transaction.amount,
-        title: transaction.title,
-        currency: transaction.currency,
-        category: transaction.category,
-        date: transaction.date,
-        dateLong: transaction.dateLong,
-        picUrl: transaction.picUrl,
-        type: transaction.type,
-        userName: transaction.userName,
-        user_id: transaction.user_id,
-        walletId: transaction.walletId
-    };
     if (byDay) {
         return doc.set({
-            transactions: { [transaction.id]: transactionToAdd },
-            categories: { [transaction.category]: { [transaction.id]: transactionToAdd } },
+            transactions: { [transaction.id]: transaction },
+            categories: { [transaction.category]: { [transaction.id]: transaction } },
             amountByCategory: { [transaction.category]: transaction.amount },
-            transactionsByDay: { [transactionDay]: { [transaction.id]: transactionToAdd } },
+            transactionsByDay: { [transactionDay]: { [transaction.id]: transaction } },
             totalAmountSpent: transaction.amount
         });
     } else {
         return doc.set({
-            transactions: { [transaction.id]: transactionToAdd },
-            categories: { [transaction.category]: { [transaction.id]: transactionToAdd } },
+            transactions: { [transaction.id]: transaction },
+            categories: { [transaction.category]: { [transaction.id]: transaction } },
             amountByCategory: { [transaction.category]: transaction.amount },
             totalAmountSpent: transaction.amount
         });
@@ -390,157 +383,28 @@ function createStatisticsDocument(doc, transaction, transactionDay, byDay) {
 }
 
 function updateStatisticsDocument(doc, transaction, transactionDay, byDay) {
-    const { idField, titleField, amountField, currencyField, categoryField,
-        dateField, dateLongField, picUrlField, typeField, userNameField,
-        user_idField, walletIdField
-    } = getTransactionsFields(transaction);
-
-    const { dayIdField, dayTitleField, dayAmountField, dayCurrencyField,
-        dayCategoryField, dayDateField, dayDateLongField, dayPicUrlField,
-        dayTypeField, dayUserNameField, dayUser_idField, dayWalletIdField
-    } = getDaysTransactionsFields(transactionDay, transaction);
-
-    const { categoryIdField, categoryTitleField, categoryAmountField,
-        categoryCurrencyField, categoryCategoryField, categoryDateField,
-        categoryDateLongField, categoryPicUrlField, categoryTypeField,
-        categoryUserNameField, categoryUser_idField, categoryWalletIdField
-    } = getCategoriesTransactionsFields(transaction);
 
     const categoriesByAmountField = `amountByCategory.${transaction.category}`;
+    const categoryIdField = `categories.${transaction.category}.${transaction.id}`;
+    const dayIdField = `transactionsByDay.${transactionDay}.${transaction.id}`;
+    const idField = `transactions.${transaction.id}`;
 
     if (byDay) {
         return doc.update({
             totalAmountSpent: admin.firestore.FieldValue.increment(transaction.amount),
             [categoriesByAmountField]: admin.firestore.FieldValue.increment(transaction.amount),
 
-            [idField]: transaction.id,
-            [titleField]: transaction.title,
-            [amountField]: transaction.amount,
-            [currencyField]: transaction.currency,
-            [categoryField]: transaction.category,
-            [dateField]: transaction.date,
-            [dateLongField]: transaction.dateLong,
-            [picUrlField]: transaction.picUrl,
-            [typeField]: transaction.type,
-            [userNameField]: transaction.userName,
-            [user_idField]: transaction.user_id,
-            [walletIdField]: transaction.walletId,
-
-            [categoryIdField]: transaction.id,
-            [categoryTitleField]: transaction.title,
-            [categoryAmountField]: transaction.amount,
-            [categoryCurrencyField]: transaction.currency,
-            [categoryCategoryField]: transaction.category,
-            [categoryDateField]: transaction.date,
-            [categoryDateLongField]: transaction.dateLong,
-            [categoryPicUrlField]: transaction.picUrl,
-            [categoryTypeField]: transaction.type,
-            [categoryUserNameField]: transaction.userName,
-            [categoryUser_idField]: transaction.user_id,
-            [categoryWalletIdField]: transaction.walletId,
-
-            [dayIdField]: transaction.id,
-            [dayTitleField]: transaction.title,
-            [dayAmountField]: transaction.amount,
-            [dayCurrencyField]: transaction.currency,
-            [dayCategoryField]: transaction.category,
-            [dayDateField]: transaction.date,
-            [dayDateLongField]: transaction.dateLong,
-            [dayPicUrlField]: transaction.picUrl,
-            [dayTypeField]: transaction.type,
-            [dayUserNameField]: transaction.userName,
-            [dayUser_idField]: transaction.user_id,
-            [dayWalletIdField]: transaction.walletId
+            [idField]: transaction,
+            [categoryIdField]: transaction,
+            [dayIdField]: transaction
         });
     } else {
         return doc.update({
             totalAmountSpent: admin.firestore.FieldValue.increment(transaction.amount),
             [categoriesByAmountField]: admin.firestore.FieldValue.increment(transaction.amount),
 
-            [idField]: transaction.id,
-            [titleField]: transaction.title,
-            [amountField]: transaction.amount,
-            [currencyField]: transaction.currency,
-            [categoryField]: transaction.category,
-            [dateField]: transaction.date,
-            [dateLongField]: transaction.dateLong,
-            [picUrlField]: transaction.picUrl,
-            [typeField]: transaction.type,
-            [userNameField]: transaction.userName,
-            [user_idField]: transaction.user_id,
-            [walletIdField]: transaction.walletId,
-
-            [categoryIdField]: transaction.id,
-            [categoryTitleField]: transaction.title,
-            [categoryAmountField]: transaction.amount,
-            [categoryCurrencyField]: transaction.currency,
-            [categoryCategoryField]: transaction.category,
-            [categoryDateField]: transaction.date,
-            [categoryDateLongField]: transaction.dateLong,
-            [categoryPicUrlField]: transaction.picUrl,
-            [categoryTypeField]: transaction.type,
-            [categoryUserNameField]: transaction.userName,
-            [categoryUser_idField]: transaction.user_id,
-            [categoryWalletIdField]: transaction.walletId
+            [idField]: transaction,
+            [categoryIdField]: transaction
         });
     }
-
 }
-function getCategoriesTransactionsFields(transaction) {
-    const categoryIdField = `categories.${transaction.category}.${transaction.id}.id`;
-    const categoryTitleField = `categories.${transaction.category}.${transaction.id}.title`;
-    const categoryAmountField = `categories.${transaction.category}.${transaction.id}.amount`;
-    const categoryCurrencyField = `categories.${transaction.category}.${transaction.id}.currency`;
-    const categoryCategoryField = `categories.${transaction.category}.${transaction.id}.category`;
-    const categoryDateField = `categories.${transaction.category}.${transaction.id}.date`;
-    const categoryDateLongField = `categories.${transaction.category}.${transaction.id}.dateLong`;
-    const categoryPicUrlField = `categories.${transaction.category}.${transaction.id}.picUrl`;
-    const categoryTypeField = `categories.${transaction.category}.${transaction.id}.type`;
-    const categoryUserNameField = `categories.${transaction.category}.${transaction.id}.userName`;
-    const categoryUser_idField = `categories.${transaction.category}.${transaction.id}.user_id`;
-    const categoryWalletIdField = `categories.${transaction.category}.${transaction.id}.walletId`;
-    return {
-        categoryIdField, categoryTitleField, categoryAmountField, categoryCurrencyField, categoryCategoryField,
-        categoryDateField, categoryDateLongField, categoryPicUrlField, categoryTypeField, categoryUserNameField,
-        categoryUser_idField, categoryWalletIdField
-    };
-}
-
-function getDaysTransactionsFields(transactionDay, transaction) {
-    const dayIdField = `transactionsByDay.${transactionDay}.${transaction.id}.id`;
-    const dayTitleField = `transactionsByDay.${transactionDay}.${transaction.id}.title`;
-    const dayAmountField = `transactionsByDay.${transactionDay}.${transaction.id}.amount`;
-    const dayCurrencyField = `transactionsByDay.${transactionDay}.${transaction.id}.currency`;
-    const dayCategoryField = `transactionsByDay.${transactionDay}.${transaction.id}.category`;
-    const dayDateField = `transactionsByDay.${transactionDay}.${transaction.id}.date`;
-    const dayDateLongField = `transactionsByDay.${transactionDay}.${transaction.id}.dateLong`;
-    const dayPicUrlField = `transactionsByDay.${transactionDay}.${transaction.id}.picUrl`;
-    const dayTypeField = `transactionsByDay.${transactionDay}.${transaction.id}.type`;
-    const dayUserNameField = `transactionsByDay.${transactionDay}.${transaction.id}.userName`;
-    const dayUser_idField = `transactionsByDay.${transactionDay}.${transaction.id}.user_id`;
-    const dayWalletIdField = `transactionsByDay.${transactionDay}.${transaction.id}.walletId`;
-    return {
-        dayIdField, dayTitleField, dayAmountField, dayCurrencyField, dayCategoryField, dayDateField,
-        dayDateLongField, dayPicUrlField, dayTypeField, dayUserNameField, dayUser_idField, dayWalletIdField
-    };
-}
-
-function getTransactionsFields(transaction) {
-    const idField = `transactions.${transaction.id}.id`;
-    const titleField = `transactions.${transaction.id}.title`;
-    const amountField = `transactions.${transaction.id}.amount`;
-    const currencyField = `transactions.${transaction.id}.currency`;
-    const categoryField = `transactions.${transaction.id}.category`;
-    const dateField = `transactions.${transaction.id}.date`;
-    const dateLongField = `transactions.${transaction.id}.dateLong`;
-    const picUrlField = `transactions.${transaction.id}.picUrl`;
-    const typeField = `transactions.${transaction.id}.type`;
-    const userNameField = `transactions.${transaction.id}.userName`;
-    const user_idField = `transactions.${transaction.id}.user_id`;
-    const walletIdField = `transactions.${transaction.id}.walletId`;
-    return {
-        idField, titleField, amountField, currencyField, categoryField, dateField, dateLongField,
-        picUrlField, typeField, userNameField, user_idField, walletIdField
-    };
-}
-
