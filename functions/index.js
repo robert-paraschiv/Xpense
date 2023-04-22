@@ -240,6 +240,7 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
 
 
     if (updatedTransaction == null) {
+        //Transaction was deleted
         const transactionDate = oldTransaction.date.toDate();
         const transactionDay = transactionDate.getDate();
 
@@ -256,12 +257,11 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
             .collection("Months")
             .doc(months[transactionDate.getMonth()]);
 
-        //Transaction was deleted
         return yearDocument.get()
             .then((yearDocSnap) => {
                 if (yearDocSnap.exists) {
                     // Update fields to remove transaction and amount           
-                    return console.log("year doc exists");
+                    return updateStatisticsDocument(yearDocument, oldTransaction, transactionDay, false, true);
                 } else {
                     return console.log("year doc did not exist");
                 }
@@ -271,13 +271,14 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
                     .then((monthDocSnap) => {
                         if (monthDocSnap.exists) {
                             // Update fields to remove transaction and amount      
-                            return console.log("month doc exists");
+                            return updateStatisticsDocument(monthDocument, oldTransaction, transactionDay, true, true);
                         } else {
                             return console.log("month doc did not exist");
                         }
                     });
             });
     } else {
+        //Transaction was either created or updated
         const transactionDate = updatedTransaction.date.toDate();
         const transactionDay = transactionDate.getDate();
 
@@ -299,7 +300,7 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
             return yearDocument.get()
                 .then((yearDocSnap) => {
                     if (yearDocSnap.exists) {
-                        return updateStatisticsDocument(yearDocument, updatedTransaction, transactionDay, false);
+                        return updateStatisticsDocument(yearDocument, updatedTransaction, transactionDay, false, false);
                     } else {
                         return createStatisticsDocument(yearDocument, updatedTransaction, transactionDay, false);
                     }
@@ -308,7 +309,7 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
                     monthDocument.get()
                         .then((monthDocSnap) => {
                             if (monthDocSnap.exists) {
-                                return updateStatisticsDocument(monthDocument, updatedTransaction, transactionDay, true);
+                                return updateStatisticsDocument(monthDocument, updatedTransaction, transactionDay, true, false);
                             } else {
                                 return createStatisticsDocument(monthDocument, updatedTransaction, transactionDay, true);
                             }
@@ -373,7 +374,7 @@ function createStatisticsDocument(doc, transaction, transactionDay, byDay) {
 
 }
 
-function updateStatisticsDocument(doc, transaction, transactionDay, byDay) {
+function updateStatisticsDocument(doc, transaction, transactionDay, byDay, transactionDeleted) {
     const { idField, titleField, amountField, currencyField, categoryField,
         dateField, dateLongField, picUrlField, typeField, userNameField,
         user_idField, walletIdField
@@ -394,78 +395,82 @@ function updateStatisticsDocument(doc, transaction, transactionDay, byDay) {
 
     if (byDay) {
         return doc.update({
-            totalAmountSpent: admin.firestore.FieldValue.increment(transaction.amount),
-            [categoriesByAmountField]: admin.firestore.FieldValue.increment(transaction.amount),
+            totalAmountSpent: transactionDeleted ?
+                admin.firestore.FieldValue.increment(-transaction.amount) : admin.firestore.FieldValue.increment(transaction.amount),
+            [categoriesByAmountField]: transactionDeleted ?
+                admin.firestore.FieldValue.increment(-transaction.amount) : admin.firestore.FieldValue.increment(transaction.amount),
 
-            [idField]: transaction.id,
-            [titleField]: transaction.title,
-            [amountField]: transaction.amount,
-            [currencyField]: transaction.currency,
-            [categoryField]: transaction.category,
-            [dateField]: transaction.date,
-            [dateLongField]: transaction.dateLong,
-            [picUrlField]: transaction.picUrl,
-            [typeField]: transaction.type,
-            [userNameField]: transaction.userName,
-            [user_idField]: transaction.user_id,
-            [walletIdField]: transaction.walletId,
+            [idField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.id,
+            [titleField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.title,
+            [amountField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.amount,
+            [currencyField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.currency,
+            [categoryField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.category,
+            [dateField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.date,
+            [dateLongField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.dateLong,
+            [picUrlField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.picUrl,
+            [typeField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.type,
+            [userNameField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.userName,
+            [user_idField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.user_id,
+            [walletIdField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.walletId,
 
-            [categoryIdField]: transaction.id,
-            [categoryTitleField]: transaction.title,
-            [categoryAmountField]: transaction.amount,
-            [categoryCurrencyField]: transaction.currency,
-            [categoryCategoryField]: transaction.category,
-            [categoryDateField]: transaction.date,
-            [categoryDateLongField]: transaction.dateLong,
-            [categoryPicUrlField]: transaction.picUrl,
-            [categoryTypeField]: transaction.type,
-            [categoryUserNameField]: transaction.userName,
-            [categoryUser_idField]: transaction.user_id,
-            [categoryWalletIdField]: transaction.walletId,
+            [categoryIdField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.id,
+            [categoryTitleField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.title,
+            [categoryAmountField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.amount,
+            [categoryCurrencyField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.currency,
+            [categoryCategoryField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.category,
+            [categoryDateField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.date,
+            [categoryDateLongField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.dateLong,
+            [categoryPicUrlField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.picUrl,
+            [categoryTypeField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.type,
+            [categoryUserNameField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.userName,
+            [categoryUser_idField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.user_id,
+            [categoryWalletIdField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.walletId,
 
-            [dayIdField]: transaction.id,
-            [dayTitleField]: transaction.title,
-            [dayAmountField]: transaction.amount,
-            [dayCurrencyField]: transaction.currency,
-            [dayCategoryField]: transaction.category,
-            [dayDateField]: transaction.date,
-            [dayDateLongField]: transaction.dateLong,
-            [dayPicUrlField]: transaction.picUrl,
-            [dayTypeField]: transaction.type,
-            [dayUserNameField]: transaction.userName,
-            [dayUser_idField]: transaction.user_id,
-            [dayWalletIdField]: transaction.walletId
+            [dayIdField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.id,
+            [dayTitleField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.title,
+            [dayAmountField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.amount,
+            [dayCurrencyField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.currency,
+            [dayCategoryField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.category,
+            [dayDateField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.date,
+            [dayDateLongField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.dateLong,
+            [dayPicUrlField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.picUrl,
+            [dayTypeField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.type,
+            [dayUserNameField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.userName,
+            [dayUser_idField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.user_id,
+            [dayWalletIdField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.walletId
         });
     } else {
         return doc.update({
-            totalAmountSpent: admin.firestore.FieldValue.increment(transaction.amount),
-            [categoriesByAmountField]: admin.firestore.FieldValue.increment(transaction.amount),
+            totalAmountSpent: transactionDeleted ?
+                admin.firestore.FieldValue.increment(-transaction.amount) : admin.firestore.FieldValue.increment(transaction.amount),
+            [categoriesByAmountField]: transactionDeleted ?
+                admin.firestore.FieldValue.increment(-transaction.amount) : admin.firestore.FieldValue.increment(transaction.amount),
 
-            [idField]: transaction.id,
-            [titleField]: transaction.title,
-            [amountField]: transaction.amount,
-            [currencyField]: transaction.currency,
-            [categoryField]: transaction.category,
-            [dateField]: transaction.date,
-            [dateLongField]: transaction.dateLong,
-            [picUrlField]: transaction.picUrl,
-            [typeField]: transaction.type,
-            [userNameField]: transaction.userName,
-            [user_idField]: transaction.user_id,
-            [walletIdField]: transaction.walletId,
+            [idField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.id,
+            [titleField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.title,
+            [amountField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.amount,
+            [currencyField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.currency,
+            [categoryField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.category,
+            [dateField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.date,
+            [dateLongField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.dateLong,
+            [picUrlField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.picUrl,
+            [typeField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.type,
+            [userNameField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.userName,
+            [user_idField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.user_id,
+            [walletIdField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.walletId,
 
-            [categoryIdField]: transaction.id,
-            [categoryTitleField]: transaction.title,
-            [categoryAmountField]: transaction.amount,
-            [categoryCurrencyField]: transaction.currency,
-            [categoryCategoryField]: transaction.category,
-            [categoryDateField]: transaction.date,
-            [categoryDateLongField]: transaction.dateLong,
-            [categoryPicUrlField]: transaction.picUrl,
-            [categoryTypeField]: transaction.type,
-            [categoryUserNameField]: transaction.userName,
-            [categoryUser_idField]: transaction.user_id,
-            [categoryWalletIdField]: transaction.walletId
+            [categoryIdField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.id,
+            [categoryTitleField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.title,
+            [categoryAmountField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.amount,
+            [categoryCurrencyField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.currency,
+            [categoryCategoryField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.category,
+            [categoryDateField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.date,
+            [categoryDateLongField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.dateLong,
+            [categoryPicUrlField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.picUrl,
+            [categoryTypeField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.type,
+            [categoryUserNameField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.userName,
+            [categoryUser_idField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.user_id,
+            [categoryWalletIdField]: transactionDeleted ? admin.firestore.FieldValue.delete() : transaction.walletId
         });
     }
 
