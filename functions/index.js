@@ -332,7 +332,80 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
                 || oldDate.getDate() !== newDate.getDate());
 
 
-            return console.log("Transaction was updated");
+            const oldTransactionDate = oldTransaction.date.toDate();
+            const oldTransactionDay = oldTransactionDate.getDate();
+
+            const oldYearDocument = admin.firestore()
+                .collection("Wallets")
+                .doc(oldTransaction.walletId)
+                .collection("Statistics")
+                .doc('' + oldTransactionDate.getFullYear());
+            const oldMonthDocument = admin.firestore()
+                .collection("Wallets")
+                .doc(oldTransaction.walletId)
+                .collection("Statistics")
+                .doc('' + oldTransactionDate.getFullYear())
+                .collection("Months")
+                .doc(months[oldTransactionDate.getMonth()]);
+
+            const newTransactionDate = updatedTransaction.date.toDate();
+            const newTransactionDay = newTransactionDate.getDate();
+
+            const newYearDocument = admin.firestore()
+                .collection("Wallets")
+                .doc(updatedTransaction.walletId)
+                .collection("Statistics")
+                .doc('' + newTransactionDate.getFullYear());
+            const newMonthDocument = admin.firestore()
+                .collection("Wallets")
+                .doc(updatedTransaction.walletId)
+                .collection("Statistics")
+                .doc('' + newTransactionDate.getFullYear())
+                .collection("Months")
+                .doc(months[newTransactionDate.getMonth()]);
+
+            //Remove old transaction
+            return oldYearDocument.get()
+                .then((yearDocSnap) => {
+                    if (yearDocSnap.exists) {
+                        // Update fields to remove transaction and amount                    
+                        return removeTransactionFromStatistics(oldYearDocument, oldTransaction, oldTransactionDay, false);
+
+                    } else {
+                        return console.log("year doc did not exist");
+                    }
+                })
+                .then(() => {
+                    oldMonthDocument.get()
+                        .then((monthDocSnap) => {
+                            if (monthDocSnap.exists) {
+                                // Update fields to remove transaction and amount      
+                                return removeTransactionFromStatistics(oldMonthDocument, oldTransaction, oldTransactionDay, true);
+                            } else {
+                                return console.log("month doc did not exist");
+                            }
+                        });
+                }).then(() => {
+                    //Add new transaction
+                    newYearDocument.get()
+                        .then((newYearDocSnap) => {
+                            if (newYearDocSnap.exists) {
+                                return updateStatisticsDocument(newYearDocument, updatedTransaction, newTransactionDay, false);
+                            } else {
+                                return createStatisticsDocument(newYearDocument, updatedTransaction, newTransactionDay, false);
+                            }
+                        })
+                        .then(() => {
+                            newMonthDocument.get()
+                                .then((newMonthDocSnap) => {
+                                    if (newMonthDocSnap.exists) {
+                                        return updateStatisticsDocument(newMonthDocument, updatedTransaction, newTransactionDay, true);
+                                    } else {
+                                        return createStatisticsDocument(newMonthDocument, updatedTransaction, newTransactionDay, true);
+                                    }
+                                });
+                        });
+                });
         }
     }
 
