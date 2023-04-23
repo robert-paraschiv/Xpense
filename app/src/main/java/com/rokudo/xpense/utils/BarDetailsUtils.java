@@ -47,7 +47,7 @@ public class BarDetailsUtils {
 
         barChart.getDescription().setEnabled(false);
         barChart.getXAxis().setGranularity(1f);
-//        barChart.getXAxis().setLabelRotationAngle(-45);
+        barChart.getXAxis().setLabelRotationAngle(-45);
         barChart.getXAxis().setTextSize(8f);
     }
 

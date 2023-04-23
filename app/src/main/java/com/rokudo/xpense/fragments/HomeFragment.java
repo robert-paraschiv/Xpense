@@ -50,7 +50,6 @@ import com.google.android.material.transition.MaterialSharedAxis;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.rokudo.xpense.R;
@@ -59,6 +58,7 @@ import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.data.viewmodels.WalletsViewModel;
 import com.rokudo.xpense.databinding.FragmentHomeBinding;
 import com.rokudo.xpense.models.SpentMostItem;
+import com.rokudo.xpense.models.StatisticsDoc;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.models.User;
 import com.rokudo.xpense.models.Wallet;
@@ -215,6 +215,29 @@ public class HomeFragment extends Fragment {
 
 
     private void loadTransactions(String id) {
+//        List<StatisticsDoc> statisticsDocs = new ArrayList<>();
+//        DatabaseUtils.walletsRef.document(id)
+//                .collection("Statistics")
+//                .document("2023")
+//                .get().addOnSuccessListener(documentSnapshot -> {
+//                    StatisticsDoc statisticsDoc = documentSnapshot.toObject(StatisticsDoc.class);
+//                    if (statisticsDoc != null) {
+//                        statisticsDocs.add(statisticsDoc);
+//                    }
+//                });
+//        DatabaseUtils.getMonthsReference(id, "2023")
+//                .get().addOnSuccessListener(queryDocumentSnapshots -> {
+//                    for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+//                        StatisticsDoc statisticsDoc = documentSnapshot.toObject(StatisticsDoc.class);
+//                        if (statisticsDoc == null) {
+//                            continue;
+//                        }
+//                        statisticsDocs.add(statisticsDoc);
+//                    }
+//                    Log.d(TAG, "onSuccess: ");
+//                });
+
+
         transactionViewModel.loadTransactions(id, getCurrentMonth()).observe(getViewLifecycleOwner(), values -> {
             if (values == null || values.isEmpty()) {
                 return;

@@ -15,9 +15,17 @@ public class DatabaseUtils {
 //    public static CollectionReference transactionsRef = FirebaseFirestore.getInstance()
 //            .collection("TestTransactions");
 
-    public static CollectionReference getTransactionsRef(String walletId){
+    public static CollectionReference getMonthsReference(String walletId, String year) {
+        return walletsRef.document(walletId)
+                .collection("Statistics")
+                .document(year)
+                .collection("Months");
+    }
+
+    public static CollectionReference getTransactionsRef(String walletId) {
         return walletsRef.document(walletId).collection("Transactions");
     }
+
     public static CollectionReference invitationsRef = FirebaseFirestore.getInstance()
             .collection("Invitations");
     public static CollectionReference bAccountsRef = FirebaseFirestore.getInstance()
