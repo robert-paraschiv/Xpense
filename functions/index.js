@@ -256,27 +256,33 @@ exports.testTransactionListener = functions.firestore.document("TestTransactions
             .collection("Months")
             .doc(months[transactionDate.getMonth()]);
 
-        return yearDocument.get()
-            .then((yearDocSnap) => {
-                if (yearDocSnap.exists) {
-                    // Update fields to remove transaction and amount                    
-                    return removeTransactionFromStatistics(yearDocument, oldTransaction, transactionDay, false);
+        //Update wallet balance
+        return admin.firestore().collection("Wallets").doc(oldTransaction.walletId).update({
+            amount: admin.firestore.FieldValue.increment(oldTransaction.type === "Expense" ? oldTransaction.amount : -oldTransaction.amount)
+        }).then(() => {
+            yearDocument.get()
+                .then((yearDocSnap) => {
+                    if (yearDocSnap.exists) {
+                        // Update fields to remove transaction and amount                    
+                        return removeTransactionFromStatistics(yearDocument, oldTransaction, transactionDay, false);
 
-                } else {
-                    return console.log("year doc did not exist");
-                }
-            })
-            .then(() => {
-                monthDocument.get()
-                    .then((monthDocSnap) => {
-                        if (monthDocSnap.exists) {
-                            // Update fields to remove transaction and amount      
-                            return removeTransactionFromStatistics(monthDocument, oldTransaction, transactionDay, true);
-                        } else {
-                            return console.log("month doc did not exist");
-                        }
-                    });
-            });
+                    } else {
+                        return console.log("year doc did not exist");
+                    }
+                })
+                .then(() => {
+                    monthDocument.get()
+                        .then((monthDocSnap) => {
+                            if (monthDocSnap.exists) {
+                                // Update fields to remove transaction and amount      
+                                return removeTransactionFromStatistics(monthDocument, oldTransaction, transactionDay, true);
+                            } else {
+                                return console.log("month doc did not exist");
+                            }
+                        });
+                });
+        });
+
     } else {
         //Transaction was either created or updated
         const transactionDate = updatedTransaction.date.toDate();
