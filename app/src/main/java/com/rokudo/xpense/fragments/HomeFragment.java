@@ -43,13 +43,16 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialFadeThrough;
 import com.google.android.material.transition.MaterialSharedAxis;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.SpentMostAdapter;
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
@@ -480,14 +483,6 @@ public class HomeFragment extends Fragment {
         setReenterTransition(hold);
 
         Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
-    }
-
-    private void deleteTransactions() {
-        DatabaseUtils.transactionsRef.get().addOnSuccessListener(queryDocumentSnapshots -> {
-            for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                documentSnapshot.getReference().delete();
-            }
-        });
     }
 
     private void handleAddWalletBtnClick() {

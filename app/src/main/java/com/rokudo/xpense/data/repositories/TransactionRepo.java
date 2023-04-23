@@ -72,8 +72,7 @@ public class TransactionRepo {
         if (transactionListener != null) {
             transactionListener.remove();
         }
-        transactionListener = DatabaseUtils.transactionsRef
-                .whereEqualTo("walletId", walletId)
+        transactionListener = DatabaseUtils.getTransactionsRef(walletId)
                 .whereGreaterThan("date", startDate)
                 .whereLessThan("date", end)
                 .orderBy("date", Query.Direction.DESCENDING)
@@ -104,7 +103,7 @@ public class TransactionRepo {
 
     public MutableLiveData<String> addTransaction(Transaction transaction) {
 
-        DatabaseUtils.transactionsRef.document(transaction.getId())
+        DatabaseUtils.getTransactionsRef(transaction.getWalletId()).document(transaction.getId())
                 .set(transaction)
                 .addOnSuccessListener(result -> addTransactionStatus.setValue("Success"));
 
@@ -117,8 +116,7 @@ public class TransactionRepo {
 
     public MutableLiveData<List<Transaction>> loadTransactionsDateInterval(String walletId, Date start, Date end) {
         MutableLiveData<List<Transaction>> data = new MutableLiveData<>();
-        DatabaseUtils.transactionsRef
-                .whereEqualTo("walletId", walletId)
+        DatabaseUtils.getTransactionsRef(walletId)
                 .whereGreaterThan("date", start)
                 .whereLessThan("date", end)
                 .orderBy("date", Query.Direction.DESCENDING)
@@ -146,17 +144,17 @@ public class TransactionRepo {
     }
 
     public MutableLiveData<String> updateTransaction(Transaction transaction) {
-        DatabaseUtils.transactionsRef.document(transaction.getId())
+        DatabaseUtils.getTransactionsRef(transaction.getWalletId()).document(transaction.getId())
                 .set(transaction)
                 .addOnSuccessListener(result -> updateTransactionStatus.setValue("Success"));
 
         return updateTransactionStatus;
     }
 
-    public MutableLiveData<Boolean> deleteTransaction(String transactionId) {
+    public MutableLiveData<Boolean> deleteTransaction(String transactionId, String walletId) {
         MutableLiveData<Boolean> result = new MutableLiveData<>();
 
-        DatabaseUtils.transactionsRef
+        DatabaseUtils.getTransactionsRef(walletId)
                 .document(transactionId)
                 .delete()
                 .addOnCompleteListener(task -> result.setValue(task.isSuccessful()));

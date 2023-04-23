@@ -18,7 +18,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -191,7 +190,7 @@ public class AddTransactionFragment extends Fragment {
             confirmationDialog.setOnClickListener(() -> {
                 confirmationDialog.dismiss();
                 viewModel
-                        .deleteTransaction(mTransaction.getId())
+                        .deleteTransaction(mTransaction.getId(), mTransaction.getWalletId())
                         .observe(getViewLifecycleOwner(), result -> {
                             if (result != null && result) {
                                 Toast.makeText(requireContext(), "Deleted Successfully", Toast.LENGTH_SHORT).show();
@@ -270,7 +269,7 @@ public class AddTransactionFragment extends Fragment {
         transaction.setType(binding.incomeChip.isChecked() ? INCOME_TYPE : EXPENSE_TYPE);
 
         if (mTransaction == null) {
-            DocumentReference documentReference = DatabaseUtils.transactionsRef.document();
+            DocumentReference documentReference = DatabaseUtils.getTransactionsRef(walletId).document();
             transaction.setId(documentReference.getId());
 
             UploadingDialog uploadingDialog = new UploadingDialog("Please Wait...");
@@ -284,7 +283,7 @@ public class AddTransactionFragment extends Fragment {
             });
         } else {
             if (mTransaction.getId() == null || mTransaction.getId().equals("NOTPROVIDED")) {
-                DocumentReference documentReference = DatabaseUtils.transactionsRef.document();
+                DocumentReference documentReference = DatabaseUtils.getTransactionsRef(walletId).document();
                 transaction.setId(documentReference.getId());
             } else {
                 transaction.setId(mTransaction.getId());

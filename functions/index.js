@@ -233,7 +233,7 @@ exports.transactionInsertionListener = functions.firestore.document("Transaction
 
 });
 
-exports.testTransactionListener = functions.firestore.document("TestTransactions/{transactionID}").onWrite((snap, context) => {
+exports.testTransactionListener = functions.firestore.document("Wallets/{walletId}/Transactions/{transactionID}").onWrite((snap, context) => {
     const updatedTransaction = snap.after.exists ? snap.after.data() : null;
     const oldTransaction = snap.before.exists ? snap.before.data() : null;
 
