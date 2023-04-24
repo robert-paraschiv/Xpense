@@ -27,6 +27,9 @@ public class CategoriesUtil {
         expenseCategoryList.add(new ExpenseCategory("Transport",
                 R.drawable.ic_round_directions_car_24,
                 Color.rgb(140, 234, 255)));
+        expenseCategoryList.add(new ExpenseCategory("Fuel",
+                R.drawable.baseline_local_gas_station_24,
+                Color.rgb(140, 234, 255)));
         expenseCategoryList.add(new ExpenseCategory("Bills",
                 R.drawable.ic_round_receipt_24,
                 Color.rgb(255, 140, 157)));
@@ -39,9 +42,21 @@ public class CategoriesUtil {
         expenseCategoryList.add(new ExpenseCategory("Others",
                 R.drawable.ic_round_category_24,
                 rgb("#e74c3c")));
+
+        expenseCategoryList.add(new ExpenseCategory("Housing",
+                R.drawable.baseline_house_24,
+                rgb("#e74c3c")));
+
+        expenseCategoryList.add(new ExpenseCategory("Clothing",
+                R.drawable.baseline_shopping_bag_24,
+                rgb("#e74c3c")));
+
+        expenseCategoryList.add(new ExpenseCategory("Entertainment",
+                R.drawable.baseline_theater_comedy_24,
+                rgb("#e74c3c")));
+
         expenseCategoryList.add(new ExpenseCategory("Income",
                 R.drawable.round_monetization_on_24,
                 Color.rgb(192, 255, 140)));
     }
-
 }
