@@ -29,7 +29,7 @@ public class CategoriesUtil {
                 Color.rgb(140, 234, 255)));
         expenseCategoryList.add(new ExpenseCategory("Fuel",
                 R.drawable.baseline_local_gas_station_24,
-                Color.rgb(140, 234, 255)));
+                rgb("#80CBC4")));
         expenseCategoryList.add(new ExpenseCategory("Bills",
                 R.drawable.ic_round_receipt_24,
                 Color.rgb(255, 140, 157)));
@@ -45,15 +45,15 @@ public class CategoriesUtil {
 
         expenseCategoryList.add(new ExpenseCategory("Housing",
                 R.drawable.baseline_house_24,
-                rgb("#e74c3c")));
+                rgb("#4E342E")));
 
         expenseCategoryList.add(new ExpenseCategory("Clothing",
                 R.drawable.baseline_shopping_bag_24,
-                rgb("#e74c3c")));
+                rgb("#D500F9")));
 
         expenseCategoryList.add(new ExpenseCategory("Entertainment",
                 R.drawable.baseline_theater_comedy_24,
-                rgb("#e74c3c")));
+                rgb("#F57F17")));
 
         expenseCategoryList.add(new ExpenseCategory("Income",
                 R.drawable.round_monetization_on_24,
