@@ -12,6 +12,7 @@ import java.util.Locale;
 
 public class DateUtils {
     public static SimpleDateFormat monthYearFormat = new SimpleDateFormat("MMMM, yyyy", Locale.getDefault());
+    public static SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy", Locale.getDefault());
 
     public static List<TransEntry> getLast7Days(SimpleDateFormat dayOfMonthFormat) {
         List<TransEntry> transEntryList = new ArrayList<>();

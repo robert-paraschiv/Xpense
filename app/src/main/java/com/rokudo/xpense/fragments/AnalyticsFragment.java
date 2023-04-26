@@ -5,6 +5,7 @@ import static android.view.View.VISIBLE;
 import static androidx.recyclerview.widget.RecyclerView.VERTICAL;
 import static com.rokudo.xpense.utils.AnalyticsBarUtils.setupBarChart;
 import static com.rokudo.xpense.utils.DateUtils.monthYearFormat;
+import static com.rokudo.xpense.utils.DateUtils.yearFormat;
 import static com.rokudo.xpense.utils.PieChartUtils.setupPieChart;
 
 import android.annotation.SuppressLint;
@@ -75,7 +76,6 @@ public class AnalyticsFragment extends Fragment {
         statisticsViewModel = new ViewModelProvider(requireActivity()).get(StatisticsViewModel.class);
 
         initOnClicks();
-        initDateChip();
         buildDatePickerRv();
         getArgsPassed();
         setUpExpenseCategoryRv();
@@ -111,7 +111,8 @@ public class AnalyticsFragment extends Fragment {
             Chip chip = group.findViewById(checkedIds.get(0));
             if (chip != null) {
                 try {
-                    selectedDate = monthYearFormat.parse(chip.getText().toString());
+                    selectedDate = isYearMode ? yearFormat.parse(chip.getText().toString())
+                            : monthYearFormat.parse(chip.getText().toString());
                     AnalyticsBarUtils.setBarLabelRotation(binding.barChart, true);
                     resetCategoriesRv();
                     loadMonthTransactions(selectedDate);
@@ -132,7 +133,8 @@ public class AnalyticsFragment extends Fragment {
             binding.monthCard.setVisibility(VISIBLE);
 
             binding.monthHorizontalScroll.postDelayed(() -> {
-                Chip chip = binding.monthChipGroup.findViewWithTag(monthYearFormat.format(selectedDate.getTime()));
+                Chip chip = binding.monthChipGroup.findViewWithTag(isYearMode ? yearFormat.format(selectedDate.getTime())
+                        : monthYearFormat.format(selectedDate.getTime()));
                 binding.monthHorizontalScroll.smoothScrollTo(chip.getLeft() - chip.getPaddingLeft(), chip.getTop());
             }, 30);
         });
@@ -141,11 +143,19 @@ public class AnalyticsFragment extends Fragment {
         binding.thisMonthChip.setOnClickListener(v -> {
             AnalyticsBarUtils.setBarLabelRotation(binding.barChart, true);
             isYearMode = false;
+            buildDatePickerRv();
+            if (binding.dateChipCard.getVisibility() == GONE) {
+                hideChipGroup();
+            }
             resetCategoriesRv();
             loadTransactions(selectedDate, isYearMode);
         });
         binding.thisYearChip.setOnClickListener(v -> {
             isYearMode = true;
+            buildDatePickerRv();
+            if (binding.dateChipCard.getVisibility() == GONE) {
+                hideChipGroup();
+            }
             resetCategoriesRv();
             loadTransactions(selectedDate, isYearMode);
         });
@@ -234,11 +244,8 @@ public class AnalyticsFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
-    private void initDateChip() {
-        binding.dateChip.setText(monthYearFormat.format(new Date()));
-    }
-
     private void buildDatePickerRv() {
+        binding.monthChipGroup.removeAllViews();
 
         Calendar calendar = Calendar.getInstance();
 
@@ -252,26 +259,44 @@ public class AnalyticsFragment extends Fragment {
         calendar.set(Calendar.MONTH, 0);
 
         do {
-            for (int i = 0; i < 12; i++) {
-                calendar.set(Calendar.MONTH, i);
-
+            if (isYearMode) {
                 LocalDate innerLocalDate = LocalDate.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, 1);
                 if (innerLocalDate.isAfter(localDate)) {
                     break;
                 }
-
                 Chip chip = (Chip) getLayoutInflater().inflate(R.layout.item_month_picker, binding.monthChipGroup, false);
-                chip.setText(monthYearFormat.format(calendar.getTime()));
-                chip.setTag(monthYearFormat.format(calendar.getTime()));
-                if (monthYearFormat.format(calendar.getTime()).equals(monthYearFormat.format(new Date()))) {
+                chip.setText(yearFormat.format(calendar.getTime()));
+                chip.setTag(yearFormat.format(calendar.getTime()));
+                if (yearFormat.format(calendar.getTime()).equals(yearFormat.format(new Date()))) {
                     chip.setChecked(true);
                 }
                 binding.monthChipGroup.addView(chip);
+
+            } else {
+                for (int i = 0; i < 12; i++) {
+                    calendar.set(Calendar.MONTH, i);
+
+                    LocalDate innerLocalDate = LocalDate.of(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, 1);
+                    if (innerLocalDate.isAfter(localDate)) {
+                        break;
+                    }
+
+                    Chip chip = (Chip) getLayoutInflater().inflate(R.layout.item_month_picker, binding.monthChipGroup, false);
+                    chip.setText(monthYearFormat.format(calendar.getTime()));
+                    chip.setTag(monthYearFormat.format(calendar.getTime()));
+                    if (monthYearFormat.format(calendar.getTime()).equals(monthYearFormat.format(new Date()))) {
+                        chip.setChecked(true);
+                        selectedDate = new Date();
+                    }
+                    binding.monthChipGroup.addView(chip);
+                }
             }
 
             calendar.set(Calendar.YEAR, calendar.get(Calendar.YEAR) + 1);
 
         } while (calendar.get(Calendar.YEAR) <= yearNow);
+
+        binding.dateChip.setText(isYearMode ? yearFormat.format(new Date()) : monthYearFormat.format(new Date()));
     }
 
     private void loadMonthTransactions(Date selectedMonthDate) {
@@ -283,8 +308,14 @@ public class AnalyticsFragment extends Fragment {
                 0, 0);
         Date date = calendar.getTime();
 
-        binding.dateChip.setText(monthYearFormat.format(date));
+        binding.dateChip.setText(isYearMode ? yearFormat.format(date) : monthYearFormat.format(date));
 
+        hideChipGroup();
+
+        loadTransactions(date, isYearMode);
+    }
+
+    private void hideChipGroup() {
         MaterialSharedAxis materialContainerTransform = new MaterialSharedAxis(MaterialSharedAxis.X, true);
         materialContainerTransform.setPathMotion(new MaterialArcMotion());
         materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
@@ -293,8 +324,6 @@ public class AnalyticsFragment extends Fragment {
 
         binding.monthCard.setVisibility(GONE);
         binding.dateChipCard.setVisibility(VISIBLE);
-
-        loadTransactions(date, isYearMode);
     }
 
     private void loadTransactions(Date start, boolean isYearSelected) {

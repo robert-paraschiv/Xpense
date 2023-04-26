@@ -230,7 +230,7 @@
                                 android:checked="true"
                                 android:clickable="true"
                                 android:focusable="true"
-                                android:text="@string/this_month"
+                                android:text="@string/monthly"
                                 app:chipBackgroundColor="@color/bar_details_chip_state_list"
                                 app:chipMinTouchTargetSize="0dp"
                                 app:chipStrokeWidth="0dp" />
@@ -244,7 +244,7 @@
                                 android:checkable="true"
                                 android:clickable="true"
                                 android:focusable="true"
-                                android:text="@string/this_year"
+                                android:text="@string/annually"
                                 app:chipBackgroundColor="@color/bar_details_chip_state_list"
                                 app:chipMinTouchTargetSize="0dp"
                                 app:chipStrokeWidth="0dp" />
