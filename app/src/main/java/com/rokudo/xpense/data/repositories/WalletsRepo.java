@@ -94,6 +94,7 @@ public class WalletsRepo {
             lastLoadedWalletId = walletId;
             if (walletListener != null) {
                 walletListener.remove();
+                walletMutableLiveData.setValue(null);
             }
             walletListener = DatabaseUtils.walletsRef.document(walletId)
                     .addSnapshotListener((value, error) -> {

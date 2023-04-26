@@ -1,5 +1,8 @@
 package com.rokudo.xpense.models;
 
+import com.google.firebase.firestore.ServerTimestamp;
+
+import java.util.Date;
 import java.util.Map;
 
 public class StatisticsDoc {
@@ -8,6 +11,27 @@ public class StatisticsDoc {
     Map<String, Map<String, Transaction>> categories;
     Map<String, Transaction> transactions;
     Map<String, Map<String, Transaction>> transactionsByDay;
+
+    private String docPath;
+
+    @ServerTimestamp
+    Date latestUpdateTime;
+
+    public Date getLatestUpdateTime() {
+        return latestUpdateTime;
+    }
+
+    public String getDocPath() {
+        return docPath;
+    }
+
+    public void setDocPath(String docPath) {
+        this.docPath = docPath;
+    }
+
+    public void setLatestUpdateTime(Date latestUpdateTime) {
+        this.latestUpdateTime = latestUpdateTime;
+    }
 
     public Double getTotalAmountSpent() {
         return totalAmountSpent;

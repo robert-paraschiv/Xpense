@@ -179,8 +179,8 @@ public class AnalyticsFragment extends Fragment {
         binding.categoriesRv.setAdapter(adapter);
     }
 
-    @SuppressLint("SetTextI18n")
-    private void sortTransactions(Map<String, Double> categories, Map<String, Map<String, Transaction>> transactionsByCategory) {
+    private void populateCategoriesRv(Map<String, Double> categories,
+                                      Map<String, Map<String, Transaction>> transactionsByCategory) {
 
         categories = MapUtil.sortByValue(categories);
 
@@ -207,7 +207,7 @@ public class AnalyticsFragment extends Fragment {
     }
 
     private void getInitialTransactionData() {
-        sortTransactions(statisticsViewModel.getStoredStatisticsDoc().getAmountByCategory(),
+        populateCategoriesRv(statisticsViewModel.getStoredStatisticsDoc().getAmountByCategory(),
                 statisticsViewModel.getStoredStatisticsDoc().getCategories());
         PieChartUtils.updatePieChartData(binding.pieChart,
                 wallet.getCurrency(),
@@ -284,12 +284,6 @@ public class AnalyticsFragment extends Fragment {
         Date date = calendar.getTime();
 
         binding.dateChip.setText(monthYearFormat.format(date));
-//        if (monthYearFormat.format(date).equals(monthYearFormat.format(new Date()))) {
-//            binding.periodCard.setVisibility(VISIBLE);
-//            binding.thisMonthChip.setChecked(true);
-//        } else {
-//            binding.periodCard.setVisibility(GONE);
-//        }
 
         MaterialSharedAxis materialContainerTransform = new MaterialSharedAxis(MaterialSharedAxis.X, true);
         materialContainerTransform.setPathMotion(new MaterialArcMotion());
@@ -320,7 +314,7 @@ public class AnalyticsFragment extends Fragment {
                         binding.totalAmountTv.setText(R.string.no_data_provided);
                     } else {
                         List<Transaction> transactions = new ArrayList<>(statisticsDoc.getTransactions().values());
-                        sortTransactions(statisticsDoc.getAmountByCategory(), statisticsDoc.getCategories());
+                        populateCategoriesRv(statisticsDoc.getAmountByCategory(), statisticsDoc.getCategories());
                         transactions.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
 
                         AnalyticsBarUtils.updateBarchartData(binding.barChart,

@@ -33,4 +33,10 @@ public class StatisticsViewModel extends AndroidViewModel {
         return statisticsRepo.loadStatisticsDoc(walletId, date, isYearSelected);
     }
 
+    public StatisticsDoc getHomeStoredStatisticsDoc(){
+        return statisticsRepo.getHomeStatisticsDoc();
+    }
+    public void setHomeStoredStatisticsDoc(StatisticsDoc statisticsDoc){
+        statisticsRepo.setHomeStoredStatisticsDoc(statisticsDoc);
+    }
 }

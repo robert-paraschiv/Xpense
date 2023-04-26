@@ -18,13 +18,13 @@ import com.google.android.material.transition.MaterialSharedAxis;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.TransactionsAdapter;
 import com.rokudo.xpense.data.viewmodels.StatisticsViewModel;
-import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.databinding.FragmentListTransactionsBinding;
 import com.rokudo.xpense.models.Transaction;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -48,7 +48,7 @@ public class ListTransactionsFragment extends Fragment implements TransactionsAd
         ListTransactionsFragmentArgs args = ListTransactionsFragmentArgs.fromBundle(requireArguments());
         walletId = args.getWalletId();
         currency = args.getWalletCurrency();
-        loadTransactions(args.getWalletId());
+        loadTransactions();
 
         binding.backBtn.setOnClickListener(view -> Navigation.findNavController(view).popBackStack());
 
@@ -74,11 +74,13 @@ public class ListTransactionsFragment extends Fragment implements TransactionsAd
 //        adapter.setOnItemClickListener();
     }
 
-    private void loadTransactions(String id) {
+    private void loadTransactions() {
         StatisticsViewModel statisticsViewModel = new ViewModelProvider(requireActivity())
                 .get(StatisticsViewModel.class);
+        List<Transaction> transactions = new ArrayList<>(statisticsViewModel.getStoredStatisticsDoc().getTransactions().values());
+        transactions.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
 
-        statisticsViewModel.getStoredStatisticsDoc().getTransactions().values().forEach(transaction -> {
+        transactions.forEach(transaction -> {
             if (transactionList.contains(transaction)) {
                 transactionList.set(transactionList.indexOf(transaction), transaction);
                 adapter.notifyItemChanged(transactionList.indexOf(transaction));
@@ -92,15 +94,6 @@ public class ListTransactionsFragment extends Fragment implements TransactionsAd
                 }
             }
         });
-    }
-
-    private Date getCurrentSelectedMonth() {
-        LocalDateTime localDateTime = LocalDateTime.of(LocalDateTime.now().getYear(),
-                LocalDateTime.now().getMonth(),
-                1,
-                0,
-                0);
-        return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
     }
 
     @Override

@@ -455,6 +455,7 @@ function removeTransactionFromStatistics(doc, oldTransaction, transactionDay, by
 
     if (byDay) {
         return doc.update({
+            latestUpdateTime: firestore.Timestamp.now(),
             totalAmountSpent: admin.firestore.FieldValue.increment(oldTransaction.type === "Expense" ? -oldTransaction.amount : 0),
             [categoriesByAmountField]: admin.firestore.FieldValue.increment(-oldTransaction.amount),
 
@@ -464,6 +465,7 @@ function removeTransactionFromStatistics(doc, oldTransaction, transactionDay, by
         });
     } else {
         return doc.update({
+            latestUpdateTime: firestore.Timestamp.now(),
             totalAmountSpent: admin.firestore.FieldValue.increment(oldTransaction.type === "Expense" ? -oldTransaction.amount : 0),
             [categoriesByAmountField]: admin.firestore.FieldValue.increment(-oldTransaction.amount),
 
@@ -476,6 +478,7 @@ function removeTransactionFromStatistics(doc, oldTransaction, transactionDay, by
 function createStatisticsDocument(doc, transaction, transactionDay, byDay) {
     if (byDay) {
         return doc.set({
+            latestUpdateTime: firestore.Timestamp.now(),
             transactions: { [transaction.id]: transaction },
             categories: { [transaction.category]: { [transaction.id]: transaction } },
             amountByCategory: { [transaction.category]: transaction.amount },
@@ -484,6 +487,7 @@ function createStatisticsDocument(doc, transaction, transactionDay, byDay) {
         });
     } else {
         return doc.set({
+            latestUpdateTime: firestore.Timestamp.now(),
             transactions: { [transaction.id]: transaction },
             categories: { [transaction.category]: { [transaction.id]: transaction } },
             amountByCategory: { [transaction.category]: transaction.amount },
@@ -501,6 +505,7 @@ function updateStatisticsDocument(doc, transaction, transactionDay, byDay) {
 
     if (byDay) {
         return doc.update({
+            latestUpdateTime: firestore.Timestamp.now(),
             totalAmountSpent: admin.firestore.FieldValue.increment(transaction.type === "Expense" ? transaction.amount : 0),
             [categoriesByAmountField]: admin.firestore.FieldValue.increment(transaction.amount),
 
@@ -510,6 +515,7 @@ function updateStatisticsDocument(doc, transaction, transactionDay, byDay) {
         });
     } else {
         return doc.update({
+            latestUpdateTime: firestore.Timestamp.now(),
             totalAmountSpent: admin.firestore.FieldValue.increment(transaction.type === "Expense" ? transaction.amount : 0),
             [categoriesByAmountField]: admin.firestore.FieldValue.increment(transaction.amount),
 

@@ -17,6 +17,7 @@ public class StatisticsRepo {
     private ListenerRegistration statisticsDocListener;
 
     StatisticsDoc storedStatisticsDoc;
+    StatisticsDoc homeStatisticsDoc;
     MutableLiveData<Map<String, Double>> categoriesByAmount;
     MutableLiveData<StatisticsDoc> statisticsLiveData;
 
@@ -80,10 +81,10 @@ public class StatisticsRepo {
         String month = new SimpleDateFormat("MMMM", Locale.getDefault()).format(date);
         if (statisticsDocListener == null
                 || (walletId == null || !walletId.equals(wallet))
-                || (storedDate == null || !storedDate.equals(year + month))
-        ) {
+                || (storedDate == null || !storedDate.equals(year + month))) {
             if (statisticsDocListener != null) {
                 statisticsDocListener.remove();
+                statisticsLiveData.setValue(null);
             }
             walletId = wallet;
             storedDate = year + month;
@@ -97,6 +98,7 @@ public class StatisticsRepo {
                         if (statisticsDoc == null) {
                             return;
                         }
+                        statisticsDoc.setDocPath(value.getReference().getPath());
                         statisticsLiveData.postValue(statisticsDoc);
                         storedStatisticsDoc = statisticsDoc;
                     });
@@ -105,7 +107,15 @@ public class StatisticsRepo {
         return statisticsLiveData;
     }
 
+    public StatisticsDoc getHomeStatisticsDoc() {
+        return homeStatisticsDoc;
+    }
+
     public StatisticsDoc getStoredStatisticsDoc() {
         return storedStatisticsDoc;
+    }
+
+    public void setHomeStoredStatisticsDoc(StatisticsDoc statisticsDoc) {
+        homeStatisticsDoc = statisticsDoc;
     }
 }

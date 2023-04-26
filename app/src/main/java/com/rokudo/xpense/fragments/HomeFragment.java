@@ -57,6 +57,7 @@ import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.data.viewmodels.WalletsViewModel;
 import com.rokudo.xpense.databinding.FragmentHomeBinding;
 import com.rokudo.xpense.models.SpentMostItem;
+import com.rokudo.xpense.models.StatisticsDoc;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.models.User;
 import com.rokudo.xpense.models.Wallet;
@@ -74,6 +75,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class HomeFragment extends Fragment {
     private static final String TAG = "HomeFragment";
@@ -81,13 +83,11 @@ public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
 
     private ListenerRegistration userDetailsListenerRegistration;
-    private final List<Transaction> transactionList = new ArrayList<>();
     private Wallet mWallet;
     private WalletsViewModel walletsViewModel;
     private StatisticsViewModel statisticsViewModel;
     private TransactionViewModel transactionViewModel;
     private SpentMostAdapter adapter;
-    private Boolean gotTransactionsOnce = false;
     boolean firstPictureLoad = true;
     private final List<SpentMostItem> spentMostItems = new ArrayList<>();
 
@@ -118,7 +118,8 @@ public class HomeFragment extends Fragment {
         RecyclerView spentMostRv = binding.spentMostRv;
 //        spentMostRv.setHasFixedSize(false);
         adapter = new SpentMostAdapter(spentMostItems);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false);
+        LinearLayoutManager linearLayoutManager =
+                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false);
         spentMostRv.setLayoutManager(linearLayoutManager);
         spentMostRv.setAdapter(adapter);
         SnapHelper snapHelper = new PagerSnapHelper();
@@ -171,6 +172,7 @@ public class HomeFragment extends Fragment {
                 loadTransactions(wallet.getId());
                 mWallet = wallet;
             }
+            Log.d(TAG, "loadWalletDetails: wallet change observed");
         });
     }
 
@@ -214,9 +216,18 @@ public class HomeFragment extends Fragment {
 
 
     private void loadTransactions(String id) {
-        statisticsViewModel.listenForStatisticsDoc(id, new Date())
+        statisticsViewModel
+                .listenForStatisticsDoc(id, new Date())
                 .observe(getViewLifecycleOwner(), val -> {
-                    if (val != null) {
+                    Log.d(TAG, "loadStatistics: statistics change observed " + val);
+                    if (val == null) {
+                        return;
+                    }
+
+                    boolean shouldUpdateStatistics = isShouldUpdateStatistics(val);
+
+                    if (shouldUpdateStatistics) {
+                        statisticsViewModel.setHomeStoredStatisticsDoc(val);
                         updatePieChartData(binding.pieChart,
                                 mWallet == null ? "" : mWallet.getCurrency(),
                                 val.getAmountByCategory(),
@@ -227,11 +238,9 @@ public class HomeFragment extends Fragment {
                                 new ArrayList<>(val.getTransactions().values()),
                                 new TextView(requireContext()).getCurrentTextColor());
 
-
                         updateSpentMostOn(new ArrayList<>(val.getTransactions().values()),
                                 mWallet == null ? "" : mWallet.getCurrency(),
                                 adapter);
-
                     }
                 });
 
@@ -242,19 +251,17 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    private Date getCurrentMonth() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.getActualMinimum(Calendar.DAY_OF_MONTH),
-                0, 0);
-        return calendar.getTime();
-    }
+    private boolean isShouldUpdateStatistics(StatisticsDoc val) {
+        if (statisticsViewModel.getHomeStoredStatisticsDoc() == null) {
+            return true;
+        }
+        boolean shouldUpdateStatistics = statisticsViewModel.getHomeStoredStatisticsDoc().getLatestUpdateTime() == null
+                || !statisticsViewModel.getHomeStoredStatisticsDoc().getLatestUpdateTime().equals(val.getLatestUpdateTime());
 
-    private boolean isTransactionDifferent(Transaction newTransaction, Transaction oldTransaction) {
-        if (!newTransaction.getAmount().equals(oldTransaction.getAmount())) return true;
-        if (!newTransaction.getCategory().equals(oldTransaction.getCategory())) return true;
-        return !newTransaction.getType().equals(oldTransaction.getType());
+        if (!statisticsViewModel.getHomeStoredStatisticsDoc().getDocPath().equals(val.getDocPath())) {
+            shouldUpdateStatistics = true;
+        }
+        return shouldUpdateStatistics;
     }
 
     @SuppressLint("SetTextI18n")
@@ -350,7 +357,7 @@ public class HomeFragment extends Fragment {
                 updateUserDetailsUI(user);
                 DatabaseUtils.setCurrentUser(user);
             }
-            Log.d(TAG, "onCreateView: got data");
+            Log.d(TAG, "userDetailsEventListener: got data");
         }
     };
 
@@ -403,7 +410,7 @@ public class HomeFragment extends Fragment {
     private void showPersonInfo() {
         User user = new User();
         mWallet.getWalletUsers().forEach(walletUser -> {
-            if (!walletUser.getUserId().equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+            if (!walletUser.getUserId().equals(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid())) {
                 user.setPictureUrl(walletUser.getUserPic());
                 user.setUid(walletUser.getUserId());
                 user.setName(walletUser.getUserName());
@@ -627,7 +634,6 @@ public class HomeFragment extends Fragment {
                         mWallet = wallet;
                         PrefsUtils.setSelectedWalletId(requireContext(), wallet.getId());
                         PrefsUtils.saveBAccountToPrefs(requireContext(), wallet.getbAccount());
-                        transactionList.clear();
                         binding.barChart.clear();
                         binding.pieChart.clear();
                         loadWalletDetails();
