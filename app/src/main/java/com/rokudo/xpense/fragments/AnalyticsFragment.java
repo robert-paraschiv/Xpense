@@ -3,7 +3,7 @@ package com.rokudo.xpense.fragments;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static androidx.recyclerview.widget.RecyclerView.VERTICAL;
-import static com.rokudo.xpense.utils.BarDetailsUtils.setupBarChart;
+import static com.rokudo.xpense.utils.AnalyticsBarUtils.setupBarChart;
 import static com.rokudo.xpense.utils.DateUtils.monthYearFormat;
 import static com.rokudo.xpense.utils.PieChartUtils.setupPieChart;
 
@@ -33,12 +33,11 @@ import com.google.android.material.transition.MaterialSharedAxis;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.ExpenseCategoryAdapter;
 import com.rokudo.xpense.data.viewmodels.StatisticsViewModel;
-import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.databinding.FragmentAnalyticsBinding;
 import com.rokudo.xpense.models.ExpenseCategory;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.models.Wallet;
-import com.rokudo.xpense.utils.BarDetailsUtils;
+import com.rokudo.xpense.utils.AnalyticsBarUtils;
 import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.MapUtil;
 import com.rokudo.xpense.utils.PieChartUtils;
@@ -48,7 +47,6 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -60,12 +58,12 @@ public class AnalyticsFragment extends Fragment {
     private static final String TAG = "AnalyticsFragment";
 
     private FragmentAnalyticsBinding binding;
-    private TransactionViewModel transactionViewModel;
     private StatisticsViewModel statisticsViewModel;
-    private Double sum = 0.0;
     private Date selectedDate = new Date();
     private Wallet wallet;
     private ExpenseCategoryAdapter adapter;
+
+    private boolean isYearMode = false;
     private List<ExpenseCategory> categoryList = new ArrayList<>();
 
     @Override
@@ -74,7 +72,6 @@ public class AnalyticsFragment extends Fragment {
         // Inflate the layout for this fragment
         binding = FragmentAnalyticsBinding.inflate(inflater);
 
-        transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
         statisticsViewModel = new ViewModelProvider(requireActivity()).get(StatisticsViewModel.class);
 
         initOnClicks();
@@ -83,9 +80,9 @@ public class AnalyticsFragment extends Fragment {
         getArgsPassed();
         setUpExpenseCategoryRv();
 
-        getInitialTransactionData();
         setupPieChart(binding.pieChart, new TextView(requireContext()).getCurrentTextColor(), false);
         setupBarChart(binding.barChart, new TextView(requireContext()).getCurrentTextColor());
+        getInitialTransactionData();
 
 
         return binding.getRoot();
@@ -115,7 +112,7 @@ public class AnalyticsFragment extends Fragment {
             if (chip != null) {
                 try {
                     selectedDate = monthYearFormat.parse(chip.getText().toString());
-                    BarDetailsUtils.setBarLabelRotation(binding.barChart, true);
+                    AnalyticsBarUtils.setBarLabelRotation(binding.barChart, true);
                     resetCategoriesRv();
                     loadMonthTransactions(selectedDate);
                 } catch (ParseException e) {
@@ -128,7 +125,7 @@ public class AnalyticsFragment extends Fragment {
             materialContainerTransform.setPathMotion(new MaterialArcMotion());
             materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
 
-            BarDetailsUtils.setBarLabelRotation(binding.barChart, true);
+            AnalyticsBarUtils.setBarLabelRotation(binding.barChart, true);
             TransitionManager.beginDelayedTransition(binding.monthLayout, materialContainerTransform);
 
             binding.dateChipCard.setVisibility(GONE);
@@ -140,6 +137,18 @@ public class AnalyticsFragment extends Fragment {
             }, 30);
         });
         binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.backBtn).popBackStack());
+
+        binding.thisMonthChip.setOnClickListener(v -> {
+            AnalyticsBarUtils.setBarLabelRotation(binding.barChart, true);
+            isYearMode = false;
+            resetCategoriesRv();
+            loadTransactions(selectedDate, isYearMode);
+        });
+        binding.thisYearChip.setOnClickListener(v -> {
+            isYearMode = true;
+            resetCategoriesRv();
+            loadTransactions(selectedDate, isYearMode);
+        });
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -171,37 +180,16 @@ public class AnalyticsFragment extends Fragment {
     }
 
     @SuppressLint("SetTextI18n")
-    private void sortTransactions(List<Transaction> values) {
-        Map<String, Double> categories = new HashMap<>();
-        Map<String, List<Transaction>> transactionsByCategory = new HashMap<>();
-        for (Transaction transaction : values) {
-            if (transaction.getType().equals(Transaction.INCOME_TYPE))
-                continue;
+    private void sortTransactions(Map<String, Double> categories, Map<String, Map<String, Transaction>> transactionsByCategory) {
 
-            sum += transaction.getAmount();
-
-            if (transactionsByCategory.containsKey(transaction.getCategory())) {
-                Objects.requireNonNull(transactionsByCategory
-                                .get(transaction.getCategory()))
-                        .add(transaction);
-            } else {
-                transactionsByCategory.put(transaction.getCategory(),
-                        new ArrayList<>(Collections.singleton(transaction)));
-            }
-
-            if (categories.containsKey(transaction.getCategory())) {
-                Double amount = categories.getOrDefault(transaction.getCategory(), 0.0);
-                categories.put(transaction.getCategory(),
-                        amount == null ? 0.0f : amount + transaction.getAmount());
-            } else {
-                categories.put(transaction.getCategory(), transaction.getAmount());
-            }
-        }
         categories = MapUtil.sortByValue(categories);
 
         categories.forEach((key, value) -> {
+            if (key.equals("Income")) {
+                return;
+            }
             ExpenseCategory expenseCategory = new ExpenseCategory(key,
-                    transactionsByCategory.get(key),
+                    new ArrayList<>(Objects.requireNonNull(transactionsByCategory.get(key)).values()),
                     null,
                     value);
             if (CategoriesUtil.expenseCategoryList.contains(expenseCategory)) {
@@ -216,20 +204,24 @@ public class AnalyticsFragment extends Fragment {
             }
         });
 
-        binding.totalAmountTv.setText(wallet.getCurrency() + " " + new DecimalFormat("0.00").format(sum));
     }
 
     private void getInitialTransactionData() {
-        sortTransactions(new ArrayList<>(statisticsViewModel.getStoredStatisticsDoc().getTransactions().values()));
+        sortTransactions(statisticsViewModel.getStoredStatisticsDoc().getAmountByCategory(),
+                statisticsViewModel.getStoredStatisticsDoc().getCategories());
         PieChartUtils.updatePieChartData(binding.pieChart,
                 wallet.getCurrency(),
                 statisticsViewModel.getStoredStatisticsDoc().getAmountByCategory(),
                 statisticsViewModel.getStoredStatisticsDoc().getTotalAmountSpent(),
                 false);
-        BarDetailsUtils.updateBarchartData(binding.barChart,
+        AnalyticsBarUtils.updateBarchartData(binding.barChart,
                 new ArrayList<>(statisticsViewModel.getStoredStatisticsDoc().getTransactions().values()),
                 new TextView(requireContext()).getCurrentTextColor(),
                 false);
+
+        binding.totalAmountTv.setText(String.format("%s %s",
+                wallet.getCurrency(),
+                new DecimalFormat("0.00").format(statisticsViewModel.getStoredStatisticsDoc().getTotalAmountSpent())));
     }
 
     @Override
@@ -282,28 +274,22 @@ public class AnalyticsFragment extends Fragment {
         } while (calendar.get(Calendar.YEAR) <= yearNow);
     }
 
-    private void loadMonthTransactions(Date date) {
+    private void loadMonthTransactions(Date selectedMonthDate) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.set(calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.getActualMaximum(Calendar.DAY_OF_MONTH),
-                23, 59);
-        Date end = calendar.getTime();
-
+        calendar.setTime(selectedMonthDate);
         calendar.set(calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
                 calendar.getActualMinimum(Calendar.DAY_OF_MONTH),
                 0, 0);
-        Date start = calendar.getTime();
+        Date date = calendar.getTime();
 
-        binding.dateChip.setText(monthYearFormat.format(start));
-        if (monthYearFormat.format(start).equals(monthYearFormat.format(new Date()))) {
-            binding.periodCard.setVisibility(VISIBLE);
-            binding.allMonthChip.setChecked(true);
-        } else {
-            binding.periodCard.setVisibility(GONE);
-        }
+        binding.dateChip.setText(monthYearFormat.format(date));
+//        if (monthYearFormat.format(date).equals(monthYearFormat.format(new Date()))) {
+//            binding.periodCard.setVisibility(VISIBLE);
+//            binding.thisMonthChip.setChecked(true);
+//        } else {
+//            binding.periodCard.setVisibility(GONE);
+//        }
 
         MaterialSharedAxis materialContainerTransform = new MaterialSharedAxis(MaterialSharedAxis.X, true);
         materialContainerTransform.setPathMotion(new MaterialArcMotion());
@@ -314,25 +300,43 @@ public class AnalyticsFragment extends Fragment {
         binding.monthCard.setVisibility(GONE);
         binding.dateChipCard.setVisibility(VISIBLE);
 
-        loadTransactions(start, end);
+        loadTransactions(date, isYearMode);
     }
 
-    private void loadTransactions(Date start, Date end) {
-        statisticsViewModel.loadStatisticsDoc(wallet.getId(), start)
-                .observe(getViewLifecycleOwner(), values -> {
-                    if (values == null || values.getTransactions().isEmpty()) {
+    private void loadTransactions(Date start, boolean isYearSelected) {
+        statisticsViewModel.loadStatisticsDoc(wallet.getId(), start, isYearSelected)
+                .observe(getViewLifecycleOwner(), statisticsDoc -> {
+                    if (statisticsDoc == null || statisticsDoc.getTransactions().isEmpty()) {
                         Log.e(TAG, "loadTransactions: empty");
-                        BarDetailsUtils.updateBarchartData(binding.barChart,
+                        AnalyticsBarUtils.updateBarchartData(binding.barChart,
                                 new ArrayList<>(),
-                                new TextView(requireContext()).getCurrentTextColor(), false);
+                                new TextView(requireContext()).getCurrentTextColor(), isYearSelected);
+
+                        PieChartUtils.updatePieChartData(binding.pieChart,
+                                wallet.getCurrency(),
+                                new HashMap<>(),
+                                0d,
+                                false);
                         binding.totalAmountTv.setText(R.string.no_data_provided);
                     } else {
-                        List<Transaction> transactions = new ArrayList<>(values.getTransactions().values());
+                        List<Transaction> transactions = new ArrayList<>(statisticsDoc.getTransactions().values());
+                        sortTransactions(statisticsDoc.getAmountByCategory(), statisticsDoc.getCategories());
                         transactions.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
-                        sortTransactions(transactions);
-                        BarDetailsUtils.updateBarchartData(binding.barChart,
+
+                        AnalyticsBarUtils.updateBarchartData(binding.barChart,
                                 transactions,
-                                new TextView(requireContext()).getCurrentTextColor(), false);
+                                new TextView(requireContext()).getCurrentTextColor(), isYearSelected);
+
+                        PieChartUtils.updatePieChartData(binding.pieChart,
+                                wallet.getCurrency(),
+                                statisticsDoc.getAmountByCategory(),
+                                statisticsDoc.getTotalAmountSpent(),
+                                false);
+
+
+                        binding.totalAmountTv.setText(String.format("%s %s",
+                                wallet.getCurrency(),
+                                new DecimalFormat("0.00").format(statisticsDoc.getTotalAmountSpent())));
 
                         binding.categoriesRv.scheduleLayoutAnimation();
                     }

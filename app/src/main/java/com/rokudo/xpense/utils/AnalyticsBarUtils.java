@@ -19,8 +19,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
-public class BarDetailsUtils {
+public class AnalyticsBarUtils {
     private static final String TAG = "BarChartUtils";
 
     @SuppressLint("SimpleDateFormat")
@@ -55,13 +56,13 @@ public class BarDetailsUtils {
         barChart.getXAxis().setLabelRotationAngle(rotated ? -45 : 0);
     }
 
-    public static void updateBarchartData(BarChart barChart, List<Transaction> transactionList, int textColor, Boolean last7days) {
+    public static void updateBarchartData(BarChart barChart, List<Transaction> transactionList, int textColor, Boolean isYearMode) {
         transactionList.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
 
         ArrayList<IBarDataSet> dataSets = new ArrayList<>();
         ArrayList<BarEntry> valueSet = new ArrayList<>();
 
-        List<TransEntry> transEntryArrayList = getTransEntryArrayList(transactionList, last7days);
+        List<TransEntry> transEntryArrayList = getTransEntryArrayList(transactionList, isYearMode);
 
         for (int i = 0; i < transEntryArrayList.size(); i++) {
             BarEntry barEntry = new BarEntry(i, transEntryArrayList.get(i).getAmount());
@@ -96,19 +97,23 @@ public class BarDetailsUtils {
 
         barChart.getXAxis().setLabelCount(valueSet.size());
 
+        barChart.getXAxis().setLabelRotationAngle(valueSet.size() > 5 ? -45 : 0);
         barChart.invalidate();
     }
 
     @NonNull
-    public static List<TransEntry> getTransEntryArrayList(List<Transaction> transactionList, Boolean last7days) {
-        List<TransEntry> transEntryArrayList = last7days ? DateUtils.getLast7Days(dayOfMonthFormat) : new ArrayList<>();
+    public static List<TransEntry> getTransEntryArrayList(List<Transaction> transactionList, Boolean isYearMode) {
+        List<TransEntry> transEntryArrayList = new ArrayList<>();
 
         for (Transaction transaction : transactionList) {
             if (transaction.getType().equals(Transaction.INCOME_TYPE)) {
                 continue;
             }
 
-            TransEntry transEntry = new TransEntry(dayOfMonthFormat.format(transaction.getDate()),
+            String dateString = isYearMode ? new SimpleDateFormat("MMMM", Locale.getDefault()).format(transaction.getDate())
+                    : dayOfMonthFormat.format(transaction.getDate());
+            TransEntry
+                    transEntry = new TransEntry(dateString,
                     transaction.getDate(),
                     Float.parseFloat(transaction.getAmount().toString()));
 

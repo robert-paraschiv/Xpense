@@ -1,6 +1,7 @@
 package com.rokudo.xpense.utils;
 
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -12,8 +13,12 @@ public class DatabaseUtils {
             .collection("Users");
     public static CollectionReference walletsRef = FirebaseFirestore.getInstance()
             .collection("Wallets");
-//    public static CollectionReference transactionsRef = FirebaseFirestore.getInstance()
-//            .collection("TestTransactions");
+
+    public static DocumentReference getYearReference(String walletId, String year) {
+        return walletsRef.document(walletId)
+                .collection("Statistics")
+                .document(year);
+    }
 
     public static CollectionReference getMonthsReference(String walletId, String year) {
         return walletsRef.document(walletId)

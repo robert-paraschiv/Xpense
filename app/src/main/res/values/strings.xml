@@ -21,6 +21,7 @@
     <string name="monthly">Monthly</string>
     <string name="yearly">Yearly</string>
     <string name="analytics_type">Analytics type</string>
+    <string name="this_year">This Year</string>
     <integer name="transition_duration_millis">600</integer>
     <integer name="categories_insert_animation_duration">200</integer>
     <integer name="categories_insert_slide_right_animation_duration">250</integer>

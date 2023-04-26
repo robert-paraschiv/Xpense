@@ -2,8 +2,6 @@ package com.rokudo.xpense.data.repositories;
 
 import androidx.lifecycle.MutableLiveData;
 
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.rokudo.xpense.models.StatisticsDoc;
 import com.rokudo.xpense.utils.DatabaseUtils;
@@ -38,17 +36,16 @@ public class StatisticsRepo {
         return instance;
     }
 
-    public MutableLiveData<StatisticsDoc> loadStatisticsDoc(String wallet, Date date) {
+    public MutableLiveData<StatisticsDoc> loadStatisticsDoc(String wallet, Date date, boolean isYearStatisticsDoc) {
         MutableLiveData<StatisticsDoc> statisticsDocMutableLiveData = new MutableLiveData<>();
 
         String year = new SimpleDateFormat("yyyy", Locale.getDefault()).format(date);
         String month = new SimpleDateFormat("MMMM", Locale.getDefault()).format(date);
 
-        DatabaseUtils.getMonthsReference(wallet, year)
-                .document(month)
-                .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+        if (isYearStatisticsDoc) {
+            DatabaseUtils.getYearReference(wallet, year)
+                    .get()
+                    .addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot == null) {
                             return;
                         }
@@ -57,8 +54,22 @@ public class StatisticsRepo {
                             return;
                         }
                         statisticsDocMutableLiveData.setValue(statisticsDoc);
-                    }
-                });
+                    });
+
+        } else {
+            DatabaseUtils.getMonthsReference(wallet, year)
+                    .document(month)
+                    .get().addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot == null) {
+                            return;
+                        }
+                        StatisticsDoc statisticsDoc = documentSnapshot.toObject(StatisticsDoc.class);
+                        if (statisticsDoc == null) {
+                            return;
+                        }
+                        statisticsDocMutableLiveData.setValue(statisticsDoc);
+                    });
+        }
         return statisticsDocMutableLiveData;
     }
 

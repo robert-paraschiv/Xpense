@@ -29,8 +29,8 @@ public class StatisticsViewModel extends AndroidViewModel {
         return statisticsRepo.listenForStatisticsDoc(walletId, date);
     }
 
-    public MutableLiveData<StatisticsDoc> loadStatisticsDoc(String walletId, Date date) {
-        return statisticsRepo.loadStatisticsDoc(walletId, date);
+    public MutableLiveData<StatisticsDoc> loadStatisticsDoc(String walletId, Date date, boolean isYearSelected) {
+        return statisticsRepo.loadStatisticsDoc(walletId, date, isYearSelected);
     }
 
 }
