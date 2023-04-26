@@ -219,7 +219,7 @@ public class AnalyticsFragment extends Fragment {
     }
 
     private void getInitialTransactionData() {
-        sortTransactions(transactionViewModel.getStoredTransactionList());
+        sortTransactions(new ArrayList<>(statisticsViewModel.getStoredStatisticsDoc().getTransactions().values()));
         PieChartUtils.updatePieChartData(binding.pieChart,
                 wallet.getCurrency(),
                 statisticsViewModel.getStoredStatisticsDoc().getAmountByCategory(),
