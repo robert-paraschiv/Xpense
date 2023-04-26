@@ -2,16 +2,22 @@ package com.rokudo.xpense.data.repositories;
 
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.android.gms.common.util.CollectionUtils;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.utils.DatabaseUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -21,12 +27,15 @@ public class TransactionRepo {
     public static TransactionRepo instance;
 
     private ListenerRegistration transactionListener;
+    private ListenerRegistration latestTransListener;
 
     private final MutableLiveData<List<Transaction>> allTransactionList;
     private final List<Transaction> storedTransactionList;
     private final MutableLiveData<Transaction> latestTransaction;
     private final MutableLiveData<String> addTransactionStatus;
     private final MutableLiveData<String> updateTransactionStatus;
+
+    private String storedWalletId;
 
     public static TransactionRepo getInstance() {
         if (instance == null) {
@@ -46,6 +55,9 @@ public class TransactionRepo {
     public void removeAllTransactionsData() {
         if (transactionListener != null) {
             transactionListener.remove();
+        }
+        if (latestTransListener != null) {
+            latestTransListener.remove();
         }
         allTransactionList.setValue(null);
         storedTransactionList.clear();
@@ -107,7 +119,28 @@ public class TransactionRepo {
         return addTransactionStatus;
     }
 
-    public MutableLiveData<Transaction> loadLatestTransaction() {
+    public MutableLiveData<Transaction> loadLatestTransaction(String walletId) {
+        if (latestTransListener == null || storedWalletId == null || !storedWalletId.equals(walletId)) {
+            if (latestTransListener != null) {
+                latestTransListener.remove();
+            }
+
+            storedWalletId = walletId;
+
+            latestTransListener = DatabaseUtils.getTransactionsRef(walletId)
+                    .orderBy("date", Query.Direction.DESCENDING)
+                    .limit(1)
+                    .addSnapshotListener((value, error) -> {
+                        if (value == null || value.isEmpty()) {
+                            return;
+                        }
+                        Transaction transaction = value.getDocuments().get(0).toObject(Transaction.class);
+                        if (transaction == null) {
+                            return;
+                        }
+                        latestTransaction.setValue(transaction);
+                    });
+        }
         return latestTransaction;
     }
 

@@ -32,6 +32,7 @@ import com.google.android.material.transition.MaterialContainerTransform;
 import com.google.android.material.transition.MaterialSharedAxis;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.ExpenseCategoryAdapter;
+import com.rokudo.xpense.data.viewmodels.StatisticsViewModel;
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.databinding.FragmentAnalyticsBinding;
 import com.rokudo.xpense.models.ExpenseCategory;
@@ -59,6 +60,7 @@ public class AnalyticsFragment extends Fragment {
 
     private FragmentAnalyticsBinding binding;
     private TransactionViewModel transactionViewModel;
+    private StatisticsViewModel statisticsViewModel;
     private Double sum = 0.0;
     private Date selectedDate = new Date();
     private Wallet wallet;
@@ -72,6 +74,7 @@ public class AnalyticsFragment extends Fragment {
         binding = FragmentAnalyticsBinding.inflate(inflater);
 
         transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
+        statisticsViewModel = new ViewModelProvider(requireActivity()).get(StatisticsViewModel.class);
 
         initOnClicks();
         initDateChip();
@@ -219,10 +222,11 @@ public class AnalyticsFragment extends Fragment {
         sortTransactions(transactionViewModel.getStoredTransactionList());
         PieChartUtils.updatePieChartData(binding.pieChart,
                 wallet.getCurrency(),
-                transactionViewModel.getStoredTransactionList(),
+                statisticsViewModel.getStoredStatisticsDoc().getAmountByCategory(),
+                statisticsViewModel.getStoredStatisticsDoc().getTotalAmountSpent(),
                 false);
         BarDetailsUtils.updateBarchartData(binding.barChart,
-                transactionViewModel.getStoredTransactionList(),
+                new ArrayList<>(statisticsViewModel.getStoredStatisticsDoc().getTransactions().values()),
                 new TextView(requireContext()).getCurrentTextColor(),
                 false);
     }

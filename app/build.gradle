@@ -35,7 +35,7 @@ android {
 dependencies {
     implementation 'com.google.code.gson:gson:2.10'
 
-    def work_manager_version = "2.8.0"
+    def work_manager_version = "2.8.1"
     implementation "androidx.work:work-runtime:$work_manager_version"
 
     implementation 'com.facebook.shimmer:shimmer:0.5.0'
@@ -64,8 +64,8 @@ dependencies {
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    implementation 'com.google.firebase:firebase-auth:21.2.0'
-    implementation 'com.google.firebase:firebase-firestore:24.4.5'
+    implementation 'com.google.firebase:firebase-auth:21.3.0'
+    implementation 'com.google.firebase:firebase-firestore:24.5.0'
     implementation 'com.google.firebase:firebase-messaging:23.1.2'
     implementation 'com.google.firebase:firebase-storage:20.1.0'
 

@@ -12,19 +12,16 @@ import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.rokudo.xpense.models.ExpenseCategory;
-import com.rokudo.xpense.models.Transaction;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class PieChartUtils {
 
     public static void setupPieChart(PieChart pieChart, int textColor, boolean isCalledFromHome) {
-                pieChart.setTouchEnabled(!isCalledFromHome);
+        pieChart.setTouchEnabled(!isCalledFromHome);
         pieChart.setUsePercentValues(true);
         pieChart.setHighlightPerTapEnabled(!isCalledFromHome);
 
@@ -56,24 +53,8 @@ public class PieChartUtils {
 
 
     public static void updatePieChartData(PieChart pieChart, String currency,
-                                          List<Transaction> transactionList, boolean isCalledFromHome) {
-        if (transactionList == null) {
-            return;
-        }
-        Map<String, Double> categories = new HashMap<>();
-        Double sum = 0.0;
-        for (Transaction transaction : transactionList) {
-            if (transaction.getType().equals(Transaction.INCOME_TYPE)) {
-                continue;
-            }
-            if (categories.containsKey(transaction.getCategory())) {
-                Double amount = categories.getOrDefault(transaction.getCategory(), 0.0);
-                categories.put(transaction.getCategory(), amount == null ? 0.0f : amount + transaction.getAmount());
-            } else {
-                categories.put(transaction.getCategory(), transaction.getAmount());
-            }
-            sum += transaction.getAmount();
-        }
+                                          Map<String, Double> categories, Double sum, boolean isCalledFromHome) {
+
 
         ArrayList<PieEntry> entries = getPieEntries(categories, sum);
         PieDataSet dataSet = new PieDataSet(entries, "");
@@ -112,7 +93,12 @@ public class PieChartUtils {
     @NonNull
     private static ArrayList<PieEntry> getPieEntries(Map<String, Double> categories, Double sum) {
         ArrayList<PieEntry> entries = new ArrayList<>();
-        categories.forEach((key, value) -> entries.add(new PieEntry(getPercentageOfCategory(value, sum), key)));
+        categories.forEach((key, value) -> {
+            if (key.equals("Income") || value == 0) {
+                return;
+            }
+            entries.add(new PieEntry(getPercentageOfCategory(value, sum), key));
+        });
         entries.sort(Comparator.comparingDouble(PieEntry::getValue).reversed());
         return entries;
     }

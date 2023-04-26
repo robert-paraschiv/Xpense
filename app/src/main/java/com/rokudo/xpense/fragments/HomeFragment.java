@@ -43,7 +43,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialFadeThrough;
 import com.google.android.material.transition.MaterialSharedAxis;
@@ -51,14 +50,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.SpentMostAdapter;
+import com.rokudo.xpense.data.viewmodels.StatisticsViewModel;
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.data.viewmodels.WalletsViewModel;
 import com.rokudo.xpense.databinding.FragmentHomeBinding;
 import com.rokudo.xpense.models.SpentMostItem;
-import com.rokudo.xpense.models.StatisticsDoc;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.models.User;
 import com.rokudo.xpense.models.Wallet;
@@ -86,6 +84,7 @@ public class HomeFragment extends Fragment {
     private final List<Transaction> transactionList = new ArrayList<>();
     private Wallet mWallet;
     private WalletsViewModel walletsViewModel;
+    private StatisticsViewModel statisticsViewModel;
     private TransactionViewModel transactionViewModel;
     private SpentMostAdapter adapter;
     private Boolean gotTransactionsOnce = false;
@@ -100,6 +99,7 @@ public class HomeFragment extends Fragment {
             binding.bottomNavView.setItemIconTintList(null);
             walletsViewModel = new ViewModelProvider(requireActivity()).get(WalletsViewModel.class);
             transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
+            statisticsViewModel = new ViewModelProvider(requireActivity()).get(StatisticsViewModel.class);
             initOnClicks();
 
             setupBarChart(binding.barChart, new TextView(requireContext()).getCurrentTextColor(), true);
@@ -170,7 +170,6 @@ public class HomeFragment extends Fragment {
                 updateWalletUI(wallet);
                 loadTransactions(wallet.getId());
                 mWallet = wallet;
-                loadLast7DaysTransactions();
             }
         });
     }
@@ -215,57 +214,28 @@ public class HomeFragment extends Fragment {
 
 
     private void loadTransactions(String id) {
-//        List<StatisticsDoc> statisticsDocs = new ArrayList<>();
-//        DatabaseUtils.walletsRef.document(id)
-//                .collection("Statistics")
-//                .document("2023")
-//                .get().addOnSuccessListener(documentSnapshot -> {
-//                    StatisticsDoc statisticsDoc = documentSnapshot.toObject(StatisticsDoc.class);
-//                    if (statisticsDoc != null) {
-//                        statisticsDocs.add(statisticsDoc);
-//                    }
-//                });
-//        DatabaseUtils.getMonthsReference(id, "2023")
-//                .get().addOnSuccessListener(queryDocumentSnapshots -> {
-//                    for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-//                        StatisticsDoc statisticsDoc = documentSnapshot.toObject(StatisticsDoc.class);
-//                        if (statisticsDoc == null) {
-//                            continue;
-//                        }
-//                        statisticsDocs.add(statisticsDoc);
-//                    }
-//                    Log.d(TAG, "onSuccess: ");
-//                });
+        statisticsViewModel.loadStatisticsMonth(id, new Date())
+                .observe(getViewLifecycleOwner(), val -> {
+                    if (val != null) {
+                        updatePieChartData(binding.pieChart,
+                                mWallet == null ? "" : mWallet.getCurrency(),
+                                val.getAmountByCategory(),
+                                val.getTotalAmountSpent(),
+                                true);
+
+                        updateBarchartData(binding.barChart,
+                                new ArrayList<>(val.getTransactions().values()),
+                                new TextView(requireContext()).getCurrentTextColor());
 
 
-        transactionViewModel.loadTransactions(id, getCurrentMonth()).observe(getViewLifecycleOwner(), values -> {
-            if (values == null || values.isEmpty()) {
-                return;
-            }
-            boolean needUpdate = false;
-            for (Transaction transaction : values) {
-                if (transactionList.contains(transaction)) {
-                    if (isTransactionDifferent(transaction, transactionList.get(transactionList.indexOf(transaction)))) {
-                        needUpdate = true;
-                        transactionList.set(transactionList.indexOf(transaction), transaction);
+                        updateSpentMostOn(new ArrayList<>(val.getTransactions().values()),
+                                mWallet == null ? "" : mWallet.getCurrency(),
+                                adapter);
+
                     }
-                } else {
-                    if (gotTransactionsOnce) {
-                        transactionList.add(0, transaction);
-                    } else {
-                        transactionList.add(transaction);
-                    }
-                    needUpdate = true;
-                }
-            }
-            if (needUpdate || values.isEmpty()) {
-                updatePieChartData(binding.pieChart, mWallet == null ? "" : mWallet.getCurrency(), values, true);
-                updateBarchartData(binding.barChart, values, new TextView(requireContext()).getCurrentTextColor());
-                updateSpentMostOn(values, mWallet == null ? "" : mWallet.getCurrency(), adapter);
-            }
-            gotTransactionsOnce = true;
-        });
-        transactionViewModel.loadLatestTransaction().observe(getViewLifecycleOwner(), value -> {
+                });
+
+        transactionViewModel.loadLatestTransaction(id).observe(getViewLifecycleOwner(), value -> {
             if (value != null) {
                 updateLatestTransactionUI(value, binding, requireContext());
             }

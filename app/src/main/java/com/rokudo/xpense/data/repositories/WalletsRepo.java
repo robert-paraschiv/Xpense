@@ -24,6 +24,8 @@ public class WalletsRepo {
     private ArrayList<Wallet> walletList;
     private final MutableLiveData<Wallet> walletMutableLiveData;
 
+    private String lastLoadedWalletId;
+
     public static WalletsRepo getInstance() {
         if (instance == null) {
             instance = new WalletsRepo();
@@ -58,9 +60,7 @@ public class WalletsRepo {
     }
 
     public MutableLiveData<Wallet> loadWallet(String walletId) {
-        if (walletListener != null) {
-            walletListener.remove();
-        }
+
         if (walletId.isEmpty()) {
             if (FirebaseAuth.getInstance().getCurrentUser() != null) {
                 FirebaseFirestore.getInstance().collection("Wallets")
@@ -76,7 +76,7 @@ public class WalletsRepo {
                             Wallet wallet = queryDocumentSnapshots
                                     .getDocuments().get(0).toObject(Wallet.class);
                             if (wallet != null) {
-                                walletMutableLiveData.setValue(wallet);
+                                walletMutableLiveData.postValue(wallet);
                                 setListenerForWallet(wallet.getId());
                             }
                         })
@@ -89,18 +89,25 @@ public class WalletsRepo {
     }
 
     private void setListenerForWallet(String walletId) {
-        walletListener = DatabaseUtils.walletsRef.document(walletId)
-                .addSnapshotListener((value, error) -> {
-                    if (error != null || value == null) {
-                        Log.e(TAG, "getWallet: empty or: ", error);
-                    } else {
-                        Wallet wallet = value.toObject(Wallet.class);
-                        if (wallet != null) {
-                            wallet.setId(value.getId());
-                            walletMutableLiveData.setValue(wallet);
+
+        if (walletListener == null || lastLoadedWalletId == null || !lastLoadedWalletId.equals(walletId)) {
+            lastLoadedWalletId = walletId;
+            if (walletListener != null) {
+                walletListener.remove();
+            }
+            walletListener = DatabaseUtils.walletsRef.document(walletId)
+                    .addSnapshotListener((value, error) -> {
+                        if (error != null || value == null) {
+                            Log.e(TAG, "getWallet: empty or: ", error);
+                        } else {
+                            Wallet wallet = value.toObject(Wallet.class);
+                            if (wallet != null) {
+                                wallet.setId(value.getId());
+                                walletMutableLiveData.postValue(wallet);
+                            }
                         }
-                    }
-                });
+                    });
+        }
     }
 
     public MutableLiveData<ArrayList<Wallet>> getWallets() {

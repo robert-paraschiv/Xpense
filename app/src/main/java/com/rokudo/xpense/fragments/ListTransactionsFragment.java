@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.google.android.material.transition.MaterialSharedAxis;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.TransactionsAdapter;
+import com.rokudo.xpense.data.viewmodels.StatisticsViewModel;
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.databinding.FragmentListTransactionsBinding;
 import com.rokudo.xpense.models.Transaction;
@@ -74,10 +75,10 @@ public class ListTransactionsFragment extends Fragment implements TransactionsAd
     }
 
     private void loadTransactions(String id) {
-        TransactionViewModel transactionViewModel = new ViewModelProvider(requireActivity())
-                .get(TransactionViewModel.class);
+        StatisticsViewModel statisticsViewModel = new ViewModelProvider(requireActivity())
+                .get(StatisticsViewModel.class);
 
-        transactionViewModel.getStoredTransactionList().forEach(transaction -> {
+        statisticsViewModel.getStoredStatisticsDoc().getTransactions().values().forEach(transaction -> {
             if (transactionList.contains(transaction)) {
                 transactionList.set(transactionList.indexOf(transaction), transaction);
                 adapter.notifyItemChanged(transactionList.indexOf(transaction));
