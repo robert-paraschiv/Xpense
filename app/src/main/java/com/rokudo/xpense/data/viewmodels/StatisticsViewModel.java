@@ -8,14 +8,12 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.rokudo.xpense.data.repositories.StatisticsRepo;
 import com.rokudo.xpense.models.StatisticsDoc;
-import com.rokudo.xpense.models.Transaction;
 
 import java.util.Date;
-import java.util.List;
 
 public class StatisticsViewModel extends AndroidViewModel {
 
-    private StatisticsRepo statisticsRepo;
+    private final StatisticsRepo statisticsRepo;
 
     public StatisticsViewModel(@NonNull Application application) {
         super(application);
@@ -27,7 +25,11 @@ public class StatisticsViewModel extends AndroidViewModel {
         return statisticsRepo.getStoredStatisticsDoc();
     }
 
-    public MutableLiveData<StatisticsDoc> loadStatisticsMonth(String walletId, Date date) {
+    public MutableLiveData<StatisticsDoc> listenForStatisticsDoc(String walletId, Date date) {
+        return statisticsRepo.listenForStatisticsDoc(walletId, date);
+    }
+
+    public MutableLiveData<StatisticsDoc> loadStatisticsDoc(String walletId, Date date) {
         return statisticsRepo.loadStatisticsDoc(walletId, date);
     }
 

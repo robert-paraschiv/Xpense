@@ -49,6 +49,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -313,31 +314,26 @@ public class AnalyticsFragment extends Fragment {
         binding.monthCard.setVisibility(GONE);
         binding.dateChipCard.setVisibility(VISIBLE);
 
-        loadTransactions(start, end, true, false);
+        loadTransactions(start, end);
     }
 
-    private void loadTransactions(Date start, Date end, Boolean updateBar, Boolean last7Days) {
-        transactionViewModel
-                .loadTransactionsDateInterval(wallet.getId(), start, end)
+    private void loadTransactions(Date start, Date end) {
+        statisticsViewModel.loadStatisticsDoc(wallet.getId(), start)
                 .observe(getViewLifecycleOwner(), values -> {
-                    if (values == null || values.isEmpty()) {
+                    if (values == null || values.getTransactions().isEmpty()) {
                         Log.e(TAG, "loadTransactions: empty");
                         BarDetailsUtils.updateBarchartData(binding.barChart,
                                 new ArrayList<>(),
-                                new TextView(requireContext()).getCurrentTextColor(), last7Days);
+                                new TextView(requireContext()).getCurrentTextColor(), false);
                         binding.totalAmountTv.setText(R.string.no_data_provided);
                     } else {
-                        sortTransactions(values);
-                        if (updateBar) {
-                            BarDetailsUtils.updateBarchartData(binding.barChart,
-                                    values,
-                                    new TextView(requireContext()).getCurrentTextColor(), last7Days);
-//                            transEntryList = BarDetailsUtils.getTransEntryArrayList(values, last7Days);
-                        }
-//                        if (firstLoad) {
-//                            startPostponedEnterTransition();
-//                            firstLoad = false;
-//                        }
+                        List<Transaction> transactions = new ArrayList<>(values.getTransactions().values());
+                        transactions.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
+                        sortTransactions(transactions);
+                        BarDetailsUtils.updateBarchartData(binding.barChart,
+                                transactions,
+                                new TextView(requireContext()).getCurrentTextColor(), false);
+
                         binding.categoriesRv.scheduleLayoutAnimation();
                     }
                 });

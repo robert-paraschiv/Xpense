@@ -214,7 +214,7 @@ public class HomeFragment extends Fragment {
 
 
     private void loadTransactions(String id) {
-        statisticsViewModel.loadStatisticsMonth(id, new Date())
+        statisticsViewModel.listenForStatisticsDoc(id, new Date())
                 .observe(getViewLifecycleOwner(), val -> {
                     if (val != null) {
                         updatePieChartData(binding.pieChart,
