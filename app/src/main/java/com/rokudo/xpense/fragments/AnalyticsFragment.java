@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,6 +34,7 @@ import com.google.android.material.transition.MaterialContainerTransform;
 import com.google.android.material.transition.MaterialSharedAxis;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.ExpenseCategoryAdapter;
+import com.rokudo.xpense.adapters.OnTransClickListener;
 import com.rokudo.xpense.data.viewmodels.StatisticsViewModel;
 import com.rokudo.xpense.databinding.FragmentAnalyticsBinding;
 import com.rokudo.xpense.models.ExpenseCategory;
@@ -55,7 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class AnalyticsFragment extends Fragment {
+public class AnalyticsFragment extends Fragment implements OnTransClickListener {
     private static final String TAG = "AnalyticsFragment";
 
     private FragmentAnalyticsBinding binding;
@@ -164,7 +166,7 @@ public class AnalyticsFragment extends Fragment {
     @SuppressLint("NotifyDataSetChanged")
     private void resetCategoriesRv() {
         categoryList = new ArrayList<>();
-        adapter = new ExpenseCategoryAdapter(categoryList, wallet.getCurrency());
+        adapter = new ExpenseCategoryAdapter(categoryList, wallet.getCurrency(), this);
         binding.categoriesRv.setAdapter(adapter);
         adapter.notifyDataSetChanged();
     }
@@ -184,7 +186,7 @@ public class AnalyticsFragment extends Fragment {
     }
 
     private void setUpExpenseCategoryRv() {
-        adapter = new ExpenseCategoryAdapter(categoryList, wallet.getCurrency());
+        adapter = new ExpenseCategoryAdapter(categoryList, wallet.getCurrency(), this);
         binding.categoriesRv.setLayoutManager(new LinearLayoutManager(requireContext(), VERTICAL, false));
         binding.categoriesRv.setAdapter(adapter);
     }
@@ -397,5 +399,23 @@ public class AnalyticsFragment extends Fragment {
         binding.barChart.setVisibility(View.VISIBLE);
         binding.analyticsTypeImage
                 .setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.baseline_pie_chart_24));
+    }
+
+    @Override
+    public void onClick(Transaction transaction) {
+        MaterialSharedAxis exit = new MaterialSharedAxis(MaterialSharedAxis.X, true);
+        exit.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+        MaterialSharedAxis reenter = new MaterialSharedAxis(MaterialSharedAxis.X, false);
+        reenter.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+
+        setExitTransition(exit);
+        setReenterTransition(reenter);
+
+
+        Navigation.findNavController(binding.getRoot())
+                .navigate(AnalyticsFragmentDirections
+                        .actionAnalyticsFragmentToAddTransactionFragment(wallet.getId(),
+                                wallet.getCurrency(),
+                                transaction));
     }
 }

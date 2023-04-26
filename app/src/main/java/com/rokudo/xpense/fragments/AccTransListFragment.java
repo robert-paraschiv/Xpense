@@ -14,9 +14,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.rokudo.xpense.adapters.OnTransClickListener;
 import com.rokudo.xpense.adapters.TransactionsAdapter;
-import com.rokudo.xpense.data.viewmodels.BankApiViewModel;
 import com.rokudo.xpense.data.retrofit.models.BankTransaction;
+import com.rokudo.xpense.data.viewmodels.BankApiViewModel;
 import com.rokudo.xpense.databinding.FragmentAccTransListBinding;
 import com.rokudo.xpense.models.Transaction;
 
@@ -24,13 +25,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class AccTransListFragment extends Fragment implements TransactionsAdapter.OnTransactionClickListener {
+public class AccTransListFragment extends Fragment implements OnTransClickListener {
     private static final String TAG = "AccTransListFragment";
 
     private FragmentAccTransListBinding binding;
     private TransactionsAdapter adapter;
-    private List<BankTransaction> bankTransactionList = new ArrayList<>();
-    private List<Transaction> transactionList = new ArrayList<>();
+    private final List<BankTransaction> bankTransactionList = new ArrayList<>();
+    private final List<Transaction> transactionList = new ArrayList<>();
     private BankApiViewModel bankApiViewModel;
 
     @Override

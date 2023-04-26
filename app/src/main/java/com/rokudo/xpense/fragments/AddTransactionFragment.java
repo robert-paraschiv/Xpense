@@ -2,6 +2,7 @@ package com.rokudo.xpense.fragments;
 
 import static com.rokudo.xpense.models.Transaction.EXPENSE_TYPE;
 import static com.rokudo.xpense.models.Transaction.INCOME_TYPE;
+import static com.rokudo.xpense.utils.TransactionUtils.isTransactionDifferent;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -24,6 +25,7 @@ import androidx.navigation.Navigation;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.transition.MaterialContainerTransform;
+import com.google.android.material.transition.MaterialSharedAxis;
 import com.google.firebase.firestore.DocumentReference;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
@@ -104,17 +106,37 @@ public class AddTransactionFragment extends Fragment {
     private void handleArgs() {
         AddTransactionFragmentArgs args = AddTransactionFragmentArgs.fromBundle(requireArguments());
         if (args.getTransaction() == null) {
+
+            MaterialContainerTransform materialContainerTransform = new MaterialContainerTransform();
+            materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+            materialContainerTransform.setElevationShadowEnabled(true);
+            materialContainerTransform.setAllContainerColors(Color.TRANSPARENT);
+            materialContainerTransform.setScrimColor(Color.TRANSPARENT);
+            materialContainerTransform.setDrawingViewId(R.id.nav_host_fragment);
+            setSharedElementEnterTransition(materialContainerTransform);
+
             binding.getRoot().setTransitionName(requireContext().getResources().getString(R.string.transition_name_add_transaction));
             binding.selectedTextDummy.setText("Expense Category");
+            binding.addTransToolbarTitle.setText("Add Transaction");
             selectedCategory = CategoriesUtil.expenseCategoryList.get(0);
             binding.simpleDatePicker.setMaxDate(new Date().getTime());
+
         } else {
             if (args.getTransaction() == null) {
                 return;
             }
+
+            MaterialSharedAxis enter = new MaterialSharedAxis(MaterialSharedAxis.X, true);
+            enter.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+            MaterialSharedAxis exit = new MaterialSharedAxis(MaterialSharedAxis.X, false);
+            exit.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+            setEnterTransition(enter);
+            setReturnTransition(exit);
+
             binding.deleteTransBtn.setVisibility(View.VISIBLE);
             mTransaction = args.getTransaction();
             binding.getRoot().setTransitionName("adjustBalance");
+            binding.addTransToolbarTitle.setText("Edit Transaction");
             binding.transactionAmount.setText(mTransaction.getAmount().toString());
             binding.transactionTitle.setText(mTransaction.getTitle());
 
@@ -282,33 +304,27 @@ public class AddTransactionFragment extends Fragment {
                 }
             });
         } else {
-            if (mTransaction.getId() == null || mTransaction.getId().equals("NOTPROVIDED")) {
-                DocumentReference documentReference = DatabaseUtils.getTransactionsRef(walletId).document();
-                transaction.setId(documentReference.getId());
-            } else {
-                transaction.setId(mTransaction.getId());
-            }
-            UploadingDialog uploadingDialog = new UploadingDialog("Please Wait...");
-            uploadingDialog.show(getParentFragmentManager(), "wait");
-            viewModel.updateTransaction(transaction).observe(getViewLifecycleOwner(), result -> {
-                if (result.equals("Success")) {
-                    uploadingDialog.dismiss();
-                    Navigation.findNavController(binding.getRoot())
-                            .popBackStack(R.id.homeFragment, false);
-                }
-            });
-        }
-    }
+            if (isTransactionDifferent(mTransaction, transaction)) {
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        MaterialContainerTransform materialContainerTransform = new MaterialContainerTransform();
-        materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
-        materialContainerTransform.setElevationShadowEnabled(true);
-        materialContainerTransform.setAllContainerColors(Color.TRANSPARENT);
-        materialContainerTransform.setScrimColor(Color.TRANSPARENT);
-        materialContainerTransform.setDrawingViewId(R.id.nav_host_fragment);
-        setSharedElementEnterTransition(materialContainerTransform);
-        super.onCreate(savedInstanceState);
+                if (mTransaction.getId() == null || mTransaction.getId().equals("NOTPROVIDED")) {
+                    DocumentReference documentReference = DatabaseUtils.getTransactionsRef(walletId).document();
+                    transaction.setId(documentReference.getId());
+                } else {
+                    transaction.setId(mTransaction.getId());
+                }
+                UploadingDialog uploadingDialog = new UploadingDialog("Please Wait...");
+                uploadingDialog.show(getParentFragmentManager(), "wait");
+                viewModel.updateTransaction(transaction).observe(getViewLifecycleOwner(), result -> {
+                    if (result.equals("Success")) {
+                        uploadingDialog.dismiss();
+                        Navigation.findNavController(binding.getRoot())
+                                .popBackStack(R.id.homeFragment, false);
+                    }
+                });
+            } else {
+                Navigation.findNavController(binding.getRoot())
+                        .popBackStack(R.id.homeFragment, false);
+            }
+        }
     }
 }

@@ -25,11 +25,15 @@ import java.util.List;
 public class ExpenseCategoryAdapter extends RecyclerView.Adapter<ExpenseCategoryAdapter.ViewHolder> {
     private final List<ExpenseCategory> categoryList;
     private final String currency;
+    private OnTransClickListener onTransClickListener;
 
-    public ExpenseCategoryAdapter(List<ExpenseCategory> categoryList, String currency) {
+    public ExpenseCategoryAdapter(List<ExpenseCategory> categoryList, String currency,
+                                  OnTransClickListener onTransClickListener) {
         this.categoryList = categoryList;
         this.currency = currency;
+        this.onTransClickListener = onTransClickListener;
     }
+
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final ImageView categoryPic;
@@ -74,21 +78,28 @@ public class ExpenseCategoryAdapter extends RecyclerView.Adapter<ExpenseCategory
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ExpenseCategory expenseCategory = categoryList.get(position);
-        if (expenseCategory != null) {
-            holder.categoryName.setText(expenseCategory.getName());
-            holder.categoryAmount.setText(new DecimalFormat("0.00").format(expenseCategory.getAmount()) + " " + currency);
-            holder.categoryPic.setImageDrawable(
-                    AppCompatResources.getDrawable(holder.categoryPic.getContext(),
-                            expenseCategory.getResourceId()));
-            holder.categoryPic.setColorFilter(CategoriesUtil.expenseCategoryList.get(
-                    CategoriesUtil.expenseCategoryList.indexOf(expenseCategory)).getColor());
-            if (expenseCategory.getTransactionList() == null || expenseCategory.getTransactionList().isEmpty()) {
-                holder.itemView.findViewById(R.id.mainCard).setClickable(false);
-            } else {
-                holder.itemView.findViewById(R.id.mainCard).setClickable(true);
-                holder.transactionsRv.setLayoutManager(new LinearLayoutManager(holder.transactionsRv.getContext()));
-                holder.transactionsRv.setAdapter(new TransactionsAdapter(expenseCategory.getTransactionList(), true, null));
-            }
+        if (expenseCategory == null) {
+            return;
+        }
+        holder.categoryName.setText(expenseCategory.getName());
+        holder.categoryAmount.setText(new DecimalFormat("0.00").format(expenseCategory.getAmount()) + " " + currency);
+        holder.categoryPic.setImageDrawable(
+                AppCompatResources.getDrawable(holder.categoryPic.getContext(),
+                        expenseCategory.getResourceId()));
+        holder.categoryPic.setColorFilter(CategoriesUtil.expenseCategoryList.get(
+                CategoriesUtil.expenseCategoryList.indexOf(expenseCategory)).getColor());
+        if (expenseCategory.getTransactionList() == null || expenseCategory.getTransactionList().isEmpty()) {
+            holder.itemView.findViewById(R.id.mainCard).setClickable(false);
+        } else {
+            holder.itemView.findViewById(R.id.mainCard).setClickable(true);
+            holder.transactionsRv.setLayoutManager(new LinearLayoutManager(holder.transactionsRv.getContext()));
+            TransactionsAdapter transactionsAdapter = new TransactionsAdapter(expenseCategory.getTransactionList(),
+                    true, transaction -> {
+                if (onTransClickListener != null) {
+                    onTransClickListener.onClick(transaction);
+                }
+            });
+            holder.transactionsRv.setAdapter(transactionsAdapter);
         }
     }
 

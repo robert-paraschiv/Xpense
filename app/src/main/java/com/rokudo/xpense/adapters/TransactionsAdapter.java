@@ -27,18 +27,14 @@ import java.util.List;
 
 public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapter.ViewHolder> {
     private final List<Transaction> transactionList;
-    private final OnTransactionClickListener onTransactionClickListener;
-    Boolean smallLayout;
+    private final OnTransClickListener onTransactionClickListener;
+    private final Boolean smallLayout;
 
     public TransactionsAdapter(List<Transaction> transactionList, Boolean smallLayout,
-                               OnTransactionClickListener onTransactionClickListener) {
+                               OnTransClickListener onTransactionClickListener) {
         this.transactionList = transactionList;
         this.smallLayout = smallLayout;
         this.onTransactionClickListener = onTransactionClickListener;
-    }
-
-    public interface OnTransactionClickListener {
-        void onClick(Transaction transaction);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

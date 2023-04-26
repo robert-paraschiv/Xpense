@@ -30,6 +30,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.shape.ShapeAppearanceModel;
 import com.google.android.material.transition.MaterialContainerTransform;
 import com.rokudo.xpense.R;
+import com.rokudo.xpense.adapters.OnTransClickListener;
 import com.rokudo.xpense.adapters.TransactionsAdapter;
 import com.rokudo.xpense.data.retrofit.models.AccountDetails;
 import com.rokudo.xpense.data.retrofit.models.BankTransaction;
@@ -58,7 +59,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class BAccountDetailsFragment extends Fragment implements TransactionsAdapter.OnTransactionClickListener {
+public class BAccountDetailsFragment extends Fragment implements OnTransClickListener {
     private static final String TAG = "BAccountDetailsFragment";
 
     private BankApiViewModel bankApiViewModel;

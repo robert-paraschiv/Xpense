@@ -35,6 +35,22 @@ public class TransactionUtils {
         return checkDateFormat.format(new Date()).equals(checkDateFormat.format(transaction.getDate()));
     }
 
+    public static boolean isTransactionDifferent(Transaction oldTransaction, Transaction newTransaction) {
+        if (!oldTransaction.getTitle().equals(newTransaction.getTitle()))
+            return true;
+
+        if (!oldTransaction.getAmount().equals(newTransaction.getAmount()))
+            return true;
+
+        if (!oldTransaction.getType().equals(newTransaction.getType()))
+            return true;
+
+        if (!oldTransaction.getCategory().equals(newTransaction.getCategory()))
+            return true;
+
+        return false;
+    }
+
     @SuppressLint("SetTextI18n")
     public static void updateLatestTransactionUI(Transaction transaction, FragmentHomeBinding binding, Context context) {
         if (transaction.getId() == null) {

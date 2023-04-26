@@ -158,5 +158,8 @@
         <argument
             android:name="wallet"
             app:argType="com.rokudo.xpense.models.Wallet" />
+        <action
+            android:id="@+id/action_analyticsFragment_to_addTransactionFragment"
+            app:destination="@id/addTransactionFragment" />
     </fragment>
 </navigation>

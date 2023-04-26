@@ -16,19 +16,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.transition.MaterialSharedAxis;
 import com.rokudo.xpense.R;
+import com.rokudo.xpense.adapters.OnTransClickListener;
 import com.rokudo.xpense.adapters.TransactionsAdapter;
 import com.rokudo.xpense.data.viewmodels.StatisticsViewModel;
 import com.rokudo.xpense.databinding.FragmentListTransactionsBinding;
 import com.rokudo.xpense.models.Transaction;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
-public class ListTransactionsFragment extends Fragment implements TransactionsAdapter.OnTransactionClickListener {
+public class ListTransactionsFragment extends Fragment implements OnTransClickListener {
 
     private FragmentListTransactionsBinding binding;
     private TransactionsAdapter adapter;
@@ -98,6 +96,15 @@ public class ListTransactionsFragment extends Fragment implements TransactionsAd
 
     @Override
     public void onClick(Transaction transaction) {
+
+        MaterialSharedAxis exit = new MaterialSharedAxis(MaterialSharedAxis.X, true);
+        exit.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+        MaterialSharedAxis reenter = new MaterialSharedAxis(MaterialSharedAxis.X, false);
+        reenter.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+
+        setExitTransition(exit);
+        setReenterTransition(reenter);
+
         Navigation.findNavController(binding.getRoot()).navigate(
                 ListTransactionsFragmentDirections
                         .actionListTransactionsFragmentToAddTransactionLayout(walletId, currency, transaction));

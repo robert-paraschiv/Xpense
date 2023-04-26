@@ -398,7 +398,8 @@ exports.testTransactionListener = functions.firestore.document("Wallets/{walletI
 function updateWalletAmount(transBefore, transAfter) {
     if (transAfter.amount == transBefore.amount) {
         if (transBefore.type == transAfter.type) {
-            return 0;
+            console.log("transaction type and amount were the same");
+            return;
         } else {
             if (transAfter.type == "Expense") {
                 return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
@@ -445,9 +446,11 @@ function updateWalletAmount(transBefore, transAfter) {
                     });
                 }
             }
+        } else {
+            console.log("unimplemented bruh");
+            return;
         }
     }
-    return 0;
 }
 
 function removeTransactionFromStatistics(doc, oldTransaction, transactionDay, byDay) {
