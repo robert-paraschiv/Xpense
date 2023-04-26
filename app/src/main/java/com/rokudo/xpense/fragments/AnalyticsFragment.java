@@ -185,7 +185,7 @@ public class AnalyticsFragment extends Fragment {
         categories = MapUtil.sortByValue(categories);
 
         categories.forEach((key, value) -> {
-            if (key.equals("Income")) {
+            if (key.equals("Income") || value == 0d) {
                 return;
             }
             ExpenseCategory expenseCategory = new ExpenseCategory(key,
