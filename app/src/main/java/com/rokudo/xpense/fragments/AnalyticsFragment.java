@@ -197,11 +197,12 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
         categories = MapUtil.sortByValue(categories);
 
         categories.forEach((key, value) -> {
-            if (key.equals("Income") || value == 0d) {
+            if (key.equals("Income") || value == 0d
+                    || !transactionsByCategory.containsKey(key)) {
                 return;
             }
             ExpenseCategory expenseCategory = new ExpenseCategory(key,
-                    new ArrayList<>(Objects.requireNonNull(transactionsByCategory.get(key)).values()),
+                    new ArrayList<>(transactionsByCategory.get(key).values()),
                     null,
                     value);
             if (CategoriesUtil.expenseCategoryList.contains(expenseCategory)) {

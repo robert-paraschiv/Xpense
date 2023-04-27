@@ -237,8 +237,6 @@ exports.testTransactionListener = functions.firestore.document("Wallets/{walletI
     const updatedTransaction = snap.after.exists ? snap.after.data() : null;
     const oldTransaction = snap.before.exists ? snap.before.data() : null;
 
-    const batchUpdate = {};
-
     const batch = admin.firestore().batch();
 
     if (updatedTransaction == null) {
@@ -396,184 +394,127 @@ exports.testTransactionListener = functions.firestore.document("Wallets/{walletI
                 .collection("Statistics").doc('' + newTransactionDate.getFullYear())
                 .collection("Months").doc(months[newTransactionDate.getMonth()]);
 
-            return updateWalletAmount(oldTransaction, updatedTransaction)
-                .then(() => {
-                    //Remove old transaction
-                    return oldYearDocument.get()
-                        .then((yearDocSnap) => {
-                            if (yearDocSnap.exists) {
-                                // Update fields to remove transaction and amount                    
-                                return removeTransactionFromStatistics(oldYearDocument, oldTransaction, oldTransactionDay, false);
 
-                            } else {
-                                return console.log("year doc did not exist");
-                            }
-                        })
-                        .then(() => {
-                            oldMonthDocument.get()
-                                .then((monthDocSnap) => {
-                                    if (monthDocSnap.exists) {
-                                        // Update fields to remove transaction and amount      
-                                        return removeTransactionFromStatistics(oldMonthDocument, oldTransaction, oldTransactionDay, true);
-                                    } else {
-                                        return console.log("month doc did not exist");
-                                    }
-                                });
-                        }).then(() => {
-                            //Add new transaction
-                            newYearDocument.get()
-                                .then((newYearDocSnap) => {
-                                    if (newYearDocSnap.exists) {
-                                        return updateStatisticsDocument(newYearDocument, updatedTransaction, newTransactionDay, false);
-                                    } else {
-                                        return createStatisticsDocument(newYearDocument, updatedTransaction, newTransactionDay, false);
-                                    }
-                                })
-                                .then(() => {
-                                    newMonthDocument.get()
-                                        .then((newMonthDocSnap) => {
-                                            if (newMonthDocSnap.exists) {
-                                                return updateStatisticsDocument(newMonthDocument, updatedTransaction, newTransactionDay, true);
-                                            } else {
-                                                return createStatisticsDocument(newMonthDocument, updatedTransaction, newTransactionDay, true);
-                                            }
-                                        });
-                                });
-                        });
-                });
+            const walletDoc = admin.firestore().collection("Wallets").doc(updatedTransaction.walletId);
+
+            if (updatedTransaction.amount == oldTransaction.amount) {
+                if (oldTransaction.type == updatedTransaction.type) {
+                    console.log("amount and type were the same");
+                } else {
+                    if (updatedTransaction.type == "Expense") {
+                        batch.update(walletDoc, { amount: admin.firestore.FieldValue.increment(-updatedTransaction.amount) });
+                    } else {
+                        batch.update(walletDoc, { amount: admin.firestore.FieldValue.increment(updatedTransaction.amount) });
+                    }
+                }
+
+            } else {
+
+                if (oldTransaction.type == updatedTransaction.type) {
+
+                    if (oldTransaction.type == "Expense") {
+                        if (oldTransaction.amount < updatedTransaction.amount) {
+                            var decrement = updatedTransaction.amount - oldTransaction.amount;
+
+                            batch.update(walletDoc, { amount: admin.firestore.FieldValue.increment(-decrement) });
+                        } else {
+                            var increment = oldTransaction.amount - updatedTransaction.amount;
+
+                            batch.update(walletDoc, { amount: admin.firestore.FieldValue.increment(increment) });
+                        }
+
+                    } else {
+                        if (oldTransaction.amount < updatedTransaction.amount) {
+                            var increment = updatedTransaction.amount - oldTransaction.amount;
+
+                            batch.update(walletDoc, { amount: admin.firestore.FieldValue.increment(increment) });
+                        } else {
+                            var decrement = oldTransaction.amount - updatedTransaction.amount;
+
+                            batch.update(walletDoc, { amount: admin.firestore.FieldValue.increment(-decrement) });
+                        }
+                    }
+                } else {
+                    console.log("unimplemented bruh");
+                }
+            }
+
+            return Promise.all([oldYearDocument.get(), oldMonthDocument.get(), newYearDocument.get(), newMonthDocument.get()]).then(result => {
+                const oldYearDoc = result[0];
+                const oldMonthDoc = result[1];
+                const newYearDoc = result[2];
+                const newMonthDoc = result[3];
+
+
+                if (oldYearDoc.exists) {
+                    batch.update(oldYearDocument, {
+                        latestUpdateTime: firestore.Timestamp.now(),
+                        totalAmountSpent: admin.firestore.FieldValue.increment(oldTransaction.type === "Expense" ? -oldTransaction.amount : 0),
+                        [`amountByCategory.${oldTransaction.category}`]: admin.firestore.FieldValue.increment(-oldTransaction.amount),
+
+                        [`transactions.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
+                        [`categories.${oldTransaction.category}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete()
+                    });
+                }
+                if (oldMonthDoc.exists) {
+                    batch.update(oldMonthDocument, {
+                        latestUpdateTime: firestore.Timestamp.now(),
+                        totalAmountSpent: admin.firestore.FieldValue.increment(oldTransaction.type === "Expense" ? -oldTransaction.amount : 0),
+                        [`amountByCategory.${oldTransaction.category}`]: admin.firestore.FieldValue.increment(-oldTransaction.amount),
+
+                        [`transactions.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
+                        [`categories.${oldTransaction.category}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
+                        [`transactionsByDay.${oldTransactionDay}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete()
+                    });
+                }
+
+                const categoriesByAmountField = `amountByCategory.${updatedTransaction.category}`;
+                const categoryIdField = `categories.${updatedTransaction.category}.${updatedTransaction.id}`;
+                const dayIdField = `transactionsByDay.${newTransactionDay}.${updatedTransaction.id}`;
+                const idField = `transactions.${updatedTransaction.id}`;
+
+                if (newYearDoc.exists) {
+                    batch.update(newYearDocument, {
+                        latestUpdateTime: firestore.Timestamp.now(),
+                        totalAmountSpent: admin.firestore.FieldValue.increment(updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0),
+                        [categoriesByAmountField]: admin.firestore.FieldValue.increment(updatedTransaction.amount),
+
+                        [idField]: updatedTransaction,
+                        [categoryIdField]: updatedTransaction
+                    });
+                } else {
+                    batch.set(newYearDocument, {
+                        latestUpdateTime: firestore.Timestamp.now(),
+                        transactions: { [updatedTransaction.id]: updatedTransaction },
+                        categories: { [updatedTransaction.category]: { [updatedTransaction.id]: updatedTransaction } },
+                        amountByCategory: { [updatedTransaction.category]: updatedTransaction.amount },
+                        totalAmountSpent: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
+                    });
+
+                }
+                if (newMonthDoc.exists) {
+                    batch.update(newMonthDocument, {
+                        latestUpdateTime: firestore.Timestamp.now(),
+                        totalAmountSpent: admin.firestore.FieldValue.increment(updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0),
+                        [categoriesByAmountField]: admin.firestore.FieldValue.increment(updatedTransaction.amount),
+
+                        [idField]: updatedTransaction,
+                        [categoryIdField]: updatedTransaction,
+                        [dayIdField]: updatedTransaction
+                    });
+                } else {
+                    batch.set(newMonthDocument, {
+                        latestUpdateTime: firestore.Timestamp.now(),
+                        transactions: { [updatedTransaction.id]: updatedTransaction },
+                        categories: { [updatedTransaction.category]: { [updatedTransaction.id]: updatedTransaction } },
+                        amountByCategory: { [updatedTransaction.category]: updatedTransaction.amount },
+                        transactionsByDay: { [newTransactionDay]: { [updatedTransaction.id]: updatedTransaction } },
+                        totalAmountSpent: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
+                    });
+                }
+
+                return batch.commit();
+            });
         }
     }
 });
-
-function updateWalletAmount(transBefore, transAfter) {
-    if (transAfter.amount == transBefore.amount) {
-        if (transBefore.type == transAfter.type) {
-            console.log("transaction type and amount were the same");
-            return;
-        } else {
-            if (transAfter.type == "Expense") {
-                return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
-                    amount: admin.firestore.FieldValue.increment(-transAfter.amount)
-                });
-            } else {
-                return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
-                    amount: admin.firestore.FieldValue.increment(transAfter.amount)
-                });
-            }
-        }
-
-    } else {
-
-        if (transBefore.type == transAfter.type) {
-
-            if (transBefore.type == "Expense") {
-                if (transBefore.amount < transAfter.amount) {
-                    var decrement = transAfter.amount - transBefore.amount;
-
-                    return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
-                        amount: admin.firestore.FieldValue.increment(-decrement)
-                    });
-                } else {
-                    var increment = transBefore.amount - transAfter.amount;
-
-                    return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
-                        amount: admin.firestore.FieldValue.increment(increment)
-                    });
-                }
-
-            } else {
-                if (transBefore.amount < transAfter.amount) {
-                    var increment = transAfter.amount - transBefore.amount;
-
-                    return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
-                        amount: admin.firestore.FieldValue.increment(increment)
-                    });
-                } else {
-                    var decrement = transBefore.amount - transAfter.amount;
-
-                    return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
-                        amount: admin.firestore.FieldValue.increment(-decrement)
-                    });
-                }
-            }
-        } else {
-            console.log("unimplemented bruh");
-            return;
-        }
-    }
-}
-
-function removeTransactionFromStatistics(doc, oldTransaction, transactionDay, byDay) {
-    const categoriesByAmountField = `amountByCategory.${oldTransaction.category}`;
-
-    if (byDay) {
-        return doc.update({
-            latestUpdateTime: firestore.Timestamp.now(),
-            totalAmountSpent: admin.firestore.FieldValue.increment(oldTransaction.type === "Expense" ? -oldTransaction.amount : 0),
-            [categoriesByAmountField]: admin.firestore.FieldValue.increment(-oldTransaction.amount),
-
-            [`transactions.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
-            [`categories.${oldTransaction.category}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
-            [`transactionsByDay.${transactionDay}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete()
-        });
-    } else {
-        return doc.update({
-            latestUpdateTime: firestore.Timestamp.now(),
-            totalAmountSpent: admin.firestore.FieldValue.increment(oldTransaction.type === "Expense" ? -oldTransaction.amount : 0),
-            [categoriesByAmountField]: admin.firestore.FieldValue.increment(-oldTransaction.amount),
-
-            [`transactions.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
-            [`categories.${oldTransaction.category}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete()
-        });
-    }
-}
-
-function createStatisticsDocument(doc, transaction, transactionDay, byDay) {
-    if (byDay) {
-        return doc.set({
-            latestUpdateTime: firestore.Timestamp.now(),
-            transactions: { [transaction.id]: transaction },
-            categories: { [transaction.category]: { [transaction.id]: transaction } },
-            amountByCategory: { [transaction.category]: transaction.amount },
-            transactionsByDay: { [transactionDay]: { [transaction.id]: transaction } },
-            totalAmountSpent: transaction.type === "Expense" ? transaction.amount : 0
-        });
-    } else {
-        return doc.set({
-            latestUpdateTime: firestore.Timestamp.now(),
-            transactions: { [transaction.id]: transaction },
-            categories: { [transaction.category]: { [transaction.id]: transaction } },
-            amountByCategory: { [transaction.category]: transaction.amount },
-            totalAmountSpent: transaction.type === "Expense" ? transaction.amount : 0
-        });
-    }
-
-}
-
-function updateStatisticsDocument(doc, transaction, transactionDay, byDay) {
-    const categoriesByAmountField = `amountByCategory.${transaction.category}`;
-    const categoryIdField = `categories.${transaction.category}.${transaction.id}`;
-    const dayIdField = `transactionsByDay.${transactionDay}.${transaction.id}`;
-    const idField = `transactions.${transaction.id}`;
-
-    if (byDay) {
-        return doc.update({
-            latestUpdateTime: firestore.Timestamp.now(),
-            totalAmountSpent: admin.firestore.FieldValue.increment(transaction.type === "Expense" ? transaction.amount : 0),
-            [categoriesByAmountField]: admin.firestore.FieldValue.increment(transaction.amount),
-
-            [idField]: transaction,
-            [categoryIdField]: transaction,
-            [dayIdField]: transaction
-        });
-    } else {
-        return doc.update({
-            latestUpdateTime: firestore.Timestamp.now(),
-            totalAmountSpent: admin.firestore.FieldValue.increment(transaction.type === "Expense" ? transaction.amount : 0),
-            [categoriesByAmountField]: admin.firestore.FieldValue.increment(transaction.amount),
-
-            [idField]: transaction,
-            [categoryIdField]: transaction
-        });
-    }
-}

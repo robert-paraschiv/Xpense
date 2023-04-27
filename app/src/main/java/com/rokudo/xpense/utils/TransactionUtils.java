@@ -19,6 +19,7 @@ import com.rokudo.xpense.models.Transaction;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 @SuppressLint("SimpleDateFormat")
 public class TransactionUtils {
@@ -36,6 +37,8 @@ public class TransactionUtils {
     }
 
     public static boolean isTransactionDifferent(Transaction oldTransaction, Transaction newTransaction) {
+        SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
+
         if (!oldTransaction.getTitle().equals(newTransaction.getTitle()))
             return true;
 
@@ -46,6 +49,9 @@ public class TransactionUtils {
             return true;
 
         if (!oldTransaction.getCategory().equals(newTransaction.getCategory()))
+            return true;
+
+        if (!simpleDateFormat1.format(oldTransaction.getDate()).equals(simpleDateFormat1.format(newTransaction.getDate())))
             return true;
 
         return false;
