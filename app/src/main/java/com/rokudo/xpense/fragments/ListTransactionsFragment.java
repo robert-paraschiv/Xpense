@@ -75,6 +75,11 @@ public class ListTransactionsFragment extends Fragment implements OnTransClickLi
     private void loadTransactions() {
         StatisticsViewModel statisticsViewModel = new ViewModelProvider(requireActivity())
                 .get(StatisticsViewModel.class);
+
+        if (statisticsViewModel.getStoredStatisticsDoc() == null) {
+            return;
+        }
+
         List<Transaction> transactions = new ArrayList<>(statisticsViewModel.getStoredStatisticsDoc().getTransactions().values());
         transactions.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
 

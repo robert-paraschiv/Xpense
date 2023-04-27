@@ -207,6 +207,10 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
     }
 
     private void getInitialTransactionData() {
+        if (statisticsViewModel.getStoredStatisticsDoc() == null) {
+            return;
+        }
+
         populateCategoriesRv(statisticsViewModel.getStoredStatisticsDoc().getAmountByCategory(),
                 statisticsViewModel.getStoredStatisticsDoc().getCategories());
         PieChartUtils.updatePieChartData(binding.pieChart,

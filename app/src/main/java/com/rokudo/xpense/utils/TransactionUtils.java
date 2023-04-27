@@ -39,6 +39,9 @@ public class TransactionUtils {
     public static boolean isTransactionDifferent(Transaction oldTransaction, Transaction newTransaction) {
         SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
 
+        if (oldTransaction.getTitle() == null)
+            return true;
+
         if (!oldTransaction.getTitle().equals(newTransaction.getTitle()))
             return true;
 
