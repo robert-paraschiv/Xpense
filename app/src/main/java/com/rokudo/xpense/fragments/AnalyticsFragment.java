@@ -14,9 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -55,7 +53,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class AnalyticsFragment extends Fragment implements OnTransClickListener {
     private static final String TAG = "AnalyticsFragment";
@@ -75,6 +72,8 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
         // Inflate the layout for this fragment
         binding = FragmentAnalyticsBinding.inflate(inflater);
 
+        postponeEnterTransition();
+
         statisticsViewModel = new ViewModelProvider(requireActivity()).get(StatisticsViewModel.class);
 
         initOnClicks();
@@ -87,23 +86,9 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
         getInitialTransactionData();
 
 
+        startPostponedEnterTransition();
+
         return binding.getRoot();
-    }
-
-    @Override
-    public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
-        postponeEnterTransition();
-        final ViewGroup viewGroup = (ViewGroup) view.getParent();
-        viewGroup.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                viewGroup.getViewTreeObserver().removeOnPreDrawListener(this);
-                startPostponedEnterTransition();
-                return true;
-            }
-        });
-
-        super.onViewCreated(view, savedInstanceState);
     }
 
     private void initOnClicks() {
@@ -201,8 +186,10 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                     || !transactionsByCategory.containsKey(key)) {
                 return;
             }
+            List<Transaction> transactionList = new ArrayList<>(transactionsByCategory.get(key).values());
+            transactionList.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
             ExpenseCategory expenseCategory = new ExpenseCategory(key,
-                    new ArrayList<>(transactionsByCategory.get(key).values()),
+                    transactionList,
                     null,
                     value);
             if (CategoriesUtil.expenseCategoryList.contains(expenseCategory)) {

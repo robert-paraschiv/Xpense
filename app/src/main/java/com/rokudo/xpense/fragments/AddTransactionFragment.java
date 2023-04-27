@@ -12,12 +12,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -59,6 +57,8 @@ public class AddTransactionFragment extends Fragment {
         // Inflate the layout for this fragment
         binding = FragmentAddTransactionBinding.inflate(inflater, container, false);
 
+        postponeEnterTransition();
+
         viewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
 
         getWalletId();
@@ -66,23 +66,9 @@ public class AddTransactionFragment extends Fragment {
         buildCategoriesRv();
         handleArgs();
 
+        startPostponedEnterTransition();
+
         return binding.getRoot();
-    }
-
-    @Override
-    public void onViewCreated(@NonNull final View view, @Nullable Bundle savedInstanceState) {
-        postponeEnterTransition();
-        final ViewGroup viewGroup = (ViewGroup) view.getParent();
-        viewGroup.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                viewGroup.getViewTreeObserver().removeOnPreDrawListener(this);
-                startPostponedEnterTransition();
-                return true;
-            }
-        });
-
-        super.onViewCreated(view, savedInstanceState);
     }
 
     private void buildCategoriesRv() {
