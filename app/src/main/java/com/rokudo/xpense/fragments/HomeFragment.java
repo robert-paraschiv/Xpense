@@ -226,7 +226,10 @@ public class HomeFragment extends Fragment {
 
                     boolean shouldUpdateStatistics = isShouldUpdateStatistics(val);
 
-                    if (shouldUpdateStatistics) {
+
+                    if (shouldUpdateStatistics
+                            || binding.pieChart.getData() == null
+                            || binding.barChart.getData() == null) {
                         statisticsViewModel.setHomeStoredStatisticsDoc(val);
                         updatePieChartData(binding.pieChart,
                                 mWallet == null ? "" : mWallet.getCurrency(),
@@ -259,8 +262,14 @@ public class HomeFragment extends Fragment {
                 || !statisticsViewModel.getHomeStoredStatisticsDoc().getLatestUpdateTime().equals(val.getLatestUpdateTime());
 
         if (!statisticsViewModel.getHomeStoredStatisticsDoc().getDocPath().equals(val.getDocPath())) {
-            shouldUpdateStatistics = true;
+            return true;
         }
+
+        if (!statisticsViewModel.getHomeStoredStatisticsDoc().getAmountByCategory().equals(val.getAmountByCategory())) {
+            return true;
+        }
+
+
         return shouldUpdateStatistics;
     }
 
