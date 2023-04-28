@@ -63,7 +63,7 @@ public class PieChartUtils {
         ArrayList<Integer> pieColors = new ArrayList<>();
         entries.forEach(value ->
                 pieColors.add(CategoriesUtil.expenseCategoryList.get(
-                                CategoriesUtil.expenseCategoryList.indexOf(new ExpenseCategory(value.getLabel(), null, null)))
+                                CategoriesUtil.expenseCategoryList.indexOf(new ExpenseCategory(value.getLabel())))
                         .getColor()));
 
         dataSet.setColors(pieColors);

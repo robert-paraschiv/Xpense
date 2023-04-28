@@ -122,7 +122,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
                 holder.transactionDate.setText(getTransactionDateString(transaction));
             if (transaction.getCategory() != null) {
                 holder.transactionCategory.setText(transaction.getCategory());
-                ExpenseCategory expenseCategory = new ExpenseCategory(transaction.getCategory(), 0, 0);
+                ExpenseCategory expenseCategory = new ExpenseCategory(transaction.getCategory());
                 int i = CategoriesUtil.expenseCategoryList.indexOf(expenseCategory);
                 if (i >= 0) {
                     holder.transactionCategoryImage.setImageDrawable(

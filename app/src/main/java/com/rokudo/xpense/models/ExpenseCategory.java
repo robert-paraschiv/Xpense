@@ -10,6 +10,10 @@ public class ExpenseCategory {
     List<Transaction> transactionList;
     Integer color;
 
+    public ExpenseCategory(String name) {
+        this.name = name;
+    }
+
     public ExpenseCategory(String name, Integer resourceId, Integer color) {
         this.name = name;
         this.resourceId = resourceId;

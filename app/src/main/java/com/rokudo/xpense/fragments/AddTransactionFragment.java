@@ -138,7 +138,7 @@ public class AddTransactionFragment extends Fragment {
             if (mTransaction.getType().equals(INCOME_TYPE)) {
                 binding.expenseChip.setChecked(false);
                 binding.incomeChip.setChecked(true);
-                selectedCategory = new ExpenseCategory("Income", null, null);
+                selectedCategory = new ExpenseCategory("Income");
                 binding.selectedTextDummy.setVisibility(View.GONE);
                 binding.categoryChipGroup.setVisibility(View.GONE);
             } else {
@@ -152,7 +152,7 @@ public class AddTransactionFragment extends Fragment {
                     return;
                 }
 
-                ExpenseCategory transactionExpenseCategory = new ExpenseCategory(mTransaction.getCategory(), null, null);
+                ExpenseCategory transactionExpenseCategory = new ExpenseCategory(mTransaction.getCategory());
                 try {
                     selectedCategory = CategoriesUtil.expenseCategoryList.get(
                             CategoriesUtil.expenseCategoryList
@@ -213,13 +213,13 @@ public class AddTransactionFragment extends Fragment {
             if (chip != null)
                 selectedCategory = CategoriesUtil.expenseCategoryList.get(
                         CategoriesUtil.expenseCategoryList.indexOf(
-                                new ExpenseCategory(chip.getText().toString(), null, null)
+                                new ExpenseCategory(chip.getText().toString())
                         )
                 );
         });
         binding.incomeChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-                selectedCategory = new ExpenseCategory("Income", null, null);
+                selectedCategory = new ExpenseCategory("Income");
                 binding.categoryChipGroup.setVisibility(View.GONE);
                 binding.selectedTextDummy.setVisibility(View.GONE);
             }

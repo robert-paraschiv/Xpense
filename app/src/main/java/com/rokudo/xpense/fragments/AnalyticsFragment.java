@@ -19,6 +19,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -162,11 +163,15 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
             binding.pieChart.setVisibility(View.VISIBLE);
             binding.analyticsTypeImage
                     .setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.baseline_bar_chart_24));
+            binding.pieChart.animateXY(requireContext().getResources().getInteger(R.integer.transition_duration_millis),
+                    requireContext().getResources().getInteger(R.integer.transition_duration_millis));
         } else {
             binding.barChart.setVisibility(View.VISIBLE);
             binding.pieChart.setVisibility(View.GONE);
             binding.analyticsTypeImage
                     .setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.baseline_pie_chart_24));
+            binding.barChart.animateXY(requireContext().getResources().getInteger(R.integer.transition_duration_millis),
+                    requireContext().getResources().getInteger(R.integer.transition_duration_millis));
         }
     }
 
@@ -343,13 +348,16 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                         AnalyticsBarUtils.updateBarchartData(binding.barChart,
                                 transactions,
                                 new TextView(requireContext()).getCurrentTextColor(), isYearSelected);
+                        binding.barChart.animateXY(requireContext().getResources().getInteger(R.integer.transition_duration_millis),
+                                requireContext().getResources().getInteger(R.integer.transition_duration_millis));
 
                         PieChartUtils.updatePieChartData(binding.pieChart,
                                 wallet.getCurrency(),
                                 statisticsDoc.getAmountByCategory(),
                                 statisticsDoc.getTotalAmountSpent(),
                                 false);
-
+                        binding.pieChart.animateXY(requireContext().getResources().getInteger(R.integer.transition_duration_millis),
+                                requireContext().getResources().getInteger(R.integer.transition_duration_millis));
 
                         binding.totalAmountTv.setText(String.format("%s %s",
                                 wallet.getCurrency(),
