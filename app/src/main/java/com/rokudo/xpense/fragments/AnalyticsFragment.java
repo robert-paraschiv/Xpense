@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.transition.TransitionManager;
 
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.google.android.material.chip.Chip;
@@ -37,6 +38,7 @@ import com.google.android.material.transition.MaterialSharedAxis;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.ExpenseCategoryAdapter;
 import com.rokudo.xpense.adapters.OnTransClickListener;
+import com.rokudo.xpense.adapters.TransactionsAdapter;
 import com.rokudo.xpense.data.viewmodels.StatisticsViewModel;
 import com.rokudo.xpense.databinding.FragmentAnalyticsBinding;
 import com.rokudo.xpense.models.ExpenseCategory;
@@ -139,6 +141,12 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
 
         binding.thisMonthChip.setOnClickListener(v -> {
             binding.barChart.highlightValue(null);
+            binding.pieChart.highlightValue(null);
+            if (binding.categoriesRv.getVisibility() == GONE) {
+                binding.categoriesRv.setVisibility(VISIBLE);
+                binding.transactionsRv.setVisibility(GONE);
+            }
+
             AnalyticsBarUtils.setBarLabelRotation(binding.barChart, true);
             isYearMode = false;
             buildDatePickerRv();
@@ -150,6 +158,11 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
         });
         binding.thisYearChip.setOnClickListener(v -> {
             binding.barChart.highlightValue(null);
+            binding.pieChart.highlightValue(null);
+            if (binding.categoriesRv.getVisibility() == GONE) {
+                binding.categoriesRv.setVisibility(VISIBLE);
+                binding.transactionsRv.setVisibility(GONE);
+            }
             isYearMode = true;
             buildDatePickerRv();
             if (binding.dateChipCard.getVisibility() == GONE) {
@@ -186,12 +199,19 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
 
                                 if (categoriesByAmount.containsKey(transaction.getCategory())) {
                                     Double oldVal = categoriesByAmount.get(transaction.getCategory());
-                                    categoriesByAmount.replace(transaction.getCategory(), oldVal + transaction.getAmount());
+                                    if (oldVal != null) {
+                                        categoriesByAmount.replace(transaction.getCategory(), oldVal + transaction.getAmount());
+                                    }
                                 } else {
                                     categoriesByAmount.put(transaction.getCategory(), transaction.getAmount());
                                 }
+
                                 if (transactionsByCategory.containsKey(transaction.getCategory())) {
-                                    transactionsByCategory.get(transaction.getCategory()).put(transaction.getId(), transaction);
+                                    if (transactionsByCategory.get(transaction.getCategory()) == null) {
+                                        return;
+                                    }
+                                    Objects.requireNonNull(transactionsByCategory.get(transaction.getCategory()))
+                                            .put(transaction.getId(), transaction);
                                 } else {
                                     Map<String, Transaction> transactionMap = new HashMap<>();
                                     transactionMap.put(transaction.getId(), transaction);
@@ -200,19 +220,32 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                             });
 
                 } else {
-                    statisticsViewModel.getAnalyticsStoredStatisticsDoc()
-                            .getTransactionsByDay()
-                            .get(transEntryDay)
+                    if (statisticsViewModel.getAnalyticsStoredStatisticsDoc()
+                            .getTransactionsByDay() == null
+                            || statisticsViewModel.getAnalyticsStoredStatisticsDoc()
+                            .getTransactionsByDay().get(transEntryDay)
+                            == null) {
+                        return;
+                    }
+                    Objects.requireNonNull(statisticsViewModel.getAnalyticsStoredStatisticsDoc()
+                                    .getTransactionsByDay()
+                                    .get(transEntryDay))
                             .values().forEach(transaction -> {
 
                                 if (categoriesByAmount.containsKey(transaction.getCategory())) {
                                     Double oldVal = categoriesByAmount.get(transaction.getCategory());
-                                    categoriesByAmount.replace(transaction.getCategory(), oldVal + transaction.getAmount());
+                                    if (oldVal != null) {
+                                        categoriesByAmount.replace(transaction.getCategory(), oldVal + transaction.getAmount());
+                                    }
                                 } else {
                                     categoriesByAmount.put(transaction.getCategory(), transaction.getAmount());
                                 }
                                 if (transactionsByCategory.containsKey(transaction.getCategory())) {
-                                    transactionsByCategory.get(transaction.getCategory()).put(transaction.getId(), transaction);
+                                    if (transactionsByCategory.get(transaction.getCategory()) == null) {
+                                        return;
+                                    }
+                                    Objects.requireNonNull(transactionsByCategory.get(transaction.getCategory()))
+                                            .put(transaction.getId(), transaction);
                                 } else {
                                     Map<String, Transaction> transactionMap = new HashMap<>();
                                     transactionMap.put(transaction.getId(), transaction);
@@ -236,6 +269,46 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                 binding.categoriesRv.scheduleLayoutAnimation();
             }
         });
+
+        binding.pieChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                Log.d(TAG, "onValueSelected: ");
+                binding.categoriesRv.setVisibility(GONE);
+                binding.transactionsRv.setVisibility(VISIBLE);
+
+                List<Transaction> transactions = new ArrayList<>(Objects.requireNonNull(statisticsViewModel.getAnalyticsStoredStatisticsDoc()
+                                .getCategories().get(((PieEntry) e).getLabel()))
+                        .values());
+                transactions.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
+                TransactionsAdapter transactionsAdapter = new TransactionsAdapter(transactions, true, transaction -> {
+                    MaterialSharedAxis exit = new MaterialSharedAxis(MaterialSharedAxis.X, true);
+                    exit.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+                    MaterialSharedAxis reenter = new MaterialSharedAxis(MaterialSharedAxis.X, false);
+                    reenter.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+
+                    setExitTransition(exit);
+                    setReenterTransition(reenter);
+
+
+                    Navigation.findNavController(binding.getRoot())
+                            .navigate(AnalyticsFragmentDirections
+                                    .actionAnalyticsFragmentToAddTransactionFragment(wallet.getId(),
+                                            wallet.getCurrency(),
+                                            transaction));
+                });
+                binding.transactionsRv.setLayoutManager(new LinearLayoutManager(requireContext()));
+                binding.transactionsRv.setAdapter(transactionsAdapter);
+                binding.transactionsRv.scheduleLayoutAnimation();
+            }
+
+            @Override
+            public void onNothingSelected() {
+                binding.categoriesRv.setVisibility(VISIBLE);
+                binding.transactionsRv.setVisibility(GONE);
+                binding.categoriesRv.scheduleLayoutAnimation();
+            }
+        });
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -254,6 +327,14 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                     statisticsViewModel.getStoredStatisticsDoc().getCategories());
             binding.categoriesRv.scheduleLayoutAnimation();
         }
+        if (binding.pieChart.getHighlighted() != null) {
+            binding.pieChart.highlightValue(null);
+            if (binding.categoriesRv.getVisibility() == GONE) {
+                binding.categoriesRv.setVisibility(VISIBLE);
+                binding.transactionsRv.setVisibility(GONE);
+            }
+        }
+
         if (binding.barChart.getVisibility() == View.VISIBLE) {
             binding.barChart.setVisibility(View.GONE);
             binding.pieChart.setVisibility(View.VISIBLE);
@@ -445,7 +526,11 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                                 false);
                         binding.totalAmountTv.setText(R.string.no_data_provided);
                     } else {
-
+                        if (binding.categoriesRv.getVisibility() == GONE) {
+                            binding.pieChart.highlightValue(null);
+                            binding.categoriesRv.setVisibility(VISIBLE);
+                            binding.transactionsRv.setVisibility(GONE);
+                        }
                         populateCategoriesRv(statisticsDoc.getAmountByCategory(), statisticsDoc.getCategories());
 
                         List<Transaction> transactions = new ArrayList<>(statisticsDoc.getTransactions().values());
