@@ -3,6 +3,7 @@ package com.rokudo.xpense.fragments;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static androidx.recyclerview.widget.RecyclerView.VERTICAL;
+import static com.rokudo.xpense.utils.AnalyticsBarUtils.getTransEntryArrayList;
 import static com.rokudo.xpense.utils.AnalyticsBarUtils.setupBarChart;
 import static com.rokudo.xpense.utils.DateUtils.monthYearFormat;
 import static com.rokudo.xpense.utils.DateUtils.yearFormat;
@@ -19,13 +20,15 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.transition.TransitionManager;
 
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.shape.ShapeAppearanceModel;
 import com.google.android.material.transition.MaterialArcMotion;
@@ -37,6 +40,7 @@ import com.rokudo.xpense.adapters.OnTransClickListener;
 import com.rokudo.xpense.data.viewmodels.StatisticsViewModel;
 import com.rokudo.xpense.databinding.FragmentAnalyticsBinding;
 import com.rokudo.xpense.models.ExpenseCategory;
+import com.rokudo.xpense.models.TransEntry;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.AnalyticsBarUtils;
@@ -46,6 +50,7 @@ import com.rokudo.xpense.utils.PieChartUtils;
 
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -53,7 +58,9 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 public class AnalyticsFragment extends Fragment implements OnTransClickListener {
     private static final String TAG = "AnalyticsFragment";
@@ -66,6 +73,8 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
 
     private boolean isYearMode = false;
     private List<ExpenseCategory> categoryList = new ArrayList<>();
+
+    private List<TransEntry> transEntryArrayList;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -129,6 +138,7 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
         binding.backBtn.setOnClickListener(view -> Navigation.findNavController(binding.backBtn).popBackStack());
 
         binding.thisMonthChip.setOnClickListener(v -> {
+            binding.barChart.highlightValue(null);
             AnalyticsBarUtils.setBarLabelRotation(binding.barChart, true);
             isYearMode = false;
             buildDatePickerRv();
@@ -139,6 +149,7 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
             loadTransactions(selectedDate, isYearMode);
         });
         binding.thisYearChip.setOnClickListener(v -> {
+            binding.barChart.highlightValue(null);
             isYearMode = true;
             buildDatePickerRv();
             if (binding.dateChipCard.getVisibility() == GONE) {
@@ -146,6 +157,84 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
             }
             resetCategoriesRv();
             loadTransactions(selectedDate, isYearMode);
+        });
+
+        binding.barChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry entry, Highlight h) {
+                TransEntry transEntry = transEntryArrayList.get((int) entry.getX());
+                Log.d(TAG, "onValueSelected: ");
+
+
+                SimpleDateFormat monthFormat = new SimpleDateFormat("MMMM", Locale.getDefault());
+                SimpleDateFormat dayFormat = new SimpleDateFormat("d", Locale.getDefault());
+                String transEntryDay = isYearMode ? monthFormat.format(transEntry.getDate())
+                        : dayFormat.format(transEntry.getDate());
+
+                Map<String, Double> categoriesByAmount = new HashMap<>();
+                Map<String, Map<String, Transaction>> transactionsByCategory = new HashMap<>();
+
+
+                if (isYearMode) {
+                    statisticsViewModel.getAnalyticsStoredStatisticsDoc()
+                            .getTransactions()
+                            .values()
+                            .forEach(transaction -> {
+                                if (!monthFormat.format(transaction.getDate()).equals(transEntryDay)) {
+                                    return;
+                                }
+
+                                if (categoriesByAmount.containsKey(transaction.getCategory())) {
+                                    Double oldVal = categoriesByAmount.get(transaction.getCategory());
+                                    categoriesByAmount.replace(transaction.getCategory(), oldVal + transaction.getAmount());
+                                } else {
+                                    categoriesByAmount.put(transaction.getCategory(), transaction.getAmount());
+                                }
+                                if (transactionsByCategory.containsKey(transaction.getCategory())) {
+                                    transactionsByCategory.get(transaction.getCategory()).put(transaction.getId(), transaction);
+                                } else {
+                                    Map<String, Transaction> transactionMap = new HashMap<>();
+                                    transactionMap.put(transaction.getId(), transaction);
+                                    transactionsByCategory.put(transaction.getCategory(), transactionMap);
+                                }
+                            });
+
+                } else {
+                    statisticsViewModel.getAnalyticsStoredStatisticsDoc()
+                            .getTransactionsByDay()
+                            .get(transEntryDay)
+                            .values().forEach(transaction -> {
+
+                                if (categoriesByAmount.containsKey(transaction.getCategory())) {
+                                    Double oldVal = categoriesByAmount.get(transaction.getCategory());
+                                    categoriesByAmount.replace(transaction.getCategory(), oldVal + transaction.getAmount());
+                                } else {
+                                    categoriesByAmount.put(transaction.getCategory(), transaction.getAmount());
+                                }
+                                if (transactionsByCategory.containsKey(transaction.getCategory())) {
+                                    transactionsByCategory.get(transaction.getCategory()).put(transaction.getId(), transaction);
+                                } else {
+                                    Map<String, Transaction> transactionMap = new HashMap<>();
+                                    transactionMap.put(transaction.getId(), transaction);
+                                    transactionsByCategory.put(transaction.getCategory(), transactionMap);
+                                }
+
+                            });
+                }
+
+                resetCategoriesRv();
+                populateCategoriesRv(categoriesByAmount, transactionsByCategory);
+                binding.categoriesRv.scheduleLayoutAnimation();
+            }
+
+            @Override
+            public void onNothingSelected() {
+                resetCategoriesRv();
+                populateCategoriesRv(statisticsViewModel.getStoredStatisticsDoc().getAmountByCategory(),
+                        statisticsViewModel.getStoredStatisticsDoc().getCategories());
+
+                binding.categoriesRv.scheduleLayoutAnimation();
+            }
         });
     }
 
@@ -158,6 +247,13 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
     }
 
     private void toggleChartsVisibility() {
+        if (binding.barChart.getHighlighted() != null) {
+            binding.barChart.highlightValue(null);
+            resetCategoriesRv();
+            populateCategoriesRv(statisticsViewModel.getStoredStatisticsDoc().getAmountByCategory(),
+                    statisticsViewModel.getStoredStatisticsDoc().getCategories());
+            binding.categoriesRv.scheduleLayoutAnimation();
+        }
         if (binding.barChart.getVisibility() == View.VISIBLE) {
             binding.barChart.setVisibility(View.GONE);
             binding.pieChart.setVisibility(View.VISIBLE);
@@ -191,7 +287,7 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                     || !transactionsByCategory.containsKey(key)) {
                 return;
             }
-            List<Transaction> transactionList = new ArrayList<>(transactionsByCategory.get(key).values());
+            List<Transaction> transactionList = new ArrayList<>(Objects.requireNonNull(transactionsByCategory.get(key)).values());
             transactionList.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
             ExpenseCategory expenseCategory = new ExpenseCategory(key,
                     transactionList,
@@ -216,6 +312,8 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
             return;
         }
 
+        statisticsViewModel.setAnalyticsStoredStatisticsDoc(statisticsViewModel.getStoredStatisticsDoc());
+
         populateCategoriesRv(statisticsViewModel.getStoredStatisticsDoc().getAmountByCategory(),
                 statisticsViewModel.getStoredStatisticsDoc().getCategories());
         PieChartUtils.updatePieChartData(binding.pieChart,
@@ -223,10 +321,15 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                 statisticsViewModel.getStoredStatisticsDoc().getAmountByCategory(),
                 statisticsViewModel.getStoredStatisticsDoc().getTotalAmountSpent(),
                 false);
+
+        List<Transaction> transactionList = new ArrayList<>(statisticsViewModel.getStoredStatisticsDoc().getTransactions().values());
+        transactionList.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
+        transEntryArrayList = getTransEntryArrayList(transactionList, isYearMode);
+
         AnalyticsBarUtils.updateBarchartData(binding.barChart,
-                new ArrayList<>(statisticsViewModel.getStoredStatisticsDoc().getTransactions().values()),
-                new TextView(requireContext()).getCurrentTextColor(),
-                false);
+                transEntryArrayList,
+                new TextView(requireContext()).getCurrentTextColor()
+        );
 
         binding.totalAmountTv.setText(String.format("%s %s",
                 wallet.getCurrency(),
@@ -328,11 +431,12 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
     private void loadTransactions(Date start, boolean isYearSelected) {
         statisticsViewModel.loadStatisticsDoc(wallet.getId(), start, isYearSelected)
                 .observe(getViewLifecycleOwner(), statisticsDoc -> {
+                    statisticsViewModel.setAnalyticsStoredStatisticsDoc(statisticsDoc);
                     if (statisticsDoc == null || statisticsDoc.getTransactions().isEmpty()) {
                         Log.e(TAG, "loadTransactions: empty");
                         AnalyticsBarUtils.updateBarchartData(binding.barChart,
                                 new ArrayList<>(),
-                                new TextView(requireContext()).getCurrentTextColor(), isYearSelected);
+                                new TextView(requireContext()).getCurrentTextColor());
 
                         PieChartUtils.updatePieChartData(binding.pieChart,
                                 wallet.getCurrency(),
@@ -341,13 +445,17 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                                 false);
                         binding.totalAmountTv.setText(R.string.no_data_provided);
                     } else {
-                        List<Transaction> transactions = new ArrayList<>(statisticsDoc.getTransactions().values());
+
                         populateCategoriesRv(statisticsDoc.getAmountByCategory(), statisticsDoc.getCategories());
+
+                        List<Transaction> transactions = new ArrayList<>(statisticsDoc.getTransactions().values());
                         transactions.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
 
+                        transEntryArrayList = getTransEntryArrayList(transactions, isYearMode);
+
                         AnalyticsBarUtils.updateBarchartData(binding.barChart,
-                                transactions,
-                                new TextView(requireContext()).getCurrentTextColor(), isYearSelected);
+                                transEntryArrayList,
+                                new TextView(requireContext()).getCurrentTextColor());
                         binding.barChart.animateXY(requireContext().getResources().getInteger(R.integer.transition_duration_millis),
                                 requireContext().getResources().getInteger(R.integer.transition_duration_millis));
 

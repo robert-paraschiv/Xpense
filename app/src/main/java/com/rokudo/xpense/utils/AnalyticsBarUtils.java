@@ -56,13 +56,10 @@ public class AnalyticsBarUtils {
         barChart.getXAxis().setLabelRotationAngle(rotated ? -45 : 0);
     }
 
-    public static void updateBarchartData(BarChart barChart, List<Transaction> transactionList, int textColor, Boolean isYearMode) {
-        transactionList.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
+    public static void updateBarchartData(BarChart barChart, List<TransEntry> transEntryArrayList, int textColor) {
 
         ArrayList<IBarDataSet> dataSets = new ArrayList<>();
         ArrayList<BarEntry> valueSet = new ArrayList<>();
-
-        List<TransEntry> transEntryArrayList = getTransEntryArrayList(transactionList, isYearMode);
 
         for (int i = 0; i < transEntryArrayList.size(); i++) {
             BarEntry barEntry = new BarEntry(i, transEntryArrayList.get(i).getAmount());

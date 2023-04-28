@@ -39,4 +39,12 @@ public class StatisticsViewModel extends AndroidViewModel {
     public void setHomeStoredStatisticsDoc(StatisticsDoc statisticsDoc){
         statisticsRepo.setHomeStoredStatisticsDoc(statisticsDoc);
     }
+
+    public void setAnalyticsStoredStatisticsDoc(StatisticsDoc statisticsDoc){
+        statisticsRepo.setAnalyticsStoredStatisticsDoc(statisticsDoc);
+    }
+
+    public StatisticsDoc getAnalyticsStoredStatisticsDoc(){
+        return statisticsRepo.getAnalyticsStoredDoc();
+    }
 }

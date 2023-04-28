@@ -16,8 +16,7 @@ public class StatisticsRepo {
 
     private ListenerRegistration statisticsDocListener;
 
-    StatisticsDoc storedStatisticsDoc;
-    StatisticsDoc homeStatisticsDoc;
+    StatisticsDoc storedStatisticsDoc, homeStatisticsDoc, analyticsStoredDoc;
     MutableLiveData<Map<String, Double>> categoriesByAmount;
     MutableLiveData<StatisticsDoc> statisticsLiveData;
 
@@ -117,5 +116,13 @@ public class StatisticsRepo {
 
     public void setHomeStoredStatisticsDoc(StatisticsDoc statisticsDoc) {
         homeStatisticsDoc = statisticsDoc;
+    }
+
+    public void setAnalyticsStoredStatisticsDoc(StatisticsDoc statisticsDoc) {
+        analyticsStoredDoc = statisticsDoc;
+    }
+
+    public StatisticsDoc getAnalyticsStoredDoc() {
+        return analyticsStoredDoc;
     }
 }
