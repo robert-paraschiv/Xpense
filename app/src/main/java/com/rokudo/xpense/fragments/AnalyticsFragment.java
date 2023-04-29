@@ -11,6 +11,8 @@ import static com.rokudo.xpense.utils.PieChartUtils.setupPieChart;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -72,6 +74,7 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
     private Date selectedDate = new Date();
     private Wallet wallet;
     private ExpenseCategoryAdapter adapter;
+    private TransactionsAdapter transactionsAdapter;
 
     private boolean isYearMode = false;
     private List<ExpenseCategory> categoryList = new ArrayList<>();
@@ -92,6 +95,7 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
         buildDatePickerRv();
         getArgsPassed();
         setUpExpenseCategoryRv();
+        setUpTransactionsRv();
 
         setupPieChart(binding.pieChart, new TextView(requireContext()).getCurrentTextColor(), false);
         setupBarChart(binding.barChart, new TextView(requireContext()).getCurrentTextColor());
@@ -101,6 +105,13 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
         startPostponedEnterTransition();
 
         return binding.getRoot();
+    }
+
+    private void setUpTransactionsRv() {
+        transactionsAdapter = new TransactionsAdapter(new ArrayList<>(), true, this);
+
+        binding.transactionsRv.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.transactionsRv.setAdapter(transactionsAdapter);
     }
 
     private void initOnClicks() {
@@ -184,80 +195,88 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                 String transEntryDay = isYearMode ? monthFormat.format(transEntry.getDate())
                         : dayFormat.format(transEntry.getDate());
 
-                Map<String, Double> categoriesByAmount = new HashMap<>();
-                Map<String, Map<String, Transaction>> transactionsByCategory = new HashMap<>();
 
+                HandlerThread handlerThread = new HandlerThread(transEntryDay);
+                handlerThread.start();
+                Handler handler = new Handler(handlerThread.getLooper());
+                handler.post(() -> {
+                    Map<String, Double> categoriesByAmount = new HashMap<>();
+                    Map<String, Map<String, Transaction>> transactionsByCategory = new HashMap<>();
 
-                if (isYearMode) {
-                    statisticsViewModel.getAnalyticsStoredStatisticsDoc()
-                            .getTransactions()
-                            .values()
-                            .forEach(transaction -> {
-                                if (!monthFormat.format(transaction.getDate()).equals(transEntryDay)) {
-                                    return;
-                                }
-
-                                if (categoriesByAmount.containsKey(transaction.getCategory())) {
-                                    Double oldVal = categoriesByAmount.get(transaction.getCategory());
-                                    if (oldVal != null) {
-                                        categoriesByAmount.replace(transaction.getCategory(), oldVal + transaction.getAmount());
-                                    }
-                                } else {
-                                    categoriesByAmount.put(transaction.getCategory(), transaction.getAmount());
-                                }
-
-                                if (transactionsByCategory.containsKey(transaction.getCategory())) {
-                                    if (transactionsByCategory.get(transaction.getCategory()) == null) {
+                    if (isYearMode) {
+                        statisticsViewModel.getAnalyticsStoredStatisticsDoc()
+                                .getTransactions()
+                                .values()
+                                .forEach(transaction -> {
+                                    if (!monthFormat.format(transaction.getDate()).equals(transEntryDay)) {
                                         return;
                                     }
-                                    Objects.requireNonNull(transactionsByCategory.get(transaction.getCategory()))
-                                            .put(transaction.getId(), transaction);
-                                } else {
-                                    Map<String, Transaction> transactionMap = new HashMap<>();
-                                    transactionMap.put(transaction.getId(), transaction);
-                                    transactionsByCategory.put(transaction.getCategory(), transactionMap);
-                                }
-                            });
 
-                } else {
-                    if (statisticsViewModel.getAnalyticsStoredStatisticsDoc()
-                            .getTransactionsByDay() == null
-                            || statisticsViewModel.getAnalyticsStoredStatisticsDoc()
-                            .getTransactionsByDay().get(transEntryDay)
-                            == null) {
-                        return;
+                                    if (categoriesByAmount.containsKey(transaction.getCategory())) {
+                                        Double oldVal = categoriesByAmount.get(transaction.getCategory());
+                                        if (oldVal != null) {
+                                            categoriesByAmount.replace(transaction.getCategory(), oldVal + transaction.getAmount());
+                                        }
+                                    } else {
+                                        categoriesByAmount.put(transaction.getCategory(), transaction.getAmount());
+                                    }
+
+                                    if (transactionsByCategory.containsKey(transaction.getCategory())) {
+                                        if (transactionsByCategory.get(transaction.getCategory()) == null) {
+                                            return;
+                                        }
+                                        Objects.requireNonNull(transactionsByCategory.get(transaction.getCategory()))
+                                                .put(transaction.getId(), transaction);
+                                    } else {
+                                        Map<String, Transaction> transactionMap = new HashMap<>();
+                                        transactionMap.put(transaction.getId(), transaction);
+                                        transactionsByCategory.put(transaction.getCategory(), transactionMap);
+                                    }
+                                });
+
+                    } else {
+                        if (statisticsViewModel.getAnalyticsStoredStatisticsDoc()
+                                .getTransactionsByDay() == null
+                                || statisticsViewModel.getAnalyticsStoredStatisticsDoc()
+                                .getTransactionsByDay().get(transEntryDay)
+                                == null) {
+                            return;
+                        }
+                        Objects.requireNonNull(statisticsViewModel.getAnalyticsStoredStatisticsDoc()
+                                        .getTransactionsByDay()
+                                        .get(transEntryDay))
+                                .values().forEach(transaction -> {
+
+                                    if (categoriesByAmount.containsKey(transaction.getCategory())) {
+                                        Double oldVal = categoriesByAmount.get(transaction.getCategory());
+                                        if (oldVal != null) {
+                                            categoriesByAmount.replace(transaction.getCategory(), oldVal + transaction.getAmount());
+                                        }
+                                    } else {
+                                        categoriesByAmount.put(transaction.getCategory(), transaction.getAmount());
+                                    }
+                                    if (transactionsByCategory.containsKey(transaction.getCategory())) {
+                                        if (transactionsByCategory.get(transaction.getCategory()) == null) {
+                                            return;
+                                        }
+                                        Objects.requireNonNull(transactionsByCategory.get(transaction.getCategory()))
+                                                .put(transaction.getId(), transaction);
+                                    } else {
+                                        Map<String, Transaction> transactionMap = new HashMap<>();
+                                        transactionMap.put(transaction.getId(), transaction);
+                                        transactionsByCategory.put(transaction.getCategory(), transactionMap);
+                                    }
+
+                                });
                     }
-                    Objects.requireNonNull(statisticsViewModel.getAnalyticsStoredStatisticsDoc()
-                                    .getTransactionsByDay()
-                                    .get(transEntryDay))
-                            .values().forEach(transaction -> {
 
-                                if (categoriesByAmount.containsKey(transaction.getCategory())) {
-                                    Double oldVal = categoriesByAmount.get(transaction.getCategory());
-                                    if (oldVal != null) {
-                                        categoriesByAmount.replace(transaction.getCategory(), oldVal + transaction.getAmount());
-                                    }
-                                } else {
-                                    categoriesByAmount.put(transaction.getCategory(), transaction.getAmount());
-                                }
-                                if (transactionsByCategory.containsKey(transaction.getCategory())) {
-                                    if (transactionsByCategory.get(transaction.getCategory()) == null) {
-                                        return;
-                                    }
-                                    Objects.requireNonNull(transactionsByCategory.get(transaction.getCategory()))
-                                            .put(transaction.getId(), transaction);
-                                } else {
-                                    Map<String, Transaction> transactionMap = new HashMap<>();
-                                    transactionMap.put(transaction.getId(), transaction);
-                                    transactionsByCategory.put(transaction.getCategory(), transactionMap);
-                                }
+                    requireActivity().runOnUiThread(() -> {
+                        resetCategoriesRv();
+                        populateCategoriesRv(categoriesByAmount, transactionsByCategory);
+                        binding.categoriesRv.scheduleLayoutAnimation();
+                    });
+                });
 
-                            });
-                }
-
-                resetCategoriesRv();
-                populateCategoriesRv(categoriesByAmount, transactionsByCategory);
-                binding.categoriesRv.scheduleLayoutAnimation();
             }
 
             @Override
@@ -274,32 +293,25 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
             @Override
             public void onValueSelected(Entry e, Highlight h) {
                 Log.d(TAG, "onValueSelected: ");
-                binding.categoriesRv.setVisibility(GONE);
-                binding.transactionsRv.setVisibility(VISIBLE);
+                HandlerThread handlerThread = new HandlerThread(((PieEntry) e).getLabel());
+                handlerThread.start();
+                Handler handler = new Handler(handlerThread.getLooper());
+                handler.post(() -> {
+                    List<Transaction> transactions = new ArrayList<>(Objects.requireNonNull(statisticsViewModel.getAnalyticsStoredStatisticsDoc()
+                                    .getCategories().get(((PieEntry) e).getLabel()))
+                            .values());
+                    transactions.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
 
-                List<Transaction> transactions = new ArrayList<>(Objects.requireNonNull(statisticsViewModel.getAnalyticsStoredStatisticsDoc()
-                                .getCategories().get(((PieEntry) e).getLabel()))
-                        .values());
-                transactions.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
-                TransactionsAdapter transactionsAdapter = new TransactionsAdapter(transactions, true, transaction -> {
-                    MaterialSharedAxis exit = new MaterialSharedAxis(MaterialSharedAxis.X, true);
-                    exit.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
-                    MaterialSharedAxis reenter = new MaterialSharedAxis(MaterialSharedAxis.X, false);
-                    reenter.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+                    requireActivity().runOnUiThread(() -> {
+                        binding.categoriesRv.setVisibility(GONE);
+                        binding.transactionsRv.setVisibility(VISIBLE);
 
-                    setExitTransition(exit);
-                    setReenterTransition(reenter);
-
-
-                    Navigation.findNavController(binding.getRoot())
-                            .navigate(AnalyticsFragmentDirections
-                                    .actionAnalyticsFragmentToAddTransactionFragment(wallet.getId(),
-                                            wallet.getCurrency(),
-                                            transaction));
+                        transactionsAdapter.setTransactionList(transactions);
+                        binding.transactionsRv.scheduleLayoutAnimation();
+                        Log.d(TAG, "onValueSelected: thread done");
+                    });
                 });
-                binding.transactionsRv.setLayoutManager(new LinearLayoutManager(requireContext()));
-                binding.transactionsRv.setAdapter(transactionsAdapter);
-                binding.transactionsRv.scheduleLayoutAnimation();
+                Log.d(TAG, "onValueSelected: finished");
             }
 
             @Override

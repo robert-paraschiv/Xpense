@@ -26,7 +26,7 @@ import com.rokudo.xpense.utils.dialogs.DialogUtils;
 import java.util.List;
 
 public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapter.ViewHolder> {
-    private final List<Transaction> transactionList;
+    private List<Transaction> transactionList;
     private final OnTransClickListener onTransactionClickListener;
     private final Boolean smallLayout;
 
@@ -35,6 +35,11 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
         this.transactionList = transactionList;
         this.smallLayout = smallLayout;
         this.onTransactionClickListener = onTransactionClickListener;
+    }
+
+    public void setTransactionList(List<Transaction> transactionList) {
+        this.transactionList = transactionList;
+        notifyDataSetChanged();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
