@@ -246,7 +246,7 @@ public class HomeFragment extends Fragment {
 
                         updateSpentMostOn(new ArrayList<>(val.getTransactions().values()),
                                 mWallet == null ? "" : mWallet.getCurrency(),
-                                adapter);
+                                adapter, requireActivity());
                     }
                 });
 

@@ -26,6 +26,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.TransitionManager;
 
 import com.github.mikephil.charting.data.Entry;
@@ -73,8 +74,10 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
     private StatisticsViewModel statisticsViewModel;
     private Date selectedDate = new Date();
     private Wallet wallet;
-    private ExpenseCategoryAdapter adapter;
+    private ExpenseCategoryAdapter expenseCategoryAdapter;
     private TransactionsAdapter transactionsAdapter;
+    private List<Transaction> transactionList = new ArrayList<>();
+    private boolean loadedAll = false;
 
     private boolean isYearMode = false;
     private List<ExpenseCategory> categoryList = new ArrayList<>();
@@ -282,8 +285,8 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
             @Override
             public void onNothingSelected() {
                 resetCategoriesRv();
-                populateCategoriesRv(statisticsViewModel.getStoredStatisticsDoc().getAmountByCategory(),
-                        statisticsViewModel.getStoredStatisticsDoc().getCategories());
+                populateCategoriesRv(statisticsViewModel.getAnalyticsStoredStatisticsDoc().getAmountByCategory(),
+                        statisticsViewModel.getAnalyticsStoredStatisticsDoc().getCategories());
 
                 binding.categoriesRv.scheduleLayoutAnimation();
             }
@@ -301,12 +304,20 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                                     .getCategories().get(((PieEntry) e).getLabel()))
                             .values());
                     transactions.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
+                    transactionList = transactions;
 
                     requireActivity().runOnUiThread(() -> {
                         binding.categoriesRv.setVisibility(GONE);
                         binding.transactionsRv.setVisibility(VISIBLE);
 
                         transactionsAdapter.setTransactionList(transactions);
+//                        if (transactions.size() < 10) {
+//                            transactionsAdapter.setTransactionList(transactions);
+//                            loadedAll = true;
+//                        } else {
+//                            transactionsAdapter.setTransactionList(transactions.subList(0, 10));
+//                            loadedAll = false;
+//                        }
                         binding.transactionsRv.scheduleLayoutAnimation();
                         Log.d(TAG, "onValueSelected: thread done");
                     });
@@ -321,14 +332,35 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                 binding.categoriesRv.scheduleLayoutAnimation();
             }
         });
+
+//        binding.transactionsRv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+//                super.onScrollStateChanged(recyclerView, newState);
+//                if (!isRecyclerScrollable(recyclerView)) {
+//                    if (!loadedAll) {
+//                        transactionsAdapter.setTransactionList(transactionList);
+//                        loadedAll = true;
+//                    }
+//                }
+//            }
+//        });
+    }
+
+    public boolean isRecyclerScrollable(RecyclerView recyclerView) {
+        LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+        TransactionsAdapter adapter = (TransactionsAdapter) recyclerView.getAdapter();
+        if (layoutManager == null || adapter == null) return false;
+
+        return layoutManager.findLastCompletelyVisibleItemPosition() < adapter.getItemCount() - 1;
     }
 
     @SuppressLint("NotifyDataSetChanged")
     private void resetCategoriesRv() {
         categoryList = new ArrayList<>();
-        adapter = new ExpenseCategoryAdapter(categoryList, wallet.getCurrency(), this);
-        binding.categoriesRv.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
+        expenseCategoryAdapter = new ExpenseCategoryAdapter(categoryList, wallet.getCurrency(), this);
+        binding.categoriesRv.setAdapter(expenseCategoryAdapter);
+        expenseCategoryAdapter.notifyDataSetChanged();
     }
 
     private void toggleChartsVisibility() {
@@ -365,9 +397,9 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
     }
 
     private void setUpExpenseCategoryRv() {
-        adapter = new ExpenseCategoryAdapter(categoryList, wallet.getCurrency(), this);
+        expenseCategoryAdapter = new ExpenseCategoryAdapter(categoryList, wallet.getCurrency(), this);
         binding.categoriesRv.setLayoutManager(new LinearLayoutManager(requireContext(), VERTICAL, false));
-        binding.categoriesRv.setAdapter(adapter);
+        binding.categoriesRv.setAdapter(expenseCategoryAdapter);
     }
 
     private void populateCategoriesRv(Map<String, Double> categories,
@@ -393,7 +425,7 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                                 .getResourceId());
                 if (!categoryList.contains(expenseCategory)) {
                     categoryList.add(expenseCategory);
-                    adapter.notifyItemInserted(categoryList.size() - 1);
+                    expenseCategoryAdapter.notifyItemInserted(categoryList.size() - 1);
                 }
             }
         });

@@ -257,6 +257,7 @@
             </com.google.android.material.card.MaterialCardView>
 
             <androidx.recyclerview.widget.RecyclerView
+                android:nestedScrollingEnabled="false"
                 android:id="@+id/categoriesRv"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -270,6 +271,7 @@
                 tools:listitem="@layout/item_expense_category" />
 
             <androidx.recyclerview.widget.RecyclerView
+                android:nestedScrollingEnabled="false"
                 android:visibility="gone"
                 tools:visibility="visible"
                 android:id="@+id/transactionsRv"
