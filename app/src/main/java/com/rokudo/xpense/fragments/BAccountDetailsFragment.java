@@ -472,6 +472,6 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
                 .navigate(BAccountDetailsFragmentDirections
                         .actionBAccountDetailsFragmentToAddTransactionFragment(bAccount.getWalletIds().get(0),
                                 bAccount.getLinked_acc_currency(),
-                                transaction));
+                                transaction,false));
     }
 }

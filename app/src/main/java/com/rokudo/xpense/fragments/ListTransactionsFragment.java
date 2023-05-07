@@ -112,6 +112,9 @@ public class ListTransactionsFragment extends Fragment implements OnTransClickLi
 
         Navigation.findNavController(binding.getRoot()).navigate(
                 ListTransactionsFragmentDirections
-                        .actionListTransactionsFragmentToAddTransactionLayout(walletId, currency, transaction));
+                        .actionListTransactionsFragmentToAddTransactionLayout(walletId,
+                                currency,
+                                transaction,
+                                true));
     }
 }

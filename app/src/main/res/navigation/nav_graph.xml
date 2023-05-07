@@ -58,6 +58,9 @@
             android:name="transaction"
             app:argType="com.rokudo.xpense.models.Transaction"
             app:nullable="true" />
+        <argument
+            android:name="editMode"
+            app:argType="boolean" />
     </fragment>
     <fragment
         android:id="@+id/listTransactionsFragment"

@@ -565,7 +565,7 @@ public class HomeFragment extends Fragment {
         NavDirections navDirections = HomeFragmentDirections
                 .actionHomeFragmentToAddTransactionLayout(mWallet.getId(),
                         mWallet.getCurrency(),
-                        transaction);
+                        transaction, false);
 
         Hold hold = new Hold();
         hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
@@ -603,7 +603,7 @@ public class HomeFragment extends Fragment {
         NavDirections navDirections = HomeFragmentDirections
                 .actionHomeFragmentToAddTransactionLayout(mWallet.getId(),
                         mWallet.getCurrency(),
-                        null);
+                        null, false);
 
         Hold hold = new Hold();
         hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));

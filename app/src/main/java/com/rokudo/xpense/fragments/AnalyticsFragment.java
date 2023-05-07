@@ -653,6 +653,6 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                 .navigate(AnalyticsFragmentDirections
                         .actionAnalyticsFragmentToAddTransactionFragment(wallet.getId(),
                                 wallet.getCurrency(),
-                                transaction));
+                                transaction,true));
     }
 }

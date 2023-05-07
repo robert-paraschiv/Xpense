@@ -122,7 +122,11 @@ public class AddTransactionFragment extends Fragment {
             binding.deleteTransBtn.setVisibility(View.VISIBLE);
             mTransaction = args.getTransaction();
             binding.getRoot().setTransitionName("adjustBalance");
-            binding.addTransToolbarTitle.setText("Edit Transaction");
+            if (args.getEditMode()) {
+                binding.addTransToolbarTitle.setText("Edit Transaction");
+            } else {
+                binding.addTransToolbarTitle.setText("Add Transaction");
+            }
             binding.transactionAmount.setText(mTransaction.getAmount().toString());
             binding.transactionTitle.setText(mTransaction.getTitle());
 
