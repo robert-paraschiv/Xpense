@@ -37,6 +37,7 @@ import com.rokudo.xpense.data.retrofit.models.BankTransaction;
 import com.rokudo.xpense.data.retrofit.models.EndUserAgreement;
 import com.rokudo.xpense.data.retrofit.models.Requisition;
 import com.rokudo.xpense.data.viewmodels.BankApiViewModel;
+import com.rokudo.xpense.data.viewmodels.StatisticsViewModel;
 import com.rokudo.xpense.databinding.FragmentBAccountDetailsBinding;
 import com.rokudo.xpense.models.BAccount;
 import com.rokudo.xpense.models.Transaction;
@@ -63,6 +64,7 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
     private static final String TAG = "BAccountDetailsFragment";
 
     private BankApiViewModel bankApiViewModel;
+    private StatisticsViewModel statisticsViewModel;
     private FragmentBAccountDetailsBinding binding;
     private BAccount bAccount;
 
@@ -79,6 +81,7 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
             binding = FragmentBAccountDetailsBinding.inflate(inflater, container, false);
 
             bankApiViewModel = new ViewModelProvider(requireActivity()).get(BankApiViewModel.class);
+            statisticsViewModel = new ViewModelProvider(requireActivity()).get(StatisticsViewModel.class);
 
             initOnClicks();
 
@@ -292,7 +295,8 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.DAY_OF_MONTH, 1);
         String date_from = simpleDateFormat.format(calendar.getTime());
-        bankApiViewModel.getAccountTransactions(bAccount.getAccounts().get(0), date_from)
+        bankApiViewModel
+                .getAccountTransactions(bAccount.getAccounts().get(0), date_from)
                 .observe(getViewLifecycleOwner(), transactionsResponse -> {
                     if (transactionsResponse == null || transactionsResponse.getTransactions() == null) {
                         Log.e(TAG, "onResponse: null trans response");
@@ -311,62 +315,75 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
                         for (int i = 0; i < bankTransactionList.size(); i++) {
                             BankTransaction bankTransaction = bankTransactionList.get(i);
 
-                            Transaction transaction = new Transaction();
-                            if (bankTransaction.getBookingDate() != null &&
-                                    !bankTransaction.getBookingDate().isEmpty()) {
-                                try {
-                                    Date transDate = simpleDateFormat.parse(bankTransaction.getBookingDate());
-                                    transaction.setDate(transDate);
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            transaction.setId(bankTransaction.getInternalTransactionId());
-                            transaction.setAmount(bankTransaction.getTransactionAmount().getAmount().doubleValue());
-                            transaction.setCategory(bankTransaction.getProprietaryBankTransactionCode());
-                            transaction.setCurrency(bankTransaction.getTransactionAmount().getCurrency());
-                            transaction.setTitle(bankTransaction.getRemittanceInformationUnstructured());
+                            Transaction transaction = getTransactionFromBankTrans(bankTransaction);
 
-                            if (transactionList.contains(transaction)) {
-                                transactionList.set(transactionList.indexOf(transaction), transaction);
-                                adapter.notifyItemChanged(transactionList.indexOf(transaction));
-                            } else {
-                                transactionList.add(transaction);
-                                adapter.notifyItemInserted(transactionList.indexOf(transaction));
-                            }
+                            addOrChangeTrans(transaction);
                         }
 
-
-                        if (binding.transactionNested.getVisibility() == View.INVISIBLE) {
-
-                            AlphaAnimation shimmerLayoutFadeAnimation = new AlphaAnimation(1.0f, 0.0f);
-                            shimmerLayoutFadeAnimation.setDuration(500);
-                            shimmerLayoutFadeAnimation.setRepeatCount(0);
-
-                            shimmerLayoutFadeAnimation.setAnimationListener(new Animation.AnimationListener() {
-                                @Override
-                                public void onAnimationStart(Animation animation) {
-                                    binding.transShimmerLayout.hideShimmer();
-                                }
-
-                                @Override
-                                public void onAnimationEnd(Animation animation) {
-                                    binding.transShimmerLayout.setVisibility(View.INVISIBLE);
-                                    binding.transactionNested.setVisibility(View.VISIBLE);
-                                    binding.transactionNested.startAnimation(
-                                            AnimationUtils
-                                                    .loadAnimation(requireContext(), R.anim.item_animation_fade_in));
-                                }
-
-                                @Override
-                                public void onAnimationRepeat(Animation animation) {
-                                }
-                            });
-
-                            binding.transShimmerLayout.startAnimation(shimmerLayoutFadeAnimation);
-                        }
+                        showTransactionsLayout();
                     }
                 });
+    }
+
+    private void addOrChangeTrans(Transaction transaction) {
+        if (transactionList.contains(transaction)) {
+            transactionList.set(transactionList.indexOf(transaction), transaction);
+            adapter.notifyItemChanged(transactionList.indexOf(transaction));
+        } else {
+            transactionList.add(transaction);
+            adapter.notifyItemInserted(transactionList.indexOf(transaction));
+        }
+    }
+
+    @NonNull
+    private Transaction getTransactionFromBankTrans(BankTransaction bankTransaction) {
+        Transaction transaction = new Transaction();
+        if (bankTransaction.getBookingDate() != null &&
+                !bankTransaction.getBookingDate().isEmpty()) {
+            try {
+                Date transDate = simpleDateFormat.parse(bankTransaction.getBookingDate());
+                transaction.setDate(transDate);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        transaction.setId(bankTransaction.getInternalTransactionId());
+        transaction.setAmount(bankTransaction.getTransactionAmount().getAmount().doubleValue());
+        transaction.setCategory(bankTransaction.getProprietaryBankTransactionCode());
+        transaction.setCurrency(bankTransaction.getTransactionAmount().getCurrency());
+        transaction.setTitle(bankTransaction.getRemittanceInformationUnstructured());
+        return transaction;
+    }
+
+    private void showTransactionsLayout() {
+        if (binding.transactionNested.getVisibility() == View.INVISIBLE) {
+
+            AlphaAnimation shimmerLayoutFadeAnimation = new AlphaAnimation(1.0f, 0.0f);
+            shimmerLayoutFadeAnimation.setDuration(500);
+            shimmerLayoutFadeAnimation.setRepeatCount(0);
+
+            shimmerLayoutFadeAnimation.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    binding.transShimmerLayout.hideShimmer();
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    binding.transShimmerLayout.setVisibility(View.INVISIBLE);
+                    binding.transactionNested.setVisibility(View.VISIBLE);
+                    binding.transactionNested.startAnimation(
+                            AnimationUtils
+                                    .loadAnimation(requireContext(), R.anim.item_animation_fade_in));
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+                }
+            });
+
+            binding.transShimmerLayout.startAnimation(shimmerLayoutFadeAnimation);
+        }
     }
 
     private void sortBankTransactionListByDate(List<BankTransaction> bankTransactionList, SimpleDateFormat simpleDateFormat) {
@@ -472,6 +489,6 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
                 .navigate(BAccountDetailsFragmentDirections
                         .actionBAccountDetailsFragmentToAddTransactionFragment(bAccount.getWalletIds().get(0),
                                 bAccount.getLinked_acc_currency(),
-                                transaction,false));
+                                transaction, false));
     }
 }
