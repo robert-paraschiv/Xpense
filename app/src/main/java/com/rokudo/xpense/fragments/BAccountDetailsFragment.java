@@ -57,8 +57,10 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class BAccountDetailsFragment extends Fragment implements OnTransClickListener {
     private static final String TAG = "BAccountDetailsFragment";
@@ -67,6 +69,8 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
     private StatisticsViewModel statisticsViewModel;
     private FragmentBAccountDetailsBinding binding;
     private BAccount bAccount;
+
+    private Map<String, String> transByAmountMap = new HashMap<>();
 
     private TransactionsAdapter adapter;
     private final List<Transaction> transactionList = new ArrayList<>();
@@ -83,6 +87,8 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
             bankApiViewModel = new ViewModelProvider(requireActivity()).get(BankApiViewModel.class);
             statisticsViewModel = new ViewModelProvider(requireActivity()).get(StatisticsViewModel.class);
 
+            populateTransByAmountMap();
+
             initOnClicks();
 
             binding.detailsShimer.startShimmer();
@@ -93,6 +99,14 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
         }
 
         return binding.getRoot();
+    }
+
+    private void populateTransByAmountMap() {
+        statisticsViewModel.getHomeStoredStatisticsDoc()
+                .getTransactions()
+                .values().forEach(transaction -> {
+                    transByAmountMap.put(transaction.getAmount().toString(), transaction.getId());
+                });
     }
 
     private void initOnClicks() {
@@ -352,6 +366,13 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
         transaction.setCategory(bankTransaction.getProprietaryBankTransactionCode());
         transaction.setCurrency(bankTransaction.getTransactionAmount().getCurrency());
         transaction.setTitle(bankTransaction.getRemittanceInformationUnstructured());
+
+        String transAmount = String.format(Locale.getDefault(), "%.2f", transaction.getAmount()).replace("-", "");
+        if (transAmount.endsWith(".00")) {
+            transAmount = transAmount.replace(".00", ".0");
+        }
+        transaction.setAlreadyAdded(transByAmountMap.containsKey(transAmount));
+
         return transaction;
     }
 

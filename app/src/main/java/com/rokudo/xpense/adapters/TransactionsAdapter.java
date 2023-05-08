@@ -17,6 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.android.material.card.MaterialCardView;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.models.ExpenseCategory;
 import com.rokudo.xpense.models.Transaction;
@@ -50,6 +52,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
         final TextView transactionDate;
         final TextView transactionCategory;
         final TextView transactionTitle;
+        final MaterialCardView transactionCard;
 
 
         public ViewHolder(@NonNull View itemView) {
@@ -61,6 +64,7 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
             transactionCategory = itemView.findViewById(R.id.transactionCategory);
             transactionCategoryImage = itemView.findViewById(R.id.transactionCategoryImage);
             transactionTitle = itemView.findViewById(R.id.transactionTitle);
+            transactionCard = itemView.findViewById(R.id.transactionCard);
             itemView.setOnClickListener(this);
 
         }
@@ -96,12 +100,14 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
 
                 if (transaction.getType().equals("Income")) {
                     transAmountPrefix = "+ ";
-                    holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_green_dark
-                            , holder.transactionAmount.getContext().getTheme()));
+                    holder.transactionAmount
+                            .setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_green_dark
+                                    , holder.transactionAmount.getContext().getTheme()));
                 } else {
                     transAmountPrefix = "- ";
-                    holder.transactionAmount.setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_red_dark
-                            , holder.transactionAmount.getContext().getTheme()));
+                    holder.transactionAmount
+                            .setTextColor(holder.transactionAmount.getContext().getResources().getColor(android.R.color.holo_red_dark
+                                    , holder.transactionAmount.getContext().getTheme()));
                 }
             } else {
                 if (transaction.getAmount() != null) {
@@ -149,6 +155,17 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
                     .error(R.drawable.ic_baseline_person_24)
                     .transition(withCrossFade())
                     .into(holder.transactionImage);
+
+            if (transaction.getAlreadyAdded() == null) {
+                return;
+            }
+            if (transaction.getAlreadyAdded()) {
+                holder.transactionCard
+                        .setCardBackgroundColor(ColorTemplate.rgb("#C9DECF"));
+            } else {
+                holder.transactionCard
+                        .setCardBackgroundColor(ColorTemplate.rgb("#E4BEB3"));
+            }
         }
     }
 

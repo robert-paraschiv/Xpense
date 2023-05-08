@@ -19,6 +19,8 @@ public class Transaction implements Serializable {
     private String picUrl;
     private Boolean isCashTransaction;
 
+    private Boolean alreadyAdded;
+
 
     public static final String INCOME_TYPE = "Income";
     public static final String EXPENSE_TYPE = "Expense";
@@ -103,12 +105,15 @@ public class Transaction implements Serializable {
     public Date getDate() {
         return date;
     }
+
     public Long getDateLong() {
         return date.getTime();
     }
-    public void setDateLong(Long dateLong){
+
+    public void setDateLong(Long dateLong) {
 //        this.date.setTime(dateLong);
     }
+
     public void setDate(Date date) {
         this.date = date;
     }
@@ -127,6 +132,14 @@ public class Transaction implements Serializable {
 
     public void setCashTransaction(Boolean cashTransaction) {
         isCashTransaction = cashTransaction;
+    }
+
+    public Boolean getAlreadyAdded() {
+        return alreadyAdded;
+    }
+
+    public void setAlreadyAdded(Boolean alreadyAdded) {
+        this.alreadyAdded = alreadyAdded;
     }
 
     @Override
