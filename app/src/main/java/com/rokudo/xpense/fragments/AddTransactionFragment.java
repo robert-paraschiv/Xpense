@@ -145,12 +145,14 @@ public class AddTransactionFragment extends Fragment {
                 selectedCategory = new ExpenseCategory("Income");
                 binding.selectedTextDummy.setVisibility(View.GONE);
                 binding.categoryChipGroup.setVisibility(View.GONE);
+                binding.cashSwitch.setVisibility(View.GONE);
             } else {
                 binding.expenseChip.setChecked(true);
                 binding.incomeChip.setChecked(false);
 
                 binding.selectedTextDummy.setVisibility(View.VISIBLE);
                 binding.categoryChipGroup.setVisibility(View.VISIBLE);
+                binding.cashSwitch.setVisibility(View.VISIBLE);
 
                 if (mTransaction.getCategory() == null) {
                     return;
@@ -226,6 +228,7 @@ public class AddTransactionFragment extends Fragment {
                 selectedCategory = new ExpenseCategory("Income");
                 binding.categoryChipGroup.setVisibility(View.GONE);
                 binding.selectedTextDummy.setVisibility(View.GONE);
+                binding.cashSwitch.setVisibility(View.GONE);
             }
         });
         binding.expenseChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -233,6 +236,7 @@ public class AddTransactionFragment extends Fragment {
                 selectedCategory = null;
                 binding.selectedTextDummy.setVisibility(View.VISIBLE);
                 binding.categoryChipGroup.setVisibility(View.VISIBLE);
+                binding.cashSwitch.setVisibility(View.VISIBLE);
             }
         });
     }

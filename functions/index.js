@@ -455,7 +455,7 @@ exports.testTransactionListener = functions.firestore.document("Wallets/{walletI
 
                 [`transactions.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
                 [`categories.${oldTransaction.category}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
-                [`transactionsByMonth.${months[oldTransaction.getMonth()]}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete()
+                [`transactionsByMonth.${months[oldTransactionDate.getMonth()]}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete()
             };
             const updateOldMonth = {
                 latestUpdateTime: firestore.Timestamp.now(),
@@ -481,7 +481,7 @@ exports.testTransactionListener = functions.firestore.document("Wallets/{walletI
 
                 [idField]: updatedTransaction,
                 [categoryIdField]: updatedTransaction,
-                [`transactionsByMonth.${months[updatedTransaction.getMonth()]}.${updatedTransaction.id}`]: updatedTransaction
+                [`transactionsByMonth.${months[newTransactionDate.getMonth()]}.${updatedTransaction.id}`]: updatedTransaction
             };
             const updateNewMonth = {
                 latestUpdateTime: firestore.Timestamp.now(),
