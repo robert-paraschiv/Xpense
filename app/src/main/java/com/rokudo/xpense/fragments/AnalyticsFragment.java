@@ -20,7 +20,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -461,16 +460,6 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                 new DecimalFormat("0.00").format(statisticsViewModel.getStoredStatisticsDoc().getTotalAmountSpent())));
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        MaterialContainerTransform materialContainerTransform = new MaterialContainerTransform();
-        materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
-        materialContainerTransform.setEndShapeAppearanceModel(new ShapeAppearanceModel().withCornerSize(18));
-        materialContainerTransform.setStartShapeAppearanceModel(new ShapeAppearanceModel().withCornerSize(48));
-        setSharedElementEnterTransition(materialContainerTransform);
-        super.onCreate(savedInstanceState);
-    }
-
     private void buildDatePickerRv() {
         binding.monthChipGroup.removeAllViews();
 
@@ -620,6 +609,21 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
             default:
                 break;
         }
+        if (args.getBottomNavAction()) {
+            MaterialSharedAxis enter = new MaterialSharedAxis(MaterialSharedAxis.X, true);
+            enter.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+            MaterialSharedAxis exit = new MaterialSharedAxis(MaterialSharedAxis.X, false);
+            exit.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+            setEnterTransition(enter);
+            setReturnTransition(exit);
+        } else {
+
+            MaterialContainerTransform materialContainerTransform = new MaterialContainerTransform();
+            materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+            materialContainerTransform.setEndShapeAppearanceModel(new ShapeAppearanceModel().withCornerSize(18));
+            materialContainerTransform.setStartShapeAppearanceModel(new ShapeAppearanceModel().withCornerSize(48));
+            setSharedElementEnterTransition(materialContainerTransform);
+        }
     }
 
     private void showPieChartDefault() {
@@ -653,6 +657,6 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                 .navigate(AnalyticsFragmentDirections
                         .actionAnalyticsFragmentToAddTransactionFragment(wallet.getId(),
                                 wallet.getCurrency(),
-                                transaction,true));
+                                transaction, true));
     }
 }

@@ -18,7 +18,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -29,6 +28,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.shape.ShapeAppearanceModel;
 import com.google.android.material.transition.MaterialContainerTransform;
+import com.google.android.material.transition.MaterialSharedAxis;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.OnTransClickListener;
 import com.rokudo.xpense.adapters.TransactionsAdapter;
@@ -117,6 +117,21 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
     private void getArgsPassed() {
         BAccountDetailsFragmentArgs args = BAccountDetailsFragmentArgs.fromBundle(requireArguments());
         bAccount = args.getBAccount();
+        if (args.getBottomNavAction()) {
+            MaterialSharedAxis enter = new MaterialSharedAxis(MaterialSharedAxis.X, true);
+            enter.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+            MaterialSharedAxis exit = new MaterialSharedAxis(MaterialSharedAxis.X, false);
+            exit.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+            setEnterTransition(enter);
+            setReturnTransition(exit);
+        } else {
+
+            MaterialContainerTransform materialContainerTransform = new MaterialContainerTransform();
+            materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+            materialContainerTransform.setEndShapeAppearanceModel(new ShapeAppearanceModel().withCornerSize(18));
+            materialContainerTransform.setStartShapeAppearanceModel(new ShapeAppearanceModel().withCornerSize(48));
+            setSharedElementEnterTransition(materialContainerTransform);
+        }
         updateBankAccDetailsUI(args.getBAccount());
     }
 
@@ -477,16 +492,6 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
                 getBankAccountDetails(bAccount);
             }
         });
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        MaterialContainerTransform materialContainerTransform = new MaterialContainerTransform();
-        materialContainerTransform.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
-        materialContainerTransform.setEndShapeAppearanceModel(new ShapeAppearanceModel().withCornerSize(18));
-        materialContainerTransform.setStartShapeAppearanceModel(new ShapeAppearanceModel().withCornerSize(48));
-        setSharedElementEnterTransition(materialContainerTransform);
-        super.onCreate(savedInstanceState);
     }
 
     @Override

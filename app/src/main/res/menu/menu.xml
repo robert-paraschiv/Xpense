@@ -4,8 +4,14 @@
 
     <item
         android:id="@+id/action_home"
-        android:icon="@drawable/baseline_bar_chart_24"
+        android:icon="@drawable/round_dashboard_24"
         android:title="Home"
+        app:showAsAction="ifRoom"  />
+
+    <item
+        android:id="@+id/action_analytics"
+        android:icon="@drawable/baseline_bar_chart_24"
+        android:title="Analytics"
         app:showAsAction="ifRoom"  />
 
     <item

@@ -43,16 +43,13 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.transition.Hold;
 import com.google.android.material.transition.MaterialFadeThrough;
 import com.google.android.material.transition.MaterialSharedAxis;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.SpentMostAdapter;
 import com.rokudo.xpense.data.viewmodels.StatisticsViewModel;
@@ -388,13 +385,13 @@ public class HomeFragment extends Fragment {
                     .into(new CustomTarget<Drawable>() {
                         @Override
                         public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                            binding.bottomNavView.getMenu().getItem(2).setIcon(resource);
+                            binding.bottomNavView.getMenu().getItem(3).setIcon(resource);
                             firstPictureLoad = false;
                         }
 
                         @Override
                         public void onLoadCleared(@Nullable Drawable placeholder) {
-                            binding.bottomNavView.getMenu().getItem(2).setIcon(placeholder);
+                            binding.bottomNavView.getMenu().getItem(3).setIcon(placeholder);
                             firstPictureLoad = false;
                         }
                     });
@@ -410,13 +407,31 @@ public class HomeFragment extends Fragment {
         binding.seeAllTransactionsBtn.setOnClickListener(view -> navigateToTransactionsListFragment());
         binding.latestTransactionCard.setOnClickListener(v -> navigateToTransactionsListFragment());
         binding.adjustBalanceBtn.setOnClickListener(view -> handleAdjustBalanceBtnClick());
-        binding.barChartCard.setOnClickListener(view -> navigateToBarDetails());
-        binding.barDetailsBtn.setOnClickListener(view -> navigateToBarDetails());
+        binding.barChartCard.setOnClickListener(view -> navigateToBarDetails(false));
+        binding.barDetailsBtn.setOnClickListener(view -> navigateToBarDetails(false));
         binding.pieChartCard.setOnClickListener(view -> navigateToPieDetails());
         binding.pieDetailsBtn.setOnClickListener(view -> navigateToPieDetails());
 //        binding.openBankFab.setOnClickListener(v -> navigateToBankFragment());
         binding.bankAccountChip.setOnClickListener(v -> handleBankChipClick());
         binding.sharedWithIcon.setOnClickListener(v -> showPersonInfo());
+        binding.bottomNavView.setOnItemSelectedListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.action_home:
+                    break;
+                case R.id.action_analytics:
+                    navigateToBarDetails(true);
+                    break;
+                case R.id.action_bank:
+                    navigateToBankAccountDetails(true);
+                    break;
+                case R.id.action_profile:
+                    navigateToSettings();
+                    break;
+                default:
+                    return false;
+            }
+            return false;
+        });
     }
 
     private void showPersonInfo() {
@@ -436,26 +451,41 @@ public class HomeFragment extends Fragment {
         if (mWallet.getbAccount() == null) {
             navigateToBankFragment();
         } else {
-            navigateToBankAccountDetails();
+            navigateToBankAccountDetails(false);
         }
     }
 
-    private void navigateToBankAccountDetails() {
+    private void navigateToBankAccountDetails(boolean bottomNavAction) {
         binding.bankAccountChip.setTransitionName("bankAccountDetailsTransition");
 
         FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
                 .addSharedElement(binding.bankAccountChip, "bankAccountDetailsTransition")
                 .build();
 
-        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToBAccountDetailsFragment(mWallet.getbAccount());
+        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToBAccountDetailsFragment(mWallet.getbAccount(), bottomNavAction);
 
-        Hold hold = new Hold();
-        hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
 
-        setExitTransition(hold);
-        setReenterTransition(hold);
+        if (bottomNavAction) {
 
-        Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
+            MaterialSharedAxis exit = new MaterialSharedAxis(MaterialSharedAxis.X, true);
+            exit.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+            MaterialSharedAxis reenter = new MaterialSharedAxis(MaterialSharedAxis.X, false);
+            reenter.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+
+            setExitTransition(exit);
+            setReenterTransition(reenter);
+
+            Navigation.findNavController(binding.getRoot()).navigate(navDirections);
+        } else {
+
+            Hold hold = new Hold();
+            hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+
+            setExitTransition(hold);
+            setReenterTransition(hold);
+
+            Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
+        }
     }
 
     private void navigateToBankFragment() {
@@ -464,21 +494,35 @@ public class HomeFragment extends Fragment {
                         .actionHomeFragmentToConnectToBankFragment(mWallet.getId()));
     }
 
-    private void navigateToBarDetails() {
+    private void navigateToBarDetails(boolean bottomNavAction) {
         FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
                 .addSharedElement(binding.barChartCard, "barChartCard")
                 .build();
 
         NavDirections navDirections = HomeFragmentDirections
-                .actionHomeFragmentToAnalyticsFragment("bar", mWallet);
+                .actionHomeFragmentToAnalyticsFragment("bar", mWallet, bottomNavAction);
 
-        Hold hold = new Hold();
-        hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+        if (bottomNavAction) {
 
-        setExitTransition(hold);
-        setReenterTransition(hold);
+            MaterialSharedAxis exit = new MaterialSharedAxis(MaterialSharedAxis.X, true);
+            exit.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+            MaterialSharedAxis reenter = new MaterialSharedAxis(MaterialSharedAxis.X, false);
+            reenter.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
 
-        Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
+            setExitTransition(exit);
+            setReenterTransition(reenter);
+
+            Navigation.findNavController(binding.getRoot()).navigate(navDirections);
+        } else {
+
+            Hold hold = new Hold();
+            hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));
+
+            setExitTransition(hold);
+            setReenterTransition(hold);
+
+            Navigation.findNavController(binding.getRoot()).navigate(navDirections, extras);
+        }
     }
 
     private void navigateToPieDetails() {
@@ -486,7 +530,7 @@ public class HomeFragment extends Fragment {
                 .addSharedElement(binding.pieChartCard, "pieChartCard").build();
 
         NavDirections navDirections = HomeFragmentDirections
-                .actionHomeFragmentToAnalyticsFragment("pie", mWallet);
+                .actionHomeFragmentToAnalyticsFragment("pie", mWallet, false);
 
         Hold hold = new Hold();
         hold.setDuration(getResources().getInteger(R.integer.transition_duration_millis));

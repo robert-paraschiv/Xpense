@@ -149,6 +149,9 @@
         <action
             android:id="@+id/action_BAccountDetailsFragment_to_addTransactionFragment"
             app:destination="@id/addTransactionFragment" />
+        <argument
+            android:name="bottomNavAction"
+            app:argType="boolean" />
     </fragment>
     <fragment
         android:id="@+id/analyticsFragment"
@@ -164,5 +167,8 @@
         <action
             android:id="@+id/action_analyticsFragment_to_addTransactionFragment"
             app:destination="@id/addTransactionFragment" />
+        <argument
+            android:name="bottomNavAction"
+            app:argType="boolean" />
     </fragment>
 </navigation>
