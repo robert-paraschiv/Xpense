@@ -18,10 +18,12 @@ import com.rokudo.xpense.R;
 
 public class TimedDialog extends BottomSheetDialogFragment {
     private String title;
+    private int durationInMillis;
     private View dialogView;
 
-    public TimedDialog(String title) {
+    public TimedDialog(String title, int durationInMillis) {
         this.title = title;
+        this.durationInMillis = durationInMillis;
     }
 
     @NonNull
@@ -30,11 +32,12 @@ public class TimedDialog extends BottomSheetDialogFragment {
         dialogView = getLayoutInflater().inflate(R.layout.dialog_timed, null);
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext(), R.style.CustomBottomSheetDialogTheme);
 
-//        startAnimation(dialogView);
 
         if (title != null) {
             ((TextView) dialogView.findViewById(R.id.name)).setText(title);
         }
+
+        startAnimation();
 
 
         bottomSheetDialog.setContentView(dialogView);
@@ -49,13 +52,16 @@ public class TimedDialog extends BottomSheetDialogFragment {
     }
 
     public void startAnimation() {
+        if (dialogView == null) {
+            return;
+        }
         LinearProgressIndicator progressIndicator =
                 dialogView.findViewById(R.id.progressIndicator);
 
-        ((TextView) dialogView.findViewById(R.id.name)).setText("Invitation sent");
+        ((TextView) dialogView.findViewById(R.id.name)).setText(title);
 
         ValueAnimator animator = ValueAnimator.ofInt(0, progressIndicator.getMax());
-        animator.setDuration(1500);
+        animator.setDuration(durationInMillis);
         animator.addUpdateListener(animation -> progressIndicator.setProgress((Integer) animation.getAnimatedValue()));
         animator.addListener(new AnimatorListenerAdapter() {
             @Override

@@ -168,7 +168,7 @@ public class ContactsFragment extends Fragment implements ContactsAdapter.OnCont
         invitation.setCreator_pic_url(DatabaseUtils.getCurrentUser().getPictureUrl());
         invitation.setInvited_person_phone_number(user.getPhoneNumber());
 
-        TimedDialog uploadingDialog = new TimedDialog("Sending invitation to " + user.getName() + " ...");
+        TimedDialog uploadingDialog = new TimedDialog("Sending invitation to " + user.getName() + " ...", 1500);
         uploadingDialog.show(getParentFragmentManager(), "sentInvite");
 
         DatabaseUtils.invitationsRef.document(invitation.getId()).get().addOnCompleteListener(task -> {

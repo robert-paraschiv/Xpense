@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,6 +48,7 @@ import com.rokudo.xpense.utils.PrefsUtils;
 import com.rokudo.xpense.utils.dialogs.AgreementExpiredDialog;
 import com.rokudo.xpense.utils.dialogs.BankAccsListDialog;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
+import com.rokudo.xpense.utils.dialogs.TimedDialog;
 import com.rokudo.xpense.utils.dialogs.UploadingDialog;
 
 import java.text.ParseException;
@@ -180,7 +182,7 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
             if (s == null || s.contains("Token is invalid or expired")) {
                 getToken(bAccount);
             } else {
-                if (bAccount.getEUA_EndDate().before(new Date()) || bankApiViewModel.isEUAExpired()) {
+                if ((bAccount.getEUA_EndDate() != null && bAccount.getEUA_EndDate().before(new Date())) || bankApiViewModel.isEUAExpired()) {
 
                     showExpiredEUADialog(bAccount);
 
@@ -329,6 +331,12 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
                 .observe(getViewLifecycleOwner(), transactionsResponse -> {
                     if (transactionsResponse == null || transactionsResponse.getTransactions() == null) {
                         Log.e(TAG, "onResponse: null trans response");
+                        TimedDialog timedDialog = new TimedDialog("Something went wrong, please try again...", 1500);
+                        timedDialog.show(getParentFragmentManager(), "TryAgainDialog");
+                        new Handler().postDelayed(() -> {
+                            timedDialog.dismiss();
+                            Navigation.findNavController(binding.getRoot()).popBackStack();
+                        }, 1500);
                     } else {
                         List<BankTransaction> bankTransactionList =
                                 new ArrayList<>(Arrays.asList(transactionsResponse.getTransactions().getBooked()));
