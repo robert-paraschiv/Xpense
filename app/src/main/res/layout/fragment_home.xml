@@ -13,14 +13,498 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+
+        <RelativeLayout
+            android:id="@+id/walletLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:id="@+id/titleLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="18dp"
+                android:layout_marginTop="26dp"
+                android:layout_marginEnd="8dp"
+                android:layout_toStartOf="@id/sharedWithLayout"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/walletTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxWidth="210dp"
+                    android:maxLines="1"
+                    android:textSize="26sp"
+                    android:textStyle="bold"
+                    tools:text="Long Wallet Title" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/walletDropDownBtn"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="8dp"
+                    android:insetLeft="0dp"
+                    android:insetTop="0dp"
+                    android:insetRight="0dp"
+                    android:insetBottom="0dp"
+                    app:icon="@drawable/ic_round_keyboard_arrow_down_24"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
+                    app:iconSize="22dp" />
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/sharedWithLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="18dp"
+                android:layout_marginEnd="24dp"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/sharedWithIcon"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription="@string/user_profile_picture"
+                    android:src="@drawable/ic_baseline_person_24" />
+
+                <ImageView
+                    android:id="@+id/sharedIcon"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="4dp"
+                    android:contentDescription="@string/user_profile_picture"
+                    android:padding="0dp"
+                    android:src="@drawable/ic_round_group_24"
+                    app:tint="@color/sharedIconTintColor" />
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/accsAmountLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/sharedWithLayout"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/walletAmountCard"
+                    android:layout_width="0dp"
+                    android:layout_height="130dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_weight="0.5"
+                    android:clickable="true"
+                    android:transitionName="barChartCard"
+                    app:cardBackgroundColor="@color/cards_bg_color"
+                    app:cardCornerRadius="@dimen/main_cards_corner_radius"
+                    app:strokeWidth="0dp">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="18dp">
+
+                        <LinearLayout
+                            android:id="@+id/walletDetailsLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/walletCurrency"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:maxLines="1"
+                                android:textSize="16sp"
+                                tools:text="lei" />
+
+                            <TextView
+                                android:id="@+id/walletAmount"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_horizontal"
+                                android:maxLines="1"
+                                android:textSize="16sp"
+                                tools:text="13020.00" />
+                        </LinearLayout>
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/adjustBalanceBtn"
+                            style="@style/Widget.Material3.Chip.Suggestion"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/walletDetailsLayout"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="18dp"
+                            android:layout_marginBottom="8dp"
+                            android:elevation="0dp"
+                            android:text="Adjust"
+                            android:textSize="12sp"
+                            app:chipBackgroundColor="@color/cards_bg_color"
+                            app:chipIcon="@drawable/ic_round_edit_24"
+                            app:chipIconEnabled="true"
+                            app:chipIconTint="@color/sharedIconTintColor"
+                            app:chipMinTouchTargetSize="0dp"
+                            app:chipStrokeWidth="0dp" />
+
+
+                    </RelativeLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/bankAmountCard"
+                    android:layout_width="0dp"
+                    android:layout_height="130dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_weight="0.5"
+                    android:clickable="true"
+                    android:transitionName="barChartCard"
+                    app:cardBackgroundColor="@color/cards_bg_color"
+                    app:cardCornerRadius="@dimen/main_cards_corner_radius"
+                    app:strokeWidth="0dp">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="18dp">
+
+                        <LinearLayout
+                            android:id="@+id/bankDetailsLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/bankCurrency"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal"
+                                android:maxLines="1"
+                                android:text="lei"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:id="@+id/bankAmount"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_horizontal"
+                                android:maxLines="1"
+                                android:text="13020.00"
+                                android:textSize="16sp" />
+                        </LinearLayout>
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/bankAccountChip"
+                            style="@style/Widget.Material3.Chip.Suggestion"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/bankDetailsLayout"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:elevation="0dp"
+                            android:text="+ Bank Account"
+                            android:textSize="12sp"
+                            app:chipBackgroundColor="@color/cards_bg_color"
+                            app:chipIcon="@drawable/ic_baseline_local_atm_24"
+                            app:chipIconEnabled="true"
+                            app:chipIconTint="@color/sharedIconTintColor"
+                            app:chipMinTouchTargetSize="0dp"
+                            app:chipStrokeWidth="0dp" />
+                    </RelativeLayout>
+
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+
+            <RelativeLayout
+                android:id="@+id/lastTransactionLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/accsAmountLayout"
+                android:layout_marginTop="8dp">
+
+                <RelativeLayout
+                    android:id="@+id/transactionsHeaderLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_marginEnd="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="8dp"
+                        android:text="Latest Transaction"
+                        android:textSize="12sp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/seeAllTransactionsBtn"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="70dp"
+                        android:layout_height="34dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:insetLeft="0dp"
+                        android:insetTop="0dp"
+                        android:insetRight="0dp"
+                        android:insetBottom="0dp"
+                        android:text="See All"
+                        android:visibility="gone"
+                        app:cornerRadius="10dp" />
+                </RelativeLayout>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/latestTransactionCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/transactionsHeaderLayout"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:clickable="true"
+                    app:cardBackgroundColor="@color/cards_bg_color"
+                    app:strokeWidth="0dp">
+
+                    <include
+                        android:id="@+id/latestTransactionItem"
+                        layout="@layout/item_latest_transaction"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:visibility="visible" />
+                </com.google.android.material.card.MaterialCardView>
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/chartsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="320dp"
+                android:layout_below="@id/lastTransactionLayout"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5"
+                    android:orientation="vertical"
+                    android:weightSum="1">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="0.55"
+                        android:orientation="vertical"
+                        tools:ignore="NestedWeights">
+
+                        <TextView
+                            android:id="@+id/monthspendingtext2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:gravity="center_horizontal"
+                            android:text="Last 7 days spending"
+                            android:textSize="12sp" />
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/barChartCard"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="4dp"
+                            android:clickable="true"
+                            android:transitionName="barChartCard"
+                            app:cardBackgroundColor="@color/cards_bg_color"
+                            app:cardCornerRadius="@dimen/main_cards_corner_radius"
+                            app:strokeWidth="0dp">
+
+                            <com.github.mikephil.charting.charts.BarChart
+                                android:id="@+id/barChart"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_marginStart="8dp"
+                                android:layout_marginTop="8dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_marginBottom="8dp" />
+
+                        </com.google.android.material.card.MaterialCardView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="0.45"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/spentMostTv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="12dp"
+                            android:text="Spent most on"
+                            android:textSize="12sp" />
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/statsCard"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="4dp"
+                            app:cardBackgroundColor="@color/cards_bg_color"
+                            app:cardCornerRadius="@dimen/main_cards_corner_radius"
+                            app:strokeWidth="0dp">
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_margin="8dp">
+
+                                <androidx.recyclerview.widget.RecyclerView
+                                    android:id="@+id/spentMostRv"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_above="@id/radioGroup"
+                                    android:layout_gravity="center"
+                                    tools:itemCount="1"
+                                    tools:listitem="@layout/item_spent_most" />
+
+                                <RadioGroup
+                                    android:id="@+id/radioGroup"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="20dp"
+                                    android:layout_alignParentBottom="true"
+                                    android:checkedButton="@id/radioBtn1"
+                                    android:clickable="false"
+                                    android:clipChildren="false"
+                                    android:gravity="center"
+                                    android:orientation="horizontal">
+
+                                    <RadioButton
+                                        android:id="@+id/radioBtn1"
+                                        android:layout_width="15dp"
+                                        android:layout_height="wrap_content"
+                                        android:clickable="false"
+                                        android:minWidth="0dp"
+                                        android:minHeight="0dp"
+                                        android:scaleX="0.25"
+                                        android:scaleY="0.25" />
+
+                                    <RadioButton
+                                        android:id="@+id/radioBtn2"
+                                        android:layout_width="15dp"
+                                        android:layout_height="wrap_content"
+                                        android:clickable="false"
+                                        android:minWidth="0dp"
+                                        android:minHeight="0dp"
+                                        android:scaleX="0.25"
+                                        android:scaleY="0.25" />
+
+                                    <RadioButton
+                                        android:id="@+id/radioBtn3"
+                                        android:layout_width="15dp"
+                                        android:layout_height="wrap_content"
+                                        android:clickable="false"
+                                        android:minWidth="0dp"
+                                        android:minHeight="0dp"
+                                        android:scaleX="0.25"
+                                        android:scaleY="0.25" />
+
+                                </RadioGroup>
+                            </RelativeLayout>
+
+                        </com.google.android.material.card.MaterialCardView>
+                    </LinearLayout>
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.5"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/monthspendingtext"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:gravity="center_horizontal"
+                        android:text="This month's spending"
+                        android:textSize="12sp" />
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/pieChartCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginTop="4dp"
+                        android:clickable="true"
+                        android:transitionName="pieChartCard"
+                        app:cardBackgroundColor="@color/cards_bg_color"
+                        app:cardCornerRadius="@dimen/main_cards_corner_radius"
+                        app:strokeWidth="0dp">
+
+                        <com.github.mikephil.charting.charts.PieChart
+                            android:id="@+id/pieChart"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:transitionName="pieChart" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/walletsCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/walletLayout"
             android:layout_marginStart="18dp"
             android:layout_marginTop="18dp"
             android:layout_marginEnd="18dp"
             android:layout_marginBottom="18dp"
+            android:visibility="gone"
             app:cardBackgroundColor="@color/cards_bg_color"
             app:cardCornerRadius="@dimen/main_cards_corner_radius"
             app:strokeWidth="0dp">
@@ -62,454 +546,8 @@
 
             </RelativeLayout>
 
-            <RelativeLayout
-                android:id="@+id/walletLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:visibility="visible">
-
-                <LinearLayout
-                    android:id="@+id/titleLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_toStartOf="@id/sharedWithLayout"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/walletTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:maxWidth="210dp"
-                        android:maxLines="1"
-                        android:textSize="26sp"
-                        android:textStyle="bold"
-                        tools:text="Long Wallet Title" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/walletDropDownBtn"
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginStart="8dp"
-                        android:insetLeft="0dp"
-                        android:insetTop="0dp"
-                        android:insetRight="0dp"
-                        android:insetBottom="0dp"
-                        app:icon="@drawable/ic_round_keyboard_arrow_down_24"
-                        app:iconGravity="textStart"
-                        app:iconPadding="0dp"
-                        app:iconSize="22dp" />
-
-                </LinearLayout>
-
-
-                <LinearLayout
-                    android:id="@+id/sharedWithLayout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginEnd="24dp"
-                    android:orientation="vertical">
-
-                    <ImageView
-                        android:id="@+id/sharedWithIcon"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:contentDescription="@string/user_profile_picture"
-                        android:src="@drawable/ic_baseline_person_24" />
-
-                    <ImageView
-                        android:id="@+id/sharedIcon"
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="4dp"
-                        android:contentDescription="@string/user_profile_picture"
-                        android:padding="0dp"
-                        android:src="@drawable/ic_round_group_24"
-                        app:tint="@color/sharedIconTintColor" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/walletDetailsLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/titleLayout"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginEnd="24dp"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/walletCurrency"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:maxLines="1"
-                        android:textSize="22sp"
-                        tools:text="lei" />
-
-                    <TextView
-                        android:id="@+id/walletAmount"
-                        android:layout_width="100dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:maxLines="1"
-                        android:textSize="22sp"
-                        tools:text="13020.00" />
-                </LinearLayout>
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/adjustBalanceBtn"
-                    style="@style/Widget.Material3.Chip.Suggestion"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/walletDetailsLayout"
-                    android:layout_alignParentStart="true"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="24dp"
-                    android:layout_marginBottom="8dp"
-                    android:elevation="0dp"
-                    android:text="Adjust Balance"
-                    android:textSize="12sp"
-                    app:chipBackgroundColor="@color/home_chip_bg_color"
-                    app:chipIcon="@drawable/ic_round_edit_24"
-                    app:chipIconEnabled="true"
-                    app:chipIconTint="@color/sharedIconTintColor"
-                    app:chipMinTouchTargetSize="0dp"
-                    app:chipStrokeWidth="0dp" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/bankAccountChip"
-                    style="@style/Widget.Material3.Chip.Suggestion"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/walletDetailsLayout"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginBottom="8dp"
-                    android:elevation="0dp"
-                    android:text="+ Bank Account"
-                    android:textSize="12sp"
-                    app:chipBackgroundColor="@color/fragments_bg_color"
-                    app:chipIcon="@drawable/ic_baseline_local_atm_24"
-                    app:chipIconEnabled="true"
-                    app:chipIconTint="@color/sharedIconTintColor"
-                    app:chipMinTouchTargetSize="0dp"
-                    app:chipStrokeWidth="0dp" />
-
-
-                <RelativeLayout
-                    android:id="@+id/lastTransactionLayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/adjustBalanceBtn"
-                    android:layout_marginTop="8dp"
-                    android:orientation="vertical">
-
-                    <RelativeLayout
-                        android:id="@+id/transactionsHeaderLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="24dp"
-                        android:layout_marginEnd="10dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
-                            android:layout_centerVertical="true"
-                            android:layout_marginEnd="8dp"
-                            android:text="Latest Transaction" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/seeAllTransactionsBtn"
-                            style="@style/Widget.Material3.Button.TextButton"
-                            android:layout_width="70dp"
-                            android:layout_height="34dp"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true"
-                            android:insetLeft="0dp"
-                            android:insetTop="0dp"
-                            android:insetRight="0dp"
-                            android:insetBottom="0dp"
-                            android:text="See All"
-                            app:cornerRadius="10dp" />
-                    </RelativeLayout>
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/latestTransactionCard"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/transactionsHeaderLayout"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginEnd="16dp"
-                        android:layout_marginBottom="24dp"
-                        android:clickable="true"
-                        app:cardBackgroundColor="@color/cards_bg_color"
-                        app:strokeWidth="0dp">
-
-                        <include
-                            android:id="@+id/latestTransactionItem"
-                            layout="@layout/item_latest_transaction"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="8dp"
-                            android:visibility="visible" />
-                    </com.google.android.material.card.MaterialCardView>
-
-                </RelativeLayout>
-
-            </RelativeLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <LinearLayout
-            android:id="@+id/chartsLayout"
-            android:layout_width="match_parent"
-            android:layout_height="320dp"
-            android:layout_below="@id/walletsCard"
-            android:layout_marginStart="18dp"
-            android:layout_marginEnd="18dp"
-            android:baselineAligned="false"
-            android:orientation="horizontal"
-            android:weightSum="1">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.5"
-                android:orientation="vertical"
-                android:weightSum="1">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="0.55"
-                    android:orientation="vertical"
-                    tools:ignore="NestedWeights">
-
-                    <TextView
-                        android:id="@+id/monthspendingtext2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:gravity="center_horizontal"
-                        android:text="Last 7 days spending"
-                        android:textSize="12sp" />
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/barChartCard"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginTop="4dp"
-                        android:clickable="true"
-                        android:transitionName="barChartCard"
-                        app:cardBackgroundColor="@color/cards_bg_color"
-                        app:cardCornerRadius="@dimen/main_cards_corner_radius"
-                        app:strokeWidth="0dp">
-
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
-
-                            <com.github.mikephil.charting.charts.BarChart
-                                android:id="@+id/barChart"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_above="@id/barDetailsBtn"
-                                android:layout_marginStart="8dp"
-                                android:layout_marginTop="8dp"
-                                android:layout_marginEnd="8dp"
-                                android:layout_marginBottom="8dp" />
-
-                            <com.google.android.material.button.MaterialButton
-                                android:id="@+id/barDetailsBtn"
-                                style="@style/Widget.Material3.Button.TextButton"
-                                android:layout_width="wrap_content"
-                                android:layout_height="34dp"
-                                android:layout_alignParentBottom="true"
-                                android:layout_centerHorizontal="true"
-                                android:layout_marginBottom="8dp"
-                                android:insetLeft="0dp"
-                                android:insetTop="0dp"
-                                android:insetRight="0dp"
-                                android:insetBottom="0dp"
-                                android:text="Show Details"
-                                android:textSize="12sp"
-                                android:visibility="gone"
-                                app:cornerRadius="10dp" />
-
-                        </RelativeLayout>
-
-                    </com.google.android.material.card.MaterialCardView>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="0.45"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/spentMostTv"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginEnd="12dp"
-                        android:text="Spent most on"
-                        android:textSize="12sp" />
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/statsCard"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginTop="4dp"
-                        app:cardBackgroundColor="@color/cards_bg_color"
-                        app:cardCornerRadius="@dimen/main_cards_corner_radius"
-                        app:strokeWidth="0dp">
-
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_margin="8dp">
-
-                            <androidx.recyclerview.widget.RecyclerView
-                                android:id="@+id/spentMostRv"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_above="@id/radioGroup"
-                                android:layout_gravity="center"
-                                tools:itemCount="1"
-                                tools:listitem="@layout/item_spent_most" />
-
-                            <RadioGroup
-                                android:id="@+id/radioGroup"
-                                android:layout_width="match_parent"
-                                android:layout_height="20dp"
-                                android:layout_alignParentBottom="true"
-                                android:checkedButton="@id/radioBtn1"
-                                android:clickable="false"
-                                android:clipChildren="false"
-                                android:gravity="center"
-                                android:orientation="horizontal">
-
-                                <RadioButton
-                                    android:id="@+id/radioBtn1"
-                                    android:layout_width="15dp"
-                                    android:layout_height="wrap_content"
-                                    android:clickable="false"
-                                    android:minWidth="0dp"
-                                    android:minHeight="0dp"
-                                    android:scaleX="0.25"
-                                    android:scaleY="0.25" />
-
-                                <RadioButton
-                                    android:id="@+id/radioBtn2"
-                                    android:layout_width="15dp"
-                                    android:layout_height="wrap_content"
-                                    android:clickable="false"
-                                    android:minWidth="0dp"
-                                    android:minHeight="0dp"
-                                    android:scaleX="0.25"
-                                    android:scaleY="0.25" />
-
-                                <RadioButton
-                                    android:id="@+id/radioBtn3"
-                                    android:layout_width="15dp"
-                                    android:layout_height="wrap_content"
-                                    android:clickable="false"
-                                    android:minWidth="0dp"
-                                    android:minHeight="0dp"
-                                    android:scaleX="0.25"
-                                    android:scaleY="0.25" />
-
-                            </RadioGroup>
-                        </RelativeLayout>
-
-                    </com.google.android.material.card.MaterialCardView>
-                </LinearLayout>
-
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.5"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/monthspendingtext"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginEnd="12dp"
-                    android:gravity="center_horizontal"
-                    android:text="This month's spending"
-                    android:textSize="12sp" />
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/pieChartCard"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginTop="4dp"
-                    android:clickable="true"
-                    android:transitionName="pieChartCard"
-                    app:cardBackgroundColor="@color/cards_bg_color"
-                    app:cardCornerRadius="@dimen/main_cards_corner_radius"
-                    app:strokeWidth="0dp">
-
-                    <RelativeLayout
-                        android:id="@+id/pieChartLayout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:transitionName="pieChartLayout">
-
-                        <com.github.mikephil.charting.charts.PieChart
-                            android:id="@+id/pieChart"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_above="@id/pieDetailsBtn"
-                            android:layout_marginStart="8dp"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginEnd="8dp"
-                            android:layout_marginBottom="8dp"
-                            android:transitionName="pieChart" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/pieDetailsBtn"
-                            style="@style/Widget.Material3.Button.TextButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="34dp"
-                            android:layout_alignParentBottom="true"
-                            android:layout_centerHorizontal="true"
-                            android:layout_marginBottom="8dp"
-                            android:insetLeft="0dp"
-                            android:insetTop="0dp"
-                            android:insetRight="0dp"
-                            android:insetBottom="0dp"
-                            android:text="Show Details"
-                            android:textSize="12sp"
-                            android:visibility="gone"
-                            app:cornerRadius="10dp" />
-
-                    </RelativeLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-            </LinearLayout>
-
-        </LinearLayout>
 
     </RelativeLayout>
 
@@ -549,19 +587,19 @@
         app:layout_anchor="@id/bottomAppBar" />
 
 
-<!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
-<!--        android:id="@+id/deleteTransBtn"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_alignParentStart="true"-->
-<!--        android:layout_alignParentBottom="true"-->
-<!--        android:layout_gravity="bottom|end"-->
-<!--        android:layout_marginStart="18dp"-->
-<!--        android:layout_marginBottom="22dp"-->
-<!--        android:contentDescription="@string/add_conversation_button"-->
-<!--        android:src="@drawable/ic_baseline_local_atm_24"-->
-<!--        android:visibility="visible"-->
-<!--        app:fabSize="normal"-->
-<!--        app:layout_anchorGravity="bottom|start" />-->
+    <!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
+    <!--        android:id="@+id/deleteTransBtn"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_alignParentStart="true"-->
+    <!--        android:layout_alignParentBottom="true"-->
+    <!--        android:layout_gravity="bottom|end"-->
+    <!--        android:layout_marginStart="18dp"-->
+    <!--        android:layout_marginBottom="22dp"-->
+    <!--        android:contentDescription="@string/add_conversation_button"-->
+    <!--        android:src="@drawable/ic_baseline_local_atm_24"-->
+    <!--        android:visibility="visible"-->
+    <!--        app:fabSize="normal"-->
+    <!--        app:layout_anchorGravity="bottom|start" />-->
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -398,6 +398,7 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    @SuppressLint("NonConstantResourceId")
     private void initOnClicks() {
 //        binding.profileImage.setOnClickListener(view -> navigateToSettings());
         binding.addWalletBtn.setOnClickListener(view -> handleAddWalletBtnClick());
@@ -407,12 +408,12 @@ public class HomeFragment extends Fragment {
         binding.seeAllTransactionsBtn.setOnClickListener(view -> navigateToTransactionsListFragment());
         binding.latestTransactionCard.setOnClickListener(v -> navigateToTransactionsListFragment());
         binding.adjustBalanceBtn.setOnClickListener(view -> handleAdjustBalanceBtnClick());
+        binding.walletAmountCard.setOnClickListener(view -> handleAdjustBalanceBtnClick());
         binding.barChartCard.setOnClickListener(view -> navigateToBarDetails(false));
-        binding.barDetailsBtn.setOnClickListener(view -> navigateToBarDetails(false));
         binding.pieChartCard.setOnClickListener(view -> navigateToPieDetails());
-        binding.pieDetailsBtn.setOnClickListener(view -> navigateToPieDetails());
 //        binding.openBankFab.setOnClickListener(v -> navigateToBankFragment());
         binding.bankAccountChip.setOnClickListener(v -> handleBankChipClick());
+        binding.bankAmountCard.setOnClickListener(v -> handleBankChipClick());
         binding.sharedWithIcon.setOnClickListener(v -> showPersonInfo());
         binding.bottomNavView.setOnItemSelectedListener(item -> {
             switch (item.getItemId()) {
@@ -456,10 +457,10 @@ public class HomeFragment extends Fragment {
     }
 
     private void navigateToBankAccountDetails(boolean bottomNavAction) {
-        binding.bankAccountChip.setTransitionName("bankAccountDetailsTransition");
+        binding.bankAmountCard.setTransitionName("bankAccountDetailsTransition");
 
         FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
-                .addSharedElement(binding.bankAccountChip, "bankAccountDetailsTransition")
+                .addSharedElement(binding.bankAmountCard, "bankAccountDetailsTransition")
                 .build();
 
         NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToBAccountDetailsFragment(mWallet.getbAccount(), bottomNavAction);
