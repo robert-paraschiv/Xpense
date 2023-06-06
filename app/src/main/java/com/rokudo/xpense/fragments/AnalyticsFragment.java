@@ -299,8 +299,9 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                 handlerThread.start();
                 Handler handler = new Handler(handlerThread.getLooper());
                 handler.post(() -> {
-                    List<Transaction> transactions = new ArrayList<>(Objects.requireNonNull(statisticsViewModel.getAnalyticsStoredStatisticsDoc()
-                                    .getCategories().get(((PieEntry) e).getLabel()))
+                    List<Transaction> transactions = new ArrayList<>(Objects.requireNonNull(
+                                    statisticsViewModel.getAnalyticsStoredStatisticsDoc()
+                                            .getCategories().get(((PieEntry) e).getLabel()))
                             .values());
                     transactions.sort(Comparator.comparingLong(Transaction::getDateLong).reversed());
                     transactionList = transactions;

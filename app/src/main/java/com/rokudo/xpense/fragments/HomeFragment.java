@@ -463,7 +463,8 @@ public class HomeFragment extends Fragment {
                 .addSharedElement(binding.bankAmountCard, "bankAccountDetailsTransition")
                 .build();
 
-        NavDirections navDirections = HomeFragmentDirections.actionHomeFragmentToBAccountDetailsFragment(mWallet.getbAccount(), bottomNavAction);
+        NavDirections navDirections = HomeFragmentDirections
+                .actionHomeFragmentToBAccountDetailsFragment(mWallet.getbAccount(), bottomNavAction);
 
 
         if (bottomNavAction) {
@@ -496,6 +497,8 @@ public class HomeFragment extends Fragment {
     }
 
     private void navigateToBarDetails(boolean bottomNavAction) {
+        binding.barChartCard.setTransitionName("barChartCard");
+
         FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
                 .addSharedElement(binding.barChartCard, "barChartCard")
                 .build();
@@ -528,7 +531,8 @@ public class HomeFragment extends Fragment {
 
     private void navigateToPieDetails() {
         FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()
-                .addSharedElement(binding.pieChartCard, "pieChartCard").build();
+                .addSharedElement(binding.pieChartCard, "pieChartCard")
+                .build();
 
         NavDirections navDirections = HomeFragmentDirections
                 .actionHomeFragmentToAnalyticsFragment("pie", mWallet, false);

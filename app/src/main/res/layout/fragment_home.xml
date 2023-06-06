@@ -109,7 +109,6 @@
                     android:layout_marginTop="4dp"
                     android:layout_weight="0.5"
                     android:clickable="true"
-                    android:transitionName="barChartCard"
                     app:cardBackgroundColor="@color/cards_bg_color"
                     app:cardCornerRadius="@dimen/main_cards_corner_radius"
                     app:strokeWidth="0dp">
@@ -177,7 +176,6 @@
                     android:layout_marginTop="4dp"
                     android:layout_weight="0.5"
                     android:clickable="true"
-                    android:transitionName="barChartCard"
                     app:cardBackgroundColor="@color/cards_bg_color"
                     app:cardCornerRadius="@dimen/main_cards_corner_radius"
                     app:strokeWidth="0dp">
@@ -351,10 +349,7 @@
                                 android:id="@+id/barChart"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:layout_marginStart="8dp"
-                                android:layout_marginTop="8dp"
-                                android:layout_marginEnd="8dp"
-                                android:layout_marginBottom="8dp" />
+                                android:layout_margin="8dp" />
 
                         </com.google.android.material.card.MaterialCardView>
                     </LinearLayout>
@@ -482,10 +477,7 @@
                             android:id="@+id/pieChart"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_marginStart="8dp"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginEnd="8dp"
-                            android:layout_marginBottom="8dp"
+                            android:layout_margin="8dp"
                             android:transitionName="pieChart" />
                     </com.google.android.material.card.MaterialCardView>
 
