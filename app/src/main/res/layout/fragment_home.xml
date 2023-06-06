@@ -113,10 +113,28 @@
                     app:cardCornerRadius="@dimen/main_cards_corner_radius"
                     app:strokeWidth="0dp">
 
-                    <RelativeLayout
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_margin="16dp">
+                        android:layout_margin="16dp"
+                        android:orientation="vertical">
+
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/adjustBalanceBtn"
+                            style="@style/Widget.Material3.Chip.Suggestion"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:elevation="0dp"
+                            android:text="Adjust"
+                            android:textSize="12sp"
+                            app:chipBackgroundColor="@color/cards_bg_color"
+                            app:chipIcon="@drawable/ic_round_edit_24"
+                            app:chipIconEnabled="true"
+                            app:chipIconTint="@color/sharedIconTintColor"
+                            app:chipMinTouchTargetSize="0dp"
+                            app:chipStrokeWidth="0dp" />
 
                         <LinearLayout
                             android:id="@+id/walletDetailsLayout"
@@ -140,32 +158,12 @@
                                 android:layout_height="wrap_content"
                                 android:gravity="center_horizontal"
                                 android:maxLines="1"
-                                android:textSize="18sp"
+                                android:textSize="20sp"
                                 tools:text="13020.00" />
                         </LinearLayout>
 
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/adjustBalanceBtn"
-                            style="@style/Widget.Material3.Chip.Suggestion"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@id/walletDetailsLayout"
-                            android:layout_centerHorizontal="true"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginEnd="18dp"
-                            android:layout_marginBottom="8dp"
-                            android:elevation="0dp"
-                            android:text="Adjust"
-                            android:textSize="12sp"
-                            app:chipBackgroundColor="@color/cards_bg_color"
-                            app:chipIcon="@drawable/ic_round_edit_24"
-                            app:chipIconEnabled="true"
-                            app:chipIconTint="@color/sharedIconTintColor"
-                            app:chipMinTouchTargetSize="0dp"
-                            app:chipStrokeWidth="0dp" />
 
-
-                    </RelativeLayout>
+                    </LinearLayout>
 
                 </com.google.android.material.card.MaterialCardView>
 
@@ -181,10 +179,27 @@
                     app:cardCornerRadius="@dimen/main_cards_corner_radius"
                     app:strokeWidth="0dp">
 
-                    <RelativeLayout
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_margin="16dp">
+                        android:layout_margin="16dp"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/bankAccountChip"
+                            style="@style/Widget.Material3.Chip.Suggestion"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:elevation="0dp"
+                            android:text="+ Bank Account"
+                            android:textSize="12sp"
+                            app:chipBackgroundColor="@color/cards_bg_color"
+                            app:chipIcon="@drawable/ic_baseline_local_atm_24"
+                            app:chipIconEnabled="true"
+                            app:chipIconTint="@color/sharedIconTintColor"
+                            app:chipMinTouchTargetSize="0dp"
+                            app:chipStrokeWidth="0dp" />
 
                         <LinearLayout
                             android:id="@+id/bankDetailsLayout"
@@ -209,28 +224,9 @@
                                 android:gravity="center_horizontal"
                                 android:maxLines="1"
                                 android:text="Retrieving..."
-                                android:textSize="18sp" />
+                                android:textSize="20sp" />
                         </LinearLayout>
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/bankAccountChip"
-                            style="@style/Widget.Material3.Chip.Suggestion"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@id/bankDetailsLayout"
-                            android:layout_centerHorizontal="true"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginBottom="8dp"
-                            android:elevation="0dp"
-                            android:text="+ Bank Account"
-                            android:textSize="12sp"
-                            app:chipBackgroundColor="@color/cards_bg_color"
-                            app:chipIcon="@drawable/ic_baseline_local_atm_24"
-                            app:chipIconEnabled="true"
-                            app:chipIconTint="@color/sharedIconTintColor"
-                            app:chipMinTouchTargetSize="0dp"
-                            app:chipStrokeWidth="0dp" />
-                    </RelativeLayout>
+                    </LinearLayout>
 
 
                 </com.google.android.material.card.MaterialCardView>
@@ -257,7 +253,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="12dp"
                         android:text="Latest Transaction"
                         android:textSize="12sp" />
 
