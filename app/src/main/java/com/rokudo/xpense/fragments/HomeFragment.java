@@ -52,10 +52,12 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.adapters.SpentMostAdapter;
+import com.rokudo.xpense.data.viewmodels.BankApiViewModel;
 import com.rokudo.xpense.data.viewmodels.StatisticsViewModel;
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel;
 import com.rokudo.xpense.data.viewmodels.WalletsViewModel;
 import com.rokudo.xpense.databinding.FragmentHomeBinding;
+import com.rokudo.xpense.models.BAccount;
 import com.rokudo.xpense.models.SpentMostItem;
 import com.rokudo.xpense.models.StatisticsDoc;
 import com.rokudo.xpense.models.Transaction;
@@ -87,6 +89,7 @@ public class HomeFragment extends Fragment {
     private WalletsViewModel walletsViewModel;
     private StatisticsViewModel statisticsViewModel;
     private TransactionViewModel transactionViewModel;
+    private BankApiViewModel bankApiViewModel;
     private SpentMostAdapter adapter;
     boolean firstPictureLoad = true;
     private final List<SpentMostItem> spentMostItems = new ArrayList<>();
@@ -100,6 +103,7 @@ public class HomeFragment extends Fragment {
             walletsViewModel = new ViewModelProvider(requireActivity()).get(WalletsViewModel.class);
             transactionViewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
             statisticsViewModel = new ViewModelProvider(requireActivity()).get(StatisticsViewModel.class);
+            bankApiViewModel = new ViewModelProvider(requireActivity()).get(BankApiViewModel.class);
             initOnClicks();
 
             setupBarChart(binding.barChart, new TextView(requireContext()).getCurrentTextColor(), true);
@@ -170,10 +174,20 @@ public class HomeFragment extends Fragment {
                 binding.addWalletLayout.setVisibility(View.GONE);
                 updateWalletUI(wallet);
                 loadTransactions(wallet.getId());
+                loadBankAccountBalance(wallet.getbAccount());
                 mWallet = wallet;
             }
             Log.d(TAG, "loadWalletDetails: wallet change observed");
         });
+    }
+
+    private void loadBankAccountBalance(BAccount bAccount) {
+        bankApiViewModel.getAccountBalances(bAccount.getLinked_acc_id())
+                .observe(getViewLifecycleOwner(), balances -> {
+                    Log.d(TAG, "loadBankAccountBalance: ");
+                    binding.bankAmount.setText(balances.getBalances()[0].getBalanceAmount().get("amount"));
+                    binding.bankCurrency.setText(balances.getBalances()[0].getBalanceAmount().get("currency"));
+                });
     }
 
     private void loadLast7DaysTransactions() {

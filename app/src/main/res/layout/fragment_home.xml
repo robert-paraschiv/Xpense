@@ -197,7 +197,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_horizontal"
                                 android:maxLines="1"
-                                android:text="lei"
+                                tools:text="lei"
                                 android:textSize="16sp" />
 
                             <TextView
@@ -206,7 +206,7 @@
                                 android:layout_height="wrap_content"
                                 android:gravity="center_horizontal"
                                 android:maxLines="1"
-                                android:text="13020.00"
+                                android:text="Retrieving..."
                                 android:textSize="16sp" />
                         </LinearLayout>
 

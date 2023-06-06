@@ -43,12 +43,12 @@ public class BankApiRepo {
     //    private final MutableLiveData<List<Institution>> institutionLiveData;
 //    private final MutableLiveData<AccountDetails> accountDetailsMutableLiveData;
     private final MutableLiveData<Balances> balancesMutableLiveData;
-//    private final MutableLiveData<TransactionsResponse> accountTransactionsLiveData;
+    private final MutableLiveData<TransactionsResponse> accountTransactionsLiveData;
 
     public BankApiRepo() {
 //        this.institutionLiveData = new MutableLiveData<>();
         this.balancesMutableLiveData = new MutableLiveData<>();
-//        this.accountTransactionsLiveData = new MutableLiveData<>();
+        this.accountTransactionsLiveData = new MutableLiveData<>();
 //        this.accountDetailsMutableLiveData = new MutableLiveData<>();
     }
 
@@ -266,26 +266,52 @@ public class BankApiRepo {
     public MutableLiveData<Balances> getAccountBalances(String account_id) {
 //        MutableLiveData<Balances> balancesMutableLiveData = new MutableLiveData<>();
 
-        service.getAccountBalances(account_id).enqueue(new Callback<Balances>() {
-            @Override
-            public void onResponse(@NonNull Call<Balances> call, @NonNull Response<Balances> response) {
-                if (response.isSuccessful()) {
-                    balancesMutableLiveData.setValue(response.body());
-                } else {
-                    balancesMutableLiveData.setValue(null);
-                    Log.e(TAG, "onResponse: " + getErrorMessage(response.errorBody()));
-                    if (response.code() == 409) {
-                        EUA_expired = true;
+        if (NordigenUtils.TOKEN_VAL.isEmpty()) {
+
+            service.getToken(NordigenUtils.NORDIGEN_SECRET_KEY_ID, NordigenUtils.NORDIGEN_SECRET_KEY)
+                    .enqueue(new Callback<Token>() {
+                        @Override
+                        public void onResponse(@NonNull Call<Token> call, @NonNull Response<Token> response) {
+                            Log.d(TAG, "onResponse: ");
+                            if (response.isSuccessful()) {
+                                if (response.body() != null) {
+                                    NordigenUtils.TOKEN_VAL = response.body().getAccess();
+                                    tokenMutableLiveData.setValue(response.body());
+
+                                    getAccountBalances(account_id);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<Token> call, @NonNull Throwable t) {
+                            Log.e(TAG, "onFailure: " + t.getMessage());
+                        }
+                    });
+
+        } else {
+            service.getAccountBalances(account_id).enqueue(new Callback<Balances>() {
+                @Override
+                public void onResponse(@NonNull Call<Balances> call, @NonNull Response<Balances> response) {
+                    if (response.isSuccessful()) {
+                        balancesMutableLiveData.setValue(response.body());
+                    } else {
+                        balancesMutableLiveData.setValue(null);
+                        Log.e(TAG, "onResponse: " + getErrorMessage(response.errorBody()));
+                        if (response.code() == 409) {
+                            EUA_expired = true;
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(@NonNull Call<Balances> call, @NonNull Throwable t) {
-                balancesMutableLiveData.setValue(null);
-                Log.e(TAG, "onFailure: ", t);
-            }
-        });
+                @Override
+                public void onFailure(@NonNull Call<Balances> call, @NonNull Throwable t) {
+                    balancesMutableLiveData.setValue(null);
+                    Log.e(TAG, "onFailure: ", t);
+                }
+            });
+
+        }
 
         return balancesMutableLiveData;
     }
@@ -295,7 +321,6 @@ public class BankApiRepo {
     }
 
     public MutableLiveData<TransactionsResponse> getAccountTransactions(String account_id, String date_from) {
-        MutableLiveData<TransactionsResponse> accountTransactionsLiveData = new MutableLiveData<>();
         service.getAccountTransactions(account_id, date_from)
                 .enqueue(new Callback<TransactionsResponse>() {
                     @Override
