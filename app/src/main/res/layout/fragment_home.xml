@@ -105,7 +105,7 @@
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/walletAmountCard"
                     android:layout_width="0dp"
-                    android:layout_height="130dp"
+                    android:layout_height="120dp"
                     android:layout_marginTop="4dp"
                     android:layout_weight="0.5"
                     android:clickable="true"
@@ -116,7 +116,7 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_margin="18dp">
+                        android:layout_margin="16dp">
 
                         <LinearLayout
                             android:id="@+id/walletDetailsLayout"
@@ -131,6 +131,7 @@
                                 android:layout_gravity="center_horizontal"
                                 android:maxLines="1"
                                 android:textSize="16sp"
+                                android:textStyle="bold"
                                 tools:text="lei" />
 
                             <TextView
@@ -139,7 +140,7 @@
                                 android:layout_height="wrap_content"
                                 android:gravity="center_horizontal"
                                 android:maxLines="1"
-                                android:textSize="16sp"
+                                android:textSize="18sp"
                                 tools:text="13020.00" />
                         </LinearLayout>
 
@@ -171,8 +172,8 @@
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/bankAmountCard"
                     android:layout_width="0dp"
-                    android:layout_height="130dp"
-                    android:layout_marginStart="8dp"
+                    android:layout_height="120dp"
+                    android:layout_marginStart="12dp"
                     android:layout_marginTop="4dp"
                     android:layout_weight="0.5"
                     android:clickable="true"
@@ -183,7 +184,7 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_margin="18dp">
+                        android:layout_margin="16dp">
 
                         <LinearLayout
                             android:id="@+id/bankDetailsLayout"
@@ -197,8 +198,9 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_horizontal"
                                 android:maxLines="1"
-                                tools:text="lei"
-                                android:textSize="16sp" />
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                tools:text="lei" />
 
                             <TextView
                                 android:id="@+id/bankAmount"
@@ -207,7 +209,7 @@
                                 android:gravity="center_horizontal"
                                 android:maxLines="1"
                                 android:text="Retrieving..."
-                                android:textSize="16sp" />
+                                android:textSize="18sp" />
                         </LinearLayout>
 
                         <com.google.android.material.chip.Chip
@@ -293,7 +295,7 @@
                         layout="@layout/item_latest_transaction"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_margin="8dp"
+                        android:layout_margin="16dp"
                         android:visibility="visible" />
                 </com.google.android.material.card.MaterialCardView>
 
@@ -447,6 +449,7 @@
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
+                    android:layout_marginStart="12dp"
                     android:layout_weight="0.5"
                     android:orientation="vertical">
 
@@ -465,7 +468,6 @@
                         android:id="@+id/pieChartCard"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginStart="12dp"
                         android:layout_marginTop="4dp"
                         android:clickable="true"
                         android:transitionName="pieChartCard"
