@@ -43,6 +43,7 @@ import com.rokudo.xpense.models.BAccount;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.utils.DatabaseUtils;
 import com.rokudo.xpense.utils.PrefsUtils;
+import com.rokudo.xpense.utils.ShimmerUtils;
 import com.rokudo.xpense.utils.dialogs.AgreementExpiredDialog;
 import com.rokudo.xpense.utils.dialogs.BankAccsListDialog;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
@@ -333,7 +334,11 @@ public class BankAccFragment extends Fragment implements OnTransClickListener {
                             addOrChangeTrans(transaction);
                         }
 
-                        showTransactionsLayout();
+                        ShimmerUtils.transitionShimmerLayoutToFinalView(
+                                binding.transShimmerLayout,
+                                binding.transactionNested,
+                                requireContext()
+                        );
                     }
                 });
     }
@@ -381,37 +386,6 @@ public class BankAccFragment extends Fragment implements OnTransClickListener {
         transaction.setAlreadyAdded(transByAmountMap.containsKey(transAmount));
 
         return transaction;
-    }
-
-    private void showTransactionsLayout() {
-        if (binding.transactionNested.getVisibility() == View.INVISIBLE) {
-
-            AlphaAnimation shimmerLayoutFadeAnimation = new AlphaAnimation(1.0f, 0.0f);
-            shimmerLayoutFadeAnimation.setDuration(500);
-            shimmerLayoutFadeAnimation.setRepeatCount(0);
-
-            shimmerLayoutFadeAnimation.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {
-                    binding.transShimmerLayout.hideShimmer();
-                }
-
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    binding.transShimmerLayout.setVisibility(View.INVISIBLE);
-                    binding.transactionNested.setVisibility(View.VISIBLE);
-                    binding.transactionNested.startAnimation(
-                            AnimationUtils
-                                    .loadAnimation(requireContext(), R.anim.item_animation_fade_in));
-                }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-                }
-            });
-
-            binding.transShimmerLayout.startAnimation(shimmerLayoutFadeAnimation);
-        }
     }
 
     private void sortBankTransactionListByDate(List<BankTransaction> bankTransactionList, SimpleDateFormat simpleDateFormat) {
