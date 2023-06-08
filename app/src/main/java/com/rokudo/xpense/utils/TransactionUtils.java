@@ -60,6 +60,24 @@ public class TransactionUtils {
         return false;
     }
 
+    public static boolean isBankTransactionDifferent(Transaction oldTransaction, Transaction newTransaction) {
+        SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
+
+        if (oldTransaction.getTitle() == null)
+            return true;
+
+        if (!oldTransaction.getTitle().equals(newTransaction.getTitle()))
+            return true;
+
+        if (!oldTransaction.getAmount().equals(newTransaction.getAmount()))
+            return true;
+
+        if (!simpleDateFormat1.format(oldTransaction.getDate()).equals(simpleDateFormat1.format(newTransaction.getDate())))
+            return true;
+
+        return false;
+    }
+
     @SuppressLint("SetTextI18n")
     public static void updateLatestTransactionUI(Transaction transaction, FragmentHomeBinding binding, Context context) {
         if (transaction.getId() == null) {

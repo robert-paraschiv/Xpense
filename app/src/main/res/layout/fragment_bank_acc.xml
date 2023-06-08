@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/fragments_bg_color"
     android:transitionName="bankAccountDetailsTransition"
-    tools:context=".fragments.BAccountDetailsFragment">
+    tools:context=".fragments.BankAccFragment">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"

@@ -2,9 +2,8 @@ package com.rokudo.xpense.fragments;
 
 import static androidx.recyclerview.widget.RecyclerView.VERTICAL;
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
-import static com.rokudo.xpense.utils.NordigenUtils.TOKEN_PREFS_NAME;
+import static com.rokudo.xpense.utils.TransactionUtils.isBankTransactionDifferent;
 
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -39,11 +38,10 @@ import com.rokudo.xpense.data.retrofit.models.EndUserAgreement;
 import com.rokudo.xpense.data.retrofit.models.Requisition;
 import com.rokudo.xpense.data.viewmodels.BankApiViewModel;
 import com.rokudo.xpense.data.viewmodels.StatisticsViewModel;
-import com.rokudo.xpense.databinding.FragmentBAccountDetailsBinding;
+import com.rokudo.xpense.databinding.FragmentBankAccBinding;
 import com.rokudo.xpense.models.BAccount;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.utils.DatabaseUtils;
-import com.rokudo.xpense.utils.NordigenUtils;
 import com.rokudo.xpense.utils.PrefsUtils;
 import com.rokudo.xpense.utils.dialogs.AgreementExpiredDialog;
 import com.rokudo.xpense.utils.dialogs.BankAccsListDialog;
@@ -64,15 +62,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class BAccountDetailsFragment extends Fragment implements OnTransClickListener {
+public class BankAccFragment extends Fragment implements OnTransClickListener {
     private static final String TAG = "BAccountDetailsFragment";
 
     private BankApiViewModel bankApiViewModel;
     private StatisticsViewModel statisticsViewModel;
-    private FragmentBAccountDetailsBinding binding;
+    private FragmentBankAccBinding binding;
     private BAccount bAccount;
 
-    private Map<String, String> transByAmountMap = new HashMap<>();
+    private final Map<String, String> transByAmountMap = new HashMap<>();
 
     private TransactionsAdapter adapter;
     private final List<Transaction> transactionList = new ArrayList<>();
@@ -84,7 +82,7 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
         if (binding == null) {
 
             // Inflate the layout for this fragment
-            binding = FragmentBAccountDetailsBinding.inflate(inflater, container, false);
+            binding = FragmentBankAccBinding.inflate(inflater, container, false);
 
             bankApiViewModel = new ViewModelProvider(requireActivity()).get(BankApiViewModel.class);
             statisticsViewModel = new ViewModelProvider(requireActivity()).get(StatisticsViewModel.class);
@@ -106,9 +104,7 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
     private void populateTransByAmountMap() {
         statisticsViewModel.getHomeStoredStatisticsDoc()
                 .getTransactions()
-                .values().forEach(transaction -> {
-                    transByAmountMap.put(transaction.getAmount().toString(), transaction.getId());
-                });
+                .values().forEach(transaction -> transByAmountMap.put(transaction.getAmount().toString(), transaction.getId()));
     }
 
     private void initOnClicks() {
@@ -117,7 +113,7 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
     }
 
     private void getArgsPassed() {
-        BAccountDetailsFragmentArgs args = BAccountDetailsFragmentArgs.fromBundle(requireArguments());
+        BankAccFragmentArgs args = BankAccFragmentArgs.fromBundle(requireArguments());
         bAccount = args.getBAccount();
         if (args.getBottomNavAction()) {
             MaterialSharedAxis enter = new MaterialSharedAxis(MaterialSharedAxis.X, true);
@@ -159,40 +155,20 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
                 .transition(withCrossFade())
                 .into(binding.accBankImage);
 
-        getBankAccountDetails(bAccount);
-    }
+        if ((bAccount.getEUA_EndDate() != null
+                && bAccount.getEUA_EndDate().before(new Date()))
+                || bankApiViewModel.isEUAExpired()) {
 
-    private void getBankAccountDetails(BAccount bAccount) {
-        String token = requireContext()
-                .getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE)
-                .getString(TOKEN_PREFS_NAME, "");
-        NordigenUtils.TOKEN_VAL = token;
+            showExpiredEUADialog(bAccount);
 
-        if (token.isEmpty()) {
-            getToken(bAccount);
         } else {
-            checkToken(bAccount, token);
+            getAccountBalances(bAccount);
+            getAccountTransactions(bAccount);
         }
 
+//        getBankAccountDetails(bAccount);
     }
 
-    private void checkToken(BAccount bAccount, String token) {
-        bankApiViewModel.refreshToken(token).observe(getViewLifecycleOwner(), s -> {
-            Log.d(TAG, "getBankAccountDetails: " + s);
-            if (s == null || s.contains("Token is invalid or expired")) {
-                getToken(bAccount);
-            } else {
-                if ((bAccount.getEUA_EndDate() != null && bAccount.getEUA_EndDate().before(new Date())) || bankApiViewModel.isEUAExpired()) {
-
-                    showExpiredEUADialog(bAccount);
-
-                } else {
-                    getAccountBalances(bAccount);
-                    getAccountTransactions(bAccount);
-                }
-            }
-        });
-    }
 
     private void showExpiredEUADialog(BAccount bAccount) {
         binding.detailsShimer.hideShimmer();
@@ -364,8 +340,16 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
 
     private void addOrChangeTrans(Transaction transaction) {
         if (transactionList.contains(transaction)) {
-            transactionList.set(transactionList.indexOf(transaction), transaction);
-            adapter.notifyItemChanged(transactionList.indexOf(transaction));
+            try {
+                if (!isBankTransactionDifferent(transaction, transactionList.get(transactionList.indexOf(transaction)))) {
+                    return;
+                }
+                transactionList.set(transactionList.indexOf(transaction), transaction);
+                adapter.notifyItemChanged(transactionList.indexOf(transaction));
+
+            } catch (Exception e) {
+                Log.e(TAG, "addOrChangeTrans: ", e);
+            }
         } else {
             transactionList.add(transaction);
             adapter.notifyItemInserted(transactionList.indexOf(transaction));
@@ -490,18 +474,6 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
                 });
     }
 
-    private void getToken(BAccount bAccount) {
-        bankApiViewModel.getToken().observe(getViewLifecycleOwner(), token -> {
-            if (token == null) {
-                Log.d(TAG, "getToken: null");
-            } else {
-                NordigenUtils.TOKEN_VAL = token.getAccess();
-                PrefsUtils.setToken(requireContext(), NordigenUtils.TOKEN_VAL);
-                getBankAccountDetails(bAccount);
-            }
-        });
-    }
-
     @Override
     public void onClick(Transaction transaction) {
         if (transaction.getAmount().toString().startsWith("-")) {
@@ -520,8 +492,9 @@ public class BAccountDetailsFragment extends Fragment implements OnTransClickLis
         transaction.setAmount(Math.abs(transaction.getAmount()));
 
         Navigation.findNavController(binding.getRoot())
-                .navigate(BAccountDetailsFragmentDirections
-                        .actionBAccountDetailsFragmentToAddTransactionFragment(bAccount.getWalletIds().get(0),
+                .navigate(BankAccFragmentDirections
+                        .actionBAccountDetailsFragmentToAddTransactionFragment(
+                                bAccount.getWalletIds().get(0),
                                 bAccount.getLinked_acc_currency(),
                                 transaction, false));
     }

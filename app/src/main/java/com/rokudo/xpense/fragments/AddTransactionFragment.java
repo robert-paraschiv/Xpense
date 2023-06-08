@@ -55,18 +55,21 @@ public class AddTransactionFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        binding = FragmentAddTransactionBinding.inflate(inflater, container, false);
+        if (binding == null) {
 
-        postponeEnterTransition();
+            binding = FragmentAddTransactionBinding.inflate(inflater, container, false);
 
-        viewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
+            postponeEnterTransition();
 
-        getWalletId();
-        initOnClicks();
-        buildCategoriesRv();
-        handleArgs();
+            viewModel = new ViewModelProvider(requireActivity()).get(TransactionViewModel.class);
 
-        startPostponedEnterTransition();
+            getWalletId();
+            initOnClicks();
+            buildCategoriesRv();
+            handleArgs();
+
+            startPostponedEnterTransition();
+        }
 
         return binding.getRoot();
     }

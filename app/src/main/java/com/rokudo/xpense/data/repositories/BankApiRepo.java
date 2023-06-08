@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.rokudo.xpense.data.retrofit.GetDataService;
 import com.rokudo.xpense.data.retrofit.RetrofitClientInstance;
 import com.rokudo.xpense.data.retrofit.models.AccountDetails;
+import com.rokudo.xpense.data.retrofit.models.Balance;
 import com.rokudo.xpense.data.retrofit.models.Balances;
 import com.rokudo.xpense.data.retrofit.models.DeleteResponse;
 import com.rokudo.xpense.data.retrofit.models.EndUserAgreement;
@@ -25,6 +26,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import okhttp3.ResponseBody;
@@ -294,7 +296,32 @@ public class BankApiRepo {
                 @Override
                 public void onResponse(@NonNull Call<Balances> call, @NonNull Response<Balances> response) {
                     if (response.isSuccessful()) {
-                        balancesMutableLiveData.setValue(response.body());
+                        if (balancesMutableLiveData.getValue() == null
+                                || response.body() == null
+                                || response.body().getBalances() == null) {
+                            balancesMutableLiveData.setValue(response.body());
+                            return;
+                        }
+                        if (balancesMutableLiveData.getValue().getBalances().length != response.body().getBalances().length) {
+                            balancesMutableLiveData.setValue(response.body());
+                            return;
+                        }
+
+                        int i = 0;
+                        boolean updateNeeded = false;
+                        for (Balance balance : response.body().getBalances()) {
+                            try {
+                                String balanceAmount = balancesMutableLiveData.getValue().getBalances()[i++].getBalanceAmount().get("amount");
+                                String newBalanceAmount = balance.getBalanceAmount().get("amount");
+                                if (balanceAmount != null && !balanceAmount.equals(newBalanceAmount)) {
+                                    updateNeeded = true;
+                                }
+                            } catch (Exception ignored) {
+                            }
+                        }
+                        if (updateNeeded) {
+                            balancesMutableLiveData.setValue(response.body());
+                        }
                     } else {
                         balancesMutableLiveData.setValue(null);
                         Log.e(TAG, "onResponse: " + getErrorMessage(response.errorBody()));

@@ -7,7 +7,7 @@
     android:layout_marginEnd="24dp"
     android:orientation="vertical"
     android:padding="18dp"
-    tools:showIn="@layout/fragment_b_account_details">
+    tools:showIn="@layout/fragment_bank_acc">
 
     <com.google.android.material.card.MaterialCardView
         android:layout_width="130dp"

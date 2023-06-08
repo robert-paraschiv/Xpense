@@ -140,9 +140,9 @@
     </fragment>
     <fragment
         android:id="@+id/BAccountDetailsFragment"
-        android:name="com.rokudo.xpense.fragments.BAccountDetailsFragment"
+        android:name="com.rokudo.xpense.fragments.BankAccFragment"
         android:label="fragment_b_account_details"
-        tools:layout="@layout/fragment_b_account_details" >
+        tools:layout="@layout/fragment_bank_acc" >
         <argument
             android:name="bAccount"
             app:argType="com.rokudo.xpense.models.BAccount" />

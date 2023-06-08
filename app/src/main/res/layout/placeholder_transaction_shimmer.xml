@@ -10,7 +10,7 @@
     android:clickable="true"
     app:cardBackgroundColor="@color/cards_bg_color"
     app:cardCornerRadius="@dimen/main_cards_corner_radius"
-    tools:showIn="@layout/fragment_b_account_details"
+    tools:showIn="@layout/fragment_bank_acc"
     app:strokeWidth="0dp">
 
     <RelativeLayout
