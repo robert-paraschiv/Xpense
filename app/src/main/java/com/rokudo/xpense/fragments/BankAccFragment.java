@@ -315,6 +315,8 @@ public class BankAccFragment extends Fragment implements OnTransClickListener {
                             Navigation.findNavController(binding.getRoot()).popBackStack();
                         }, 1500);
                     } else {
+                        boolean transactionListWasInitiallyEmpty = transactionList.isEmpty();
+
                         List<BankTransaction> bankTransactionList =
                                 new ArrayList<>(Arrays.asList(transactionsResponse.getTransactions().getBooked()));
 
@@ -334,11 +336,13 @@ public class BankAccFragment extends Fragment implements OnTransClickListener {
                             addOrChangeTrans(transaction);
                         }
 
-                        ShimmerUtils.transitionShimmerLayoutToFinalView(
-                                binding.transShimmerLayout,
-                                binding.transactionNested,
-                                requireContext()
-                        );
+                        if (transactionListWasInitiallyEmpty) {
+                            ShimmerUtils.transitionShimmerLayoutToFinalView(
+                                    binding.transShimmerLayout,
+                                    binding.transactionNested,
+                                    requireContext()
+                            );
+                        }
                     }
                 });
     }

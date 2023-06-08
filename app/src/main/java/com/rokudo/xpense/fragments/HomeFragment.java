@@ -186,12 +186,16 @@ public class HomeFragment extends Fragment {
         bankApiViewModel.getAccountBalances(bAccount.getLinked_acc_id())
                 .observe(getViewLifecycleOwner(), balances -> {
                     Log.d(TAG, "loadBankAccountBalance: ");
-                    binding.bankAmount.setText(balances.getBalances()[0].getBalanceAmount().get("amount"));
-                    binding.bankCurrency.setText(balances.getBalances()[0].getBalanceAmount().get("currency"));
-                    ShimmerUtils.transitionShimmerLayoutToFinalView(
-                            binding.bankAccCardShimmer,
-                            binding.bankAccBalanceLayout,
-                            requireContext());
+                    if (binding.bankAmount.getText().toString().equals("Retrieving...")
+                            || !binding.bankAmount.getText().toString().equals(balances.getBalances()[0].getBalanceAmount().get("amount"))) {
+
+                        binding.bankAmount.setText(balances.getBalances()[0].getBalanceAmount().get("amount"));
+                        binding.bankCurrency.setText(balances.getBalances()[0].getBalanceAmount().get("currency"));
+                        ShimmerUtils.transitionShimmerLayoutToFinalView(
+                                binding.bankAccCardShimmer,
+                                binding.bankAccBalanceLayout,
+                                requireContext());
+                    }
                 });
     }
 
