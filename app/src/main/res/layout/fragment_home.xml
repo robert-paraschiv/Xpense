@@ -179,54 +179,72 @@
                     app:cardCornerRadius="@dimen/main_cards_corner_radius"
                     app:strokeWidth="0dp">
 
-                    <LinearLayout
+                    <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_margin="16dp"
-                        android:orientation="vertical">
+                        android:layout_height="match_parent">
 
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/bankAccountChip"
-                            style="@style/Widget.Material3.Chip.Suggestion"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:elevation="0dp"
-                            android:text="+ Bank Account"
-                            android:textSize="12sp"
-                            app:chipBackgroundColor="@color/cards_bg_color"
-                            app:chipIcon="@drawable/ic_baseline_local_atm_24"
-                            app:chipIconEnabled="true"
-                            app:chipIconTint="@color/sharedIconTintColor"
-                            app:chipMinTouchTargetSize="0dp"
-                            app:chipStrokeWidth="0dp" />
+
+                        <com.facebook.shimmer.ShimmerFrameLayout
+                            android:layout_centerVertical="true"
+                            android:id="@+id/bankAccCardShimmer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <include layout="@layout/placeholder_bank_acc_home_shimmer" />
+                        </com.facebook.shimmer.ShimmerFrameLayout>
 
                         <LinearLayout
-                            android:id="@+id/bankDetailsLayout"
+                            android:visibility="invisible"
+                            android:id="@+id/bankAccBalanceLayout"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_margin="16dp"
                             android:orientation="vertical">
 
-                            <TextView
-                                android:id="@+id/bankCurrency"
+                            <com.google.android.material.chip.Chip
+                                android:id="@+id/bankAccountChip"
+                                style="@style/Widget.Material3.Chip.Suggestion"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_horizontal"
-                                android:maxLines="1"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                tools:text="lei" />
+                                android:elevation="0dp"
+                                android:text="+ Bank Account"
+                                android:textSize="12sp"
+                                app:chipBackgroundColor="@color/cards_bg_color"
+                                app:chipIcon="@drawable/ic_baseline_local_atm_24"
+                                app:chipIconEnabled="true"
+                                app:chipIconTint="@color/sharedIconTintColor"
+                                app:chipMinTouchTargetSize="0dp"
+                                app:chipStrokeWidth="0dp" />
 
-                            <TextView
-                                android:id="@+id/bankAmount"
+                            <LinearLayout
+                                android:id="@+id/bankDetailsLayout"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:gravity="center_horizontal"
-                                android:maxLines="1"
-                                android:text="Retrieving..."
-                                android:textSize="20sp" />
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/bankCurrency"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_horizontal"
+                                    android:maxLines="1"
+                                    android:textSize="16sp"
+                                    android:textStyle="bold"
+                                    tools:text="lei" />
+
+                                <TextView
+                                    android:id="@+id/bankAmount"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:gravity="center_horizontal"
+                                    android:maxLines="1"
+                                    android:text="Retrieving..."
+                                    android:textSize="20sp" />
+                            </LinearLayout>
                         </LinearLayout>
-                    </LinearLayout>
+
+                    </RelativeLayout>
 
 
                 </com.google.android.material.card.MaterialCardView>

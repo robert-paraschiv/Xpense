@@ -21,6 +21,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -187,7 +190,36 @@ public class HomeFragment extends Fragment {
                     Log.d(TAG, "loadBankAccountBalance: ");
                     binding.bankAmount.setText(balances.getBalances()[0].getBalanceAmount().get("amount"));
                     binding.bankCurrency.setText(balances.getBalances()[0].getBalanceAmount().get("currency"));
+                    stopShimmer();
                 });
+    }
+
+    private void stopShimmer() {
+        AlphaAnimation shimmerLayoutFadeAnimation = new AlphaAnimation(1.0f, 0.0f);
+        shimmerLayoutFadeAnimation.setDuration(500);
+        shimmerLayoutFadeAnimation.setRepeatCount(0);
+        shimmerLayoutFadeAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                binding.bankAccCardShimmer.hideShimmer();
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                binding.bankAccCardShimmer.stopShimmer();
+                binding.bankAccCardShimmer.setVisibility(View.INVISIBLE);
+                binding.bankAccBalanceLayout.setVisibility(View.VISIBLE);
+                binding.bankAccBalanceLayout.startAnimation(
+                        AnimationUtils.loadAnimation(requireContext(), R.anim.item_animation_fade_in)
+                );
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        binding.bankAccCardShimmer.startAnimation(shimmerLayoutFadeAnimation);
     }
 
     private void loadLast7DaysTransactions() {

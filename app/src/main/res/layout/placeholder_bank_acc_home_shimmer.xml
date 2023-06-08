@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerVertical="true"
+    android:orientation="vertical">
+
+    <com.google.android.material.card.MaterialCardView
+        app:cardCornerRadius="8dp"
+        android:layout_width="70dp"
+        android:layout_height="22dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal"
+        app:cardBackgroundColor="@color/sharedIconTintColor"
+        app:strokeWidth="0dp"
+        tools:ignore="UseCompoundDrawables" />
+
+    <com.google.android.material.card.MaterialCardView
+        app:cardCornerRadius="8dp"
+        android:layout_width="60dp"
+        android:layout_height="22dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal"
+        app:cardBackgroundColor="@color/sharedIconTintColor"
+        app:strokeWidth="0dp"
+        tools:ignore="UseCompoundDrawables" />
+
+    <com.google.android.material.card.MaterialCardView
+        app:cardCornerRadius="8dp"
+        android:layout_width="90dp"
+        android:layout_height="22dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal"
+        app:cardBackgroundColor="@color/sharedIconTintColor"
+        app:strokeWidth="0dp"
+        tools:ignore="UseCompoundDrawables" />
+</LinearLayout>
