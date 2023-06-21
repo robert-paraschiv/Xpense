@@ -183,6 +183,13 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadBankAccountBalance(BAccount bAccount) {
+        if (bAccount == null || bAccount.getLinked_acc_id() == null) {
+            ShimmerUtils.transitionShimmerLayoutToFinalView(
+                    binding.bankAccCardShimmer,
+                    binding.tapToAddBankTv,
+                    requireContext());
+            return;
+        }
         bankApiViewModel.getAccountBalances(bAccount.getLinked_acc_id())
                 .observe(getViewLifecycleOwner(), balances -> {
                     Log.d(TAG, "loadBankAccountBalance: ");
@@ -308,7 +315,7 @@ public class HomeFragment extends Fragment {
         if (wallet.getWalletUsers() == null
                 || wallet.getWalletUsers().isEmpty()
                 || wallet.getWalletUsers().size() < 2) {
-            binding.sharedWithLayout.setVisibility(View.GONE);
+            binding.sharedWithLayout.setVisibility(View.INVISIBLE);
         } else {
             binding.sharedWithLayout.setVisibility(View.VISIBLE);
 
@@ -484,6 +491,11 @@ public class HomeFragment extends Fragment {
     }
 
     private void navigateToBankAccountDetails(boolean bottomNavAction) {
+        if (mWallet.getbAccount() == null) {
+            Log.e(TAG, "navigateToBankAccountDetails: no linked account");
+            return;
+        }
+
         binding.bankAmountCard.setTransitionName("bankAccountDetailsTransition");
 
         FragmentNavigator.Extras extras = new FragmentNavigator.Extras.Builder()

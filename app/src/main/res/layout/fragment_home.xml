@@ -183,23 +183,34 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
+                        <TextView
+                            android:id="@+id/tapToAddBankTv"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="Tap to Link
+                            Bank Account"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:visibility="gone" />
+
 
                         <com.facebook.shimmer.ShimmerFrameLayout
-                            android:layout_centerVertical="true"
                             android:id="@+id/bankAccCardShimmer"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true">
 
                             <include layout="@layout/placeholder_bank_acc_home_shimmer" />
                         </com.facebook.shimmer.ShimmerFrameLayout>
 
                         <LinearLayout
-                            android:visibility="invisible"
                             android:id="@+id/bankAccBalanceLayout"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_margin="16dp"
-                            android:orientation="vertical">
+                            android:orientation="vertical"
+                            android:visibility="invisible">
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/bankAccountChip"
@@ -280,7 +291,6 @@
                         style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="70dp"
                         android:layout_height="34dp"
-                        android:textSize="12sp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
                         android:insetLeft="0dp"
@@ -288,6 +298,7 @@
                         android:insetRight="0dp"
                         android:insetBottom="0dp"
                         android:text="See All"
+                        android:textSize="12sp"
                         android:visibility="visible"
                         app:cornerRadius="10dp" />
                 </RelativeLayout>
