@@ -12,9 +12,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -427,32 +424,7 @@ public class BankAccFragment extends Fragment implements OnTransClickListener {
                         Log.d(TAG, "onChanged: " + balances);
                         binding.accAmount.setText(balances.getBalances()[0].getBalanceAmount().get("amount"));
 
-
-                        AlphaAnimation shimmerLayoutFadeAnimation = new AlphaAnimation(1.0f, 0.0f);
-                        shimmerLayoutFadeAnimation.setDuration(500);
-                        shimmerLayoutFadeAnimation.setRepeatCount(0);
-
-                        shimmerLayoutFadeAnimation.setAnimationListener(new Animation.AnimationListener() {
-                            @Override
-                            public void onAnimationStart(Animation animation) {
-                                binding.detailsShimer.hideShimmer();
-                            }
-
-                            @Override
-                            public void onAnimationEnd(Animation animation) {
-                                binding.accDetails.setVisibility(View.VISIBLE);
-                                binding.detailsShimer.setVisibility(View.INVISIBLE);
-                                binding.accDetails.startAnimation(AnimationUtils.loadAnimation(requireContext(),
-                                        R.anim.item_animation_fade_in));
-                            }
-
-                            @Override
-                            public void onAnimationRepeat(Animation animation) {
-                            }
-                        });
-
-                        binding.detailsShimer.startAnimation(shimmerLayoutFadeAnimation);
-
+                        ShimmerUtils.transitionShimmerLayoutToFinalView(binding.detailsShimer, binding.accDetails, requireContext());
                     }
                 });
     }
