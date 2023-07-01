@@ -42,24 +42,12 @@ public class BankApiRepo {
     private final MutableLiveData<Token> tokenMutableLiveData = new MutableLiveData<>();
     private String requisitionError;
     private boolean EUA_expired = false;
-    //    private final MutableLiveData<List<Institution>> institutionLiveData;
-//    private final MutableLiveData<AccountDetails> accountDetailsMutableLiveData;
     private final MutableLiveData<Balances> balancesMutableLiveData;
     private final MutableLiveData<TransactionsResponse> accountTransactionsLiveData;
 
     public BankApiRepo() {
-//        this.institutionLiveData = new MutableLiveData<>();
         this.balancesMutableLiveData = new MutableLiveData<>();
         this.accountTransactionsLiveData = new MutableLiveData<>();
-//        this.accountDetailsMutableLiveData = new MutableLiveData<>();
-    }
-
-    public String getRequisitionError() {
-        return requisitionError;
-    }
-
-    public boolean isEUA_expired() {
-        return EUA_expired;
     }
 
     public static BankApiRepo getInstance() {
@@ -440,5 +428,13 @@ public class BankApiRepo {
                 Log.e(TAG, "onFailure: ", t);
             }
         });
+    }
+
+    public String getRequisitionError() {
+        return requisitionError;
+    }
+
+    public boolean isEUA_expired() {
+        return EUA_expired;
     }
 }

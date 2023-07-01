@@ -12,7 +12,8 @@ public class Token {
     @SerializedName("refresh_expires")
     private Integer refresh_expires;
 
-    public Token(String access, Integer access_expires, String refresh, Integer refresh_expires) {
+    public Token(String access, Integer access_expires, String refresh,
+                 Integer refresh_expires) {
         this.access = access;
         this.access_expires = access_expires;
         this.refresh = refresh;

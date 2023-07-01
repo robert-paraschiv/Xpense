@@ -28,7 +28,8 @@ public interface GetDataService {
 
     @FormUrlEncoded
     @POST("/api/v2/token/new/")
-    Call<Token> getToken(@Field("secret_id") String secret_id, @Field("secret_key") String secret_key);
+    Call<Token> getToken(@Field("secret_id") String secret_id,
+                         @Field("secret_key") String secret_key);
 
     @FormUrlEncoded
     @POST("/api/v2/token/refresh/")
@@ -38,7 +39,6 @@ public interface GetDataService {
     @POST("/api/v2/agreements/enduser/")
     Call<EndUserAgreement> createEUA(@Field("institution_id") String institution_id,
                                      @Field("access_scope") List<String> access_scope);
-
 
     @FormUrlEncoded
     @POST("/api/v2/requisitions/")

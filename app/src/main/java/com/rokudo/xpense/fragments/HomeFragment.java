@@ -197,7 +197,8 @@ public class HomeFragment extends Fragment {
                         return;
                     }
                     if (binding.bankAmount.getText().toString().equals("Retrieving...")
-                            || !binding.bankAmount.getText().toString().equals(balances.getBalances()[0].getBalanceAmount().get("amount"))) {
+                            || !binding.bankAmount.getText().toString()
+                            .equals(balances.getBalances()[0].getBalanceAmount().get("amount"))) {
 
                         binding.bankAmount.setText(balances.getBalances()[0].getBalanceAmount().get("amount"));
                         binding.bankCurrency.setText(balances.getBalances()[0].getBalanceAmount().get("currency"));

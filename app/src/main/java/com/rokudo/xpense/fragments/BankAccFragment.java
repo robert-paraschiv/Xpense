@@ -103,9 +103,14 @@ public class BankAccFragment extends Fragment implements OnTransClickListener {
     }
 
     private void populateTransByAmountMap() {
+        if (statisticsViewModel.getHomeStoredStatisticsDoc() == null) {
+            return;
+        }
         statisticsViewModel.getHomeStoredStatisticsDoc()
                 .getTransactions()
-                .values().forEach(transaction -> transByAmountMap.put(transaction.getAmount().toString(), transaction.getId()));
+                .values()
+                .forEach(transaction ->
+                        transByAmountMap.put(transaction.getAmount().toString(), transaction.getId()));
     }
 
     private void initOnClicks() {
