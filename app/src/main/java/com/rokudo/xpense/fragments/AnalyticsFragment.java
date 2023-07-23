@@ -50,6 +50,7 @@ import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.AnalyticsBarUtils;
 import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.MapUtil;
+import com.rokudo.xpense.utils.OnSwipeTouchListener;
 import com.rokudo.xpense.utils.PieChartUtils;
 
 import java.text.DecimalFormat;
@@ -116,6 +117,7 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
         binding.transactionsRv.setAdapter(transactionsAdapter);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initOnClicks() {
         binding.analyticsTypeImage.setOnClickListener(v -> toggleChartsVisibility());
 
@@ -332,7 +334,25 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                 binding.categoriesRv.scheduleLayoutAnimation();
             }
         });
+        binding.dateChip.setOnTouchListener(new OnSwipeTouchListener(requireContext()) {
 
+            @Override
+            public void onSwipeLeft() {
+                if (monthYearFormat.format(selectedDate).equals(monthYearFormat.format(new Date()))) {
+                    return;
+                }
+                handleSwipeOnDate(true);
+
+                super.onSwipeLeft();
+            }
+
+            @Override
+            public void onSwipeRight() {
+                handleSwipeOnDate(false);
+                super.onSwipeRight();
+            }
+
+        });
 //        binding.transactionsRv.addOnScrollListener(new RecyclerView.OnScrollListener() {
 //            @Override
 //            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -345,6 +365,22 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
 //                }
 //            }
 //        });
+    }
+
+    private void handleSwipeOnDate(boolean increaseDate) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(selectedDate);
+        if (isYearMode) {
+            calendar.set(Calendar.YEAR, increaseDate ? calendar.get(Calendar.YEAR) + 1 : calendar.get(Calendar.YEAR) - 1);
+        } else {
+            calendar.set(Calendar.MONTH, increaseDate ? calendar.get(Calendar.MONTH) + 1 : calendar.get(Calendar.MONTH) - 1);
+        }
+        selectedDate = calendar.getTime();
+
+        binding.dateChip.setText(isYearMode ? yearFormat.format(selectedDate) : monthYearFormat.format(selectedDate));
+        AnalyticsBarUtils.setBarLabelRotation(binding.barChart, true);
+        resetCategoriesRv();
+        loadMonthTransactions(selectedDate);
     }
 
     public boolean isRecyclerScrollable(RecyclerView recyclerView) {
