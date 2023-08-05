@@ -303,7 +303,7 @@ public class BankAccFragment extends Fragment implements OnTransClickListener {
 
     private void getAccountTransactions(BAccount bAccount) {
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.add(Calendar.DAY_OF_YEAR, -30);
         String date_from = simpleDateFormat.format(calendar.getTime());
         bankApiViewModel
                 .getAccountTransactions(bAccount.getAccounts().get(0), date_from)
