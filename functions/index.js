@@ -133,107 +133,8 @@ exports.profilePictureChangeListener = functions.firestore.document("Users/{user
 
 });
 
-exports.transactionInsertionListener = functions.firestore.document("Transactions/{transactionID}").onWrite((snap, context) => {
-    //Don't do anything if it is a cash transaction
-    if (snap.after.exists && snap.after.data().cashTransaction == true) {
-        return 0;
-    }
 
-    var isNewTrans = true;
-    if (snap.before.exists) {
-        isNewTrans = false;
-    }
-
-    if (isNewTrans) {
-        const transaction = snap.after.exists ? snap.after.data() : null;
-        if (transaction == null) {
-            return 0;
-        }
-
-        if (transaction.type == "Income") {
-            return admin.firestore().collection("Wallets").doc(transaction.walletId).update({
-                amount: admin.firestore.FieldValue.increment(transaction.amount)
-            });
-        } else {
-            return admin.firestore().collection("Wallets").doc(transaction.walletId).update({
-                amount: admin.firestore.FieldValue.increment(-transaction.amount)
-            });
-        }
-    } else {
-        const transBefore = snap.before.exists ? snap.before.data() : null;
-        const transAfter = snap.after.exists ? snap.after.data() : null;
-
-        if (transAfter == null) {
-            //Transaction was deleted
-            if (transBefore.type == "Expense") {
-                return admin.firestore().collection("Wallets").doc(transBefore.walletId).update({
-                    amount: admin.firestore.FieldValue.increment(transBefore.amount)
-                });
-            } else {
-                return admin.firestore().collection("Wallets").doc(transBefore.walletId).update({
-                    amount: admin.firestore.FieldValue.increment(-transBefore.amount)
-                });
-            }
-
-        }
-
-        if (transAfter.amount == transBefore.amount) {
-            if (transBefore.type == transAfter.type) {
-                return 0;
-            } else {
-                if (transAfter.type == "Expense") {
-                    return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
-                        amount: admin.firestore.FieldValue.increment(-transAfter.amount)
-                    });
-                } else {
-                    return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
-                        amount: admin.firestore.FieldValue.increment(transAfter.amount)
-                    });
-                }
-            }
-
-        } else {
-
-            if (transBefore.type == transAfter.type) {
-
-                if (transBefore.type == "Expense") {
-                    if (transBefore.amount < transAfter.amount) {
-                        var decrement = transAfter.amount - transBefore.amount;
-
-                        return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
-                            amount: admin.firestore.FieldValue.increment(-decrement)
-                        });
-                    } else {
-                        var increment = transBefore.amount - transAfter.amount;
-
-                        return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
-                            amount: admin.firestore.FieldValue.increment(increment)
-                        });
-                    }
-
-                } else {
-                    if (transBefore.amount < transAfter.amount) {
-                        var increment = transAfter.amount - transBefore.amount;
-
-                        return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
-                            amount: admin.firestore.FieldValue.increment(increment)
-                        });
-                    } else {
-                        var decrement = transBefore.amount - transAfter.amount;
-
-                        return admin.firestore().collection("Wallets").doc(transAfter.walletId).update({
-                            amount: admin.firestore.FieldValue.increment(-decrement)
-                        });
-                    }
-                }
-            }
-        }
-        return 0;
-    }
-
-});
-
-exports.testTransactionListener = functions.firestore.document("Wallets/{walletId}/Transactions/{transactionID}").onWrite((snap, context) => {
+exports.transactionInsertionListener = functions.firestore.document("Wallets/{walletId}/Transactions/{transactionID}").onWrite((snap, context) => {
     const updatedTransaction = snap.after.exists ? snap.after.data() : null;
     const oldTransaction = snap.before.exists ? snap.before.data() : null;
 
@@ -241,6 +142,7 @@ exports.testTransactionListener = functions.firestore.document("Wallets/{walletI
 
     if (updatedTransaction == null) {
         //Transaction was deleted
+
         const transactionDate = oldTransaction.date.toDate();
         const transactionDay = transactionDate.getDate();
 
@@ -279,8 +181,7 @@ exports.testTransactionListener = functions.firestore.document("Wallets/{walletI
                         [categoriesByAmountField]: admin.firestore.FieldValue.increment(-oldTransaction.amount),
 
                         [`transactions.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
-                        [`categories.${oldTransaction.category}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
-                        [`transactionsByMonth.${months[transactionDate.getMonth()]}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete()
+                        [`categories.${oldTransaction.category}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete()
                     });
                 }
                 if (monthDoc.exists) {
@@ -347,8 +248,7 @@ exports.testTransactionListener = functions.firestore.document("Wallets/{walletI
                                 [categoriesByAmountField]: admin.firestore.FieldValue.increment(updatedTransaction.amount),
 
                                 [idField]: updatedTransaction,
-                                [categoryIdField]: updatedTransaction,
-                                [`transactionsByMonth.${months[transactionDate.getMonth()]}.${updatedTransaction.id}`]: updatedTransaction
+                                [categoryIdField]: updatedTransaction
                             });
                         } else {
                             batch.set(yearDocument, {
@@ -356,8 +256,7 @@ exports.testTransactionListener = functions.firestore.document("Wallets/{walletI
                                 transactions: { [updatedTransaction.id]: updatedTransaction },
                                 categories: { [updatedTransaction.category]: { [updatedTransaction.id]: updatedTransaction } },
                                 amountByCategory: { [updatedTransaction.category]: updatedTransaction.amount },
-                                totalAmountSpent: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0,
-                                transactionsByMonth: { [months[transactionDate.getMonth()]]: { [updatedTransaction.id]: updatedTransaction } }
+                                totalAmountSpent: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
                             });
                         }
                         if (monthDoc.exists) {
@@ -458,8 +357,7 @@ exports.testTransactionListener = functions.firestore.document("Wallets/{walletI
                 [`amountByCategory.${oldTransaction.category}`]: admin.firestore.FieldValue.increment(-oldTransaction.amount),
 
                 [`transactions.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
-                [`categories.${oldTransaction.category}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete(),
-                [`transactionsByMonth.${months[oldTransactionDate.getMonth()]}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete()
+                [`categories.${oldTransaction.category}.${oldTransaction.id}`]: admin.firestore.FieldValue.delete()
             };
             const updateOldMonth = {
                 latestUpdateTime: firestore.Timestamp.now(),
@@ -484,8 +382,7 @@ exports.testTransactionListener = functions.firestore.document("Wallets/{walletI
                 [categoriesByAmountField]: admin.firestore.FieldValue.increment(updatedTransaction.amount),
 
                 [idField]: updatedTransaction,
-                [categoryIdField]: updatedTransaction,
-                [`transactionsByMonth.${months[newTransactionDate.getMonth()]}.${updatedTransaction.id}`]: updatedTransaction
+                [categoryIdField]: updatedTransaction
             };
             const updateNewMonth = {
                 latestUpdateTime: firestore.Timestamp.now(),
@@ -518,8 +415,7 @@ exports.testTransactionListener = functions.firestore.document("Wallets/{walletI
                         transactions: { [updatedTransaction.id]: updatedTransaction },
                         categories: { [updatedTransaction.category]: { [updatedTransaction.id]: updatedTransaction } },
                         amountByCategory: { [updatedTransaction.category]: updatedTransaction.amount },
-                        totalAmountSpent: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0,
-                        transactionsByMonth: { [months[transactionDate.getMonth()]]: { [updatedTransaction.id]: updatedTransaction } }
+                        totalAmountSpent: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
                     });
 
                 }
