@@ -92,9 +92,9 @@
                     android:layout_height="60dp"
                     android:elevation="1dp"
                     android:text="Income"
-                    android:textSize="18sp"
-                    app:textEndPadding="18dp"
-                    app:textStartPadding="18dp" />
+                    android:textSize="16sp"
+                    app:textEndPadding="8dp"
+                    app:textStartPadding="8dp" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/expenseChip"
@@ -104,9 +104,20 @@
                     android:checked="true"
                     android:elevation="1dp"
                     android:text="Expense"
-                    android:textSize="18sp"
-                    app:textEndPadding="18dp"
-                    app:textStartPadding="18dp" />
+                    android:textSize="16sp"
+                    app:textEndPadding="8dp"
+                    app:textStartPadding="8dp" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/transferChip"
+                    style="@style/Widget.Material3.Chip.Filter.Elevated"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:elevation="1dp"
+                    android:text="Transfer"
+                    android:textSize="16sp"
+                    app:textEndPadding="8dp"
+                    app:textStartPadding="8dp" />
             </com.google.android.material.chip.ChipGroup>
 
             <com.google.android.material.textfield.TextInputLayout

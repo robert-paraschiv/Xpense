@@ -331,55 +331,59 @@ exports.testTransactionListener = functions.firestore.document("Wallets/{walletI
                 });
             }
 
-            return Promise.all([yearDocument.get(), monthDocument.get()])
-                .then(results => {
-                    const yearDoc = results[0];
-                    const monthDoc = results[1];
+            if (updatedTransaction.type === "Transfer") {
+                return batch.commit();
+            } else {
+                return Promise.all([yearDocument.get(), monthDocument.get()])
+                    .then(results => {
+                        const yearDoc = results[0];
+                        const monthDoc = results[1];
 
 
-                    if (yearDoc.exists) {
-                        batch.update(yearDocument, {
-                            latestUpdateTime: firestore.Timestamp.now(),
-                            totalAmountSpent: admin.firestore.FieldValue.increment(updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0),
-                            [categoriesByAmountField]: admin.firestore.FieldValue.increment(updatedTransaction.amount),
+                        if (yearDoc.exists) {
+                            batch.update(yearDocument, {
+                                latestUpdateTime: firestore.Timestamp.now(),
+                                totalAmountSpent: admin.firestore.FieldValue.increment(updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0),
+                                [categoriesByAmountField]: admin.firestore.FieldValue.increment(updatedTransaction.amount),
 
-                            [idField]: updatedTransaction,
-                            [categoryIdField]: updatedTransaction,
-                            [`transactionsByMonth.${months[transactionDate.getMonth()]}.${updatedTransaction.id}`]: updatedTransaction
-                        });
-                    } else {
-                        batch.set(yearDocument, {
-                            latestUpdateTime: firestore.Timestamp.now(),
-                            transactions: { [updatedTransaction.id]: updatedTransaction },
-                            categories: { [updatedTransaction.category]: { [updatedTransaction.id]: updatedTransaction } },
-                            amountByCategory: { [updatedTransaction.category]: updatedTransaction.amount },
-                            totalAmountSpent: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0,
-                            transactionsByMonth: { [months[transactionDate.getMonth()]]: { [updatedTransaction.id]: updatedTransaction } }
-                        });
-                    }
-                    if (monthDoc.exists) {
-                        batch.update(monthDocument, {
-                            latestUpdateTime: firestore.Timestamp.now(),
-                            totalAmountSpent: admin.firestore.FieldValue.increment(updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0),
-                            [categoriesByAmountField]: admin.firestore.FieldValue.increment(updatedTransaction.amount),
+                                [idField]: updatedTransaction,
+                                [categoryIdField]: updatedTransaction,
+                                [`transactionsByMonth.${months[transactionDate.getMonth()]}.${updatedTransaction.id}`]: updatedTransaction
+                            });
+                        } else {
+                            batch.set(yearDocument, {
+                                latestUpdateTime: firestore.Timestamp.now(),
+                                transactions: { [updatedTransaction.id]: updatedTransaction },
+                                categories: { [updatedTransaction.category]: { [updatedTransaction.id]: updatedTransaction } },
+                                amountByCategory: { [updatedTransaction.category]: updatedTransaction.amount },
+                                totalAmountSpent: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0,
+                                transactionsByMonth: { [months[transactionDate.getMonth()]]: { [updatedTransaction.id]: updatedTransaction } }
+                            });
+                        }
+                        if (monthDoc.exists) {
+                            batch.update(monthDocument, {
+                                latestUpdateTime: firestore.Timestamp.now(),
+                                totalAmountSpent: admin.firestore.FieldValue.increment(updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0),
+                                [categoriesByAmountField]: admin.firestore.FieldValue.increment(updatedTransaction.amount),
 
-                            [idField]: updatedTransaction,
-                            [categoryIdField]: updatedTransaction,
-                            [dayIdField]: updatedTransaction
-                        });
-                    } else {
-                        batch.set(monthDocument, {
-                            latestUpdateTime: firestore.Timestamp.now(),
-                            transactions: { [updatedTransaction.id]: updatedTransaction },
-                            categories: { [updatedTransaction.category]: { [updatedTransaction.id]: updatedTransaction } },
-                            amountByCategory: { [updatedTransaction.category]: updatedTransaction.amount },
-                            transactionsByDay: { [transactionDay]: { [updatedTransaction.id]: updatedTransaction } },
-                            totalAmountSpent: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
-                        });
-                    }
+                                [idField]: updatedTransaction,
+                                [categoryIdField]: updatedTransaction,
+                                [dayIdField]: updatedTransaction
+                            });
+                        } else {
+                            batch.set(monthDocument, {
+                                latestUpdateTime: firestore.Timestamp.now(),
+                                transactions: { [updatedTransaction.id]: updatedTransaction },
+                                categories: { [updatedTransaction.category]: { [updatedTransaction.id]: updatedTransaction } },
+                                amountByCategory: { [updatedTransaction.category]: updatedTransaction.amount },
+                                transactionsByDay: { [transactionDay]: { [updatedTransaction.id]: updatedTransaction } },
+                                totalAmountSpent: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
+                            });
+                        }
 
-                    return batch.commit();
-                });
+                        return batch.commit();
+                    });
+            }
 
         } else {
             //transaction is updated
@@ -409,7 +413,7 @@ exports.testTransactionListener = functions.firestore.document("Wallets/{walletI
                 if (oldTransaction.type == updatedTransaction.type) {
                     console.log("amount and type were the same");
                 } else {
-                    
+
                     if (updatedTransaction.type == "Expense") {
                         batch.update(walletDoc, { amount: admin.firestore.FieldValue.increment(-updatedTransaction.amount) });
                     } else {

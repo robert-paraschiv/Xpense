@@ -2,6 +2,7 @@ package com.rokudo.xpense.fragments;
 
 import static com.rokudo.xpense.models.Transaction.EXPENSE_TYPE;
 import static com.rokudo.xpense.models.Transaction.INCOME_TYPE;
+import static com.rokudo.xpense.models.Transaction.TRANSFER_TYPE;
 import static com.rokudo.xpense.utils.TransactionUtils.isTransactionDifferent;
 
 import android.annotation.SuppressLint;
@@ -242,6 +243,14 @@ public class AddTransactionFragment extends Fragment {
                 binding.cashSwitch.setVisibility(View.VISIBLE);
             }
         });
+        binding.transferChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                selectedCategory = new ExpenseCategory("Transfer");
+                binding.selectedTextDummy.setVisibility(View.GONE);
+                binding.categoryChipGroup.setVisibility(View.GONE);
+                binding.cashSwitch.setVisibility(View.GONE);
+            }
+        });
     }
 
     private void addTransactionToDb() {
@@ -285,7 +294,15 @@ public class AddTransactionFragment extends Fragment {
         transaction.setCategory(selectedCategory.getName());
         transaction.setTitle(Objects.requireNonNull(binding.transactionTitle.getText()).toString());
         transaction.setCashTransaction(binding.cashSwitch.isChecked());
-        transaction.setType(binding.incomeChip.isChecked() ? INCOME_TYPE : EXPENSE_TYPE);
+        String transactionType = null;
+        if (binding.incomeChip.isChecked()) {
+            transactionType = INCOME_TYPE;
+        } else if (binding.expenseChip.isChecked()) {
+            transactionType = EXPENSE_TYPE;
+        } else if (binding.transferChip.isChecked()) {
+            transactionType = TRANSFER_TYPE;
+        }
+        transaction.setType(transactionType);
 
         if (mTransaction == null) {
             DocumentReference documentReference = DatabaseUtils.getTransactionsRef(walletId).document();

@@ -24,6 +24,7 @@ public class Transaction implements Serializable {
 
     public static final String INCOME_TYPE = "Income";
     public static final String EXPENSE_TYPE = "Expense";
+    public static final String TRANSFER_TYPE = "Transfer";
 
 
     public Transaction() {
