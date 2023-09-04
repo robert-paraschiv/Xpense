@@ -10,7 +10,9 @@ import com.facebook.shimmer.ShimmerFrameLayout;
 import com.rokudo.xpense.R;
 
 public class ShimmerUtils {
-    public static void transitionShimmerLayoutToFinalView(ShimmerFrameLayout shimmerView, View finalView, Context context) {
+    public static void transitionShimmerLayoutToFinalView(ShimmerFrameLayout shimmerView,
+                                                          View finalView,
+                                                          Context context) {
         AlphaAnimation shimmerLayoutFadeAnimation = new AlphaAnimation(1.0f, 0.0f);
         shimmerLayoutFadeAnimation.setDuration(500);
         shimmerLayoutFadeAnimation.setRepeatCount(0);

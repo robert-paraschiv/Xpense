@@ -328,13 +328,14 @@ public class AddTransactionFragment extends Fragment {
                 }
                 UploadingDialog uploadingDialog = new UploadingDialog("Please Wait...");
                 uploadingDialog.show(getParentFragmentManager(), "wait");
-                viewModel.updateTransaction(transaction).observe(getViewLifecycleOwner(), result -> {
-                    if (result.equals("Success")) {
-                        uploadingDialog.dismiss();
-                        Navigation.findNavController(binding.getRoot())
-                                .popBackStack(R.id.homeFragment, false);
-                    }
-                });
+                viewModel.updateTransaction(transaction)
+                        .observe(getViewLifecycleOwner(), result -> {
+                            if (result != null && result.equals("Success")) {
+                                uploadingDialog.dismiss();
+                                Navigation.findNavController(binding.getRoot())
+                                        .popBackStack(R.id.homeFragment, false);
+                            }
+                        });
             } else {
                 Navigation.findNavController(binding.getRoot())
                         .popBackStack(R.id.homeFragment, false);

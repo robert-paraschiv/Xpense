@@ -188,6 +188,8 @@ public class HomeFragment extends Fragment {
                     binding.bankAccCardShimmer,
                     binding.tapToAddBankTv,
                     requireContext());
+            binding.bankAmount.setVisibility(View.GONE);
+            binding.bankCurrency.setVisibility(View.GONE);
             return;
         }
         bankApiViewModel.getAccountBalances(bAccount.getLinked_acc_id())
@@ -200,12 +202,15 @@ public class HomeFragment extends Fragment {
                             || !binding.bankAmount.getText().toString()
                             .equals(balances.getBalances()[0].getBalanceAmount().get("amount"))) {
 
+                        binding.bankAmount.setVisibility(View.VISIBLE);
+                        binding.bankCurrency.setVisibility(View.VISIBLE);
                         binding.bankAmount.setText(balances.getBalances()[0].getBalanceAmount().get("amount"));
                         binding.bankCurrency.setText(balances.getBalances()[0].getBalanceAmount().get("currency"));
                         ShimmerUtils.transitionShimmerLayoutToFinalView(
                                 binding.bankAccCardShimmer,
                                 binding.bankAccBalanceLayout,
                                 requireContext());
+                        binding.tapToAddBankTv.setVisibility(View.GONE);
                     }
                 });
     }

@@ -134,7 +134,8 @@ public class LoginFragment extends Fragment {
                                 FirebaseMessaging.getInstance().getToken().addOnSuccessListener(token ->
                                         usersRef.document(Objects.requireNonNull(edtPhone.getText()).toString())
                                                 .update("token", token)
-                                                .addOnSuccessListener(unused -> Log.d(TAG, "signInWithCredential: updated token for existing user")));
+                                                .addOnSuccessListener(unused ->
+                                                        Log.d(TAG, "signInWithCredential: updated token for existing user")));
 
                                 Intent i = new Intent(requireActivity(), MainActivity.class);
                                 startActivity(i);
@@ -144,7 +145,9 @@ public class LoginFragment extends Fragment {
                     } else {
                         generateOTPBtn.setEnabled(true);
                         Log.e(TAG, "signInWithCredential: ", task.getException());
-                        Toast.makeText(requireActivity(), Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(requireActivity(),
+                                Objects.requireNonNull(task.getException()).getMessage(),
+                                Toast.LENGTH_LONG).show();
                     }
                 });
     }
@@ -163,63 +166,35 @@ public class LoginFragment extends Fragment {
     }
 
     // callback method is called on Phone auth provider.
-    private final PhoneAuthProvider.OnVerificationStateChangedCallbacks
+    private final PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallBack =
+            new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                @Override
+                public void onCodeSent(@NonNull String s, @NonNull PhoneAuthProvider.ForceResendingToken forceResendingToken) {
+                    super.onCodeSent(s, forceResendingToken);
+                    verificationId = s;
+                }
+                @Override
+                public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
+                    final String code = phoneAuthCredential.getSmsCode();
 
-            // initializing our callbacks for on
-            // verification callback method.
-            mCallBack = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+                    if (code != null) {
+                        edtOTP.setText(code);
+                        verifyCode(code);
+                    }
+                }
+                @Override
+                public void onVerificationFailed(FirebaseException e) {
+                    Toast.makeText(requireActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "onVerificationFailed: ", e);
+                    generateOTPBtn.setEnabled(true);
+                }
 
-        // below method is used when
-        // OTP is sent from Firebase
-        @Override
-        public void onCodeSent(@NonNull String s, @NonNull PhoneAuthProvider.ForceResendingToken forceResendingToken) {
-            super.onCodeSent(s, forceResendingToken);
-            // when we receive the OTP it
-            // contains a unique id which
-            // we are storing in our string
-            // which we have already created.
-            verificationId = s;
-        }
-
-        // this method is called when user
-        // receive OTP from Firebase.
-        @Override
-        public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
-            // below line is used for getting OTP code
-            // which is sent in phone auth credentials.
-            final String code = phoneAuthCredential.getSmsCode();
-
-            if (code != null) {
-                // if the code is not null then
-                // we are setting that code to
-                // our OTP edittext field.
-                edtOTP.setText(code);
-
-                // after setting this code
-                // to OTP edittext field we
-                // are calling our verifycode method.
-                verifyCode(code);
-            }
-        }
-
-        // this method is called when firebase doesn't
-        // sends our OTP code due to any error or issue.
-        @Override
-        public void onVerificationFailed(FirebaseException e) {
-            // displaying error message with firebase exception.
-            Toast.makeText(requireActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
-            Log.e(TAG, "onVerificationFailed: ", e);
-
-            generateOTPBtn.setEnabled(true);
-        }
-
-        @Override
-        public void onCodeAutoRetrievalTimeOut(@NonNull String s) {
-            Log.d(TAG, "onCodeAutoRetrievalTimeOut: Auto Retrieval timed out ");
-
-            generateOTPBtn.setEnabled(true);
-        }
-    };
+                @Override
+                public void onCodeAutoRetrievalTimeOut(@NonNull String s) {
+                    Log.d(TAG, "onCodeAutoRetrievalTimeOut: Auto Retrieval timed out ");
+                    generateOTPBtn.setEnabled(true);
+                }
+            };
 
     // below method is use to verify code from Firebase.
     private void verifyCode(String code) {
