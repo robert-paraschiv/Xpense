@@ -35,10 +35,20 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="16dp"
+                android:layout_toStartOf="@id/refreshBtn"
                 android:layout_toEndOf="@id/backBtn"
                 android:text="Invite Partner"
                 android:textSize="18sp"
                 android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/refreshBtn"
+                style="?attr/materialIconButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="4dp"
+                app:icon="@drawable/baseline_refresh_24" />
         </RelativeLayout>
 
     </com.google.android.material.appbar.MaterialToolbar>

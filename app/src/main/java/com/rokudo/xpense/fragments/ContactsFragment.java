@@ -70,7 +70,7 @@ public class ContactsFragment extends Fragment implements ContactsAdapter.OnCont
 
     private void initOnClicks() {
         binding.backBtn.setOnClickListener(v -> Navigation.findNavController(binding.getRoot()).popBackStack());
-
+        binding.refreshBtn.setOnClickListener(v -> checkPermissions());
     }
 
     private void buildRv() {

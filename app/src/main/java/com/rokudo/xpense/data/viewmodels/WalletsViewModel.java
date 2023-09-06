@@ -31,6 +31,8 @@ public class WalletsViewModel extends AndroidViewModel {
         return repo.addWallet(wallet);
     }
 
+    public MutableLiveData<Boolean> updateWallet(Wallet wallet){return repo.updateWallet(wallet);}
+
     public void removeAllData() {
         repo.removeAllWalletsData();
     }

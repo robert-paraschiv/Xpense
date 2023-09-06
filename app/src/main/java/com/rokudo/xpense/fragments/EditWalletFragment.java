@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -55,7 +56,12 @@ public class EditWalletFragment extends Fragment {
 
     @SuppressLint("SetTextI18n")
     private void handleArgs() {
-        EditWalletFragmentArgs args = EditWalletFragmentArgs.fromBundle(requireArguments());
+        if (getArguments() == null) {
+            Navigation.findNavController(binding.getRoot()).popBackStack();
+            Toast.makeText(requireContext(), "Something went wrong trying to access wallet details", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        EditWalletFragmentArgs args = EditWalletFragmentArgs.fromBundle(getArguments());
         mWallet = args.getWallet();
 
         if (mWallet == null) {
@@ -65,7 +71,7 @@ public class EditWalletFragment extends Fragment {
             binding.invitedPersonCard.setVisibility(View.VISIBLE);
             binding.fragmentTitleTv.setText("Edit Wallet");
             binding.walletTitleInput.setText(mWallet.getTitle() == null ? "" : mWallet.getTitle());
-            binding.currencyDropBox.setText(mWallet.getCurrency() == null ? "" : mWallet.getCurrency());
+            binding.currencyDropBox.setText((mWallet.getCurrency() == null ? "" : mWallet.getCurrency()), false);
             binding.walletAmountInput.setText(mWallet.getAmount() == null ? "" : mWallet.getAmount() + "");
             if (mWallet.getWalletUsers() != null && mWallet.getWalletUsers().size() > 1) {
                 WalletUser otherUser = getOtherWalletUser(mWallet.getWalletUsers());
@@ -99,10 +105,31 @@ public class EditWalletFragment extends Fragment {
     }
 
     private void updateWallet() {
+        if (isInputInvalid()) {
+            return;
+        }
 
+        mWallet.setTitle(Objects.requireNonNull(binding.walletTitleInput.getText()).toString());
+        mWallet.setAmount(Double.parseDouble(Objects.requireNonNull(binding.walletAmountInput.getText()).toString()));
+        mWallet.setCurrency(binding.currencyDropBox.getText().toString());
+
+        walletsViewModel.updateWallet(mWallet).observe(getViewLifecycleOwner(), result -> {
+            if (result == null) {
+                return;
+            }
+            if (!result) {
+                Toast.makeText(requireContext(), "Something went, wrong please try again", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Navigation.findNavController(binding.getRoot()).popBackStack();
+        });
     }
 
     private void addWalletToDb() {
+        if (isInputInvalid()) {
+            return;
+        }
+
         DocumentReference documentReference = DatabaseUtils.walletsRef.document();
         Wallet wallet = new Wallet();
         wallet.setId(documentReference.getId());
@@ -119,6 +146,28 @@ public class EditWalletFragment extends Fragment {
                 Navigation.findNavController(binding.getRoot()).popBackStack();
             }
         });
+    }
+
+    private boolean isInputInvalid() {
+        if (binding.walletTitleInput.getText() == null
+                || binding.walletTitleInput.getText().toString().trim().equals("")) {
+            binding.walletTitleInput.setError("Wallet title can not be empty");
+            binding.walletTitleInput.requestFocus();
+            return true;
+        }
+
+        if (binding.walletAmountInput.getText() == null
+                || binding.walletAmountInput.getText().toString().trim().equals("")) {
+            binding.walletAmountInput.setError("Wallet amount can not be empty");
+            binding.walletAmountInput.requestFocus();
+            return true;
+        }
+
+        if (binding.currencyDropBox.getText().toString().trim().equals("")) {
+            binding.currencyDropBox.setError("Please select a currency for the wallet");
+            return true;
+        }
+        return false;
     }
 
     @Override
