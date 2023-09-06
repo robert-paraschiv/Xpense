@@ -37,7 +37,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_toEndOf="@id/backBtn"
                 android:text="Account Transactions"
-                android:textSize="18sp"
+                android:textSize="@dimen/fragment_title_size"
                 android:textStyle="bold" />
 
 

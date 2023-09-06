@@ -37,7 +37,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_toEndOf="@id/backBtn"
                 android:text="Transactions"
-                android:textSize="24sp"
+                android:textSize="@dimen/fragment_title_size"
                 android:textStyle="bold" />
 
             <RelativeLayout
@@ -76,7 +76,7 @@
                         app:chipMinTouchTargetSize="0dp"
                         app:iconEndPadding="8dp"
                         app:iconStartPadding="8dp"
-                        tools:text="August 2022" />
+                        tools:text="Octomber 2022" />
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView

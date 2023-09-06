@@ -39,7 +39,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_toEndOf="@id/backBtn"
                 android:text="Add Transaction"
-                android:textSize="24sp"
+                android:textSize="@dimen/fragment_title_size"
                 android:textStyle="bold" />
 
             <com.google.android.material.button.MaterialButton

@@ -40,7 +40,7 @@
                 android:layout_toEndOf="@id/backBtn"
                 android:layout_toStartOf="@id/deleteBtn"
                 android:text="Edit Wallet"
-                android:textSize="18sp"
+                android:textSize="@dimen/fragment_title_size"
                 android:textStyle="bold" />
 
             <com.google.android.material.button.MaterialButton

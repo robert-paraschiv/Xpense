@@ -161,10 +161,14 @@ public class TransactionsAdapter extends RecyclerView.Adapter<TransactionsAdapte
             }
             if (transaction.getAlreadyAdded()) {
                 holder.transactionCard
-                        .setCardBackgroundColor(ColorTemplate.rgb("#C9DECF"));
+                        .setCardBackgroundColor(holder.transactionCard.getContext().getResources()
+                                .getColor(R.color.trans_already_added_bg_color
+                                        , holder.transactionAmount.getContext().getTheme()));
             } else {
                 holder.transactionCard
-                        .setCardBackgroundColor(ColorTemplate.rgb("#E4BEB3"));
+                        .setCardBackgroundColor(holder.transactionCard.getContext().getResources()
+                                .getColor(R.color.trans_not_added_bg_color
+                                        , holder.transactionAmount.getContext().getTheme()));
             }
         }
     }

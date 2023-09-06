@@ -8,6 +8,9 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <color name="trans_already_added_bg_color">#C9DECF</color>
+    <color name="trans_not_added_bg_color">#E4BEB3</color>
+
     <color name="sharedIconTintColor">#FF000000</color>
 
     <color name="dialog_background_color">#ffffff</color>

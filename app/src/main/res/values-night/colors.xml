@@ -8,6 +8,9 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <color name="trans_already_added_bg_color">#38573B</color>
+    <color name="trans_not_added_bg_color">#733E3E</color>
+
     <color name="sharedIconTintColor">#FFFFFFFF</color>
 
     <color name="cards_bg_color">#2A3136</color>
