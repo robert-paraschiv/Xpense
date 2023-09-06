@@ -38,9 +38,20 @@
                 android:layout_centerVertical="true"
                 android:layout_marginStart="16dp"
                 android:layout_toEndOf="@id/backBtn"
+                android:layout_toStartOf="@id/deleteBtn"
                 android:text="Edit Wallet"
                 android:textSize="18sp"
                 android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/deleteBtn"
+                style="?attr/materialIconButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="4dp"
+                app:icon="@drawable/ic_round_delete_24" />
+
         </RelativeLayout>
 
     </com.google.android.material.appbar.MaterialToolbar>

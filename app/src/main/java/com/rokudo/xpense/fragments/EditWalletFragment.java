@@ -28,6 +28,7 @@ import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.models.WalletUser;
 import com.rokudo.xpense.utils.DatabaseUtils;
 import com.rokudo.xpense.utils.PrefsUtils;
+import com.rokudo.xpense.utils.dialogs.ConfirmationDialog;
 import com.rokudo.xpense.utils.dialogs.DialogUtils;
 
 import java.util.Collections;
@@ -101,6 +102,29 @@ public class EditWalletFragment extends Fragment {
             } else {
                 updateWallet();
             }
+        });
+        binding.deleteBtn.setOnClickListener(v -> {
+            ConfirmationDialog dialog = new ConfirmationDialog("WARNING !\n" +
+                    "You will not be able to recover the wallet data\n" +
+                    "Are you sure you want to delete this wallet ?");
+            dialog.setOnClickListener(() -> {
+                walletsViewModel.deleteWallet(mWallet.getId())
+                        .observe(getViewLifecycleOwner(), result -> {
+                            if (result == null) {
+                                return;
+                            }
+                            dialog.dismiss();
+                            if (!result) {
+                                Toast.makeText(requireContext(),
+                                        "Could not delete wallet, please try again",
+                                        Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            Toast.makeText(requireContext(), "Wallet deleted successfully", Toast.LENGTH_SHORT).show();
+                            Navigation.findNavController(binding.getRoot()).popBackStack();
+                        });
+            });
+            dialog.show(getParentFragmentManager(), "confirmDeletionDialog");
         });
         binding.invitedPersonCard.setOnClickListener(v -> Navigation.findNavController(binding.getRoot())
                 .navigate(EditWalletFragmentDirections.actionEditWalletFragmentToContactsFragment(mWallet)));

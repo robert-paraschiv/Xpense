@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -15,6 +16,7 @@ import com.rokudo.xpense.models.Wallet;
 import com.rokudo.xpense.utils.DatabaseUtils;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class WalletsRepo {
     private static final String TAG = "WalletsRepo";
@@ -157,6 +159,24 @@ public class WalletsRepo {
                         Log.e(TAG, "onFailure: ", e);
                         mutableLiveData.setValue(false);
                     });
+        }
+        return mutableLiveData;
+    }
+
+    public MutableLiveData<Boolean> deleteWallet(String walletId) {
+        MutableLiveData<Boolean> mutableLiveData = new MutableLiveData<>();
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            DatabaseUtils.walletsRef
+                    .document(walletId)
+                    .delete()
+                    .addOnSuccessListener(unused -> {
+                        Wallet wallet = new Wallet();
+                        wallet.setId(walletId);
+                        walletList.remove(wallet);
+                        allWallets.postValue(walletList);
+                        mutableLiveData.setValue(true);
+                    })
+                    .addOnFailureListener(e -> mutableLiveData.setValue(false));
         }
         return mutableLiveData;
     }
