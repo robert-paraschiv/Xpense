@@ -8,6 +8,7 @@ import android.content.ContentResolver;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -65,6 +66,16 @@ public class ContactsFragment extends Fragment implements ContactsAdapter.OnCont
     }
 
     private void getWalletPassed() {
+        if (getArguments() == null) {
+            Toast.makeText(requireContext(), "Something went wrong", Toast.LENGTH_SHORT).show();
+            Navigation.findNavController(binding.getRoot()).popBackStack();
+            return;
+        }
+        TimedDialog timedDialog = new TimedDialog("Please note that in order for a contact to be displayed, the phone number should start with +40 and  the user must have an existing Xpense account",
+                4500);
+        timedDialog.show(getParentFragmentManager(), "warning");
+        timedDialog.startAnimation();
+        new Handler().postDelayed(timedDialog::dismiss, 4500);
         mWallet = ContactsFragmentArgs.fromBundle(requireArguments()).getWallet();
     }
 
@@ -158,6 +169,25 @@ public class ContactsFragment extends Fragment implements ContactsAdapter.OnCont
 
     @Override
     public void onClick(User user) {
+        Invitation invitation = createInvitation(user);
+
+        TimedDialog uploadingDialog = new TimedDialog("Sending invitation to " + user.getName() + " ...",
+                1500);
+        uploadingDialog.show(getParentFragmentManager(), "sentInvite");
+
+        DatabaseUtils.invitationsRef.document(invitation.getId())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.getResult().exists()) {
+                        showInvitationAlreadySentError(uploadingDialog);
+                    } else {
+                        sendInvitation(invitation, uploadingDialog);
+                    }
+                });
+    }
+
+    @NonNull
+    private Invitation createInvitation(User user) {
         Invitation invitation = new Invitation();
         invitation.setId(mWallet == null ? "" : mWallet.getId());
         invitation.setWallet_title(mWallet.getTitle());
@@ -167,17 +197,13 @@ public class ContactsFragment extends Fragment implements ContactsAdapter.OnCont
         invitation.setCreator_name(DatabaseUtils.getCurrentUser().getName());
         invitation.setCreator_pic_url(DatabaseUtils.getCurrentUser().getPictureUrl());
         invitation.setInvited_person_phone_number(user.getPhoneNumber());
+        return invitation;
+    }
 
-        TimedDialog uploadingDialog = new TimedDialog("Sending invitation to " + user.getName() + " ...", 1500);
-        uploadingDialog.show(getParentFragmentManager(), "sentInvite");
-
-        DatabaseUtils.invitationsRef.document(invitation.getId()).get().addOnCompleteListener(task -> {
-            if (task.getResult().exists()) {
-                Toast.makeText(requireContext(), "A user has already been invited to this wallet", Toast.LENGTH_LONG).show();
-                uploadingDialog.dismiss();
-                Navigation.findNavController(binding.getRoot()).popBackStack(R.id.homeFragment, false);
-            } else {
-                DatabaseUtils.invitationsRef.document(invitation.getId()).set(invitation).addOnSuccessListener(unused -> {
+    private void sendInvitation(Invitation invitation, TimedDialog uploadingDialog) {
+        DatabaseUtils.invitationsRef.document(invitation.getId())
+                .set(invitation)
+                .addOnSuccessListener(unused -> {
                     uploadingDialog.startAnimation();
 
                     binding.getRoot().postDelayed(() -> {
@@ -185,7 +211,13 @@ public class ContactsFragment extends Fragment implements ContactsAdapter.OnCont
                         Navigation.findNavController(binding.getRoot()).popBackStack(R.id.homeFragment, false);
                     }, 1500);
                 });
-            }
-        });
+    }
+
+    private void showInvitationAlreadySentError(TimedDialog uploadingDialog) {
+        Toast.makeText(requireContext(),
+                "A user has already been invited to this wallet",
+                Toast.LENGTH_LONG).show();
+        uploadingDialog.dismiss();
+        Navigation.findNavController(binding.getRoot()).popBackStack(R.id.homeFragment, false);
     }
 }

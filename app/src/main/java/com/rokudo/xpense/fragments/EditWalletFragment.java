@@ -87,6 +87,8 @@ public class EditWalletFragment extends Fragment {
                         .error(R.drawable.ic_baseline_person_24)
                         .transition(withCrossFade())
                         .into(binding.invitedPersonPic);
+            } else {
+                binding.invitedPersonName.setText("Tap to invite a collaborator");
             }
         }
     }
