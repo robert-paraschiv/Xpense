@@ -368,3 +368,102 @@ exports.transactionInsertionStatisticsGenerator = functions.firestore.document("
         }
     }
 });
+
+exports.statisticsV2 = functions.firestore.document("Wallets/{walletId}/TransactionsV2/{transactionID}").onWrite((snap, context) => {
+    const updatedTransaction = snap.after.exists ? snap.after.data() : null;
+    const oldTransaction = snap.before.exists ? snap.before.data() : null;
+
+    const batch = admin.firestore().batch();
+
+    if (oldTransaction == null) {
+        const transactionDate = updatedTransaction.date.toDate();
+        const transactionDay = transactionDate.getDate();
+
+        const monthDoc = admin.firestore()
+            .collection("Wallets")
+            .doc(updatedTransaction.walletId)
+            .collection("StatisticsV2")
+            .doc('' + transactionDate.getFullYear())
+            .collection("MonthStatistics")
+            .doc(months[transactionDate.getMonth()]);
+
+        return monthDoc.get().then(docSnapshot => {
+            if (docSnapshot.exists) {
+
+            } else {
+                const statisticsData = {
+                    latestUpdateTime: firestore.Timestamp.now(),
+                    transactionList: {
+                        [updatedTransaction.id]: updatedTransaction
+                    },
+                    categories: {
+                        [updatedTransaction.category]: {
+                            [updatedTransaction.id]: updatedTransaction
+                        }
+                    },
+                    amountByCategory: {
+                        [updatedTransaction.category]: updatedTransaction.amount
+                    },
+                    transactionsByDay: {
+                        [transactionDay]: {
+                            [updatedTransaction.id]: updatedTransaction
+                        }
+                    },
+                    totalAmountSpent: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0,
+                    totalByDay: {
+                        [transactionDay]: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
+                    },
+                    totalPerCategoryPerDay: {
+                        [updatedTransaction.category]: {
+                            [transactionDay]: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
+                        }
+                    },
+                    totalPerCategoryUpToDay: {
+                        [updatedTransaction.category]: {
+                            [transactionDay]: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
+                        }
+                    },
+                    mostExpensiveCategory: updatedTransaction.type === "Expense" ? {
+                        name: updatedTransaction.category,
+                        amount: updatedTransaction.amount
+                    } : ""
+                };
+
+                batch.set(monthDoc, statisticsData);
+            }
+            batch.commit();
+        })
+    } else {
+
+    }
+
+
+
+
+    // if (updatedTransaction == null) {
+    //     //Transaction was deleted
+
+    // } else {
+    //     //Transaction was either created or updated
+    //     const transactionDate = updatedTransaction.date.toDate();
+    //     const transactionDay = transactionDate.getDate();
+
+    //     const monthDocument = admin.firestore()
+    //         .collection("Wallets")
+    //         .doc(updatedTransaction.walletId)
+    //         .collection("Statistics")
+    //         .doc('' + transactionDate.getFullYear())
+    //         .collection("Months")
+    //         .doc(months[transactionDate.getMonth()]);
+
+    //     if (oldTransaction == null) {
+    //         //transaction is new
+    //         //Update wallet balance
+
+
+    //     } else {
+    //         //transaction is updated
+
+    //     }
+    // }
+});

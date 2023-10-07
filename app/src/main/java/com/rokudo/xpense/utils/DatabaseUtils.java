@@ -22,13 +22,13 @@ public class DatabaseUtils {
 
     public static CollectionReference getMonthsReference(String walletId, String year) {
         return walletsRef.document(walletId)
-                .collection("Statistics")
+                .collection("StatisticsV2")
                 .document(year)
-                .collection("Months");
+                .collection("MonthStatistics");
     }
 
     public static CollectionReference getTransactionsRef(String walletId) {
-        return walletsRef.document(walletId).collection("Transactions");
+        return walletsRef.document(walletId).collection("TransactionsV2");
     }
 
     public static CollectionReference invitationsRef = FirebaseFirestore.getInstance()
