@@ -377,62 +377,78 @@ exports.statisticsV2 = functions.firestore
 
         const batch = admin.firestore().batch();
 
-        if (oldTransaction == null) {
+        if (updatedTransaction == null) {
+            //Transaction Deleted
+        } else if (oldTransaction == null) {
+            //Transaction Created
             const transactionDate = updatedTransaction.date.toDate();
             const transactionDay = transactionDate.getDate();
 
-            const statisticsDocRef = admin.firestore()
-                .collection("Wallets")
-                .doc(updatedTransaction.walletId)
-                .collection("StatisticsV2")
-                .doc('' + transactionDate.getFullYear())
-                .collection("MonthStatistics")
-                .doc(months[transactionDate.getMonth()]);
+            const statisticsDocRef = getStatisticsDocRef(updatedTransaction, transactionDate);
 
+            const statisticsData = (await statisticsDocRef.get()).data();
 
-            const statisticsData = (await statisticsDocRef.get()).data() || {
-                latestUpdateTime: firestore.Timestamp.now(),
-                transactions: {
-                    [updatedTransaction.id]: updatedTransaction
-                },
-                categories: {
-                    [updatedTransaction.category]: {
-                        [updatedTransaction.id]: updatedTransaction
-                    }
-                },
-                amountByCategory: {
-                    [updatedTransaction.category]: updatedTransaction.amount
-                },
-                transactionsByDay: {
-                    [transactionDay]: {
-                        [updatedTransaction.id]: updatedTransaction
-                    }
-                },
-                totalAmountSpent: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0,
-                totalByDay: {
-                    [transactionDay]: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
-                },
-                totalPerCategoryPerDay: {
-                    [updatedTransaction.category]: {
-                        [transactionDay]: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
-                    }
-                },
-                totalPerCategoryUpToDay: {
-                    [updatedTransaction.category]: {
-                        [transactionDay]: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
-                    }
-                },
-                mostExpensiveCategory: updatedTransaction.type === "Expense" ? {
-                    name: updatedTransaction.category,
-                    amount: updatedTransaction.amount
-                } : ""
-            };
+            if (statisticsData) {
+                statisticsData.abc = "yeah we updatin";
+            } else {
+                statisticsData = initStatisticsDoc(updatedTransaction, transactionDay);
+            }
 
             await statisticsDocRef.set(statisticsData);
 
         } else {
-
+            //Transaction Updated
         }
 
         return null;
     });
+
+function getStatisticsDocRef(updatedTransaction, transactionDate) {
+    return admin.firestore()
+        .collection("Wallets")
+        .doc(updatedTransaction.walletId)
+        .collection("StatisticsV2")
+        .doc('' + transactionDate.getFullYear())
+        .collection("MonthStatistics")
+        .doc(months[transactionDate.getMonth()]);
+}
+
+function initStatisticsDoc(updatedTransaction, transactionDay) {
+    return {
+        latestUpdateTime: firestore.Timestamp.now(),
+        transactions: {
+            [updatedTransaction.id]: updatedTransaction
+        },
+        categories: {
+            [updatedTransaction.category]: {
+                [updatedTransaction.id]: updatedTransaction
+            }
+        },
+        amountByCategory: {
+            [updatedTransaction.category]: updatedTransaction.amount
+        },
+        transactionsByDay: {
+            [transactionDay]: {
+                [updatedTransaction.id]: updatedTransaction
+            }
+        },
+        totalAmountSpent: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0,
+        totalByDay: {
+            [transactionDay]: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
+        },
+        totalPerCategoryPerDay: {
+            [updatedTransaction.category]: {
+                [transactionDay]: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
+            }
+        },
+        totalPerCategoryUpToDay: {
+            [updatedTransaction.category]: {
+                [transactionDay]: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
+            }
+        },
+        mostExpensiveCategory: updatedTransaction.type === "Expense" ? {
+            name: updatedTransaction.category,
+            amount: updatedTransaction.amount
+        } : ""
+    };
+}
