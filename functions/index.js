@@ -379,6 +379,14 @@ exports.statisticsV2 = functions.firestore
 
         if (updatedTransaction == null) {
             //Transaction Deleted
+            const transactionDate = oldTransaction.date.toDate();
+            const transactionDay = transactionDate.getDate();
+
+            const statisticsDocRef = getStatisticsDocRef(oldTransaction, transactionDate);
+            const statisticsData = (await statisticsDocRef.get()).data();
+
+            //TODO Remove transaction, recalculate statistics
+
         } else if (oldTransaction == null) {
             //Transaction Created
             const transactionDate = updatedTransaction.date.toDate();
@@ -389,7 +397,7 @@ exports.statisticsV2 = functions.firestore
             const statisticsData = (await statisticsDocRef.get()).data();
 
             if (statisticsData) {
-                statisticsData.abc = "yeah we updatin";
+                updateStatisticsDocFields(statisticsData);
             } else {
                 statisticsData = initStatisticsDoc(updatedTransaction, transactionDay);
             }
@@ -403,6 +411,11 @@ exports.statisticsV2 = functions.firestore
         return null;
     });
 
+function updateStatisticsDocFields(statisticsData) {
+    statisticsData.latestUpdateTime = firestore.Timestamp.now();
+    // statisticsData.totalPerCategoryUpToDay[updatedTransaction.category][transactionDay] = updatedTransaction.amount;
+}
+
 function getStatisticsDocRef(updatedTransaction, transactionDate) {
     return admin.firestore()
         .collection("Wallets")
@@ -413,42 +426,47 @@ function getStatisticsDocRef(updatedTransaction, transactionDate) {
         .doc(months[transactionDate.getMonth()]);
 }
 
-function initStatisticsDoc(updatedTransaction, transactionDay) {
+function initStatisticsDoc(transaction, transactionDay) {
     return {
         latestUpdateTime: firestore.Timestamp.now(),
         transactions: {
-            [updatedTransaction.id]: updatedTransaction
+            [transaction.id]: transaction
         },
         categories: {
-            [updatedTransaction.category]: {
-                [updatedTransaction.id]: updatedTransaction
+            [transaction.category]: {
+                [transaction.id]: transaction
             }
         },
         amountByCategory: {
-            [updatedTransaction.category]: updatedTransaction.amount
+            [transaction.category]: transaction.amount
         },
         transactionsByDay: {
             [transactionDay]: {
-                [updatedTransaction.id]: updatedTransaction
+                [transaction.id]: transaction
             }
         },
-        totalAmountSpent: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0,
+        totalAmountSpent: transaction.type === "Expense" ? transaction.amount : 0,
         totalByDay: {
-            [transactionDay]: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
+            [transactionDay]: transaction.type === "Expense" ? transaction.amount : 0
         },
         totalPerCategoryPerDay: {
-            [updatedTransaction.category]: {
-                [transactionDay]: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
+            [transaction.category]: {
+                [transactionDay]: transaction.type === "Expense" ? transaction.amount : 0
             }
         },
         totalPerCategoryUpToDay: {
-            [updatedTransaction.category]: {
-                [transactionDay]: updatedTransaction.type === "Expense" ? updatedTransaction.amount : 0
+            [transaction.category]: {
+                [transactionDay]: transaction.type === "Expense" ? transaction.amount : 0
             }
         },
-        mostExpensiveCategory: updatedTransaction.type === "Expense" ? {
-            name: updatedTransaction.category,
-            amount: updatedTransaction.amount
+        mostExpensiveCategory: transaction.type === "Expense" ? {
+            name: transaction.category,
+            amount: transaction.amount
+        } : "",
+        mostExpensiveTransaction: transaction.type === "Expense" ? {
+            name: transaction.title,
+            amount: transaction.amount
         } : ""
+
     };
 }
