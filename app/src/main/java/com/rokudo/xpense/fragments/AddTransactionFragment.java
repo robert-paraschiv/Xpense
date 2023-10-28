@@ -167,7 +167,7 @@ public class AddTransactionFragment extends Fragment {
                     selectedCategory = CategoriesUtil.expenseCategoryList.get(
                             CategoriesUtil.expenseCategoryList
                                     .indexOf(transactionExpenseCategory));
-                } catch (ArrayIndexOutOfBoundsException ignored) {
+                } catch (IndexOutOfBoundsException ignored) {
                 }
 
 

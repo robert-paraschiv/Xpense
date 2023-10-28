@@ -169,7 +169,7 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                 hideChipGroup();
             }
             resetCategoriesRv();
-            loadTransactions(selectedDate, isYearMode);
+            loadTransactions(selectedDate);
         });
         binding.thisYearChip.setOnClickListener(v -> {
             binding.barChart.highlightValue(null);
@@ -184,7 +184,7 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
                 hideChipGroup();
             }
             resetCategoriesRv();
-            loadTransactions(selectedDate, isYearMode);
+            loadTransactions(selectedDate);
         });
 
         binding.barChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
@@ -565,7 +565,7 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
 
         hideChipGroup();
 
-        loadTransactions(date, isYearMode);
+        loadTransactions(date);
     }
 
     private void hideChipGroup() {
@@ -579,8 +579,8 @@ public class AnalyticsFragment extends Fragment implements OnTransClickListener 
         binding.dateChipCard.setVisibility(VISIBLE);
     }
 
-    private void loadTransactions(Date start, boolean isYearSelected) {
-        statisticsViewModel.loadStatisticsDoc(wallet.getId(), start, isYearSelected)
+    private void loadTransactions(Date start) {
+        statisticsViewModel.loadStatisticsDoc(wallet.getId(), start, isYearMode)
                 .observe(getViewLifecycleOwner(), statisticsDoc -> {
                     statisticsViewModel.setAnalyticsStoredStatisticsDoc(statisticsDoc);
                     if (statisticsDoc == null || statisticsDoc.getTransactions().isEmpty()) {

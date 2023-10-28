@@ -2,12 +2,15 @@ package com.rokudo.xpense.data.repositories;
 
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.rokudo.xpense.models.StatisticsDoc;
+import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.utils.DatabaseUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -44,16 +47,39 @@ public class StatisticsRepo {
 
         if (isYearStatisticsDoc) {
             DatabaseUtils.getYearReference(wallet, year)
-                    .get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot == null) {
+                    .collection("Months")
+                    .get().addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (queryDocumentSnapshots.isEmpty()) {
                             return;
                         }
-                        StatisticsDoc statisticsDoc = documentSnapshot.toObject(StatisticsDoc.class);
-                        if (statisticsDoc == null) {
-                            return;
+                        StatisticsDoc yearDoc = new StatisticsDoc();
+                        yearDoc.setCategories(new HashMap<>());
+                        yearDoc.setAmountByCategory(new HashMap<>());
+                        yearDoc.setTransactions(new HashMap<>());
+                        yearDoc.setTotalAmountSpent(0d);
+                        for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                            StatisticsDoc statisticsMonthDoc = doc.toObject(StatisticsDoc.class);
+                            if (statisticsMonthDoc == null) {
+                                continue;
+                            }
+                            yearDoc.setTotalAmountSpent(yearDoc.getTotalAmountSpent() + statisticsMonthDoc.getTotalAmountSpent());
+                            yearDoc.getTransactions().putAll(statisticsMonthDoc.getTransactions());
+                            for (String categoryKey : statisticsMonthDoc.getCategories().keySet()) {
+                                if (yearDoc.getCategories().containsKey(categoryKey)) {
+                                    yearDoc.getCategories().get(categoryKey).putAll(yearDoc.getCategories().get(categoryKey));
+                                } else {
+                                    yearDoc.getCategories().put(categoryKey, statisticsMonthDoc.getCategories().get(categoryKey));
+                                }
+                            }
+                            for (String category : statisticsMonthDoc.getAmountByCategory().keySet()) {
+                                if (yearDoc.getAmountByCategory().containsKey(category)) {
+                                    yearDoc.getAmountByCategory().put(category, yearDoc.getAmountByCategory().get(category) + statisticsMonthDoc.getAmountByCategory().get(category));
+                                } else {
+                                    yearDoc.getAmountByCategory().put(category, statisticsMonthDoc.getAmountByCategory().get(category));
+                                }
+                            }
                         }
-                        statisticsDocMutableLiveData.setValue(statisticsDoc);
+                        statisticsDocMutableLiveData.setValue(yearDoc);
                     });
 
         } else {
