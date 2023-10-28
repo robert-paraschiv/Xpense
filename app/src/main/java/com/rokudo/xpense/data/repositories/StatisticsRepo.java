@@ -57,6 +57,7 @@ public class StatisticsRepo {
                         yearDoc.setAmountByCategory(new HashMap<>());
                         yearDoc.setTransactions(new HashMap<>());
                         yearDoc.setTotalAmountSpent(0d);
+                        yearDoc.setTransactions(new HashMap<>());
                         for (DocumentSnapshot doc : queryDocumentSnapshots) {
                             StatisticsDoc statisticsMonthDoc = doc.toObject(StatisticsDoc.class);
                             if (statisticsMonthDoc == null) {
@@ -66,7 +67,7 @@ public class StatisticsRepo {
                             yearDoc.getTransactions().putAll(statisticsMonthDoc.getTransactions());
                             for (String categoryKey : statisticsMonthDoc.getCategories().keySet()) {
                                 if (yearDoc.getCategories().containsKey(categoryKey)) {
-                                    yearDoc.getCategories().get(categoryKey).putAll(yearDoc.getCategories().get(categoryKey));
+                                    yearDoc.getCategories().get(categoryKey).putAll(statisticsMonthDoc.getCategories().get(categoryKey));
                                 } else {
                                     yearDoc.getCategories().put(categoryKey, statisticsMonthDoc.getCategories().get(categoryKey));
                                 }
