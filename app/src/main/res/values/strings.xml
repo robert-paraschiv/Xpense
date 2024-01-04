@@ -23,6 +23,10 @@
     <string name="analytics_type">Analytics type</string>
     <string name="this_year">This Year</string>
     <string name="annually">Annually</string>
+    <string name="add_transaction_add_btn">Add</string>
+    <string name="add_transaction_update_btn">Update</string>
+    <string name="add_transaction_fragment_toolbar_new">New Transaction</string>
+    <string name="add_transaction_fragment_toolbar_edit">Edit Transaction</string>
     <integer name="transition_duration_millis">600</integer>
     <integer name="categories_insert_animation_duration">400</integer>
     <integer name="categories_insert_slide_right_animation_duration">400</integer>

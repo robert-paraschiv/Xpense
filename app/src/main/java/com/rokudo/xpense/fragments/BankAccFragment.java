@@ -109,7 +109,8 @@ public class BankAccFragment extends Fragment implements OnTransClickListener {
                 .getTransactions()
                 .values()
                 .forEach(transaction ->
-                        transByAmountMap.put(transaction.getAmount().toString(), transaction.getId()));
+                        transByAmountMap.put(transaction.getAmount().toString(), transaction.getId())
+                );
     }
 
     private void initOnClicks() {

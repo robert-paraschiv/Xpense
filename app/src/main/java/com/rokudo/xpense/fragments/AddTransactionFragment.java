@@ -107,7 +107,7 @@ public class AddTransactionFragment extends Fragment {
 
             binding.getRoot().setTransitionName(requireContext().getResources().getString(R.string.transition_name_add_transaction));
             binding.selectedTextDummy.setText("Expense Category");
-            binding.addTransToolbarTitle.setText("Add Transaction");
+            binding.addTransToolbarTitle.setText(requireContext().getString(R.string.add_transaction_fragment_toolbar_new));
             selectedCategory = CategoriesUtil.expenseCategoryList.get(0);
             binding.simpleDatePicker.setMaxDate(new Date().getTime());
 
@@ -127,20 +127,19 @@ public class AddTransactionFragment extends Fragment {
             mTransaction = args.getTransaction();
             binding.getRoot().setTransitionName("adjustBalance");
             if (args.getEditMode()) {
-                binding.addTransToolbarTitle.setText("Edit Transaction");
+                binding.addTransToolbarTitle.setText(requireContext().getString(R.string.add_transaction_fragment_toolbar_edit));
             } else {
-                binding.addTransToolbarTitle.setText("Add Transaction");
+                binding.addTransToolbarTitle.setText(requireContext().getString(R.string.add_transaction_fragment_toolbar_new));
             }
             binding.transactionAmount.setText(mTransaction.getAmount().toString());
             binding.transactionTitle.setText(mTransaction.getTitle());
 
             if (mTransaction.getDate() != null) {
                 LocalDate localDate = mTransaction.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-//            binding.simpleDatePicker.setMaxDate(new Date().getTime());
                 binding.simpleDatePicker.updateDate(localDate.getYear(), localDate.getMonthValue() - 1, localDate.getDayOfMonth());
             }
 
-            binding.saveTransactionBtn.setText("Save");
+            binding.saveTransactionBtn.setText(requireContext().getString(R.string.add_transaction_update_btn));
 
 
             if (mTransaction.getType().equals(INCOME_TYPE)) {

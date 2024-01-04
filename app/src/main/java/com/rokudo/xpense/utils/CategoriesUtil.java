@@ -53,6 +53,10 @@ public class CategoriesUtil {
                 R.drawable.baseline_theater_comedy_24,
                 rgb("#69F0AE")));
 
+        expenseCategoryList.add(new ExpenseCategory("Memeluș",
+                R.drawable.outline_child_care_24,
+                rgb("#e040fb")));
+
         expenseCategoryList.add(new ExpenseCategory("Income",
                 R.drawable.round_monetization_on_24,
                 rgb("#C0FF8C")));
