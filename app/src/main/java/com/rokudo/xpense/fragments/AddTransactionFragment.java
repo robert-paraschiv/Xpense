@@ -22,7 +22,6 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
-import com.google.android.material.chip.Chip;
 import com.google.android.material.transition.MaterialContainerTransform;
 import com.google.android.material.transition.MaterialSharedAxis;
 import com.google.firebase.firestore.DocumentReference;
@@ -33,6 +32,7 @@ import com.rokudo.xpense.models.ExpenseCategory;
 import com.rokudo.xpense.models.Transaction;
 import com.rokudo.xpense.utils.CategoriesUtil;
 import com.rokudo.xpense.utils.DatabaseUtils;
+import com.rokudo.xpense.utils.dialogs.CategoryDialog;
 import com.rokudo.xpense.utils.dialogs.ConfirmationDialog;
 import com.rokudo.xpense.utils.dialogs.UploadingDialog;
 
@@ -66,30 +66,12 @@ public class AddTransactionFragment extends Fragment {
 
             getWalletId();
             initOnClicks();
-            buildCategoriesRv();
             handleArgs();
 
             startPostponedEnterTransition();
         }
 
         return binding.getRoot();
-    }
-
-    private void buildCategoriesRv() {
-        for (int i = 0; i < CategoriesUtil.expenseCategoryList.size(); i++) {
-            ExpenseCategory category = CategoriesUtil.expenseCategoryList.get(i);
-            if (category.getName().equals("Income")) {
-                continue;
-            }
-            Chip chip = (Chip) getLayoutInflater().inflate(R.layout.item_category, binding.categoryChipGroup, false);
-            chip.setText(category.getName());
-            chip.setChipIconTint(ColorStateList.valueOf(CategoriesUtil.expenseCategoryList.get(i).getColor()));
-            chip.setChipIcon(ContextCompat.getDrawable(requireContext(), category.getResourceId()));
-            chip.setChipBackgroundColor(ColorStateList.valueOf(getResources().getColor(R.color.cards_bg_color, requireActivity().getTheme())));
-            chip.setElevation(0);
-
-            binding.categoryChipGroup.addView(chip);
-        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -106,7 +88,6 @@ public class AddTransactionFragment extends Fragment {
             setSharedElementEnterTransition(materialContainerTransform);
 
             binding.getRoot().setTransitionName(requireContext().getResources().getString(R.string.transition_name_add_transaction));
-            binding.selectedTextDummy.setText("Expense Category");
             binding.addTransToolbarTitle.setText(requireContext().getString(R.string.add_transaction_fragment_toolbar_new));
             selectedCategory = CategoriesUtil.expenseCategoryList.get(0);
             binding.simpleDatePicker.setMaxDate(new Date().getTime());
@@ -146,15 +127,13 @@ public class AddTransactionFragment extends Fragment {
                 binding.expenseChip.setChecked(false);
                 binding.incomeChip.setChecked(true);
                 selectedCategory = new ExpenseCategory("Income");
-                binding.selectedTextDummy.setVisibility(View.GONE);
-                binding.categoryChipGroup.setVisibility(View.GONE);
+                binding.selectedCategoryCard.setVisibility(View.GONE);
                 binding.cashSwitch.setVisibility(View.GONE);
             } else {
                 binding.expenseChip.setChecked(true);
                 binding.incomeChip.setChecked(false);
 
-                binding.selectedTextDummy.setVisibility(View.VISIBLE);
-                binding.categoryChipGroup.setVisibility(View.VISIBLE);
+                binding.selectedCategoryCard.setVisibility(View.VISIBLE);
                 binding.cashSwitch.setVisibility(View.VISIBLE);
 
                 if (mTransaction.getCategory() == null) {
@@ -166,18 +145,11 @@ public class AddTransactionFragment extends Fragment {
                     selectedCategory = CategoriesUtil.expenseCategoryList.get(
                             CategoriesUtil.expenseCategoryList
                                     .indexOf(transactionExpenseCategory));
+
+                    binding.selectedCategoryChip.setText(selectedCategory.getName());
+                    binding.selectedCategoryChip.setChipIconTint(ColorStateList.valueOf(selectedCategory.getColor()));
+                    binding.selectedCategoryChip.setChipIcon(ContextCompat.getDrawable(requireContext(), selectedCategory.getResourceId()));
                 } catch (IndexOutOfBoundsException ignored) {
-                }
-
-
-                if (selectedCategory != null) {
-                    for (int i = 0; i < binding.categoryChipGroup.getChildCount(); i++) {
-                        Chip chip = (Chip) binding.categoryChipGroup.getChildAt(i);
-                        if (i == CategoriesUtil.expenseCategoryList.indexOf(
-                                transactionExpenseCategory)) {
-                            chip.setChecked(true);
-                        }
-                    }
                 }
 
             }
@@ -217,48 +189,46 @@ public class AddTransactionFragment extends Fragment {
             });
         });
         binding.saveTransactionBtn.setOnClickListener(v -> addTransactionToDb());
-        binding.categoryChipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
-            Chip chip = group.findViewById(checkedIds.get(0));
-            if (chip != null)
-                selectedCategory = CategoriesUtil.expenseCategoryList.get(
-                        CategoriesUtil.expenseCategoryList.indexOf(
-                                new ExpenseCategory(chip.getText().toString())
-                        )
-                );
-        });
         binding.incomeChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 selectedCategory = new ExpenseCategory("Income");
-                binding.categoryChipGroup.setVisibility(View.GONE);
-                binding.selectedTextDummy.setVisibility(View.GONE);
+                binding.selectedCategoryCard.setVisibility(View.GONE);
                 binding.cashSwitch.setVisibility(View.GONE);
             }
         });
         binding.expenseChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 selectedCategory = null;
-                binding.selectedTextDummy.setVisibility(View.VISIBLE);
-                binding.categoryChipGroup.setVisibility(View.VISIBLE);
+                binding.selectedCategoryCard.setVisibility(View.VISIBLE);
                 binding.cashSwitch.setVisibility(View.VISIBLE);
             }
         });
         binding.transferChip.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 selectedCategory = new ExpenseCategory("Transfer");
-                binding.selectedTextDummy.setVisibility(View.GONE);
-                binding.categoryChipGroup.setVisibility(View.GONE);
+                binding.selectedCategoryCard.setVisibility(View.GONE);
                 binding.cashSwitch.setVisibility(View.GONE);
             }
+        });
+
+        binding.selectedCategoryCard.setOnClickListener(view -> {
+            CategoryDialog categoryDialog = new CategoryDialog(selectedCategory);
+            categoryDialog.showNow(requireFragmentManager(), "transactionCategoryDialog");
+            categoryDialog.setClickListener(expenseCategory -> {
+                selectedCategory = expenseCategory;
+                binding.selectedCategoryChip.setText(expenseCategory.getName());
+                binding.selectedCategoryChip.setChipIconTint(ColorStateList.valueOf(expenseCategory.getColor()));
+                binding.selectedCategoryChip.setChipIcon(ContextCompat.getDrawable(requireContext(), expenseCategory.getResourceId()));
+                categoryDialog.dismiss();
+            });
         });
     }
 
     private void addTransactionToDb() {
         if (selectedCategory == null) {
             binding.pleaseSelectTv.setVisibility(View.VISIBLE);
-            binding.selectedTextDummy.setVisibility(View.INVISIBLE);
             binding.getRoot().postDelayed(() -> {
                 binding.pleaseSelectTv.setVisibility(View.GONE);
-                binding.selectedTextDummy.setVisibility(View.VISIBLE);
             }, 1500);
             return;
         }
