@@ -1,5 +1,7 @@
 package com.rokudo.xpense.utils.dialogs;
 
+import static com.rokudo.xpense.utils.CategoriesUtil.expenseCategoryList;
+
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.res.ColorStateList;
@@ -27,7 +29,11 @@ public class CategoryDialog extends BottomSheetDialogFragment {
     }
 
     public CategoryDialog(ExpenseCategory selectedCategory) {
-        this.selectedCategory = selectedCategory;
+        if (selectedCategory == null) {
+            this.selectedCategory = expenseCategoryList.get(expenseCategoryList.indexOf(new ExpenseCategory("Groceries")));
+        } else {
+            this.selectedCategory = selectedCategory;
+        }
     }
 
     public void setClickListener(OnClickListener onClickListener) {
@@ -40,18 +46,18 @@ public class CategoryDialog extends BottomSheetDialogFragment {
         @SuppressLint("InflateParams") final View dialogView = getLayoutInflater().inflate(R.layout.dialog_expense_category, null);
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext(), R.style.CustomBottomSheetDialogTheme);
         ChipGroup categoryChipGroup = dialogView.findViewById(R.id.categoryChipGroup);
-        for (int i = 0; i < CategoriesUtil.expenseCategoryList.size(); i++) {
-            ExpenseCategory category = CategoriesUtil.expenseCategoryList.get(i);
+        for (int i = 0; i < expenseCategoryList.size(); i++) {
+            ExpenseCategory category = expenseCategoryList.get(i);
             if (category.getName().equals("Income")) {
                 continue;
             }
             Chip chip = (Chip) getLayoutInflater().inflate(R.layout.item_category, categoryChipGroup, false);
             chip.setText(category.getName());
-            chip.setChipIconTint(ColorStateList.valueOf(CategoriesUtil.expenseCategoryList.get(i).getColor()));
+            chip.setChipIconTint(ColorStateList.valueOf(expenseCategoryList.get(i).getColor()));
             chip.setChipIcon(ContextCompat.getDrawable(requireContext(), category.getResourceId()));
             chip.setChipBackgroundColor(ColorStateList.valueOf(getResources().getColor(R.color.cards_bg_color, requireActivity().getTheme())));
             chip.setElevation(0);
-            if (category.getName().equals(selectedCategory.getName())){
+            if (category.getName().equals(selectedCategory.getName())) {
                 chip.setChecked(true);
             }
 
@@ -61,8 +67,8 @@ public class CategoryDialog extends BottomSheetDialogFragment {
         categoryChipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
             Chip chip = group.findViewById(checkedIds.get(0));
             if (chip != null)
-                selectedCategory = CategoriesUtil.expenseCategoryList.get(
-                        CategoriesUtil.expenseCategoryList.indexOf(
+                selectedCategory = expenseCategoryList.get(
+                        expenseCategoryList.indexOf(
                                 new ExpenseCategory(chip.getText().toString())
                         )
                 );
