@@ -1,6 +1,6 @@
 package com.rokudo.xpense.fragments;
 
-import static com.rokudo.xpense.utils.NordigenUtils.TOKEN_PREFS_NAME;
+import static com.rokudo.xpense.utils.GoCardlessUtils.TOKEN_PREFS_NAME;
 
 import android.content.Context;
 import android.content.Intent;
@@ -29,7 +29,7 @@ import com.rokudo.xpense.data.viewmodels.BankApiViewModel;
 import com.rokudo.xpense.databinding.FragmentConnectToBankBinding;
 import com.rokudo.xpense.models.BAccount;
 import com.rokudo.xpense.utils.DatabaseUtils;
-import com.rokudo.xpense.utils.NordigenUtils;
+import com.rokudo.xpense.utils.GoCardlessUtils;
 import com.rokudo.xpense.utils.PrefsUtils;
 import com.rokudo.xpense.utils.dialogs.BankAccsListDialog;
 import com.rokudo.xpense.utils.dialogs.UploadingDialog;
@@ -130,8 +130,8 @@ public class SelectBankFragment extends Fragment implements BanksAdapter.OnBankT
             if (token == null) {
                 Log.d(TAG, "getToken: null");
             } else {
-                NordigenUtils.TOKEN_VAL = token.getAccess();
-                PrefsUtils.setToken(requireContext(), NordigenUtils.TOKEN_VAL);
+                GoCardlessUtils.TOKEN_VAL = token.getAccess();
+                PrefsUtils.setToken(requireContext(), GoCardlessUtils.TOKEN_VAL);
                 getInstitutionsList();
             }
         });

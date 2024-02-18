@@ -2,7 +2,7 @@ package com.rokudo.xpense.data.retrofit;
 
 import androidx.annotation.NonNull;
 
-import com.rokudo.xpense.utils.NordigenUtils;
+import com.rokudo.xpense.utils.GoCardlessUtils;
 
 import java.io.IOException;
 
@@ -18,7 +18,7 @@ public class TokenInterceptor implements Interceptor {
 
         //rewrite the request to add bearer token
         Request newRequest = chain.request().newBuilder()
-                .header("Authorization", "Bearer " + NordigenUtils.TOKEN_VAL)
+                .header("Authorization", "Bearer " + GoCardlessUtils.TOKEN_VAL)
                 .build();
 
         return chain.proceed(newRequest);

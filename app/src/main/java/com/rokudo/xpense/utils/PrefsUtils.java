@@ -1,6 +1,6 @@
 package com.rokudo.xpense.utils;
 
-import static com.rokudo.xpense.utils.NordigenUtils.TOKEN_PREFS_NAME;
+import static com.rokudo.xpense.utils.GoCardlessUtils.TOKEN_PREFS_NAME;
 
 import android.content.Context;
 import android.content.SharedPreferences;

@@ -9,7 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class RetrofitClientInstance {
     private static Retrofit retrofit;
 
-    private static final String BASE_URL = "https://ob.nordigen.com";
+    private static final String BASE_URL = "https://bankaccountdata.gocardless.com";
 
     public static Retrofit geInstance() {
         if (retrofit == null) {

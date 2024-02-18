@@ -18,7 +18,7 @@ import com.rokudo.xpense.data.retrofit.models.RequisitionsResult;
 import com.rokudo.xpense.data.retrofit.models.Token;
 import com.rokudo.xpense.data.retrofit.models.TransactionsResponse;
 import com.rokudo.xpense.utils.DatabaseUtils;
-import com.rokudo.xpense.utils.NordigenUtils;
+import com.rokudo.xpense.utils.GoCardlessUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,7 +26,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import okhttp3.ResponseBody;
@@ -58,14 +57,14 @@ public class BankApiRepo {
     }
 
     public MutableLiveData<Token> getToken() {
-        service.getToken(NordigenUtils.NORDIGEN_SECRET_KEY_ID, NordigenUtils.NORDIGEN_SECRET_KEY)
+        service.getToken(GoCardlessUtils.GOCARDLESS_SECRET_KEY_ID, GoCardlessUtils.GOCARDLESS_SECRET_KEY)
                 .enqueue(new Callback<Token>() {
                     @Override
                     public void onResponse(@NonNull Call<Token> call, @NonNull Response<Token> response) {
                         Log.d(TAG, "onResponse: ");
                         if (response.isSuccessful()) {
                             if (response.body() != null) {
-                                NordigenUtils.TOKEN_VAL = response.body().getAccess();
+                                GoCardlessUtils.TOKEN_VAL = response.body().getAccess();
                                 tokenMutableLiveData.setValue(response.body());
                             }
                         }
@@ -256,16 +255,16 @@ public class BankApiRepo {
     public MutableLiveData<Balances> getAccountBalances(String account_id) {
 //        MutableLiveData<Balances> balancesMutableLiveData = new MutableLiveData<>();
 
-        if (NordigenUtils.TOKEN_VAL.isEmpty()) {
+        if (GoCardlessUtils.TOKEN_VAL.isEmpty()) {
 
-            service.getToken(NordigenUtils.NORDIGEN_SECRET_KEY_ID, NordigenUtils.NORDIGEN_SECRET_KEY)
+            service.getToken(GoCardlessUtils.GOCARDLESS_SECRET_KEY_ID, GoCardlessUtils.GOCARDLESS_SECRET_KEY)
                     .enqueue(new Callback<Token>() {
                         @Override
                         public void onResponse(@NonNull Call<Token> call, @NonNull Response<Token> response) {
                             Log.d(TAG, "onResponse: ");
                             if (response.isSuccessful()) {
                                 if (response.body() != null) {
-                                    NordigenUtils.TOKEN_VAL = response.body().getAccess();
+                                    GoCardlessUtils.TOKEN_VAL = response.body().getAccess();
                                     tokenMutableLiveData.setValue(response.body());
 
                                     getAccountBalances(account_id);
