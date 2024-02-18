@@ -72,9 +72,8 @@ public class CategoryDialog extends BottomSheetDialogFragment {
                                 new ExpenseCategory(chip.getText().toString())
                         )
                 );
+            onClickListener.onSaveClick(selectedCategory);
         });
-
-        dialogView.findViewById(R.id.updateCategoryBtn).setOnClickListener(view -> onClickListener.onSaveClick(selectedCategory));
 
         bottomSheetDialog.setContentView(dialogView);
         bottomSheetDialog.show();
