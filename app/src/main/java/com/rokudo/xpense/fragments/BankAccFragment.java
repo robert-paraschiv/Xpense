@@ -294,8 +294,10 @@ public class BankAccFragment extends Fragment implements OnTransClickListener {
     }
 
 
-    @NonNull
     private Date getCreationDate(BAccount bAccount) {
+        if (bAccount.getEUA_EndDate() == null) {
+            return null;
+        }
         return new Date(bAccount.getEUA_EndDate().getTime() - Duration.ofDays(90).toMillis());
     }
 

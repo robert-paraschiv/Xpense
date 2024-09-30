@@ -11,11 +11,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
+import androidx.work.Configuration;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.rokudo.xpense.R;
@@ -49,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
         PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest
                 .Builder(ApiSyncWorker.class, 15, TimeUnit.MINUTES)
                 .build();
+        FirebaseApp.initializeApp(this);
+//        WorkManager.initialize(this, new Configuration.Builder().build());
 
         WorkManager.getInstance(this)
                 .enqueueUniquePeriodicWork("workieworkie", ExistingPeriodicWorkPolicy.KEEP, periodicWorkRequest);
