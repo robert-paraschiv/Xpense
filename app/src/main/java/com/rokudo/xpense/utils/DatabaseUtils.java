@@ -15,12 +15,18 @@ public class DatabaseUtils {
             .collection("Wallets");
 
     public static DocumentReference getYearReference(String walletId, String year) {
+        if (walletId == null || walletId.isEmpty()) {
+            throw new IllegalArgumentException("Wallet ID cannot be null or empty");
+        }
         return walletsRef.document(walletId)
                 .collection("Statistics")
                 .document(year);
     }
 
     public static CollectionReference getMonthsReference(String walletId, String year) {
+        if (walletId == null || walletId.isEmpty()) {
+            throw new IllegalArgumentException("Wallet ID cannot be null or empty");
+        }
         return walletsRef.document(walletId)
                 .collection("Statistics")
                 .document(year)
@@ -28,6 +34,9 @@ public class DatabaseUtils {
     }
 
     public static CollectionReference getTransactionsRef(String walletId) {
+        if (walletId == null || walletId.isEmpty()) {
+            throw new IllegalArgumentException("Wallet ID cannot be null or empty");
+        }
         return walletsRef.document(walletId).collection("Transactions");
     }
 

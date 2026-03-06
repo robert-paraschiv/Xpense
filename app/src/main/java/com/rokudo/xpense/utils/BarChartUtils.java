@@ -64,7 +64,10 @@ public class BarChartUtils {
         List<String> days = new ArrayList<>();
 
         for (Transaction transaction : transactionList) {
-            if (transaction.getType().equals(Transaction.INCOME_TYPE)) {
+            if (transaction.getDate() == null) {
+                continue;
+            }
+            if (transaction.getType() == null || transaction.getType().equals(Transaction.INCOME_TYPE)) {
                 continue;
             }
 

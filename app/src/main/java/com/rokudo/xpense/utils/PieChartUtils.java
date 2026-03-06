@@ -55,6 +55,11 @@ public class PieChartUtils {
     public static void updatePieChartData(PieChart pieChart, String currency,
                                           Map<String, Double> categories, Double sum, boolean isCalledFromHome) {
 
+        if (categories == null || categories.isEmpty() || sum == null || sum == 0) {
+            pieChart.clear();
+            pieChart.invalidate();
+            return;
+        }
 
         ArrayList<PieEntry> entries = getPieEntries(categories, sum);
         PieDataSet dataSet = new PieDataSet(entries, "");
