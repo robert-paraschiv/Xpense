@@ -339,12 +339,45 @@ private fun SettingsDestination(navController: NavHostController, activityVmOwne
     val transactionViewModel: TransactionViewModel = viewModel(viewModelStoreOwner = activityVmOwner)
     val walletsViewModel: WalletsViewModel = viewModel(viewModelStoreOwner = activityVmOwner)
 
-    val currentUser = DatabaseUtils.getCurrentUser()
-    val invitations by invitesViewModel.loadInvitations().observeAsState(emptyList())
+    // Observe the current user reactively from Firestore
+    var userName by remember { mutableStateOf(DatabaseUtils.getCurrentUser()?.name ?: "User") }
+    var userPicUrl by remember { mutableStateOf(DatabaseUtils.getCurrentUser()?.pictureUrl) }
+
+    DisposableEffect(Unit) {
+        val firebaseUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+        val phoneNumber = firebaseUser?.phoneNumber
+        val registration = if (phoneNumber != null) {
+            DatabaseUtils.usersRef.document(phoneNumber)
+                .addSnapshotListener { snapshot, _ ->
+                    if (snapshot != null && snapshot.exists()) {
+                        val user = snapshot.toObject(com.rokudo.xpense.models.User::class.java)
+                        if (user != null) {
+                            userName = user.name ?: "User"
+                            userPicUrl = user.pictureUrl
+                            // Keep static reference in sync
+                            user.uid = firebaseUser.uid
+                            user.phoneNumber = phoneNumber
+                            DatabaseUtils.setCurrentUser(user)
+                        }
+                    }
+                }
+        } else null
+        onDispose { registration?.remove() }
+    }
+
+    // Re-load invitations whenever the user becomes available
+    val invitationsLiveData = remember(userName) { invitesViewModel.loadInvitations() }
+    val invitations by invitationsLiveData.observeAsState(emptyList())
 
     val pendingInvitations = invitations.filter {
         it.status != Invitation.STATUS_ACCEPTED && it.status != Invitation.STATUS_DECLINED
     }
+
+    val walletsList by walletsViewModel.loadWallets().observeAsState(arrayListOf())
+    var showWalletManager by remember { mutableStateOf(false) }
+
+    val firebaseUser = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser }
+    val userPhoneNumber = firebaseUser?.phoneNumber
 
     val galleryLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -357,8 +390,9 @@ private fun SettingsDestination(navController: NavHostController, activityVmOwne
     }
 
     SettingsScreen(
-        userName = currentUser?.name ?: "User",
-        userProfilePicUrl = currentUser?.pictureUrl,
+        userName = userName,
+        userProfilePicUrl = userPicUrl,
+        userPhoneNumber = userPhoneNumber,
         invitations = pendingInvitations,
         onBackClick = { navController.popBackStack() },
         onSignOutClick = {
@@ -368,8 +402,21 @@ private fun SettingsDestination(navController: NavHostController, activityVmOwne
             FirebaseAuth.getInstance().signOut()
         },
         onProfilePictureClick = {
-            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            val intent = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             galleryLauncher.launch(intent)
+        },
+        onManageWalletsClick = {
+            showWalletManager = true
+        },
+        onNotificationsClick = {
+            try {
+                val intent = Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
+                }
+                context.startActivity(intent)
+            } catch (_: Exception) {
+                Toast.makeText(context, "Unable to open notification settings", Toast.LENGTH_SHORT).show()
+            }
         },
         onAcceptInvitation = { invitation ->
             invitesViewModel.updateStatus(invitation.id, Invitation.STATUS_ACCEPTED)
@@ -380,6 +427,25 @@ private fun SettingsDestination(navController: NavHostController, activityVmOwne
             Toast.makeText(context, "Invitation declined", Toast.LENGTH_SHORT).show()
         }
     )
+
+    if (showWalletManager) {
+        WalletPickerSheet(
+            wallets = walletsList,
+            onWalletClick = { w ->
+                showWalletManager = false
+                PrefsUtils.setSelectedWalletId(context, w.id)
+            },
+            onAddClick = {
+                showWalletManager = false
+                navController.navigate(Screen.EditWallet.createRoute())
+            },
+            onEditClick = { w ->
+                showWalletManager = false
+                navController.navigate(Screen.EditWallet.createRoute(w.id))
+            },
+            onDismiss = { showWalletManager = false }
+        )
+    }
 }
 
 private fun uploadProfilePicture(context: android.content.Context, imageUri: android.net.Uri) {

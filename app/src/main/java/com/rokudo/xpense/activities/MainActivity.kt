@@ -15,6 +15,7 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.rokudo.xpense.data.viewmodels.BankApiViewModel
 import com.rokudo.xpense.models.BAccount
+import com.rokudo.xpense.models.User
 import com.rokudo.xpense.navigation.XpenseNavGraph
 import com.rokudo.xpense.ui.theme.XpenseTheme
 import com.rokudo.xpense.utils.DatabaseUtils
@@ -58,6 +59,7 @@ class MainActivity : ComponentActivity() {
         bankApiViewModel = ViewModelProvider(this)[BankApiViewModel::class.java]
 
         setupFirebaseAuth()
+        loadCurrentUser()
         handleIntent(intent)
 
         setContent {
@@ -66,6 +68,24 @@ class MainActivity : ComponentActivity() {
                 XpenseNavGraph(navController = navController)
             }
         }
+    }
+
+    private fun loadCurrentUser() {
+        val firebaseUser = FirebaseAuth.getInstance().currentUser ?: return
+        val phoneNumber = firebaseUser.phoneNumber ?: return
+        DatabaseUtils.usersRef.document(phoneNumber)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null || !snapshot.exists()) {
+                    Log.d(TAG, "loadCurrentUser: user doc not found or error")
+                    return@addSnapshotListener
+                }
+                val user = snapshot.toObject(User::class.java)
+                if (user != null) {
+                    user.uid = firebaseUser.uid
+                    user.phoneNumber = phoneNumber
+                    DatabaseUtils.setCurrentUser(user)
+                }
+            }
     }
 
     private fun handleIntent(intent: Intent?) {

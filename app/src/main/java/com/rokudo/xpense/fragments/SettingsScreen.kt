@@ -14,6 +14,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,13 +39,18 @@ import com.rokudo.xpense.ui.theme.XpenseTheme
 fun SettingsScreen(
     userName: String,
     userProfilePicUrl: String?,
+    userPhoneNumber: String?,
     invitations: List<Invitation>,
     onBackClick: () -> Unit,
     onSignOutClick: () -> Unit,
     onProfilePictureClick: () -> Unit,
+    onManageWalletsClick: () -> Unit,
+    onNotificationsClick: () -> Unit,
     onAcceptInvitation: (Invitation) -> Unit,
     onDeclineInvitation: (Invitation) -> Unit
 ) {
+    var showAboutDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -83,8 +92,15 @@ fun SettingsScreen(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
+                        if (userPhoneNumber != null) {
+                            Text(
+                                text = userPhoneNumber,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                         Text(
-                            text = "Edit profile",
+                            text = "Change photo",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -106,7 +122,7 @@ fun SettingsScreen(
                     SettingsRow(
                         icon = Icons.Filled.AccountBalanceWallet,
                         title = "Manage Wallets",
-                        onClick = {}
+                        onClick = onManageWalletsClick
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
@@ -116,7 +132,7 @@ fun SettingsScreen(
                     SettingsRow(
                         icon = Icons.Filled.People,
                         title = "Shared Wallets",
-                        onClick = {}
+                        onClick = onManageWalletsClick
                     )
                 }
             }
@@ -135,7 +151,7 @@ fun SettingsScreen(
                     SettingsRow(
                         icon = Icons.Filled.Notifications,
                         title = "Notifications",
-                        onClick = {}
+                        onClick = onNotificationsClick
                     )
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
@@ -146,7 +162,7 @@ fun SettingsScreen(
                         icon = Icons.Filled.Info,
                         title = "About",
                         subtitle = "Version 1.0",
-                        onClick = {}
+                        onClick = { showAboutDialog = true }
                     )
                 }
             }
@@ -202,6 +218,37 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
         }
+    }
+
+    if (showAboutDialog) {
+        AlertDialog(
+            onDismissRequest = { showAboutDialog = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.AccountBalanceWallet,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            },
+            title = {
+                Text("Xpense", fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("Version 1.0")
+                    Text(
+                        "A personal finance tracker to manage your wallets, track expenses, and monitor your spending habits.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showAboutDialog = false }) {
+                    Text("OK")
+                }
+            }
+        )
     }
 }
 
@@ -260,10 +307,13 @@ fun SettingsScreenPreview() {
         SettingsScreen(
             userName = "Alex Johnson",
             userProfilePicUrl = null,
+            userPhoneNumber = "+1234567890",
             invitations = mockInvitations,
             onBackClick = {},
             onSignOutClick = {},
             onProfilePictureClick = {},
+            onManageWalletsClick = {},
+            onNotificationsClick = {},
             onAcceptInvitation = {},
             onDeclineInvitation = {}
         )
