@@ -18,6 +18,7 @@ import com.rokudo.xpense.models.Transaction
 import com.rokudo.xpense.utils.dialogs.TimedDialog
 import java.text.SimpleDateFormat
 import java.util.*
+import com.rokudo.xpense.ui.theme.XpenseTheme
 
 class BankAccFragment : Fragment() {
 
@@ -39,6 +40,7 @@ class BankAccFragment : Fragment() {
 
         return ComposeView(requireContext()).apply {
             setContent {
+                XpenseTheme {
                 var balance by remember { mutableStateOf<String?>(null) }
                 var transactions by remember { mutableStateOf<List<Transaction>>(emptyList()) }
                 var isLoading by remember { mutableStateOf(true) }
@@ -136,6 +138,7 @@ class BankAccFragment : Fragment() {
                         loadAccountData()
                     }
                 )
+                } // XpenseTheme
             }
         }
     }

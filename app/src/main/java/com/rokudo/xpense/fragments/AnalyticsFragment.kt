@@ -19,6 +19,7 @@ import com.rokudo.xpense.utils.CategoriesUtil
 import com.rokudo.xpense.utils.DateUtils
 import com.rokudo.xpense.utils.MapUtil
 import java.util.*
+import com.rokudo.xpense.ui.theme.XpenseTheme
 
 class AnalyticsFragment : Fragment() {
 
@@ -39,6 +40,7 @@ class AnalyticsFragment : Fragment() {
 
         return ComposeView(requireContext()).apply {
             setContent {
+                XpenseTheme {
                 var isYearMode by remember { mutableStateOf(false) }
                 var showBarChart by remember { mutableStateOf(showBarChartInitially) }
                 var selectedDate by remember { mutableStateOf(Date()) }
@@ -128,6 +130,7 @@ class AnalyticsFragment : Fragment() {
                         findNavController().navigate(action)
                     }
                 )
+                } // XpenseTheme
             }
         }
     }

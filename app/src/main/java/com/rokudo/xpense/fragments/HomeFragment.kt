@@ -33,6 +33,7 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import com.rokudo.xpense.ui.theme.XpenseTheme
 
 class HomeFragment : Fragment() {
 
@@ -53,6 +54,7 @@ class HomeFragment : Fragment() {
 
         return ComposeView(requireContext()).apply {
             setContent {
+                XpenseTheme {
                 val context = LocalContext.current
                 val prefs = context.getSharedPreferences("PREFS_NAME", Context.MODE_PRIVATE)
 
@@ -227,6 +229,7 @@ class HomeFragment : Fragment() {
                         }
                     }
                 )
+                } // XpenseTheme
             }
         }
     }

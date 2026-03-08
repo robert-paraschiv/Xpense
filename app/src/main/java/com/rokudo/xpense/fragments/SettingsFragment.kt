@@ -28,6 +28,7 @@ import com.rokudo.xpense.utils.DatabaseUtils
 import com.rokudo.xpense.utils.PrefsUtils
 import com.rokudo.xpense.utils.RotateBitmap
 import com.rokudo.xpense.utils.dialogs.UploadingDialog
+import com.rokudo.xpense.ui.theme.XpenseTheme
 import java.io.ByteArrayOutputStream
 
 class SettingsFragment : Fragment() {
@@ -58,6 +59,7 @@ class SettingsFragment : Fragment() {
 
         return ComposeView(requireContext()).apply {
             setContent {
+                XpenseTheme {
                 val context = LocalContext.current
 
                 val currentUser = DatabaseUtils.getCurrentUser()
@@ -92,6 +94,7 @@ class SettingsFragment : Fragment() {
                         Toast.makeText(context, "Invitation declined", Toast.LENGTH_SHORT).show()
                     }
                 )
+                } // XpenseTheme
             }
         }
     }

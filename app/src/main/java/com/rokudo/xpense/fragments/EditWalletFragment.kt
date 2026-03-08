@@ -15,6 +15,7 @@ import com.rokudo.xpense.utils.DatabaseUtils
 import com.rokudo.xpense.utils.PrefsUtils
 import com.rokudo.xpense.utils.dialogs.ConfirmationDialog
 import java.util.*
+import com.rokudo.xpense.ui.theme.XpenseTheme
 
 class EditWalletFragment : Fragment() {
 
@@ -40,6 +41,7 @@ class EditWalletFragment : Fragment() {
 
         return ComposeView(requireContext()).apply {
             setContent {
+                XpenseTheme {
                 val currencies = listOf("$", "€", "£", "₹", "¥", "₽", "lei", "CHF")
 
                 EditWalletScreen(
@@ -92,6 +94,7 @@ class EditWalletFragment : Fragment() {
                         }
                     }
                 )
+                } // XpenseTheme
             }
         }
     }

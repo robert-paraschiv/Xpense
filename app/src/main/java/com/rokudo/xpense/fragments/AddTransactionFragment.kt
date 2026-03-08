@@ -16,6 +16,7 @@ import com.rokudo.xpense.data.viewmodels.AddTransactionEvent
 import com.rokudo.xpense.data.viewmodels.AddTransactionViewModel
 import com.rokudo.xpense.utils.dialogs.CategoryDialog
 import com.rokudo.xpense.utils.dialogs.ConfirmationDialog
+import com.rokudo.xpense.ui.theme.XpenseTheme
 import kotlinx.coroutines.launch
 
 class AddTransactionFragment : Fragment() {
@@ -73,11 +74,13 @@ class AddTransactionFragment : Fragment() {
 
         return ComposeView(requireContext()).apply {
             setContent {
-                val state by viewModel.state.collectAsState()
-                AddTransactionScreen(
-                    state = state,
-                    onEvent = viewModel::onEvent
-                )
+                XpenseTheme {
+                    val state by viewModel.state.collectAsState()
+                    AddTransactionScreen(
+                        state = state,
+                        onEvent = viewModel::onEvent
+                    )
+                }
             }
         }
     }

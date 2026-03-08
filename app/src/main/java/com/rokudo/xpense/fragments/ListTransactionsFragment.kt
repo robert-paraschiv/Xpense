@@ -15,6 +15,7 @@ import com.rokudo.xpense.utils.DateUtils
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.*
+import com.rokudo.xpense.ui.theme.XpenseTheme
 
 class ListTransactionsFragment : Fragment() {
 
@@ -35,6 +36,7 @@ class ListTransactionsFragment : Fragment() {
 
         return ComposeView(requireContext()).apply {
             setContent {
+                XpenseTheme {
                 var selectedMonth by remember { mutableStateOf(DateUtils.monthYearFormat.format(Date())) }
                 var transactions by remember { mutableStateOf<List<Transaction>>(emptyList()) }
 
@@ -93,6 +95,7 @@ class ListTransactionsFragment : Fragment() {
                         findNavController().navigate(action)
                     }
                 )
+                } // XpenseTheme
             }
         }
     }

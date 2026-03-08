@@ -5,12 +5,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.rokudo.xpense.ui.theme.XpenseTheme
 
 @Composable
 fun UserDetailsScreen(
@@ -21,7 +20,7 @@ fun UserDetailsScreen(
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color(0xFFEBF1F8)
+        color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
@@ -32,7 +31,7 @@ fun UserDetailsScreen(
         ) {
             Text(
                 text = "Complete Your Profile",
-                fontSize = 28.sp,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -41,8 +40,8 @@ fun UserDetailsScreen(
 
             Text(
                 text = "Let's get to know you better",
-                fontSize = 16.sp,
-                color = Color.Gray,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
 
@@ -55,7 +54,14 @@ fun UserDetailsScreen(
                 placeholder = { Text("John Doe") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                enabled = !isLoading
+                enabled = !isLoading,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                ),
+                shape = MaterialTheme.shapes.medium
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -64,16 +70,18 @@ fun UserDetailsScreen(
                 onClick = onDone,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp),
-                enabled = !isLoading && name.trim().isNotEmpty()
+                    .height(52.dp),
+                enabled = !isLoading && name.trim().isNotEmpty(),
+                shape = MaterialTheme.shapes.medium
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Done")
+                    Text("Done", style = MaterialTheme.typography.labelLarge)
                 }
             }
         }
@@ -83,11 +91,12 @@ fun UserDetailsScreen(
 @Preview(showBackground = true)
 @Composable
 fun UserDetailsScreenPreview() {
-    UserDetailsScreen(
-        name = "",
-        isLoading = false,
-        onNameChange = {},
-        onDone = {}
-    )
+    XpenseTheme(dynamicColor = false) {
+        UserDetailsScreen(
+            name = "",
+            isLoading = false,
+            onNameChange = {},
+            onDone = {}
+        )
+    }
 }
-

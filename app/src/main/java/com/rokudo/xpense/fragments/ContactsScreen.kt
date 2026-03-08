@@ -1,29 +1,31 @@
 package com.rokudo.xpense.fragments
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.rokudo.xpense.R
+import com.rokudo.xpense.components.EmptyState
+import com.rokudo.xpense.components.LoadingState
+import com.rokudo.xpense.components.XpenseCard
+import com.rokudo.xpense.components.XpenseTopAppBar
 import com.rokudo.xpense.models.User
+import com.rokudo.xpense.ui.theme.XpenseTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,86 +37,58 @@ fun ContactsScreen(
     onContactClick: (User) -> Unit
 ) {
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text("Invite Contacts") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-                    }
-                },
+            XpenseTopAppBar(
+                title = "Invite Contacts",
+                onBackClick = onBackClick,
                 actions = {
                     TextButton(onClick = onRefreshClick) {
-                        Text("Refresh")
+                        Text("Refresh", color = MaterialTheme.colorScheme.primary)
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF9FCFF)
-                )
+                }
             )
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFEBF1F8))
+                .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues)
         ) {
             // Info Card
-            Card(
+            XpenseCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFFFF9C4)
-                )
+                    .padding(16.dp)
             ) {
                 Text(
                     text = "Note: Contacts must have an Xpense account to appear in this list",
                     modifier = Modifier.padding(16.dp),
-                    fontSize = 14.sp,
-                    textAlign = TextAlign.Center
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
-            when {
-                isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-                contacts.isEmpty() -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_baseline_person_24),
-                                contentDescription = null,
-                                modifier = Modifier.size(64.dp),
-                                tint = Color.Gray
-                            )
-                            Text(
-                                "No contacts found",
-                                color = Color.Gray,
-                                fontSize = 16.sp
-                            )
-                            Text(
-                                "Grant contacts permission and refresh",
-                                color = Color.Gray,
-                                fontSize = 12.sp
-                            )
-                        }
-                    }
-                }
-                else -> {
+            Box(modifier = Modifier.fillMaxSize()) {
+                LoadingState(
+                    isLoading = isLoading,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                EmptyState(
+                    visible = !isLoading && contacts.isEmpty(),
+                    title = "No contacts found",
+                    subtitle = "Grant contacts permission and refresh",
+                    iconResId = R.drawable.ic_baseline_person_24
+                )
+
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = !isLoading && contacts.isNotEmpty(),
+                    enter = fadeIn(tween(400)),
+                    exit = fadeOut(tween(300))
+                ) {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(16.dp),
@@ -138,13 +112,9 @@ fun ContactItem(
     user: User,
     onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF9FCFF)
-        )
+    XpenseCard(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier
@@ -167,13 +137,14 @@ fun ContactItem(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = user.name ?: "Unknown",
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = user.phoneNumber ?: "",
-                    fontSize = 12.sp,
-                    color = Color.Gray
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -202,36 +173,41 @@ fun ContactsScreenPreview() {
         }
     )
 
-    ContactsScreen(
-        contacts = mockContacts,
-        isLoading = false,
-        onBackClick = {},
-        onRefreshClick = {},
-        onContactClick = {}
-    )
+    XpenseTheme(dynamicColor = false) {
+        ContactsScreen(
+            contacts = mockContacts,
+            isLoading = false,
+            onBackClick = {},
+            onRefreshClick = {},
+            onContactClick = {}
+        )
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun ContactsScreenEmptyPreview() {
-    ContactsScreen(
-        contacts = emptyList(),
-        isLoading = false,
-        onBackClick = {},
-        onRefreshClick = {},
-        onContactClick = {}
-    )
+    XpenseTheme(dynamicColor = false) {
+        ContactsScreen(
+            contacts = emptyList(),
+            isLoading = false,
+            onBackClick = {},
+            onRefreshClick = {},
+            onContactClick = {}
+        )
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun ContactsScreenLoadingPreview() {
-    ContactsScreen(
-        contacts = emptyList(),
-        isLoading = true,
-        onBackClick = {},
-        onRefreshClick = {},
-        onContactClick = {}
-    )
+    XpenseTheme(dynamicColor = false) {
+        ContactsScreen(
+            contacts = emptyList(),
+            isLoading = true,
+            onBackClick = {},
+            onRefreshClick = {},
+            onContactClick = {}
+        )
+    }
 }
-

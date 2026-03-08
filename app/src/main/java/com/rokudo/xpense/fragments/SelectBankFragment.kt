@@ -28,6 +28,7 @@ import com.rokudo.xpense.utils.dialogs.BankAccsListDialog
 import com.rokudo.xpense.utils.dialogs.UploadingDialog
 import java.time.Duration
 import java.util.*
+import com.rokudo.xpense.ui.theme.XpenseTheme
 
 class SelectBankFragment : Fragment() {
 
@@ -52,6 +53,7 @@ class SelectBankFragment : Fragment() {
 
         return ComposeView(requireContext()).apply {
             setContent {
+                XpenseTheme {
                 var banks by remember { mutableStateOf<List<Institution>>(emptyList()) }
                 var isLoading by remember { mutableStateOf(true) }
 
@@ -79,6 +81,7 @@ class SelectBankFragment : Fragment() {
                         handleBankSelection(institution)
                     }
                 )
+                } // XpenseTheme
             }
         }
     }

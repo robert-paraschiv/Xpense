@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,21 +16,21 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.github.mikephil.charting.charts.BarChart
-import com.rokudo.xpense.R
+import com.rokudo.xpense.components.XpenseCard
+import com.rokudo.xpense.components.XpenseTopAppBar
 import com.rokudo.xpense.data.viewmodels.TransactionViewModel
 import com.rokudo.xpense.models.Transaction
 import com.rokudo.xpense.models.Wallet
+import com.rokudo.xpense.ui.theme.IncomeGreen
+import com.rokudo.xpense.ui.theme.XpenseTheme
 import com.rokudo.xpense.utils.BarChartUtils
 import java.util.*
 
@@ -48,16 +50,18 @@ class BarDetailsFragment : Fragment() {
 
         return ComposeView(requireContext()).apply {
             setContent {
-                val (startDate, endDate) = remember { calculateLast7Days() }
-                val transactions by transactionViewModel.loadTransactionsDateInterval(wallet.id, startDate, endDate).observeAsState(emptyList())
+                XpenseTheme {
+                    val (startDate, endDate) = remember { calculateLast7Days() }
+                    val transactions by transactionViewModel.loadTransactionsDateInterval(wallet.id, startDate, endDate).observeAsState(emptyList())
 
-                BarDetailsScreen(
-                    wallet = wallet,
-                    transactions = transactions,
-                    onBackClick = {
-                        findNavController().popBackStack()
-                    }
-                )
+                    BarDetailsScreen(
+                        wallet = wallet,
+                        transactions = transactions,
+                        onBackClick = {
+                            findNavController().popBackStack()
+                        }
+                    )
+                }
             }
         }
     }
@@ -87,36 +91,27 @@ fun BarDetailsScreen(
     onBackClick: () -> Unit
 ) {
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text("Spending History") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_round_arrow_back_ios_24),
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF9FCFF)
-                )
+            XpenseTopAppBar(
+                title = "Spending History",
+                onBackClick = onBackClick,
+                useArrowBack = false
             )
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFEBF1F8))
+                .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Card(
+            XpenseCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FCFF))
+                    .height(300.dp)
             ) {
                 AndroidView(
                     factory = { context ->
@@ -145,6 +140,7 @@ fun BarDetailsScreen(
                 "Transactions (Last 7 Days)",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.align(Alignment.Start)
             )
 
@@ -169,7 +165,11 @@ fun BarDetailsScreen(
                                 .padding(16.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("No transactions in the last 7 days", style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                "No transactions in the last 7 days",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }
@@ -180,11 +180,7 @@ fun BarDetailsScreen(
 
 @Composable
 fun TransactionItem(transaction: Transaction, currency: String) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FCFF)),
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
+    XpenseCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .padding(16.dp)
@@ -195,25 +191,25 @@ fun TransactionItem(transaction: Transaction, currency: String) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     transaction.title ?: transaction.category ?: "Transaction",
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     transaction.category ?: "",
-                    fontSize = 12.sp,
-                    color = Color.Gray
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Text(
                 String.format("%.2f %s", transaction.amount, currency),
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
                 color = if (transaction.type == Transaction.INCOME_TYPE)
-                    Color(0xFF4CAF50)
+                    IncomeGreen
                 else
                     MaterialTheme.colorScheme.primary
             )
         }
     }
 }
-

@@ -1,29 +1,29 @@
 package com.rokudo.xpense.fragments
 
-import androidx.compose.foundation.Image
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.rokudo.xpense.R
+import com.rokudo.xpense.components.XpenseCard
+import com.rokudo.xpense.components.XpenseTopAppBar
 import com.rokudo.xpense.models.Invitation
+import com.rokudo.xpense.ui.theme.XpenseTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,39 +38,29 @@ fun SettingsScreen(
     onDeclineInvitation: (Invitation) -> Unit
 ) {
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text("Settings") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF9FCFF)
-                )
+            XpenseTopAppBar(
+                title = "Settings",
+                onBackClick = onBackClick
             )
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFEBF1F8))
+                .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
             // Profile Section
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FCFF))
-            ) {
+            XpenseCard(modifier = Modifier.fillMaxWidth()) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Profile Picture
                     AsyncImage(
                         model = userProfilePicUrl,
                         contentDescription = "Profile Picture",
@@ -85,11 +75,11 @@ fun SettingsScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // User Name
                     Text(
                         text = userName,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -97,29 +87,38 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Invitations Section
-            if (invitations.isNotEmpty()) {
-                Text(
-                    text = "Pending Invitations",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
+            AnimatedVisibility(
+                visible = invitations.isNotEmpty(),
+                enter = fadeIn(tween(400)) + expandVertically(tween(400)),
+                exit = fadeOut(tween(300)) + shrinkVertically(tween(300))
+            ) {
+                Column {
+                    Text(
+                        text = "Pending Invitations",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
 
-                LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(invitations) { invitation ->
-                        InvitationCard(
-                            invitation = invitation,
-                            onAccept = { onAcceptInvitation(invitation) },
-                            onDecline = { onDeclineInvitation(invitation) }
-                        )
+                    LazyColumn(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(invitations) { invitation ->
+                            InvitationCard(
+                                invitation = invitation,
+                                onAccept = { onAcceptInvitation(invitation) },
+                                onDecline = { onDeclineInvitation(invitation) }
+                            )
+                        }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(16.dp))
-            } else {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
+
+            if (invitations.isEmpty()) {
                 Spacer(modifier = Modifier.weight(1f))
             }
 
@@ -130,12 +129,14 @@ fun SettingsScreen(
                     .fillMaxWidth()
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
-                )
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                ),
+                shape = MaterialTheme.shapes.medium
             ) {
                 Text(
                     text = "Sign Out",
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -149,10 +150,7 @@ fun InvitationCard(
     onAccept: () -> Unit,
     onDecline: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FCFF))
-    ) {
+    XpenseCard(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -160,16 +158,17 @@ fun InvitationCard(
         ) {
             Text(
                 text = "Invitation from ${invitation.creator_name ?: "Unknown"}",
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = "Wallet: ${invitation.wallet_title ?: ""}",
-                fontSize = 12.sp,
-                color = Color.Gray
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -180,14 +179,16 @@ fun InvitationCard(
             ) {
                 OutlinedButton(
                     onClick = onDecline,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    shape = MaterialTheme.shapes.small
                 ) {
                     Text("Decline")
                 }
 
                 Button(
                     onClick = onAccept,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    shape = MaterialTheme.shapes.small
                 ) {
                     Text("Accept")
                 }
@@ -214,15 +215,16 @@ fun SettingsScreenPreview() {
         }
     )
 
-    SettingsScreen(
-        userName = "Alex Johnson",
-        userProfilePicUrl = null,
-        invitations = mockInvitations,
-        onBackClick = {},
-        onSignOutClick = {},
-        onProfilePictureClick = {},
-        onAcceptInvitation = {},
-        onDeclineInvitation = {}
-    )
+    XpenseTheme(dynamicColor = false) {
+        SettingsScreen(
+            userName = "Alex Johnson",
+            userProfilePicUrl = null,
+            invitations = mockInvitations,
+            onBackClick = {},
+            onSignOutClick = {},
+            onProfilePictureClick = {},
+            onAcceptInvitation = {},
+            onDeclineInvitation = {}
+        )
+    }
 }
-

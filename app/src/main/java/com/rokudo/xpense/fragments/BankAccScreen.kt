@@ -1,29 +1,30 @@
 package com.rokudo.xpense.fragments
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.rokudo.xpense.components.EmptyState
 import com.rokudo.xpense.components.LatestTransactionItem
+import com.rokudo.xpense.components.LoadingState
+import com.rokudo.xpense.components.XpenseCard
+import com.rokudo.xpense.components.XpenseTopAppBar
 import com.rokudo.xpense.models.BAccount
 import com.rokudo.xpense.models.Transaction
-import java.text.DecimalFormat
+import com.rokudo.xpense.ui.theme.XpenseTheme
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,92 +39,89 @@ fun BankAccScreen(
     onRefreshClick: () -> Unit
 ) {
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text("Bank Account") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-                    }
-                },
+            XpenseTopAppBar(
+                title = "Bank Account",
+                onBackClick = onBackClick,
                 actions = {
                     TextButton(onClick = onRefreshClick) {
-                        Text("Refresh")
+                        Text("Refresh", color = MaterialTheme.colorScheme.primary)
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF9FCFF)
-                )
+                }
             )
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFEBF1F8))
+                .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues)
         ) {
             // Bank Account Details Card
-            if (bAccount != null) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FCFF))
-                ) {
-                    Column(
+            AnimatedVisibility(
+                visible = bAccount != null,
+                enter = fadeIn(tween(400)) + expandVertically(tween(400)),
+                exit = fadeOut(tween(300)) + shrinkVertically(tween(300))
+            ) {
+                if (bAccount != null) {
+                    XpenseCard(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .padding(16.dp)
                     ) {
-                        // Bank Logo
-                        Image(
-                            painter = rememberAsyncImagePainter(bAccount.bankPic),
-                            contentDescription = bAccount.bankName,
+                        Column(
                             modifier = Modifier
-                                .size(64.dp)
-                                .clip(CircleShape)
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        // Bank Name
-                        Text(
-                            text = bAccount.bankName ?: "Bank Account",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Balance
-                        if (isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(32.dp)
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Image(
+                                painter = rememberAsyncImagePainter(bAccount.bankPic),
+                                contentDescription = bAccount.bankName,
+                                modifier = Modifier
+                                    .size(64.dp)
+                                    .clip(CircleShape)
                             )
-                        } else {
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
                             Text(
-                                text = "Balance",
-                                fontSize = 12.sp,
-                                color = Color.Gray
-                            )
-                            Text(
-                                text = "${balance ?: "0.00"} ${bAccount.linked_acc_currency ?: ""}",
+                                text = bAccount.bankName ?: "Bank Account",
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 24.sp,
-                                color = MaterialTheme.colorScheme.primary
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            if (isLoading) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(32.dp),
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            } else {
+                                Text(
+                                    text = "Balance",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = "${balance ?: "0.00"} ${bAccount.linked_acc_currency ?: ""}",
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = "IBAN: ${bAccount.linked_acc_iban ?: "N/A"}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        // IBAN
-                        Text(
-                            text = "IBAN: ${bAccount.linked_acc_iban ?: "N/A"}",
-                            fontSize = 12.sp,
-                            color = Color.Gray
-                        )
                     }
                 }
             }
@@ -131,53 +129,44 @@ fun BankAccScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Transactions Section
-            if (isLoading && transactions.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            } else if (transactions.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            "No transactions",
-                            fontSize = 16.sp,
-                            color = Color.Gray
-                        )
-                        Text(
-                            "Pull to refresh",
-                            fontSize = 12.sp,
-                            color = Color.Gray,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
-                }
-            } else {
-                Text(
-                    "Recent Transactions",
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    fontWeight = FontWeight.Bold
+            Box(modifier = Modifier.fillMaxSize()) {
+                LoadingState(
+                    isLoading = isLoading && transactions.isEmpty(),
+                    modifier = Modifier.fillMaxSize()
                 )
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+
+                EmptyState(
+                    visible = !isLoading && transactions.isEmpty(),
+                    title = "No transactions",
+                    subtitle = "Pull to refresh"
+                )
+
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = transactions.isNotEmpty(),
+                    enter = fadeIn(tween(400)),
+                    exit = fadeOut(tween(300))
                 ) {
-                    items(transactions) { transaction ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onTransactionClick(transaction) },
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FCFF))
+                    Column {
+                        Text(
+                            "Recent Transactions",
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            LatestTransactionItem(transaction = transaction)
+                            items(transactions) { transaction ->
+                                XpenseCard(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = { onTransactionClick(transaction) }
+                                ) {
+                                    LatestTransactionItem(transaction = transaction)
+                                }
+                            }
                         }
                     }
                 }
@@ -210,14 +199,15 @@ fun BankAccScreenPreview() {
         }
     )
 
-    BankAccScreen(
-        bAccount = mockBAccount,
-        balance = "1234.56",
-        transactions = mockTransactions,
-        isLoading = false,
-        onBackClick = {},
-        onTransactionClick = {},
-        onRefreshClick = {}
-    )
+    XpenseTheme(dynamicColor = false) {
+        BankAccScreen(
+            bAccount = mockBAccount,
+            balance = "1234.56",
+            transactions = mockTransactions,
+            isLoading = false,
+            onBackClick = {},
+            onTransactionClick = {},
+            onRefreshClick = {}
+        )
+    }
 }
-

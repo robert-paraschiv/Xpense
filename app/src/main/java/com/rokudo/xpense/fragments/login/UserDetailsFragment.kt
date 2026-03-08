@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
 import com.rokudo.xpense.activities.MainActivity
 import com.rokudo.xpense.utils.DatabaseUtils
+import com.rokudo.xpense.ui.theme.XpenseTheme
 
 class UserDetailsFragment : Fragment() {
 
@@ -22,6 +23,7 @@ class UserDetailsFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
+                XpenseTheme {
                 var name by remember { mutableStateOf("") }
                 var isLoading by remember { mutableStateOf(false) }
 
@@ -61,6 +63,7 @@ class UserDetailsFragment : Fragment() {
                         }
                     }
                 )
+                } // XpenseTheme
             }
         }
     }

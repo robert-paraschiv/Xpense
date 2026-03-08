@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,21 +17,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.github.mikephil.charting.charts.PieChart
-import com.rokudo.xpense.R
+import com.rokudo.xpense.components.XpenseCard
+import com.rokudo.xpense.components.XpenseTopAppBar
 import com.rokudo.xpense.data.viewmodels.StatisticsViewModel
 import com.rokudo.xpense.models.StatisticsDoc
 import com.rokudo.xpense.models.Wallet
+import com.rokudo.xpense.ui.theme.XpenseTheme
 import com.rokudo.xpense.utils.PieChartUtils
 import java.util.*
 
@@ -49,15 +50,17 @@ class PieDetailsFragment : Fragment() {
 
         return ComposeView(requireContext()).apply {
             setContent {
-                val statisticsDoc by statisticsViewModel.listenForStatisticsDoc(wallet.id, Date()).observeAsState()
+                XpenseTheme {
+                    val statisticsDoc by statisticsViewModel.listenForStatisticsDoc(wallet.id, Date()).observeAsState()
 
-                PieDetailsScreen(
-                    wallet = wallet,
-                    statisticsDoc = statisticsDoc,
-                    onBackClick = {
-                        findNavController().popBackStack()
-                    }
-                )
+                    PieDetailsScreen(
+                        wallet = wallet,
+                        statisticsDoc = statisticsDoc,
+                        onBackClick = {
+                            findNavController().popBackStack()
+                        }
+                    )
+                }
             }
         }
     }
@@ -71,36 +74,27 @@ fun PieDetailsScreen(
     onBackClick: () -> Unit
 ) {
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = { Text("Spending Details") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_round_arrow_back_ios_24),
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF9FCFF)
-                )
+            XpenseTopAppBar(
+                title = "Spending Details",
+                onBackClick = onBackClick,
+                useArrowBack = false
             )
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFFEBF1F8))
+                .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Card(
+            XpenseCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(300.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FCFF))
+                    .height(300.dp)
             ) {
                 AndroidView(
                     factory = { context ->
@@ -131,6 +125,7 @@ fun PieDetailsScreen(
                 "Spending by Category",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.align(Alignment.Start)
             )
 
@@ -150,8 +145,15 @@ fun PieDetailsScreen(
                     }
                 } else {
                     item {
-                        Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                            Text("No data available yet", style = MaterialTheme.typography.bodyMedium)
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "No data available yet",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }
@@ -162,11 +164,7 @@ fun PieDetailsScreen(
 
 @Composable
 fun CategoryAmountItem(category: String, amount: Double, currency: String) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FCFF)),
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
+    XpenseCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .padding(16.dp)
@@ -174,11 +172,16 @@ fun CategoryAmountItem(category: String, amount: Double, currency: String) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(category, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(
+                category,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
             Text(
                 String.format("%.2f %s", amount, currency),
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.primary
             )
         }

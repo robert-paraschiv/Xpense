@@ -26,6 +26,7 @@ import com.rokudo.xpense.models.Wallet
 import com.rokudo.xpense.utils.DatabaseUtils
 import com.rokudo.xpense.utils.dialogs.TimedDialog
 import java.util.*
+import com.rokudo.xpense.ui.theme.XpenseTheme
 
 class ContactsFragment : Fragment() {
 
@@ -67,6 +68,7 @@ class ContactsFragment : Fragment() {
 
         return ComposeView(requireContext()).apply {
             setContent {
+                XpenseTheme {
                 var contacts by remember { mutableStateOf<List<User>>(emptyList()) }
                 var isLoading by remember { mutableStateOf(true) }
 
@@ -94,6 +96,7 @@ class ContactsFragment : Fragment() {
                         sendInvitation(user)
                     }
                 )
+                } // XpenseTheme
             }
         }
     }

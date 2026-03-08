@@ -26,6 +26,7 @@ import com.rokudo.xpense.utils.DatabaseUtils
 import com.rokudo.xpense.utils.PrefsUtils
 import java.util.*
 import java.util.concurrent.TimeUnit
+import com.rokudo.xpense.ui.theme.XpenseTheme
 
 class LoginFragment : Fragment() {
 
@@ -43,6 +44,7 @@ class LoginFragment : Fragment() {
 
         return ComposeView(requireContext()).apply {
             setContent {
+                XpenseTheme {
                 var phoneNumber by remember { mutableStateOf("") }
                 var otp by remember { mutableStateOf("") }
                 var showOtpField by remember { mutableStateOf(false) }
@@ -77,6 +79,7 @@ class LoginFragment : Fragment() {
                         }
                     }
                 )
+                } // XpenseTheme
             }
         }
     }
