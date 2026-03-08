@@ -58,6 +58,8 @@ fun HomeScreen(
     onBarChartClick: () -> Unit,
     onPieChartClick: () -> Unit,
     onTransactionClick: () -> Unit,
+    onSpentClick: () -> Unit,
+    onEarnedClick: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -182,14 +184,16 @@ fun HomeScreen(
                     amount = "-${String.format("%.0f", monthlySpent)}",
                     containerColor = ExpenseRedLight,
                     contentColor = ExpenseRed,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    onClick = onSpentClick
                 )
                 SummaryPill(
                     label = "Earned",
                     amount = "+${String.format("%.0f", monthlyIncome)}",
                     containerColor = IncomeGreenLight,
                     contentColor = IncomeGreen,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    onClick = onEarnedClick
                 )
             }
 
@@ -210,7 +214,8 @@ fun HomeScreen(
                 XpenseCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+                        .padding(horizontal = 16.dp),
+                    onClick = onTransactionClick
                 ) {
                     Column {
                         txToShow.forEachIndexed { index, transaction ->
@@ -346,6 +351,8 @@ fun HomeScreenPreview() {
             onBarChartClick = {},
             onPieChartClick = {},
             onTransactionClick = {},
+            onSpentClick = {},
+            onEarnedClick = {},
             onSettingsClick = {}
         )
     }

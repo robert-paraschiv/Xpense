@@ -109,6 +109,10 @@
         <argument
             android:name="walletCurrency"
             app:argType="string" />
+        <argument
+            android:name="filterType"
+            app:argType="string"
+            android:defaultValue="all" />
         <action
             android:id="@+id/action_listTransactionsFragment_to_addTransactionLayout"
             app:destination="@id/addTransactionFragment"

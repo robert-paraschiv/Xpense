@@ -47,6 +47,8 @@ sealed class HomeEvent {
     object BarChartClicked : HomeEvent()
     object PieChartClicked : HomeEvent()
     object TransactionsClicked : HomeEvent()
+    object SpentClicked : HomeEvent()
+    object EarnedClicked : HomeEvent()
     object SettingsClicked : HomeEvent()
 }
 
@@ -58,6 +60,8 @@ sealed class HomeEffect {
     object NavigateToBarDetails : HomeEffect()
     object NavigateToPieDetails : HomeEffect()
     object NavigateToTransactions : HomeEffect()
+    object NavigateToExpenses : HomeEffect()
+    object NavigateToIncome : HomeEffect()
     object NavigateToSettings : HomeEffect()
     data class ShowToast(val message: String) : HomeEffect()
 }
@@ -145,6 +149,8 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             is HomeEvent.BarChartClicked -> emitEffect(HomeEffect.NavigateToBarDetails)
             is HomeEvent.PieChartClicked -> emitEffect(HomeEffect.NavigateToPieDetails)
             is HomeEvent.TransactionsClicked -> emitEffect(HomeEffect.NavigateToTransactions)
+            is HomeEvent.SpentClicked -> emitEffect(HomeEffect.NavigateToExpenses)
+            is HomeEvent.EarnedClicked -> emitEffect(HomeEffect.NavigateToIncome)
             is HomeEvent.SettingsClicked -> emitEffect(HomeEffect.NavigateToSettings)
         }
     }

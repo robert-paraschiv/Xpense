@@ -34,16 +34,30 @@ fun ListTransactionsScreen(
     transactions: List<Transaction>,
     selectedMonth: String,
     availableMonths: List<String>,
+    initialFilter: String = "all",
     onBackClick: () -> Unit,
     onMonthSelected: (String) -> Unit,
     onTransactionClick: (Transaction) -> Unit
 ) {
     val currentIndex = availableMonths.indexOf(selectedMonth)
 
+    // Filter state
+    var activeFilter by remember { mutableStateOf(initialFilter) }
+    val filters = listOf("all" to "All", "Expense" to "Expenses", "Income" to "Income")
+
+    // Apply filter
+    val filteredTransactions = remember(transactions, activeFilter) {
+        when (activeFilter) {
+            "Expense" -> transactions.filter { it.type == Transaction.EXPENSE_TYPE }
+            "Income" -> transactions.filter { it.type == Transaction.INCOME_TYPE }
+            else -> transactions
+        }
+    }
+
     // Group transactions by day
-    val groupedTransactions = remember(transactions) {
+    val groupedTransactions = remember(filteredTransactions) {
         val dateFormat = SimpleDateFormat("EEEE, MMMM d", Locale.getDefault())
-        transactions
+        filteredTransactions
             .filter { it.date != null }
             .sortedByDescending { it.date?.time ?: 0 }
             .groupBy { dateFormat.format(it.date!!) }
@@ -111,9 +125,37 @@ fun ListTransactionsScreen(
                 }
             }
 
+            // ─── Filter Chips ───
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                filters.forEach { (value, label) ->
+                    val selected = activeFilter == value
+                    FilterChip(
+                        selected = selected,
+                        onClick = { activeFilter = value },
+                        label = {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                            selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    )
+                }
+            }
+
             // ─── Transaction List ───
             AnimatedContent(
-                targetState = transactions.isEmpty(),
+                targetState = filteredTransactions.isEmpty(),
                 transitionSpec = { fadeIn(tween(300)).togetherWith(fadeOut(tween(200))) },
                 label = "transactions_content"
             ) { isEmpty ->
@@ -121,7 +163,11 @@ fun ListTransactionsScreen(
                     EmptyState(
                         visible = true,
                         title = "No transactions",
-                        subtitle = "Nothing recorded for $selectedMonth",
+                        subtitle = when (activeFilter) {
+                            "Expense" -> "No expenses for $selectedMonth"
+                            "Income" -> "No income for $selectedMonth"
+                            else -> "Nothing recorded for $selectedMonth"
+                        },
                         modifier = Modifier.fillMaxSize().padding(16.dp)
                     )
                 } else {

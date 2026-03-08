@@ -33,6 +33,7 @@ class ListTransactionsFragment : Fragment() {
         val args = ListTransactionsFragmentArgs.fromBundle(requireArguments())
         walletId = args.walletId
         currency = args.walletCurrency
+        val initialFilter = args.filterType
 
         return ComposeView(requireContext()).apply {
             setContent {
@@ -78,6 +79,7 @@ class ListTransactionsFragment : Fragment() {
                     transactions = transactions,
                     selectedMonth = selectedMonth,
                     availableMonths = availableMonths,
+                    initialFilter = initialFilter,
                     onBackClick = {
                         findNavController().popBackStack()
                     },

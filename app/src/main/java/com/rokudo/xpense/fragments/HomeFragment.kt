@@ -159,6 +159,8 @@ class HomeFragment : Fragment() {
                         onBarChartClick = { homeViewModel.onEvent(HomeEvent.BarChartClicked) },
                         onPieChartClick = { homeViewModel.onEvent(HomeEvent.PieChartClicked) },
                         onTransactionClick = { homeViewModel.onEvent(HomeEvent.TransactionsClicked) },
+                        onSpentClick = { homeViewModel.onEvent(HomeEvent.SpentClicked) },
+                        onEarnedClick = { homeViewModel.onEvent(HomeEvent.EarnedClicked) },
                         onSettingsClick = { homeViewModel.onEvent(HomeEvent.SettingsClicked) }
                     )
 
@@ -246,6 +248,22 @@ class HomeFragment : Fragment() {
                     val action = HomeFragmentDirections.actionHomeFragmentToListTransactionsFragment(
                         wallet.id, wallet.currency ?: "$"
                     )
+                    view?.findNavController()?.navigate(action)
+                }
+            }
+            is HomeEffect.NavigateToExpenses -> {
+                if (wallet != null) {
+                    val action = HomeFragmentDirections.actionHomeFragmentToListTransactionsFragment(
+                        wallet.id, wallet.currency ?: "$"
+                    ).setFilterType("Expense")
+                    view?.findNavController()?.navigate(action)
+                }
+            }
+            is HomeEffect.NavigateToIncome -> {
+                if (wallet != null) {
+                    val action = HomeFragmentDirections.actionHomeFragmentToListTransactionsFragment(
+                        wallet.id, wallet.currency ?: "$"
+                    ).setFilterType("Income")
                     view?.findNavController()?.navigate(action)
                 }
             }
