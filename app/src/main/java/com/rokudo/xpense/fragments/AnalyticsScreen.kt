@@ -219,6 +219,7 @@ fun AnalyticsScreen(
                                 totalSpent = totalSpent,
                                 currency = currency,
                                 isCompact = false,
+                                selectedSlice = expandedCategory,
                                 onSliceClick = { label ->
                                     expandedCategory = if (expandedCategory == label) null else label
                                 }
