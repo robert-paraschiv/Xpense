@@ -1,6 +1,5 @@
 package com.rokudo.xpense.fragments
 
-import android.widget.TextView
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -28,11 +27,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
-import com.github.mikephil.charting.charts.PieChart
 import com.rokudo.xpense.R
 import com.rokudo.xpense.components.*
+import com.rokudo.xpense.components.charts.XpenseDonutChart
 import com.rokudo.xpense.models.SpentMostItem
 import com.rokudo.xpense.models.StatisticsDoc
 import com.rokudo.xpense.models.Transaction
@@ -40,7 +38,6 @@ import com.rokudo.xpense.models.Wallet
 import com.rokudo.xpense.models.WalletUser
 import com.rokudo.xpense.ui.theme.*
 import com.rokudo.xpense.utils.CategoryIconMapper
-import com.rokudo.xpense.utils.PieChartUtils
 import java.util.Calendar
 
 @Suppress("UNUSED_PARAMETER")
@@ -287,33 +284,11 @@ fun HomeScreen(
                     ) {
                         // Pie chart
                         if (statisticsDoc != null) {
-                            // Track whether we've already animated this data
-                            var lastAnimatedDocId by remember { mutableStateOf<String?>(null) }
-                            val currentDocId = statisticsDoc.docPath ?: statisticsDoc.hashCode().toString()
-
-                            AndroidView(
-                                factory = { context ->
-                                    PieChart(context).apply {
-                                        PieChartUtils.setupPieChart(this, TextView(context).currentTextColor, true)
-                                    }
-                                },
-                                update = { chart ->
-                                    PieChartUtils.updatePieChartData(
-                                        chart,
-                                        wallet?.currency ?: "",
-                                        statisticsDoc.amountByCategory,
-                                        statisticsDoc.totalAmountSpent,
-                                        true
-                                    )
-                                    // Only animate once per unique data set
-                                    if (lastAnimatedDocId != currentDocId) {
-                                        lastAnimatedDocId = currentDocId
-                                        chart.animateY(800)
-                                    }
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(180.dp)
+                            XpenseDonutChart(
+                                categories = statisticsDoc.amountByCategory,
+                                totalSpent = statisticsDoc.totalAmountSpent ?: 0.0,
+                                currency = wallet?.currency ?: "$",
+                                isCompact = true
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                         }

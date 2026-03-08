@@ -1,6 +1,5 @@
 package com.rokudo.xpense.fragments
 
-import android.widget.TextView
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -24,22 +23,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
-import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.charts.PieChart
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.PieEntry
-import com.github.mikephil.charting.highlight.Highlight
-import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.rokudo.xpense.R
 import com.rokudo.xpense.components.*
+import com.rokudo.xpense.components.charts.XpenseBarChart
+import com.rokudo.xpense.components.charts.XpenseDonutChart
 import com.rokudo.xpense.models.ExpenseCategory
 import com.rokudo.xpense.models.TransEntry
 import com.rokudo.xpense.models.Transaction
 import com.rokudo.xpense.ui.theme.*
-import com.rokudo.xpense.utils.AnalyticsBarUtils
 import com.rokudo.xpense.utils.CategoryIconMapper
-import com.rokudo.xpense.utils.PieChartUtils
 import java.text.DecimalFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -210,74 +202,26 @@ fun AnalyticsScreen(
                 XpenseCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(260.dp)
                 ) {
                     Crossfade(
                         targetState = showBarChart,
                         animationSpec = tween(400),
                         label = "chart_crossfade"
                     ) { isBarChart ->
-                        // Track data identity to only animate on actual data change
-                        var lastAnimatedKey by remember { mutableStateOf("") }
-                        val currentDataKey = "$selectedDate-$isYearMode-${categoryAmounts.hashCode()}"
-
                         if (isBarChart) {
-                            AndroidView(
-                                factory = { context ->
-                                    BarChart(context).apply {
-                                        AnalyticsBarUtils.setupBarChart(this, TextView(context).currentTextColor)
-                                        setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
-                                            override fun onValueSelected(e: Entry?, h: Highlight?) {
-                                                if (e != null) onBarClick(e.x.toInt())
-                                            }
-                                            override fun onNothingSelected() {}
-                                        })
-                                    }
-                                },
-                                update = { chart ->
-                                    if (transEntryList.isNotEmpty()) {
-                                        AnalyticsBarUtils.updateBarchartData(
-                                            chart, ArrayList(transEntryList), TextView(chart.context).currentTextColor
-                                        )
-                                        if (lastAnimatedKey != currentDataKey) {
-                                            lastAnimatedKey = currentDataKey
-                                            chart.animateXY(500, 500)
-                                        }
-                                    }
-                                },
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(8.dp)
+                            XpenseBarChart(
+                                entries = transEntryList,
+                                modifier = Modifier.padding(8.dp)
                             )
                         } else {
-                            AndroidView(
-                                factory = { context ->
-                                    PieChart(context).apply {
-                                        PieChartUtils.setupPieChart(this, TextView(context).currentTextColor, false)
-                                        setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
-                                            override fun onValueSelected(e: Entry?, h: Highlight?) {
-                                                if (e is PieEntry) {
-                                                    expandedCategory = if (expandedCategory == e.label) null else e.label
-                                                }
-                                            }
-                                            override fun onNothingSelected() {}
-                                        })
-                                    }
-                                },
-                                update = { chart ->
-                                    if (categoryAmounts.isNotEmpty()) {
-                                        PieChartUtils.updatePieChartData(
-                                            chart, currency, HashMap(categoryAmounts), totalSpent, false
-                                        )
-                                        if (lastAnimatedKey != currentDataKey) {
-                                            lastAnimatedKey = currentDataKey
-                                            chart.animateXY(500, 500)
-                                        }
-                                    }
-                                },
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(8.dp)
+                            XpenseDonutChart(
+                                categories = categoryAmounts,
+                                totalSpent = totalSpent,
+                                currency = currency,
+                                isCompact = false,
+                                onSliceClick = { label ->
+                                    expandedCategory = if (expandedCategory == label) null else label
+                                }
                             )
                         }
                     }
