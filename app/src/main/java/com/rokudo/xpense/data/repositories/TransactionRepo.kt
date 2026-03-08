@@ -19,7 +19,6 @@ class TransactionRepo {
     private val allTransactionList = MutableLiveData<List<Transaction>>()
     private val storedTransactionList = mutableListOf<Transaction>()
     private val latestTransaction = MutableLiveData<Transaction>()
-    private val addTransactionStatus = MutableLiveData<String>()
     private val updateTransactionStatus = MutableLiveData<String>()
     private var storedWalletId: String? = null
 
@@ -28,7 +27,6 @@ class TransactionRepo {
         latestTransListener?.remove()
         allTransactionList.value = null
         storedTransactionList.clear()
-        addTransactionStatus.value = null
         latestTransaction.value = null
         updateTransactionStatus.value = null
     }
@@ -66,10 +64,12 @@ class TransactionRepo {
     }
 
     fun addTransaction(transaction: Transaction): MutableLiveData<String> {
+        val result = MutableLiveData<String>()
         DatabaseUtils.getTransactionsRef(transaction.walletId ?: "").document(transaction.id ?: "")
             .set(transaction)
-            .addOnSuccessListener { addTransactionStatus.value = "Success" }
-        return addTransactionStatus
+            .addOnSuccessListener { result.value = "Success" }
+            .addOnFailureListener { result.value = "Error" }
+        return result
     }
 
     fun loadLatestTransaction(walletId: String): MutableLiveData<Transaction> {

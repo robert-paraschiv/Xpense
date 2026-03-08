@@ -41,6 +41,7 @@ sealed class AddTransactionEvent {
     data class OnCategoryChange(val category: ExpenseCategory?) : AddTransactionEvent()
     data class OnCashTransactionChange(val isCash: Boolean) : AddTransactionEvent()
     object OnSaveClick : AddTransactionEvent()
+    object OnSaveAndAddAnother : AddTransactionEvent()
     object OnBackClick : AddTransactionEvent()
     object OnDeleteClick : AddTransactionEvent()
     object OnCategoryClick : AddTransactionEvent()
@@ -143,12 +144,15 @@ class AddTransactionViewModel(application: Application) : AndroidViewModel(appli
                 deleteTransaction()
             }
             is AddTransactionEvent.OnSaveClick -> {
-                saveTransaction()
+                saveTransaction(addAnother = false)
+            }
+            is AddTransactionEvent.OnSaveAndAddAnother -> {
+                saveTransaction(addAnother = true)
             }
         }
     }
 
-    private fun saveTransaction() {
+    private fun saveTransaction(addAnother: Boolean = false) {
         val currentState = _state.value
         val amount = currentState.amount
         val type = currentState.type
@@ -212,7 +216,20 @@ class AddTransactionViewModel(application: Application) : AndroidViewModel(appli
                  observer?.let { liveData.removeObserver(it) }
                  _state.update { it.copy(isLoading = false) }
                  if (t == "Success") {
-                     viewModelScope.launch { _effect.emit(AddTransactionEffect.NavigateBack) }
+                     if (addAnother) {
+                         _state.update { s ->
+                             s.copy(
+                                 amount = "",
+                                 title = "",
+                                 date = Date(),
+                                 amountError = null,
+                                 showCategoryError = false
+                             )
+                         }
+                         viewModelScope.launch { _effect.emit(AddTransactionEffect.ShowToast("Transaction added!")) }
+                     } else {
+                         viewModelScope.launch { _effect.emit(AddTransactionEffect.NavigateBack) }
+                     }
                  } else {
                       viewModelScope.launch { _effect.emit(AddTransactionEffect.ShowToast("Error adding transaction")) }
                  }
