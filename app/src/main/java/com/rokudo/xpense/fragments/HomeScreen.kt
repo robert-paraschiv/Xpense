@@ -143,9 +143,9 @@ fun HomeScreen(
                 Text(
                     text = String.format("%.2f", wallet?.amount ?: 0.0),
                     style = MaterialTheme.typography.displaySmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 42.sp,
-                        letterSpacing = (-1.5).sp
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 36.sp,
+                        letterSpacing = (-1).sp
                     ),
                     color = MaterialTheme.colorScheme.onBackground
                 )

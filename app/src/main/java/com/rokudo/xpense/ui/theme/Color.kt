@@ -51,11 +51,15 @@ val Error40 = Color(0xFFBA1A1A)
 val Error80 = Color(0xFFFFB4AB)
 val Error90 = Color(0xFFFFDAD6)
 
-// Semantic — income/expense
-val IncomeGreen = Color(0xFF2E7D32)
+// Semantic — income/expense (muted, refined tones)
+val IncomeGreen = Color(0xFF4CAF50)        // softer mid-green
 val IncomeGreenLight = Color(0xFFE8F5E9)
-val ExpenseRed = Color(0xFFC62828)
-val ExpenseRedLight = Color(0xFFFFEBEE)
+val ExpenseRed = Color(0xFFE57373)         // soft coral-red
+val ExpenseRedLight = Color(0xFFFCE4EC)    // very faint pink
+
+// Date / timestamp gray
+val DateGray = Color(0xFFB0B0B0)           // light mode
+val DateGrayDark = Color(0xFF757575)       // dark mode
 
 // Surfaces
 val SurfaceLight = Color(0xFFFFFFFF)

@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.rokudo.xpense.models.Transaction
+import com.rokudo.xpense.ui.theme.DateGray
 import com.rokudo.xpense.ui.theme.ExpenseRed
 import com.rokudo.xpense.ui.theme.IncomeGreen
 import com.rokudo.xpense.utils.CategoryIconMapper
@@ -95,12 +96,12 @@ fun TransactionRow(
                     Text(
                         text = "·",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = DateGray
                     )
                     Text(
                         text = SimpleDateFormat("MMM dd", Locale.getDefault()).format(transaction.date),
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = DateGray
                     )
                 }
             }

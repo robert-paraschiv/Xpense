@@ -22,6 +22,7 @@ import com.rokudo.xpense.components.TransactionRow
 import com.rokudo.xpense.components.XpenseCard
 import com.rokudo.xpense.components.XpenseTopAppBar
 import com.rokudo.xpense.models.Transaction
+import com.rokudo.xpense.ui.theme.DateGray
 import com.rokudo.xpense.ui.theme.ExpenseRed
 import com.rokudo.xpense.ui.theme.IncomeGreen
 import com.rokudo.xpense.ui.theme.XpenseTheme
@@ -190,13 +191,13 @@ fun ListTransactionsScreen(
                                     Text(
                                         text = dayLabel,
                                         style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        fontWeight = FontWeight.Medium,
+                                        color = DateGray
                                     )
                                     Text(
                                         text = String.format("%+.2f", dayTotal),
                                         style = MaterialTheme.typography.labelMedium,
-                                        fontWeight = FontWeight.Bold,
+                                        fontWeight = FontWeight.SemiBold,
                                         color = if (dayTotal >= 0) IncomeGreen else ExpenseRed
                                     )
                                 }

@@ -40,13 +40,13 @@ fun SummaryPill(
             Text(
                 text = amount,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 color = contentColor
             )
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
-                color = contentColor.copy(alpha = 0.8f)
+                color = contentColor.copy(alpha = 0.7f)
             )
         }
     }
