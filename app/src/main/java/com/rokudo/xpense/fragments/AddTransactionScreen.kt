@@ -3,8 +3,11 @@ package com.rokudo.xpense.fragments
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -17,17 +20,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rokudo.xpense.R
 import com.rokudo.xpense.components.LoadingState
 import com.rokudo.xpense.components.XpenseCard
+import com.rokudo.xpense.components.XpenseTopAppBar
 import com.rokudo.xpense.data.viewmodels.AddTransactionEvent
 import com.rokudo.xpense.data.viewmodels.AddTransactionState
 import com.rokudo.xpense.models.ExpenseCategory
 import com.rokudo.xpense.models.Transaction
-import com.rokudo.xpense.ui.theme.XpenseTheme
+import com.rokudo.xpense.ui.theme.*
+import com.rokudo.xpense.utils.CategoryIconMapper
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -44,35 +50,12 @@ fun AddTransactionScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // Custom Toolbar
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.background,
-                tonalElevation = 0.dp
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp, horizontal = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { onEvent(AddTransactionEvent.OnBackClick) }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_round_arrow_back_ios_24),
-                            contentDescription = "Back",
-                            modifier = Modifier.size(25.dp),
-                            tint = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                    Text(
-                        text = if (state.isEditMode) "Edit Transaction" else "New Transaction",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.weight(1f)
-                    )
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Top bar
+            XpenseTopAppBar(
+                title = if (state.isEditMode) "Edit Transaction" else "New Transaction",
+                onBackClick = { onEvent(AddTransactionEvent.OnBackClick) },
+                actions = {
                     AnimatedVisibility(
                         visible = state.isEditMode,
                         enter = fadeIn() + scaleIn(),
@@ -88,91 +71,198 @@ fun AddTransactionScreen(
                         }
                     }
                 }
-            }
+            )
 
-            // Scrollable Content
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 18.dp),
-                verticalArrangement = Arrangement.spacedBy(18.dp)
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                Spacer(modifier = Modifier.height(0.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
-                // Transaction Type Chips
-                TransactionTypeSelector(
-                    selectedType = state.type,
-                    onTypeChange = { onEvent(AddTransactionEvent.OnTypeChange(it)) }
+                // ─── Type Selector (Segmented-style) ───
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    listOf(
+                        Transaction.EXPENSE_TYPE to "Expense",
+                        Transaction.INCOME_TYPE to "Income",
+                        Transaction.TRANSFER_TYPE to "Transfer"
+                    ).forEach { (type, label) ->
+                        val selected = state.type == type
+                        val containerColor = when {
+                            selected && type == Transaction.EXPENSE_TYPE -> ExpenseRedLight
+                            selected && type == Transaction.INCOME_TYPE -> IncomeGreenLight
+                            selected -> MaterialTheme.colorScheme.primaryContainer
+                            else -> MaterialTheme.colorScheme.surfaceVariant
+                        }
+                        val contentColor = when {
+                            selected && type == Transaction.EXPENSE_TYPE -> ExpenseRed
+                            selected && type == Transaction.INCOME_TYPE -> IncomeGreen
+                            selected -> MaterialTheme.colorScheme.primary
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                        Surface(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(44.dp),
+                            shape = MaterialTheme.shapes.small,
+                            color = containerColor,
+                            onClick = { onEvent(AddTransactionEvent.OnTypeChange(type)) }
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = label,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                    color = contentColor
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // ─── Amount (BIG, centered) ───
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = state.currency,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    BasicTextField(
+                        value = state.amount,
+                        onValueChange = { onEvent(AddTransactionEvent.OnAmountChange(it)) },
+                        textStyle = TextStyle(
+                            fontSize = 48.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onBackground
+                        ),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        decorationBox = { innerTextField ->
+                            Box(
+                                modifier = Modifier.fillMaxWidth(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (state.amount.isEmpty()) {
+                                    Text(
+                                        text = "0.00",
+                                        style = TextStyle(
+                                            fontSize = 48.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Center
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        }
+                    )
+                    // Amount error
+                    AnimatedVisibility(visible = state.amountError != null) {
+                        Text(
+                            text = state.amountError ?: "",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
+
+                // ─── Title ───
+                Text(
+                    text = "Title",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-
-                // Title Input
                 OutlinedTextField(
                     value = state.title,
                     onValueChange = { onEvent(AddTransactionEvent.OnTitleChange(it)) },
-                    label = { Text("Transaction Title") },
+                    placeholder = { Text("What was this for?") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                        disabledContainerColor = MaterialTheme.colorScheme.surface,
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                     ),
                     shape = MaterialTheme.shapes.medium
                 )
 
-                // Amount Input
-                OutlinedTextField(
-                    value = state.amount,
-                    onValueChange = { onEvent(AddTransactionEvent.OnAmountChange(it)) },
-                    label = { Text("Amount") },
-                    placeholder = { Text("0.00") },
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = state.amountError != null,
-                    supportingText = state.amountError?.let { { Text(it) } },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    singleLine = true,
-                    textStyle = TextStyle(fontSize = 22.sp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                        disabledContainerColor = MaterialTheme.colorScheme.surface,
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                    ),
-                    shape = MaterialTheme.shapes.medium
-                )
-
-                // Category error message
-                AnimatedVisibility(
-                    visible = state.showCategoryError && state.selectedCategory == null && state.type == Transaction.EXPENSE_TYPE,
-                    enter = fadeIn(tween(300)) + expandVertically(tween(300)),
-                    exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
-                ) {
-                    Text(
-                        "Please select a category first",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                    )
-                }
-
-                // Category Selection Card (only for Expense)
+                // ─── Category ───
                 AnimatedVisibility(
                     visible = state.type == Transaction.EXPENSE_TYPE,
                     enter = fadeIn(tween(300)) + expandVertically(tween(300)),
                     exit = fadeOut(tween(200)) + shrinkVertically(tween(200))
                 ) {
-                    CategorySelectionCard(
-                        selectedCategory = state.selectedCategory,
-                        onClick = { onEvent(AddTransactionEvent.OnCategoryClick) }
-                    )
+                    Column {
+                        Text(
+                            text = "Category",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        CategorySelectionCard(
+                            selectedCategory = state.selectedCategory,
+                            onClick = { onEvent(AddTransactionEvent.OnCategoryClick) }
+                        )
+                        // Category error
+                        AnimatedVisibility(
+                            visible = state.showCategoryError && state.selectedCategory == null
+                        ) {
+                            Text(
+                                "Please select a category",
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(top = 4.dp, start = 4.dp)
+                            )
+                        }
+                    }
                 }
 
-                // Cash Transaction Switch (only for Expense)
+                // ─── Date ───
+                Text(
+                    text = "Date",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                XpenseCard(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_round_date_range_24),
+                            contentDescription = "Date",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = dateFormat.format(state.date),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+
+                // ─── Cash Transaction Switch ───
                 AnimatedVisibility(
                     visible = state.type == Transaction.EXPENSE_TYPE,
                     enter = fadeIn(tween(300)) + expandVertically(tween(300)),
@@ -180,7 +270,7 @@ fun AddTransactionScreen(
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
@@ -188,7 +278,6 @@ fun AddTransactionScreen(
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onBackground
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
                         Switch(
                             checked = state.isCashTransaction,
                             onCheckedChange = { onEvent(AddTransactionEvent.OnCashTransactionChange(it)) }
@@ -196,36 +285,15 @@ fun AddTransactionScreen(
                     }
                 }
 
-                // Date Picker
-                OutlinedTextField(
-                    value = dateFormat.format(state.date),
-                    onValueChange = {},
-                    label = { Text("Date") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp),
-                    readOnly = true,
-                    trailingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_round_date_range_24),
-                            contentDescription = "Select Date",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.background,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.background,
-                        disabledContainerColor = MaterialTheme.colorScheme.background,
-                    )
-                )
+                Spacer(modifier = Modifier.height(8.dp))
             }
 
-            // Save Button
+            // ─── Save Button ───
             Button(
                 onClick = { onEvent(AddTransactionEvent.OnSaveClick) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 18.dp, vertical = 12.dp)
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
                     .height(52.dp),
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
@@ -235,51 +303,13 @@ fun AddTransactionScreen(
             ) {
                 Text(
                     if (state.isEditMode) "Update Transaction" else "Add Transaction",
-                    style = MaterialTheme.typography.labelLarge
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
 
-        // Loading overlay
-        LoadingState(
-            isLoading = state.isLoading,
-            modifier = Modifier.fillMaxSize()
-        )
-    }
-}
-
-@Composable
-private fun TransactionTypeSelector(
-    selectedType: String,
-    onTypeChange: (String) -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        listOf(
-            Transaction.INCOME_TYPE to "Income",
-            Transaction.EXPENSE_TYPE to "Expense",
-            Transaction.TRANSFER_TYPE to "Transfer"
-        ).forEachIndexed { index, (type, label) ->
-            if (index > 0) Spacer(modifier = Modifier.width(12.dp))
-            FilterChip(
-                selected = selectedType == type,
-                onClick = { onTypeChange(type) },
-                label = {
-                    Text(
-                        label,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-                },
-                modifier = Modifier.height(52.dp),
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        }
+        LoadingState(isLoading = state.isLoading, modifier = Modifier.fillMaxSize())
     }
 }
 
@@ -288,7 +318,7 @@ private fun CategorySelectionCard(
     selectedCategory: ExpenseCategory?,
     onClick: () -> Unit
 ) {
-    val visual = com.rokudo.xpense.utils.CategoryIconMapper.get(selectedCategory?.name)
+    val visual = CategoryIconMapper.get(selectedCategory?.name)
 
     XpenseCard(
         modifier = Modifier.fillMaxWidth(),
@@ -297,21 +327,20 @@ private fun CategorySelectionCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 14.dp, horizontal = 18.dp),
+                .padding(vertical = 14.dp, horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Colored circle with icon
-            androidx.compose.foundation.layout.Box(
+            Box(
                 modifier = Modifier
-                    .size(44.dp)
-                    .background(visual.containerColor, shape = androidx.compose.foundation.shape.CircleShape),
+                    .size(40.dp)
+                    .background(visual.containerColor, shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = visual.icon,
                     contentDescription = selectedCategory?.name,
                     tint = visual.color,
-                    modifier = Modifier.size(22.dp)
+                    modifier = Modifier.size(20.dp)
                 )
             }
             Spacer(modifier = Modifier.width(14.dp))
@@ -319,14 +348,9 @@ private fun CategorySelectionCard(
                 Text(
                     text = selectedCategory?.name ?: "Select Category",
                     style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Medium,
                     color = if (selectedCategory != null) MaterialTheme.colorScheme.onSurface
-                            else MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    "Tap to change",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Icon(
@@ -342,34 +366,6 @@ private fun CategorySelectionCard(
 @Composable
 fun AddTransactionScreenPreview() {
     XpenseTheme(dynamicColor = false) {
-        AddTransactionScreen(
-            state = AddTransactionState(),
-            onEvent = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun EditTransactionScreenPreview() {
-    val mockTransaction = Transaction().apply {
-        amount = 150.0
-        title = "Grocery Shopping"
-        type = Transaction.EXPENSE_TYPE
-        category = "Shopping"
-        date = Date()
-    }
-
-    XpenseTheme(dynamicColor = false) {
-        AddTransactionScreen(
-            state = AddTransactionState(
-                originalTransaction = mockTransaction,
-                isEditMode = true,
-                title = "Grocery Shopping",
-                amount = "150.0",
-                selectedCategory = ExpenseCategory("Shopping")
-            ),
-            onEvent = {}
-        )
+        AddTransactionScreen(state = AddTransactionState(), onEvent = {})
     }
 }

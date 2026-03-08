@@ -37,13 +37,21 @@ fun ListTransactionsScreen(
 ) {
     var showMonthPicker by remember { mutableStateOf(false) }
 
-    // Group transactions by day
+    // Group transactions by day with totals
     val groupedTransactions = remember(transactions) {
         val dateFormat = SimpleDateFormat("EEEE, MMMM d", Locale.getDefault())
         transactions
             .filter { it.date != null }
             .sortedByDescending { it.date?.time ?: 0 }
             .groupBy { dateFormat.format(it.date!!) }
+    }
+    val dayTotals = remember(groupedTransactions) {
+        groupedTransactions.mapValues { (_, txs) ->
+            txs.sumOf { t ->
+                val amt = t.amount ?: 0.0
+                if (t.type == Transaction.INCOME_TYPE) amt else -amt
+            }
+        }
     }
 
     Scaffold(
@@ -150,19 +158,30 @@ fun ListTransactionsScreen(
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         groupedTransactions.forEach { (dayLabel, dayTransactions) ->
-                            // Day header
+                            // Day header with total
                             item(key = "header_$dayLabel") {
-                                Text(
-                                    text = dayLabel,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.padding(
-                                        start = 8.dp,
-                                        top = 12.dp,
-                                        bottom = 4.dp
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 8.dp, end = 8.dp, top = 12.dp, bottom = 4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = dayLabel,
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
-                                )
+                                    val dayTotal = dayTotals[dayLabel] ?: 0.0
+                                    Text(
+                                        text = String.format("%+.2f", dayTotal),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (dayTotal >= 0) com.rokudo.xpense.ui.theme.IncomeGreen
+                                               else com.rokudo.xpense.ui.theme.ExpenseRed
+                                    )
+                                }
                             }
                             // Transactions for this day
                             items(

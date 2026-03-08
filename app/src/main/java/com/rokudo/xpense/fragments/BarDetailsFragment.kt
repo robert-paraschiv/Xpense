@@ -95,8 +95,7 @@ fun BarDetailsScreen(
         topBar = {
             XpenseTopAppBar(
                 title = "Spending History",
-                onBackClick = onBackClick,
-                useArrowBack = false
+                onBackClick = onBackClick
             )
         }
     ) { paddingValues ->

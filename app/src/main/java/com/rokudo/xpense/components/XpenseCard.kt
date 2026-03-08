@@ -1,6 +1,5 @@
 package com.rokudo.xpense.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -19,11 +18,7 @@ fun XpenseCard(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = BorderStroke(
-            width = 0.5.dp,
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         content = { content() }
     )
 }

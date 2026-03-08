@@ -6,13 +6,12 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,40 +23,45 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.PieChart
 import com.rokudo.xpense.R
-import com.rokudo.xpense.components.AnimatedAmountText
-import com.rokudo.xpense.components.LatestTransactionItem
-import com.rokudo.xpense.components.XpenseCard
+import com.rokudo.xpense.components.*
 import com.rokudo.xpense.models.SpentMostItem
 import com.rokudo.xpense.models.StatisticsDoc
 import com.rokudo.xpense.models.Transaction
 import com.rokudo.xpense.models.Wallet
-import com.rokudo.xpense.ui.theme.XpenseGradients
-import com.rokudo.xpense.ui.theme.XpenseTheme
-import com.rokudo.xpense.utils.BarChartUtils
+import com.rokudo.xpense.ui.theme.*
+import com.rokudo.xpense.utils.CategoryIconMapper
 import com.rokudo.xpense.utils.PieChartUtils
+import java.util.Calendar
 
+@Suppress("UNUSED_PARAMETER")
 @Composable
 fun HomeScreen(
     wallet: Wallet?,
     latestTransaction: Transaction?,
+    recentTransactions: List<Transaction>,
     barChartTransactions: List<Transaction>,
     statisticsDoc: StatisticsDoc?,
     spentMostItems: List<SpentMostItem>,
     bankBalance: String?,
     bankCurrency: String?,
+    monthlySpent: Double,
+    monthlyIncome: Double,
+    topCategories: List<Pair<String, Double>>,
     onWalletClick: () -> Unit,
     onAdjustBalanceClick: () -> Unit,
     onAddBankClick: () -> Unit,
     onFabClick: () -> Unit,
     onBarChartClick: () -> Unit,
     onPieChartClick: () -> Unit,
-    onTransactionClick: () -> Unit
+    onTransactionClick: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
+    val greeting = getGreeting()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -78,423 +82,225 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(scrollState)
                 .padding(paddingValues)
         ) {
-            // Gradient Header Area
-            Box(
+            // ─── Header: Greeting + Settings ───
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(XpenseGradients.headerLight)
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 8.dp, bottom = 20.dp)
-            ) {
-                Column {
-                    // Wallet Header
-                    WalletHeader(
-                        walletTitle = wallet?.title,
-                        onWalletClick = onWalletClick
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Balance Cards
-                    BalanceCardsRow(
-                        wallet = wallet,
-                        bankBalance = bankBalance,
-                        bankCurrency = bankCurrency,
-                        onAdjustBalanceClick = onAdjustBalanceClick,
-                        onAddBankClick = onAddBankClick
-                    )
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 12.dp)
-            ) {
-                Spacer(modifier = Modifier.height(16.dp))
-
-            // Latest Transaction
-            AnimatedVisibility(
-                visible = latestTransaction != null,
-                enter = fadeIn(tween(400)) + expandVertically(tween(400)),
-                exit = fadeOut(tween(300)) + shrinkVertically(tween(300))
+                    .padding(horizontal = 20.dp)
+                    .padding(top = 16.dp, bottom = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
                     Text(
-                        text = "Latest Transaction",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 4.dp, bottom = 6.dp)
+                        text = greeting,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    XpenseCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = onTransactionClick
-                    ) {
-                        if (latestTransaction != null) {
-                            LatestTransactionItem(transaction = latestTransaction)
-                        }
-                    }
+                    Text(
+                        text = wallet?.title ?: "Select Wallet",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.clickable(onClick = onWalletClick)
+                    )
+                }
+                IconButton(onClick = onSettingsClick) {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = "Settings",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Charts Section
-            ChartsSection(
-                barChartTransactions = barChartTransactions,
-                statisticsDoc = statisticsDoc,
-                spentMostItems = spentMostItems,
-                walletCurrency = wallet?.currency ?: "",
-                onBarChartClick = onBarChartClick,
-                onPieChartClick = onPieChartClick
-            )
-
-            Spacer(modifier = Modifier.height(80.dp))
-            } // content Column
-        }
-    }
-}
-
-@Composable
-private fun WalletHeader(
-    walletTitle: String?,
-    onWalletClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable(onClick = onWalletClick)
-        ) {
-            Text(
-                text = walletTitle ?: "Select Wallet",
-                style = MaterialTheme.typography.headlineSmall,
-                color = Color.White,
-                maxLines = 1
-            )
-            IconButton(onClick = onWalletClick) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_round_keyboard_arrow_down_24),
-                    contentDescription = "Select Wallet",
-                    tint = Color.White.copy(alpha = 0.8f)
-                )
-            }
-        }
-        Box(
-            modifier = Modifier
-                .size(42.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.2f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Person,
-                contentDescription = "User Profile",
-                tint = Color.White,
-                modifier = Modifier.size(24.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun BalanceCardsRow(
-    wallet: Wallet?,
-    bankBalance: String?,
-    bankCurrency: String?,
-    onAdjustBalanceClick: () -> Unit,
-    onAddBankClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(130.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        // Wallet Balance Card
-        XpenseCard(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight(),
-            onClick = onAdjustBalanceClick
-        ) {
+            // ─── Balance Display ───
             Column(
                 modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                    .fillMaxWidth()
+                    .clickable(onClick = onAdjustBalanceClick),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                SuggestionChip(
-                    onClick = onAdjustBalanceClick,
-                    label = {
-                        Text("Adjust", style = MaterialTheme.typography.labelSmall)
-                    },
-                    icon = {
-                        Icon(
-                            painterResource(id = R.drawable.ic_round_edit_24),
-                            null,
-                            modifier = Modifier.size(14.dp)
-                        )
-                    }
-                )
-                Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = wallet?.currency ?: "",
-                    style = MaterialTheme.typography.labelMedium,
+                    text = wallet?.currency ?: "$",
+                    style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                AnimatedAmountText(
-                    amount = wallet?.amount?.toString() ?: "0.00",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold
+                Text(
+                    text = String.format("%.2f", wallet?.amount ?: 0.0),
+                    style = MaterialTheme.typography.displaySmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 42.sp,
+                        letterSpacing = (-1.5).sp
+                    ),
+                    color = MaterialTheme.colorScheme.onBackground
                 )
-            }
-        }
-
-        // Bank Balance Card
-        XpenseCard(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight(),
-            onClick = if (bankBalance == null) onAddBankClick else null
-        ) {
-            if (bankBalance != null) {
-                Column(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable(onClick = onWalletClick)
                 ) {
-                    SuggestionChip(
-                        onClick = {},
-                        label = {
-                            Text("Bank Account", style = MaterialTheme.typography.labelSmall)
-                        },
-                        icon = {
-                            Icon(
-                                painterResource(id = R.drawable.ic_baseline_local_atm_24),
-                                null,
-                                modifier = Modifier.size(14.dp)
-                            )
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = bankCurrency ?: "",
-                        style = MaterialTheme.typography.labelMedium,
+                        text = wallet?.title ?: "Select Wallet",
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    AnimatedAmountText(
-                        amount = bankBalance,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_round_keyboard_arrow_down_24),
+                        contentDescription = "Switch wallet",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
-            } else {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
-                ) {
+                // Bank balance line
+                AnimatedVisibility(visible = bankBalance != null) {
                     Text(
-                        text = "Tap to Link\nBank Account",
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleSmall,
+                        text = "Bank: ${bankCurrency ?: ""} $bankBalance",
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.Bold
+                        modifier = Modifier.padding(top = 4.dp)
                     )
                 }
             }
-        }
-    }
-}
 
-@Composable
-private fun ChartsSection(
-    barChartTransactions: List<Transaction>,
-    statisticsDoc: StatisticsDoc?,
-    spentMostItems: List<SpentMostItem>,
-    walletCurrency: String,
-    onBarChartClick: () -> Unit,
-    onPieChartClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(320.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        // Left column: Bar chart + Spent Most
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-        ) {
-            Text(
-                text = "Last 7 days spending",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            XpenseCard(
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // ─── Summary Pills: Spent / Earned ───
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                onClick = onBarChartClick
-            ) {
-                AndroidView(
-                    factory = { context ->
-                        BarChart(context).apply {
-                            BarChartUtils.setupBarChart(this, TextView(context).currentTextColor, true)
-                        }
-                    },
-                    update = { chart ->
-                        if (barChartTransactions.isNotEmpty()) {
-                            BarChartUtils.updateBarchartData(chart, ArrayList(barChartTransactions), TextView(chart.context).currentTextColor)
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Spent most on",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-
-            SpentMostCard(
-                spentMostItems = spentMostItems,
-                modifier = Modifier
-                    .weight(1f)
                     .fillMaxWidth()
-            )
-        }
-
-        // Right column: Pie chart
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-        ) {
-            Text(
-                text = "This month's spending",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            XpenseCard(
-                modifier = Modifier.fillMaxSize(),
-                onClick = onPieChartClick
+                    .padding(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                AndroidView(
-                    factory = { context ->
-                        PieChart(context).apply {
-                            PieChartUtils.setupPieChart(this, TextView(context).currentTextColor, true)
-                        }
-                    },
-                    update = { chart ->
-                        if (statisticsDoc != null) {
-                            PieChartUtils.updatePieChartData(
-                                chart,
-                                walletCurrency,
-                                statisticsDoc.amountByCategory,
-                                statisticsDoc.totalAmountSpent,
-                                true
-                            )
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp)
+                SummaryPill(
+                    label = "Spent",
+                    amount = "-${String.format("%.0f", monthlySpent)}",
+                    containerColor = ExpenseRedLight,
+                    contentColor = ExpenseRed,
+                    modifier = Modifier.weight(1f)
+                )
+                SummaryPill(
+                    label = "Earned",
+                    amount = "+${String.format("%.0f", monthlyIncome)}",
+                    containerColor = IncomeGreenLight,
+                    contentColor = IncomeGreen,
+                    modifier = Modifier.weight(1f)
                 )
             }
-        }
-    }
-}
 
-@Composable
-private fun SpentMostCard(
-    spentMostItems: List<SpentMostItem>,
-    modifier: Modifier = Modifier
-) {
-    XpenseCard(modifier = modifier) {
-        AnimatedContent(
-            targetState = spentMostItems.isNotEmpty(),
-            transitionSpec = {
-                fadeIn(tween(300)).togetherWith(fadeOut(tween(200)))
-            },
-            label = "spent_most_content"
-        ) { hasItems ->
-            if (hasItems) {
-                LazyRow(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    contentPadding = PaddingValues(horizontal = 4.dp)
+            Spacer(modifier = Modifier.height(28.dp))
+
+            // ─── Recent Transactions ───
+            val txToShow = if (recentTransactions.isNotEmpty()) recentTransactions
+                else listOfNotNull(latestTransaction)
+
+            if (txToShow.isNotEmpty()) {
+                SectionHeader(
+                    title = "Recent Transactions",
+                    action = "See all",
+                    onActionClick = onTransactionClick,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                XpenseCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
                 ) {
-                    items(spentMostItems) { item ->
-                        SpentMostItemCard(item)
+                    Column {
+                        txToShow.forEachIndexed { index, transaction ->
+                            LatestTransactionItem(transaction = transaction)
+                            if (index < txToShow.lastIndex) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    thickness = 0.5.dp,
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                )
+                            }
+                        }
                     }
                 }
-            } else {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            // ─── This Month: Pie Chart + Category Bars ───
+            if (statisticsDoc != null || topCategories.isNotEmpty()) {
+                SectionHeader(
+                    title = "This Month",
+                    action = "Details",
+                    onActionClick = onPieChartClick,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                XpenseCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    onClick = onPieChartClick
                 ) {
-                    Text(
-                        "No data",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        // Pie chart
+                        if (statisticsDoc != null) {
+                            AndroidView(
+                                factory = { context ->
+                                    PieChart(context).apply {
+                                        PieChartUtils.setupPieChart(this, TextView(context).currentTextColor, true)
+                                    }
+                                },
+                                update = { chart ->
+                                    PieChartUtils.updatePieChartData(
+                                        chart,
+                                        wallet?.currency ?: "",
+                                        statisticsDoc.amountByCategory,
+                                        statisticsDoc.totalAmountSpent,
+                                        true
+                                    )
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(180.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+
+                        // Top category bars
+                        val maxAmount = topCategories.maxOfOrNull { it.second } ?: 1.0
+                        topCategories.forEach { (catName, amount) ->
+                            val visual = CategoryIconMapper.get(catName)
+                            CategoryBar(
+                                icon = visual.icon,
+                                iconColor = visual.color,
+                                iconBgColor = visual.containerColor,
+                                name = catName,
+                                amount = "${wallet?.currency ?: "$"}${String.format("%.0f", amount)}",
+                                fraction = (amount / maxAmount).toFloat(),
+                                barColor = visual.color
+                            )
+                        }
+                    }
                 }
             }
+
+            // Bottom spacer for FAB
+            Spacer(modifier = Modifier.height(100.dp))
         }
     }
 }
 
-@Composable
-private fun SpentMostItemCard(item: SpentMostItem) {
-    Column(
-        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = item.title ?: "",
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Text(
-            text = item.category ?: "",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = item.amount ?: "",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.error,
-            fontWeight = FontWeight.Bold
-        )
+private fun getGreeting(): String {
+    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+    return when {
+        hour < 12 -> "Good morning"
+        hour < 17 -> "Good afternoon"
+        else -> "Good evening"
     }
 }
 
@@ -502,70 +308,45 @@ private fun SpentMostItemCard(item: SpentMostItem) {
 @Composable
 fun HomeScreenPreview() {
     val mockWallet = Wallet().apply {
-        id = "1"
-        title = "Personal"
-        currency = "$"
-        amount = 1250.50
+        id = "1"; title = "Personal"; currency = "$"; amount = 1250.50
     }
-
     val mockTransaction = Transaction().apply {
-        id = "1"
-        userName = "John Doe"
-        amount = 50.0
-        currency = "$"
-        date = java.util.Date()
-        category = "Food"
+        id = "1"; userName = "John Doe"; amount = 50.0; currency = "$"
+        date = java.util.Date(); category = "Groceries"; type = Transaction.EXPENSE_TYPE
+        title = "Weekly groceries"
+    }
+    val mockTx2 = Transaction().apply {
+        id = "2"; userName = "Uber"; amount = 12.0; currency = "$"
+        date = java.util.Date(); category = "Transport"; type = Transaction.EXPENSE_TYPE
+        title = "Uber ride"
+    }
+    val mockTx3 = Transaction().apply {
+        id = "3"; amount = 3000.0; currency = "$"
+        date = java.util.Date(); category = "Income"; type = Transaction.INCOME_TYPE
+        title = "Salary"
     }
 
     XpenseTheme(dynamicColor = false) {
         HomeScreen(
             wallet = mockWallet,
             latestTransaction = mockTransaction,
-            barChartTransactions = listOf(mockTransaction, mockTransaction),
-            statisticsDoc = null,
-            spentMostItems = listOf(
-                SpentMostItem("Groceries", "Food", "$150", "Today"),
-                SpentMostItem("Rent", "Housing", "$1200", "Monthly")
-            ),
-            bankBalance = "5000.00",
-            bankCurrency = "$",
-            onWalletClick = {},
-            onAdjustBalanceClick = {},
-            onAddBankClick = {},
-            onFabClick = {},
-            onBarChartClick = {},
-            onPieChartClick = {},
-            onTransactionClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
-@Composable
-fun HomeScreenDarkPreview() {
-    val mockWallet = Wallet().apply {
-        id = "1"
-        title = "Personal"
-        currency = "$"
-        amount = 1250.50
-    }
-
-    XpenseTheme(dynamicColor = false) {
-        HomeScreen(
-            wallet = mockWallet,
-            latestTransaction = null,
-            barChartTransactions = emptyList(),
+            recentTransactions = listOf(mockTransaction, mockTx2, mockTx3),
+            barChartTransactions = listOf(mockTransaction),
             statisticsDoc = null,
             spentMostItems = emptyList(),
             bankBalance = null,
             bankCurrency = null,
+            monthlySpent = 340.20,
+            monthlyIncome = 3000.0,
+            topCategories = listOf("Groceries" to 150.0, "Transport" to 80.0, "Bills" to 60.0),
             onWalletClick = {},
             onAdjustBalanceClick = {},
             onAddBankClick = {},
             onFabClick = {},
             onBarChartClick = {},
             onPieChartClick = {},
-            onTransactionClick = {}
+            onTransactionClick = {},
+            onSettingsClick = {}
         )
     }
 }

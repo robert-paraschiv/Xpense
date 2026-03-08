@@ -78,8 +78,7 @@ fun PieDetailsScreen(
         topBar = {
             XpenseTopAppBar(
                 title = "Spending Details",
-                onBackClick = onBackClick,
-                useArrowBack = false
+                onBackClick = onBackClick
             )
         }
     ) { paddingValues ->

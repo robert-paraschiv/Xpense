@@ -2,8 +2,6 @@ package com.rokudo.xpense.data.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.rokudo.xpense.models.SpentMostItem
 import com.rokudo.xpense.models.StatisticsDoc
@@ -22,11 +20,15 @@ data class HomeState(
     val wallet: Wallet? = null,
     val selectedWalletId: String = "",
     val latestTransaction: Transaction? = null,
+    val recentTransactions: List<Transaction> = emptyList(),
     val barChartTransactions: List<Transaction> = emptyList(),
     val statisticsDoc: StatisticsDoc? = null,
     val spentMostItems: List<SpentMostItem> = emptyList(),
     val bankBalance: String? = null,
     val bankCurrency: String? = null,
+    val monthlySpent: Double = 0.0,
+    val monthlyIncome: Double = 0.0,
+    val topCategories: List<Pair<String, Double>> = emptyList(),
     val isLoading: Boolean = true
 )
 
@@ -34,6 +36,7 @@ sealed class HomeEvent {
     data class Init(val selectedWalletId: String) : HomeEvent()
     data class WalletLoaded(val wallet: Wallet?) : HomeEvent()
     data class LatestTransactionLoaded(val transaction: Transaction?) : HomeEvent()
+    data class RecentTransactionsLoaded(val transactions: List<Transaction>) : HomeEvent()
     data class BarChartTransactionsLoaded(val transactions: List<Transaction>) : HomeEvent()
     data class StatisticsLoaded(val doc: StatisticsDoc?) : HomeEvent()
     data class BankBalanceLoaded(val balance: String?, val currency: String?) : HomeEvent()
@@ -80,16 +83,50 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             is HomeEvent.LatestTransactionLoaded -> {
                 _state.update { it.copy(latestTransaction = event.transaction) }
             }
+            is HomeEvent.RecentTransactionsLoaded -> {
+                val sorted = event.transactions
+                    .filter { it.date != null }
+                    .sortedByDescending { it.date?.time ?: 0 }
+                    .take(5)
+                _state.update { it.copy(recentTransactions = sorted) }
+            }
             is HomeEvent.BarChartTransactionsLoaded -> {
                 _state.update { it.copy(barChartTransactions = event.transactions) }
             }
             is HomeEvent.StatisticsLoaded -> {
                 val doc = event.doc
                 val wallet = _state.value.wallet
+                val spent = doc?.totalAmountSpent ?: 0.0
+
+                // Calculate income from transactions in the doc
+                var income = 0.0
+                doc?.transactions?.values?.forEach { t ->
+                    if (t.type == Transaction.INCOME_TYPE) {
+                        income += (t.amount ?: 0.0)
+                    }
+                }
+
+                // Top 3 categories by amount
+                val topCats = doc?.amountByCategory
+                    ?.entries
+                    ?.sortedByDescending { it.value }
+                    ?.take(3)
+                    ?.map { Pair(it.key, it.value) }
+                    ?: emptyList()
+
                 val spentMost = if (doc?.transactions != null && wallet != null) {
                     calculateSpentMostItems(ArrayList(doc.transactions.values), wallet.currency ?: "")
                 } else emptyList()
-                _state.update { it.copy(statisticsDoc = doc, spentMostItems = spentMost) }
+
+                _state.update {
+                    it.copy(
+                        statisticsDoc = doc,
+                        spentMostItems = spentMost,
+                        monthlySpent = spent,
+                        monthlyIncome = income,
+                        topCategories = topCats
+                    )
+                }
             }
             is HomeEvent.BankBalanceLoaded -> {
                 _state.update { it.copy(bankBalance = event.balance, bankCurrency = event.currency) }
@@ -160,4 +197,3 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 }
-

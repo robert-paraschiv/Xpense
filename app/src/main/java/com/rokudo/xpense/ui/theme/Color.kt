@@ -1,35 +1,33 @@
 package com.rokudo.xpense.ui.theme
 
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
-// Primary — warm teal/emerald
-val Primary10 = Color(0xFF002018)
-val Primary20 = Color(0xFF00382B)
-val Primary30 = Color(0xFF005140)
-val Primary40 = Color(0xFF006B55)
-val Primary50 = Color(0xFF00897B)
-val Primary60 = Color(0xFF009688)
-val Primary70 = Color(0xFF4DB6AC)
-val Primary80 = Color(0xFF80CBC4)
-val Primary90 = Color(0xFFB2DFDB)
-val Primary95 = Color(0xFFE0F2F1)
-val Primary99 = Color(0xFFF5FDFB)
+// Primary — forest green (money, trust, growth)
+val Primary10 = Color(0xFF002106)
+val Primary20 = Color(0xFF00390F)
+val Primary30 = Color(0xFF0A5219)
+val Primary40 = Color(0xFF1B5E20)
+val Primary50 = Color(0xFF2E7D32)
+val Primary60 = Color(0xFF43A047)
+val Primary70 = Color(0xFF66BB6A)
+val Primary80 = Color(0xFF81C784)
+val Primary90 = Color(0xFFC8E6C9)
+val Primary95 = Color(0xFFE8F5E9)
+val Primary99 = Color(0xFFF1F8E9)
 
-// Secondary — warm amber/gold
-val Secondary20 = Color(0xFF3E2E00)
-val Secondary40 = Color(0xFF7B5E00)
-val Secondary60 = Color(0xFFFFB300)
-val Secondary80 = Color(0xFFFFD54F)
-val Secondary90 = Color(0xFFFFECB3)
-val Secondary95 = Color(0xFFFFF8E1)
+// Secondary — blue-gray (neutral sophistication)
+val Secondary10 = Color(0xFF1B2428)
+val Secondary20 = Color(0xFF263238)
+val Secondary30 = Color(0xFF37474F)
+val Secondary40 = Color(0xFF455A64)
+val Secondary50 = Color(0xFF607D8B)
+val Secondary60 = Color(0xFF78909C)
+val Secondary70 = Color(0xFF90A4AE)
+val Secondary80 = Color(0xFFB0BEC5)
+val Secondary90 = Color(0xFFCFD8DC)
+val Secondary95 = Color(0xFFECEFF1)
 
-// Tertiary — soft rose
-val Tertiary40 = Color(0xFF8E4585)
-val Tertiary80 = Color(0xFFDDA0DD)
-val Tertiary90 = Color(0xFFF3E5F5)
-
-// Neutral palette
+// Neutral
 val Neutral10 = Color(0xFF1C1B1F)
 val Neutral20 = Color(0xFF313033)
 val Neutral30 = Color(0xFF484649)
@@ -53,30 +51,14 @@ val Error40 = Color(0xFFBA1A1A)
 val Error80 = Color(0xFFFFB4AB)
 val Error90 = Color(0xFFFFDAD6)
 
-// Semantic
+// Semantic — income/expense
 val IncomeGreen = Color(0xFF2E7D32)
 val IncomeGreenLight = Color(0xFFE8F5E9)
 val ExpenseRed = Color(0xFFC62828)
 val ExpenseRedLight = Color(0xFFFFEBEE)
 
-// Surface / background — warm grays
-val SurfaceLight = Color(0xFFFFFBFE)
-val BackgroundLight = Color(0xFFF5F5F0)
-val SurfaceDark = Color(0xFF1C1B1F)
-val BackgroundDark = Color(0xFF141316)
-
-// Gradients
-object XpenseGradients {
-    val headerLight = Brush.verticalGradient(
-        colors = listOf(Primary50, Primary70)
-    )
-    val headerDark = Brush.verticalGradient(
-        colors = listOf(Primary20, Primary40)
-    )
-    val incomeGradient = Brush.horizontalGradient(
-        colors = listOf(Color(0xFF43A047), Color(0xFF66BB6A))
-    )
-    val expenseGradient = Brush.horizontalGradient(
-        colors = listOf(Color(0xFFC62828), Color(0xFFEF5350))
-    )
-}
+// Surfaces
+val SurfaceLight = Color(0xFFFFFFFF)
+val BackgroundLight = Color(0xFFFAFAFA)
+val SurfaceDark = Color(0xFF1E1E1E)
+val BackgroundDark = Color(0xFF121212)

@@ -86,6 +86,9 @@ class HomeFragment : Fragment() {
                     val stats by statsLiveData.observeAsState()
                     LaunchedEffect(stats) {
                         homeViewModel.onEvent(HomeEvent.StatisticsLoaded(stats))
+                        // Use statistics transactions as recent transactions
+                        val recentTxs = stats?.transactions?.values?.toList() ?: emptyList()
+                        homeViewModel.onEvent(HomeEvent.RecentTransactionsLoaded(recentTxs))
                     }
 
                     // Latest transaction
@@ -128,18 +131,23 @@ class HomeFragment : Fragment() {
                     HomeScreen(
                         wallet = homeState.wallet,
                         latestTransaction = homeState.latestTransaction,
+                        recentTransactions = homeState.recentTransactions,
                         barChartTransactions = homeState.barChartTransactions,
                         statisticsDoc = homeState.statisticsDoc,
                         spentMostItems = homeState.spentMostItems,
                         bankBalance = homeState.bankBalance,
                         bankCurrency = homeState.bankCurrency,
+                        monthlySpent = homeState.monthlySpent,
+                        monthlyIncome = homeState.monthlyIncome,
+                        topCategories = homeState.topCategories,
                         onWalletClick = { homeViewModel.onEvent(HomeEvent.WalletClicked) },
                         onAdjustBalanceClick = { homeViewModel.onEvent(HomeEvent.AdjustBalanceClicked) },
                         onAddBankClick = { homeViewModel.onEvent(HomeEvent.AddBankClicked) },
                         onFabClick = { homeViewModel.onEvent(HomeEvent.FabClicked) },
                         onBarChartClick = { homeViewModel.onEvent(HomeEvent.BarChartClicked) },
                         onPieChartClick = { homeViewModel.onEvent(HomeEvent.PieChartClicked) },
-                        onTransactionClick = { homeViewModel.onEvent(HomeEvent.TransactionsClicked) }
+                        onTransactionClick = { homeViewModel.onEvent(HomeEvent.TransactionsClicked) },
+                        onSettingsClick = { homeViewModel.onEvent(HomeEvent.SettingsClicked) }
                     )
                 }
             }
