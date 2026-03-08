@@ -106,7 +106,7 @@ class MainActivity : ComponentActivity() {
                 if (user != null) {
                     user.uid = firebaseUser.uid
                     user.phoneNumber = phoneNumber
-                    DatabaseUtils.setCurrentUser(user)
+                    DatabaseUtils.currentUser = user
                 }
             }
     }
@@ -119,7 +119,7 @@ class MainActivity : ComponentActivity() {
                 return
             }
 
-            bankApiViewModel.getRequisitionDetails(bAccount.requisition_id).observe(this) { requisition ->
+            bankApiViewModel.getRequisitionDetails(bAccount.requisition_id ?: "").observe(this) { requisition ->
                 if (requisition?.id == null) {
                     Log.e(TAG, "handleIntent: requisition was null")
                 } else {
@@ -160,10 +160,11 @@ class MainActivity : ComponentActivity() {
             val selected = accountDetailsList[0]
             bAccount.accounts = listOf(selected.account_id)
             bAccount.linked_acc_id = selected.account_id
-            bAccount.linked_acc_currency = selected.account?.currency
-            bAccount.linked_acc_iban = selected.account?.iban
+            bAccount.linked_acc_currency = selected.account?.currency ?: ""
+            bAccount.linked_acc_iban = selected.account?.iban ?: ""
 
-            DatabaseUtils.walletsRef.document(bAccount.walletIds[0])
+            val walletId = bAccount.walletIds?.firstOrNull() ?: return
+            DatabaseUtils.walletsRef.document(walletId)
                 .update("bAccount", bAccount)
                 .addOnSuccessListener { Log.d(TAG, "Updated wallet with bank account") }
         }

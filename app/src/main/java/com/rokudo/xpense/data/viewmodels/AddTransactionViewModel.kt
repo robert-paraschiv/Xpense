@@ -58,7 +58,7 @@ sealed class AddTransactionEffect {
 
 class AddTransactionViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repo = TransactionRepo.getInstance()
+    private val repo = TransactionRepo.instance
 
     private val _state = MutableStateFlow(AddTransactionState())
     val state: StateFlow<AddTransactionState> = _state.asStateFlow()
@@ -98,7 +98,7 @@ class AddTransactionViewModel(application: Application) : AndroidViewModel(appli
                         title = event.transaction?.title ?: "",
                         date = event.transaction?.date ?: Date(),
                         type = event.transaction?.type ?: Transaction.EXPENSE_TYPE,
-                        isCashTransaction = event.transaction?.cashTransaction ?: false,
+                        isCashTransaction = event.transaction?.isCashTransaction ?: false,
                         selectedCategory = category
                     )
                 }
@@ -185,9 +185,9 @@ class AddTransactionViewModel(application: Application) : AndroidViewModel(appli
             this.amount = currentState.amount.toDouble()
             currency = currentState.currency
             this.date = currentState.date
-            picUrl = DatabaseUtils.getCurrentUser().pictureUrl
-            user_id = DatabaseUtils.getCurrentUser().uid
-            userName = DatabaseUtils.getCurrentUser().name
+            picUrl = DatabaseUtils.currentUser?.pictureUrl
+            user_id = DatabaseUtils.currentUser?.uid ?: ""
+            userName = DatabaseUtils.currentUser?.name ?: ""
 
             this.category = when(type) {
                  Transaction.INCOME_TYPE -> "Income"
@@ -196,7 +196,7 @@ class AddTransactionViewModel(application: Application) : AndroidViewModel(appli
             }
 
             this.title = currentState.title
-            setCashTransaction(currentState.isCashTransaction)
+            this.isCashTransaction = currentState.isCashTransaction
             this.type = type
         }
 
@@ -251,7 +251,7 @@ class AddTransactionViewModel(application: Application) : AndroidViewModel(appli
         val original = currentState.originalTransaction ?: return
 
         _state.update { it.copy(isLoading = true) }
-        val liveData = repo.deleteTransaction(original.id, original.walletId)
+        val liveData = repo.deleteTransaction(original.id ?: "", original.walletId ?: "")
         var observer: Observer<Boolean>? = null
         observer = Observer { t ->
             observer?.let { liveData.removeObserver(it) }

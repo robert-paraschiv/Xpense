@@ -47,7 +47,7 @@ fun EditWalletScreen(
     var currencyError by remember { mutableStateOf<String?>(null) }
 
     val isEditMode = wallet != null
-    val otherUser = wallet?.walletUsers?.firstOrNull { it.userId != com.rokudo.xpense.utils.DatabaseUtils.getCurrentUser().uid }
+    val otherUser = wallet?.walletUsers?.firstOrNull { it.userId != com.rokudo.xpense.utils.DatabaseUtils.currentUser?.uid }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,

@@ -233,13 +233,16 @@ fun AddTransactionScreen(
                 }
 
                 // ─── Date ───
+                var showDatePicker by remember { mutableStateOf(false) }
+
                 Text(
                     text = "Date",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 XpenseCard(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { showDatePicker = true }
                 ) {
                     Row(
                         modifier = Modifier
@@ -259,6 +262,33 @@ fun AddTransactionScreen(
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface
                         )
+                    }
+                }
+
+                if (showDatePicker) {
+                    val calendar = remember { Calendar.getInstance().apply { time = state.date } }
+                    val datePickerState = rememberDatePickerState(
+                        initialSelectedDateMillis = calendar.timeInMillis
+                    )
+                    DatePickerDialog(
+                        onDismissRequest = { showDatePicker = false },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                datePickerState.selectedDateMillis?.let { millis ->
+                                    onEvent(AddTransactionEvent.OnDateChange(Date(millis)))
+                                }
+                                showDatePicker = false
+                            }) {
+                                Text("OK")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showDatePicker = false }) {
+                                Text("Cancel")
+                            }
+                        }
+                    ) {
+                        DatePicker(state = datePickerState)
                     }
                 }
 

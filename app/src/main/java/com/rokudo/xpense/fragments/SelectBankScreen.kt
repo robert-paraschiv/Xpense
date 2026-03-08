@@ -132,12 +132,12 @@ fun SelectBankScreenPreview() {
         Institution().apply {
             id = "1"
             name = "Sample Bank"
-            logo = null
+            logo = ""
         },
         Institution().apply {
             id = "2"
             name = "Another Bank"
-            logo = null
+            logo = ""
         }
     )
 

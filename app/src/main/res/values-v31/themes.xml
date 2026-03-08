@@ -29,13 +29,5 @@
         <item name="android:windowActivityTransitions">true</item>
     </style>
 
-    <style name="DialogTheme" parent="MaterialAlertDialog.Material3">
-        <!--selected day-->
-        <item name="android:colorControlActivated">@color/material_dynamic_primary99</item>
-        <!--days of the month-->
-        <item name="android:textColorPrimary">@android:color/system_neutral1_500</item>
-        <!--days of the week-->
-        <item name="android:textColorSecondary">@color/material_dynamic_primary60</item>
-    </style>
 
 </resources>

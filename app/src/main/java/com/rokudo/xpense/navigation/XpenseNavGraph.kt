@@ -169,27 +169,27 @@ private fun HomeDestination(navController: NavHostController, activityVmOwner: V
     val (startDate, endDate) = remember { calculateLast7Days() }
 
     val barChartLiveData = remember(wallet?.id) {
-        if (wallet?.id != null && wallet!!.id.isNotEmpty() && wallet!!.id != "Wallets")
-            transactionViewModel.loadTransactionsDateInterval(wallet!!.id, startDate, endDate)
+        if (wallet?.id != null && wallet!!.id!!.isNotEmpty() && wallet!!.id != "Wallets")
+            transactionViewModel.loadTransactionsDateInterval(wallet!!.id!!, startDate, endDate)
         else androidx.lifecycle.MutableLiveData(emptyList())
     }
     val barChartTx by barChartLiveData.observeAsState(emptyList())
 
     val statsLiveData = remember(wallet?.id) {
-        if (wallet?.id != null && wallet!!.id.isNotEmpty() && wallet!!.id != "Wallets")
-            statisticsViewModel.listenForStatisticsDoc(wallet!!.id, Date())
+        if (wallet?.id != null && wallet!!.id!!.isNotEmpty() && wallet!!.id != "Wallets")
+            statisticsViewModel.listenForStatisticsDoc(wallet!!.id!!, Date())
         else androidx.lifecycle.MutableLiveData(null)
     }
     val stats by statsLiveData.observeAsState()
 
     val latestTxLiveData = remember(wallet?.id) {
-        if (wallet?.id != null && wallet!!.id.isNotEmpty())
-            transactionViewModel.loadLatestTransaction(wallet!!.id)
+        if (wallet?.id != null && wallet!!.id!!.isNotEmpty())
+            transactionViewModel.loadLatestTransaction(wallet!!.id!!)
         else androidx.lifecycle.MutableLiveData(null)
     }
     val latestTx by latestTxLiveData.observeAsState()
 
-    val bAccount = wallet?.getbAccount()
+    val bAccount = wallet?.bAccount
     val linkedAccId = bAccount?.linked_acc_id
     val balancesLiveData = remember(linkedAccId) {
         if (linkedAccId != null) bankApiViewModel.getAccountBalances(linkedAccId)
@@ -244,26 +244,26 @@ private fun HomeDestination(navController: NavHostController, activityVmOwner: V
                 is HomeEffect.NavigateToAddBank -> Toast.makeText(context, "Link Bank Account Feature", Toast.LENGTH_SHORT).show()
                 is HomeEffect.NavigateToAddTransaction -> {
                     val w = currentWallet
-                    if (w != null && w.id.isNotEmpty() && w.id != "Wallets") {
-                        navController.navigate(Screen.AddTransaction.createRoute(w.id, w.currency ?: "$"))
+                    if (w != null && !w.id.isNullOrEmpty() && w.id != "Wallets") {
+                        navController.navigate(Screen.AddTransaction.createRoute(w.id!!, w.currency ?: "$"))
                     } else {
                         Toast.makeText(context, "Please create or select a wallet first", Toast.LENGTH_SHORT).show()
                     }
                 }
                 is HomeEffect.NavigateToBarDetails -> {
-                    currentWallet?.let { w -> navController.navigate(Screen.Analytics.createRoute(w.id, "bar")) }
+                    currentWallet?.let { w -> navController.navigate(Screen.Analytics.createRoute(w.id ?: "", "bar")) }
                 }
                 is HomeEffect.NavigateToPieDetails -> {
-                    currentWallet?.let { w -> navController.navigate(Screen.Analytics.createRoute(w.id, "pie")) }
+                    currentWallet?.let { w -> navController.navigate(Screen.Analytics.createRoute(w.id ?: "", "pie")) }
                 }
                 is HomeEffect.NavigateToTransactions -> {
-                    currentWallet?.let { w -> navController.navigate(Screen.ListTransactions.createRoute(w.id, w.currency ?: "$")) }
+                    currentWallet?.let { w -> navController.navigate(Screen.ListTransactions.createRoute(w.id ?: "", w.currency ?: "$")) }
                 }
                 is HomeEffect.NavigateToExpenses -> {
-                    currentWallet?.let { w -> navController.navigate(Screen.ListTransactions.createRoute(w.id, w.currency ?: "$", "Expense")) }
+                    currentWallet?.let { w -> navController.navigate(Screen.ListTransactions.createRoute(w.id ?: "", w.currency ?: "$", "Expense")) }
                 }
                 is HomeEffect.NavigateToIncome -> {
-                    currentWallet?.let { w -> navController.navigate(Screen.ListTransactions.createRoute(w.id, w.currency ?: "$", "Income")) }
+                    currentWallet?.let { w -> navController.navigate(Screen.ListTransactions.createRoute(w.id ?: "", w.currency ?: "$", "Income")) }
                 }
                 is HomeEffect.NavigateToSettings -> navController.navigate(Screen.Settings.route)
                 is HomeEffect.ShowToast -> Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
@@ -297,10 +297,10 @@ private fun HomeDestination(navController: NavHostController, activityVmOwner: V
 
     if (showWalletPicker) {
         WalletPickerSheet(
-            wallets = walletsList,
+            wallets = walletsList ?: arrayListOf(),
             onWalletClick = { w ->
                 prefs.edit().putString("selectedWalletId", w.id).apply()
-                selectedWalletId = w.id
+                selectedWalletId = w.id ?: ""
                 showWalletPicker = false
             },
             onAddClick = {
@@ -340,8 +340,8 @@ private fun SettingsDestination(navController: NavHostController, activityVmOwne
     val walletsViewModel: WalletsViewModel = viewModel(viewModelStoreOwner = activityVmOwner)
 
     // Observe the current user reactively from Firestore
-    var userName by remember { mutableStateOf(DatabaseUtils.getCurrentUser()?.name ?: "User") }
-    var userPicUrl by remember { mutableStateOf(DatabaseUtils.getCurrentUser()?.pictureUrl) }
+    var userName by remember { mutableStateOf(DatabaseUtils.currentUser?.name ?: "User") }
+    var userPicUrl by remember { mutableStateOf(DatabaseUtils.currentUser?.pictureUrl) }
 
     DisposableEffect(Unit) {
         val firebaseUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
@@ -357,7 +357,7 @@ private fun SettingsDestination(navController: NavHostController, activityVmOwne
                             // Keep static reference in sync
                             user.uid = firebaseUser.uid
                             user.phoneNumber = phoneNumber
-                            DatabaseUtils.setCurrentUser(user)
+                            DatabaseUtils.currentUser = user
                         }
                     }
                 }
@@ -398,7 +398,7 @@ private fun SettingsDestination(navController: NavHostController, activityVmOwne
         onSignOutClick = {
             transactionViewModel.removeAllData()
             walletsViewModel.removeAllData()
-            PrefsUtils.setSelectedWalletId(context, null)
+            PrefsUtils.setSelectedWalletId(context, "")
             FirebaseAuth.getInstance().signOut()
         },
         onProfilePictureClick = {
@@ -419,21 +419,21 @@ private fun SettingsDestination(navController: NavHostController, activityVmOwne
             }
         },
         onAcceptInvitation = { invitation ->
-            invitesViewModel.updateStatus(invitation.id, Invitation.STATUS_ACCEPTED)
+            invitesViewModel.updateStatus(invitation.id ?: "", Invitation.STATUS_ACCEPTED)
             Toast.makeText(context, "Invitation accepted", Toast.LENGTH_SHORT).show()
         },
         onDeclineInvitation = { invitation ->
-            invitesViewModel.updateStatus(invitation.id, Invitation.STATUS_DECLINED)
+            invitesViewModel.updateStatus(invitation.id ?: "", Invitation.STATUS_DECLINED)
             Toast.makeText(context, "Invitation declined", Toast.LENGTH_SHORT).show()
         }
     )
 
     if (showWalletManager) {
         WalletPickerSheet(
-            wallets = walletsList,
+            wallets = walletsList ?: arrayListOf(),
             onWalletClick = { w ->
                 showWalletManager = false
-                PrefsUtils.setSelectedWalletId(context, w.id)
+                PrefsUtils.setSelectedWalletId(context, w.id ?: "")
             },
             onAddClick = {
                 showWalletManager = false
@@ -450,7 +450,7 @@ private fun SettingsDestination(navController: NavHostController, activityVmOwne
 
 private fun uploadProfilePicture(context: android.content.Context, imageUri: android.net.Uri) {
     try {
-        val bitmap = com.rokudo.xpense.utils.RotateBitmap.HandleSamplingAndRotationBitmap(context, imageUri)
+        val bitmap = com.rokudo.xpense.utils.RotateBitmap.HandleSamplingAndRotationBitmap(context, imageUri) ?: return
         val baos = java.io.ByteArrayOutputStream()
         bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 50, baos)
         val data = baos.toByteArray()
@@ -499,7 +499,7 @@ private fun AddTransactionDestination(
     val statisticsViewModel: StatisticsViewModel = viewModel(viewModelStoreOwner = activityVmOwner)
     val mTransaction = remember(transactionId) {
         if (transactionId != null) {
-            statisticsViewModel.storedStatisticsDoc?.transactions?.get(transactionId)
+            statisticsViewModel.getStoredStatisticsDoc()?.transactions?.get(transactionId)
         } else null
     }
 
@@ -565,16 +565,18 @@ private fun ListTransactionsDestination(
 
         statisticsViewModel.loadStatisticsDoc(walletId, date, false)
             .observe(lifecycleOwner) { statsDoc ->
-                transactions = if (statsDoc?.transactions != null)
-                    statsDoc.transactions.values.sortedByDescending { it.dateLong }
+                val txns = statsDoc?.transactions
+                transactions = if (txns != null)
+                    txns.values.sortedByDescending { it.dateLong }
                 else emptyList()
             }
     }
 
     LaunchedEffect(Unit) {
-        statisticsViewModel.storedStatisticsDoc?.let { statsDoc ->
-            if (statsDoc.transactions != null)
-                transactions = statsDoc.transactions.values.sortedByDescending { it.dateLong }
+        statisticsViewModel.getStoredStatisticsDoc()?.let { statsDoc ->
+            val txns = statsDoc.transactions
+            if (txns != null)
+                transactions = txns.values.sortedByDescending { it.dateLong }
         }
     }
 
@@ -704,10 +706,10 @@ private fun EditWalletDestination(
                         creation_date = Date()
                         this.currency = currency
                         this.title = title
-                        users = listOf(DatabaseUtils.getCurrentUser().uid)
-                        creator_id = DatabaseUtils.getCurrentUser().uid
+                        users = listOf(DatabaseUtils.currentUser?.uid ?: "")
+                        creator_id = DatabaseUtils.currentUser?.uid ?: ""
                     }
-                    PrefsUtils.setSelectedWalletId(context, newWallet.id)
+                    PrefsUtils.setSelectedWalletId(context, newWallet.id ?: "")
                     walletsViewModel.addWallet(newWallet).observe(lifecycleOwner) { result ->
                         if (result == "Success") navController.popBackStack()
                         else Toast.makeText(context, "Failed to create wallet", Toast.LENGTH_SHORT).show()
@@ -728,7 +730,7 @@ private fun EditWalletDestination(
         onDeleteClick = { showDeleteConfirmation = true },
         onInviteClick = {
             wallet?.let { w ->
-                navController.navigate(Screen.Contacts.createRoute(w.id))
+                navController.navigate(Screen.Contacts.createRoute(w.id ?: ""))
             }
         }
     )
@@ -746,7 +748,7 @@ private fun EditWalletDestination(
             confirmButton = {
                 androidx.compose.material3.TextButton(onClick = {
                     showDeleteConfirmation = false
-                    walletsViewModel.deleteWallet(wallet!!.id).observe(lifecycleOwner) { result ->
+                    walletsViewModel.deleteWallet(wallet!!.id ?: "").observe(lifecycleOwner) { result ->
                         if (result == true) {
                             Toast.makeText(context, "Wallet deleted successfully", Toast.LENGTH_SHORT).show()
                             navController.popBackStack()

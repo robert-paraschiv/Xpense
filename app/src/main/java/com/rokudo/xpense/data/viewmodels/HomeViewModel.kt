@@ -119,7 +119,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     ?: emptyList()
 
                 val spentMost = if (doc?.transactions != null && wallet != null) {
-                    calculateSpentMostItems(ArrayList(doc.transactions.values), wallet.currency ?: "")
+                    calculateSpentMostItems(ArrayList(doc.transactions!!.values), wallet.currency ?: "$")
                 } else emptyList()
 
                 _state.update {
@@ -172,7 +172,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 categoryMap[cat] = (categoryMap[cat] ?: 0.0) + (t.amount ?: 0.0)
 
                 if (t.date != null) {
-                    val date = t.date.toInstant().atZone(ZoneOffset.UTC).toLocalDate()
+                    val date = t.date!!.toInstant().atZone(ZoneOffset.UTC).toLocalDate()
                     dayMap[date] = (dayMap[date] ?: 0.0) + (t.amount ?: 0.0)
                 }
             }
