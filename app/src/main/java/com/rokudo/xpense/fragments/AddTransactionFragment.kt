@@ -9,15 +9,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.rokudo.xpense.components.CategoryPickerSheet
 import com.rokudo.xpense.data.viewmodels.AddTransactionEffect
 import com.rokudo.xpense.data.viewmodels.AddTransactionEvent
 import com.rokudo.xpense.data.viewmodels.AddTransactionViewModel
-import com.rokudo.xpense.utils.dialogs.CategoryDialog
 import com.rokudo.xpense.utils.dialogs.ConfirmationDialog
 import com.rokudo.xpense.ui.theme.XpenseTheme
-import kotlinx.coroutines.launch
 
 class AddTransactionFragment : Fragment() {
 
@@ -46,43 +44,56 @@ class AddTransactionFragment : Fragment() {
         // Init ViewModel
         viewModel.onEvent(AddTransactionEvent.Init(walletId, currency, mTransaction, isEditMode))
 
-        // Collect Effects
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.effect.collect { effect ->
-                when(effect) {
-                    is AddTransactionEffect.NavigateBack -> findNavController().popBackStack()
-                    is AddTransactionEffect.ShowToast -> Toast.makeText(requireContext(), effect.message, Toast.LENGTH_SHORT).show()
-                    is AddTransactionEffect.ShowCategoryDialog -> {
-                        val categoryDialog = CategoryDialog(viewModel.state.value.selectedCategory)
-                        categoryDialog.setClickListener { expenseCategory ->
-                            viewModel.onEvent(AddTransactionEvent.OnCategoryChange(expenseCategory))
-                            categoryDialog.dismiss()
-                        }
-                        categoryDialog.showNow(parentFragmentManager, "transactionCategoryDialog")
-                    }
-                    is AddTransactionEffect.ShowDeleteConfirmation -> {
-                        val dialog = ConfirmationDialog("Are you sure you want to delete this transaction?")
-                        dialog.setOnClickListener {
-                            dialog.dismiss()
-                            viewModel.onEvent(AddTransactionEvent.OnDeleteConfirmed)
-                        }
-                        dialog.show(parentFragmentManager, "ConfirmationDialog")
-                    }
-                }
-            }
-        }
-
         return ComposeView(requireContext()).apply {
             setContent {
                 XpenseTheme {
                     val state by viewModel.state.collectAsState()
+
+                    // State for showing category picker bottom sheet
+                    var showCategoryPicker by remember { mutableStateOf(false) }
+
+                    // Single effect collector
+                    LaunchedEffect(Unit) {
+                        viewModel.effect.collect { effect ->
+                            when (effect) {
+                                is AddTransactionEffect.NavigateBack -> findNavController().popBackStack()
+                                is AddTransactionEffect.ShowToast ->
+                                    Toast.makeText(requireContext(), effect.message, Toast.LENGTH_SHORT).show()
+                                is AddTransactionEffect.ShowCategoryDialog -> {
+                                    showCategoryPicker = true
+                                }
+                                is AddTransactionEffect.ShowDeleteConfirmation -> {
+                                    val dialog = ConfirmationDialog("Are you sure you want to delete this transaction?")
+                                    dialog.setOnClickListener {
+                                        dialog.dismiss()
+                                        viewModel.onEvent(AddTransactionEvent.OnDeleteConfirmed)
+                                    }
+                                    dialog.show(parentFragmentManager, "ConfirmationDialog")
+                                }
+                            }
+                        }
+                    }
+
                     AddTransactionScreen(
                         state = state,
                         onEvent = viewModel::onEvent
                     )
+
+                    // ─── Compose Category Picker Bottom Sheet ───
+                    if (showCategoryPicker) {
+                        CategoryPickerSheet(
+                            selectedCategory = state.selectedCategory,
+                            onCategorySelected = { category ->
+                                viewModel.onEvent(AddTransactionEvent.OnCategoryChange(category))
+                                showCategoryPicker = false
+                            },
+                            onDismiss = {
+                                showCategoryPicker = false
+                            }
+                        )
+                    }
                 }
             }
         }
     }
 }
-

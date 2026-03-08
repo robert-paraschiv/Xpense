@@ -8,10 +8,13 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.rokudo.xpense.data.viewmodels.StatisticsViewModel
 import com.rokudo.xpense.models.ExpenseCategory
+import com.rokudo.xpense.models.StatisticsDoc
 import com.rokudo.xpense.models.Transaction
 import com.rokudo.xpense.models.Wallet
 import com.rokudo.xpense.utils.AnalyticsBarUtils
@@ -53,13 +56,23 @@ class AnalyticsFragment : Fragment() {
                         generateAvailableDates(isYearMode)
                     }
 
-                    LaunchedEffect(selectedDate, isYearMode) {
-                        loadStatistics(selectedDate, isYearMode)
-                    }
+                    // Stable LiveData that survives recomposition
+                    val stableStatsLiveData = remember { MutableLiveData<StatisticsDoc?>() }
+                    val statisticsDoc by stableStatsLiveData.observeAsState()
 
-                    val statisticsDoc by statisticsViewModel.loadStatisticsDoc(
-                        wallet.id, selectedDate, isYearMode
-                    ).observeAsState()
+                    // Load statistics when date or mode changes; properly manage observer lifecycle
+                    DisposableEffect(selectedDate, isYearMode) {
+                        val sourceLiveData = statisticsViewModel.loadStatisticsDoc(
+                            wallet.id, selectedDate, isYearMode
+                        )
+                        val observer = Observer<StatisticsDoc> { doc ->
+                            stableStatsLiveData.value = doc
+                        }
+                        sourceLiveData.observeForever(observer)
+                        onDispose {
+                            sourceLiveData.removeObserver(observer)
+                        }
+                    }
 
                     LaunchedEffect(statisticsDoc) {
                         statisticsDoc?.let { doc ->
@@ -106,9 +119,8 @@ class AnalyticsFragment : Fragment() {
                                 e.printStackTrace()
                             }
                         },
-                        onBarClick = { barIndex ->
-                            // Bar click is handled — could navigate or expand
-                            // For now the bar chart just highlights; categories handle expand/collapse
+                        onBarClick = { _ ->
+                            // Bar click — currently no-op
                         },
                         onTransactionClick = { transaction ->
                             val action = AnalyticsFragmentDirections
@@ -154,10 +166,6 @@ class AnalyticsFragment : Fragment() {
         }
 
         return dates.reversed()
-    }
-
-    private fun loadStatistics(date: Date, isYearMode: Boolean) {
-        statisticsViewModel.loadStatisticsDoc(wallet.id, date, isYearMode)
     }
 
     private fun buildCategoryList(

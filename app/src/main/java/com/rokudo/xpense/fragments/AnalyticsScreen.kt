@@ -65,6 +65,13 @@ fun AnalyticsScreen(
     // Track which category is expanded — null means none
     var expandedCategory by remember { mutableStateOf<String?>(null) }
 
+    // If selected date is not in the list, auto-select the most recent date
+    LaunchedEffect(currentDateIndex, availableDates) {
+        if (currentDateIndex == -1 && availableDates.isNotEmpty()) {
+            onDateSelected(availableDates.first())
+        }
+    }
+
     // Reset expansion when date or mode changes
     LaunchedEffect(selectedDate, isYearMode) {
         expandedCategory = null
@@ -130,7 +137,12 @@ fun AnalyticsScreen(
             }
 
             // ─── Date Navigator ───
+            // availableDates is ordered most-recent-first (reversed),
+            // so higher index = older date. Left arrow = older, Right arrow = newer.
             item(key = "date_nav") {
+                val canGoOlder = currentDateIndex >= 0 && currentDateIndex < availableDates.lastIndex
+                val canGoNewer = currentDateIndex > 0
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -138,33 +150,33 @@ fun AnalyticsScreen(
                 ) {
                     IconButton(
                         onClick = {
-                            if (currentDateIndex > 0) onDateSelected(availableDates[currentDateIndex - 1])
+                            if (canGoOlder) onDateSelected(availableDates[currentDateIndex + 1])
                         },
-                        enabled = currentDateIndex > 0
+                        enabled = canGoOlder
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                            contentDescription = "Previous",
-                            tint = if (currentDateIndex > 0) MaterialTheme.colorScheme.onSurface
+                            contentDescription = "Previous (older)",
+                            tint = if (canGoOlder) MaterialTheme.colorScheme.onSurface
                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                         )
                     }
                     Text(
-                        text = selectedDate,
+                        text = if (currentDateIndex >= 0) selectedDate else availableDates.firstOrNull() ?: selectedDate,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     IconButton(
                         onClick = {
-                            if (currentDateIndex < availableDates.lastIndex) onDateSelected(availableDates[currentDateIndex + 1])
+                            if (canGoNewer) onDateSelected(availableDates[currentDateIndex - 1])
                         },
-                        enabled = currentDateIndex < availableDates.lastIndex
+                        enabled = canGoNewer
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            contentDescription = "Next",
-                            tint = if (currentDateIndex < availableDates.lastIndex) MaterialTheme.colorScheme.onSurface
+                            contentDescription = "Next (newer)",
+                            tint = if (canGoNewer) MaterialTheme.colorScheme.onSurface
                             else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
                         )
                     }

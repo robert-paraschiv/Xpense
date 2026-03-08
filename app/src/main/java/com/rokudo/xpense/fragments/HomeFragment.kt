@@ -10,19 +10,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import com.rokudo.xpense.components.AdjustBalanceSheet
+import com.rokudo.xpense.components.WalletPickerSheet
 import com.rokudo.xpense.data.viewmodels.*
 import com.rokudo.xpense.models.Wallet
 import com.rokudo.xpense.ui.theme.XpenseTheme
-import com.rokudo.xpense.utils.dialogs.AdjustBalanceDialog
-import com.rokudo.xpense.utils.dialogs.WalletListDialog
-import kotlinx.coroutines.launch
 import java.util.*
 
 class HomeFragment : Fragment() {
@@ -52,6 +52,10 @@ class HomeFragment : Fragment() {
             setContent {
                 XpenseTheme {
                     val homeState by homeViewModel.state.collectAsState()
+
+                    // State for showing bottom sheets
+                    var showWalletPicker by remember { mutableStateOf(false) }
+                    var showAdjustBalance by remember { mutableStateOf(false) }
 
                     // Bridge LiveData → MVI State
                     val walletState by walletsViewModel.loadWallet(homeState.selectedWalletId).observeAsState()
@@ -118,13 +122,21 @@ class HomeFragment : Fragment() {
                         homeViewModel.onEvent(HomeEvent.BankBalanceLoaded(bankBal, bankCur))
                     }
 
-                    // Wallets list for dialog
+                    // Wallets list for picker
                     val walletsList by walletsViewModel.loadWallets().observeAsState(arrayListOf())
 
                     // Collect effects
                     LaunchedEffect(Unit) {
                         homeViewModel.effect.collect { effect ->
-                            handleEffect(effect, homeState, walletsList, prefs)
+                            when (effect) {
+                                is HomeEffect.ShowWalletDialog -> {
+                                    showWalletPicker = true
+                                }
+                                is HomeEffect.ShowAdjustBalanceDialog -> {
+                                    showAdjustBalance = true
+                                }
+                                else -> handleEffect(effect, homeState, prefs)
+                            }
                         }
                     }
 
@@ -149,6 +161,45 @@ class HomeFragment : Fragment() {
                         onTransactionClick = { homeViewModel.onEvent(HomeEvent.TransactionsClicked) },
                         onSettingsClick = { homeViewModel.onEvent(HomeEvent.SettingsClicked) }
                     )
+
+                    // ─── Compose Wallet Picker Bottom Sheet ───
+                    if (showWalletPicker) {
+                        WalletPickerSheet(
+                            wallets = walletsList,
+                            onWalletClick = { w ->
+                                prefs.edit { putString("selectedWalletId", w.id) }
+                                homeViewModel.onEvent(HomeEvent.Init(w.id))
+                                showWalletPicker = false
+                            },
+                            onAddClick = {
+                                Toast.makeText(requireContext(), "Add Wallet", Toast.LENGTH_SHORT).show()
+                                showWalletPicker = false
+                            },
+                            onEditClick = { w ->
+                                Toast.makeText(requireContext(), "Edit Wallet", Toast.LENGTH_SHORT).show()
+                                showWalletPicker = false
+                            },
+                            onDismiss = {
+                                showWalletPicker = false
+                            }
+                        )
+                    }
+
+                    // ─── Compose Adjust Balance Bottom Sheet ───
+                    if (showAdjustBalance && wallet != null) {
+                        AdjustBalanceSheet(
+                            currentBalance = wallet.amount ?: 0.0,
+                            currency = wallet.currency ?: "$",
+                            onApply = { newBalance ->
+                                wallet.amount = newBalance
+                                walletsViewModel.updateWallet(wallet)
+                                showAdjustBalance = false
+                            },
+                            onDismiss = {
+                                showAdjustBalance = false
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -157,48 +208,12 @@ class HomeFragment : Fragment() {
     private fun handleEffect(
         effect: HomeEffect,
         state: HomeState,
-        walletsList: ArrayList<Wallet>,
         prefs: android.content.SharedPreferences
     ) {
         val wallet = state.wallet
         when (effect) {
-            is HomeEffect.ShowWalletDialog -> {
-                val dialog = WalletListDialog(walletsList)
-                dialog.setClickListener(object : WalletListDialog.OnClickListener {
-                    override fun onWalletClick(w: Wallet) {
-                        prefs.edit { putString("selectedWalletId", w.id) }
-                        homeViewModel.onEvent(HomeEvent.Init(w.id))
-                        dialog.dismiss()
-                    }
-                    override fun onAddClick() {
-                        Toast.makeText(requireContext(), "Add Wallet Clicked", Toast.LENGTH_SHORT).show()
-                        dialog.dismiss()
-                    }
-                    override fun onEditClick(w: Wallet) {
-                        Toast.makeText(requireContext(), "Edit Wallet Clicked", Toast.LENGTH_SHORT).show()
-                        dialog.dismiss()
-                    }
-                })
-                dialog.show(parentFragmentManager, "WalletListDialog")
-            }
-            is HomeEffect.ShowAdjustBalanceDialog -> {
-                if (wallet != null) {
-                    val dialog = AdjustBalanceDialog(wallet.amount.toString())
-                    dialog.setOnDialogClicks(object : AdjustBalanceDialog.OnAdjustBalanceDialogClickListener {
-                        override fun onApplyClick(amount: String) {
-                            try {
-                                wallet.amount = amount.toDouble()
-                                walletsViewModel.updateWallet(wallet)
-                                dialog.dismiss()
-                            } catch (_: NumberFormatException) {
-                                Toast.makeText(requireContext(), "Invalid amount", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                        override fun onCancelClick() { dialog.dismiss() }
-                    })
-                    dialog.show(parentFragmentManager, "AdjustBalanceDialog")
-                }
-            }
+            is HomeEffect.ShowWalletDialog -> { /* handled inline in Compose */ }
+            is HomeEffect.ShowAdjustBalanceDialog -> { /* handled inline in Compose */ }
             is HomeEffect.NavigateToAddBank -> {
                 Toast.makeText(requireContext(), "Link Bank Account Feature", Toast.LENGTH_SHORT).show()
             }
@@ -212,13 +227,17 @@ class HomeFragment : Fragment() {
             }
             is HomeEffect.NavigateToBarDetails -> {
                 if (wallet != null) {
-                    val action = HomeFragmentDirections.actionHomeFragmentToBarDetailsFragment(wallet)
+                    val action = HomeFragmentDirections.actionHomeFragmentToAnalyticsFragment(
+                        "bar", wallet, false
+                    )
                     view?.findNavController()?.navigate(action)
                 }
             }
             is HomeEffect.NavigateToPieDetails -> {
                 if (wallet != null) {
-                    val action = HomeFragmentDirections.actionHomeFragmentToPieDetailsFragment(wallet)
+                    val action = HomeFragmentDirections.actionHomeFragmentToAnalyticsFragment(
+                        "pie", wallet, false
+                    )
                     view?.findNavController()?.navigate(action)
                 }
             }

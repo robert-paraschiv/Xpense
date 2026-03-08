@@ -40,6 +40,12 @@ public class InvitesRepo {
         if (invitesListener != null) {
             invitesListener.remove();
         }
+
+        if (DatabaseUtils.getCurrentUser() == null || DatabaseUtils.getCurrentUser().getPhoneNumber() == null) {
+            Log.d(TAG, "loadInvites: current user or phone number is null");
+            return invitesList;
+        }
+
         invitesListener = DatabaseUtils.invitationsRef
                 .whereEqualTo("invited_person_phone_number", DatabaseUtils.getCurrentUser().getPhoneNumber())
                 .orderBy("date", Query.Direction.DESCENDING)
