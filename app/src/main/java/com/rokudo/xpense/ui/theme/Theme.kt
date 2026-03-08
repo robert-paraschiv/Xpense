@@ -10,25 +10,25 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 
 private val LightColorScheme = lightColorScheme(
-    primary = Blue60,
-    onPrimary = Neutral99,
-    primaryContainer = Blue90,
-    onPrimaryContainer = Blue10,
-    secondary = SecondaryBlue60,
-    onSecondary = Neutral99,
-    secondaryContainer = SecondaryBlue90,
-    onSecondaryContainer = Blue10,
-    tertiary = Teal40,
-    onTertiary = Neutral99,
-    tertiaryContainer = Teal90,
-    onTertiaryContainer = Blue10,
+    primary = Primary50,
+    onPrimary = Color.White,
+    primaryContainer = Primary90,
+    onPrimaryContainer = Primary10,
+    secondary = Secondary60,
+    onSecondary = Color.White,
+    secondaryContainer = Secondary90,
+    onSecondaryContainer = Secondary20,
+    tertiary = Tertiary40,
+    onTertiary = Color.White,
+    tertiaryContainer = Tertiary90,
+    onTertiaryContainer = Color(0xFF380032),
     error = Error40,
-    onError = Neutral99,
+    onError = Color.White,
     errorContainer = Error90,
     onErrorContainer = Color(0xFF410002),
-    background = FragmentsBgLight,
+    background = BackgroundLight,
     onBackground = Neutral10,
-    surface = CardsBgLight,
+    surface = SurfaceLight,
     onSurface = Neutral10,
     surfaceVariant = NeutralVariant90,
     onSurfaceVariant = NeutralVariant30,
@@ -36,30 +36,30 @@ private val LightColorScheme = lightColorScheme(
     outlineVariant = NeutralVariant80,
     inverseSurface = Neutral20,
     inverseOnSurface = Neutral95,
-    inversePrimary = Blue80,
-    surfaceTint = Blue60
+    inversePrimary = Primary80,
+    surfaceTint = Primary50
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Blue80,
-    onPrimary = Blue20,
-    primaryContainer = Blue30,
-    onPrimaryContainer = Blue90,
-    secondary = SecondaryBlue80,
-    onSecondary = Blue20,
-    secondaryContainer = SecondaryBlue40,
-    onSecondaryContainer = SecondaryBlue90,
-    tertiary = Teal80,
-    onTertiary = Color(0xFF003829),
-    tertiaryContainer = Teal40,
-    onTertiaryContainer = Teal90,
+    primary = Primary80,
+    onPrimary = Primary20,
+    primaryContainer = Primary30,
+    onPrimaryContainer = Primary90,
+    secondary = Secondary80,
+    onSecondary = Secondary20,
+    secondaryContainer = Secondary40,
+    onSecondaryContainer = Secondary90,
+    tertiary = Tertiary80,
+    onTertiary = Color(0xFF4E1249),
+    tertiaryContainer = Tertiary40,
+    onTertiaryContainer = Tertiary90,
     error = Error80,
     onError = Color(0xFF690005),
     errorContainer = Error40,
     onErrorContainer = Error90,
-    background = FragmentsBgDark,
+    background = BackgroundDark,
     onBackground = Neutral90,
-    surface = CardsBgDark,
+    surface = SurfaceDark,
     onSurface = Neutral90,
     surfaceVariant = NeutralVariant30,
     onSurfaceVariant = NeutralVariant80,
@@ -67,8 +67,8 @@ private val DarkColorScheme = darkColorScheme(
     outlineVariant = NeutralVariant30,
     inverseSurface = Neutral90,
     inverseOnSurface = Neutral20,
-    inversePrimary = Blue40,
-    surfaceTint = Blue80
+    inversePrimary = Primary40,
+    surfaceTint = Primary80
 )
 
 private val XpenseShapes = Shapes(
@@ -82,7 +82,7 @@ private val XpenseShapes = Shapes(
 @Composable
 fun XpenseTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -101,5 +101,3 @@ fun XpenseTheme(
         content = content
     )
 }
-
-

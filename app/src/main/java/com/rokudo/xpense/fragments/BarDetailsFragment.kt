@@ -180,14 +180,28 @@ fun BarDetailsScreen(
 
 @Composable
 fun TransactionItem(transaction: Transaction, currency: String) {
+    val visual = com.rokudo.xpense.utils.CategoryIconMapper.get(transaction.category)
     XpenseCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(visual.containerColor, shape = androidx.compose.foundation.shape.CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = visual.icon,
+                    contentDescription = transaction.category,
+                    tint = visual.color,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     transaction.title ?: transaction.category ?: "Transaction",
@@ -208,7 +222,7 @@ fun TransactionItem(transaction: Transaction, currency: String) {
                 color = if (transaction.type == Transaction.INCOME_TYPE)
                     IncomeGreen
                 else
-                    MaterialTheme.colorScheme.primary
+                    visual.color
             )
         }
     }

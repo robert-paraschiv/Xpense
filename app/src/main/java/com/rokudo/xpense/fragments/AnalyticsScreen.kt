@@ -324,6 +324,8 @@ fun CategoryItem(
     currency: String,
     onClick: () -> Unit
 ) {
+    val visual = com.rokudo.xpense.utils.CategoryIconMapper.get(category.name)
+
     XpenseCard(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick
@@ -334,12 +336,19 @@ fun CategoryItem(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painter = painterResource(id = category.resourceId),
-                contentDescription = category.name,
-                tint = Color(category.color),
-                modifier = Modifier.size(32.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .background(visual.containerColor, shape = androidx.compose.foundation.shape.CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = visual.icon,
+                    contentDescription = category.name,
+                    tint = visual.color,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -358,7 +367,7 @@ fun CategoryItem(
                 "$currency ${DecimalFormat("0.00").format(category.amount ?: 0.0)}",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = visual.color
             )
         }
     }

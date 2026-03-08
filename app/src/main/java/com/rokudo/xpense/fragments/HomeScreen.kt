@@ -3,7 +3,6 @@ package com.rokudo.xpense.fragments
 import android.widget.TextView
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,11 +11,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -33,6 +35,7 @@ import com.rokudo.xpense.models.SpentMostItem
 import com.rokudo.xpense.models.StatisticsDoc
 import com.rokudo.xpense.models.Transaction
 import com.rokudo.xpense.models.Wallet
+import com.rokudo.xpense.ui.theme.XpenseGradients
 import com.rokudo.xpense.ui.theme.XpenseTheme
 import com.rokudo.xpense.utils.BarChartUtils
 import com.rokudo.xpense.utils.PieChartUtils
@@ -61,48 +64,57 @@ fun HomeScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onFabClick,
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = MaterialTheme.shapes.large
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_round_add_24),
                     contentDescription = "Add Transaction"
                 )
             }
-        },
-        bottomBar = {
-            BottomAppBar(
-                containerColor = MaterialTheme.colorScheme.surface,
-                actions = {}
-            )
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(scrollState)
                 .padding(paddingValues)
-                .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
-            // Wallet Header
-            WalletHeader(
-                walletTitle = wallet?.title,
-                onWalletClick = onWalletClick
-            )
+            // Gradient Header Area
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(XpenseGradients.headerLight)
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 8.dp, bottom = 20.dp)
+            ) {
+                Column {
+                    // Wallet Header
+                    WalletHeader(
+                        walletTitle = wallet?.title,
+                        onWalletClick = onWalletClick
+                    )
 
-            Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-            // Balance Cards
-            BalanceCardsRow(
-                wallet = wallet,
-                bankBalance = bankBalance,
-                bankCurrency = bankCurrency,
-                onAdjustBalanceClick = onAdjustBalanceClick,
-                onAddBankClick = onAddBankClick
-            )
+                    // Balance Cards
+                    BalanceCardsRow(
+                        wallet = wallet,
+                        bankBalance = bankBalance,
+                        bankCurrency = bankCurrency,
+                        onAdjustBalanceClick = onAdjustBalanceClick,
+                        onAddBankClick = onAddBankClick
+                    )
+                }
+            }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp)
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
 
             // Latest Transaction
             AnimatedVisibility(
@@ -139,6 +151,9 @@ fun HomeScreen(
                 onBarChartClick = onBarChartClick,
                 onPieChartClick = onPieChartClick
             )
+
+            Spacer(modifier = Modifier.height(80.dp))
+            } // content Column
         }
     }
 }
@@ -151,7 +166,7 @@ private fun WalletHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp, horizontal = 4.dp),
+            .padding(vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -162,24 +177,31 @@ private fun WalletHeader(
             Text(
                 text = walletTitle ?: "Select Wallet",
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = Color.White,
                 maxLines = 1
             )
             IconButton(onClick = onWalletClick) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_round_keyboard_arrow_down_24),
                     contentDescription = "Select Wallet",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = Color.White.copy(alpha = 0.8f)
                 )
             }
         }
-        Image(
-            painter = painterResource(id = R.drawable.ic_baseline_person_24),
-            contentDescription = "User Profile",
+        Box(
             modifier = Modifier
-                .size(40.dp)
+                .size(42.dp)
                 .clip(CircleShape)
-        )
+                .background(Color.White.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Person,
+                contentDescription = "User Profile",
+                tint = Color.White,
+                modifier = Modifier.size(24.dp)
+            )
+        }
     }
 }
 

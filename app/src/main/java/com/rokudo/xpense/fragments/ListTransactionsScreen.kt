@@ -4,11 +4,11 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +22,7 @@ import com.rokudo.xpense.components.XpenseCard
 import com.rokudo.xpense.components.XpenseTopAppBar
 import com.rokudo.xpense.models.Transaction
 import com.rokudo.xpense.ui.theme.XpenseTheme
+import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,6 +36,15 @@ fun ListTransactionsScreen(
     onTransactionClick: (Transaction) -> Unit
 ) {
     var showMonthPicker by remember { mutableStateOf(false) }
+
+    // Group transactions by day
+    val groupedTransactions = remember(transactions) {
+        val dateFormat = SimpleDateFormat("EEEE, MMMM d", Locale.getDefault())
+        transactions
+            .filter { it.date != null }
+            .sortedByDescending { it.date?.time ?: 0 }
+            .groupBy { dateFormat.format(it.date!!) }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -96,8 +106,16 @@ fun ListTransactionsScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp),
-                            horizontalArrangement = Arrangement.Center
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
+                            Icon(
+                                imageVector = Icons.Filled.DateRange,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = selectedMonth,
                                 style = MaterialTheme.typography.titleMedium,
@@ -109,7 +127,7 @@ fun ListTransactionsScreen(
                 }
             }
 
-            // Transactions List
+            // Transactions List grouped by day
             AnimatedContent(
                 targetState = transactions.isEmpty(),
                 transitionSpec = {
@@ -128,22 +146,38 @@ fun ListTransactionsScreen(
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        itemsIndexed(
-                            transactions,
-                            key = { _, t -> t.id ?: UUID.randomUUID().toString() }
-                        ) { _, transaction ->
-                            XpenseCard(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .animateContentSize(),
-                                onClick = { onTransactionClick(transaction) }
-                            ) {
-                                LatestTransactionItem(transaction = transaction)
+                        groupedTransactions.forEach { (dayLabel, dayTransactions) ->
+                            // Day header
+                            item(key = "header_$dayLabel") {
+                                Text(
+                                    text = dayLabel,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(
+                                        start = 8.dp,
+                                        top = 12.dp,
+                                        bottom = 4.dp
+                                    )
+                                )
+                            }
+                            // Transactions for this day
+                            items(
+                                dayTransactions,
+                                key = { it.id ?: UUID.randomUUID().toString() }
+                            ) { transaction ->
+                                XpenseCard(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = { onTransactionClick(transaction) }
+                                ) {
+                                    LatestTransactionItem(transaction = transaction)
+                                }
                             }
                         }
+                        item { Spacer(modifier = Modifier.height(16.dp)) }
                     }
                 }
             }
@@ -156,35 +190,20 @@ fun ListTransactionsScreen(
 fun ListTransactionsScreenPreview() {
     val mockTransactions = listOf(
         Transaction().apply {
-            id = "1"
-            userName = "John Doe"
-            amount = 50.0
-            currency = "$"
-            date = Date()
-            category = "Food"
-            type = Transaction.EXPENSE_TYPE
+            id = "1"; userName = "John Doe"; amount = 50.0; currency = "$"
+            date = Date(); category = "Groceries"; type = Transaction.EXPENSE_TYPE
         },
         Transaction().apply {
-            id = "2"
-            userName = "Grocery Store"
-            amount = 120.50
-            currency = "$"
-            date = Date()
-            category = "Shopping"
-            type = Transaction.EXPENSE_TYPE
+            id = "2"; userName = "Grocery Store"; amount = 120.50; currency = "$"
+            date = Date(); category = "Restaurant"; type = Transaction.EXPENSE_TYPE
         },
         Transaction().apply {
-            id = "3"
-            userName = "Salary"
-            amount = 3000.0
-            currency = "$"
-            date = Date()
-            category = "Income"
-            type = Transaction.INCOME_TYPE
+            id = "3"; userName = "Salary"; amount = 3000.0; currency = "$"
+            date = Date(); category = "Income"; type = Transaction.INCOME_TYPE
         }
     )
 
-    XpenseTheme(dynamicColor = false) {
+    XpenseTheme {
         ListTransactionsScreen(
             transactions = mockTransactions,
             selectedMonth = "Mar 2024",

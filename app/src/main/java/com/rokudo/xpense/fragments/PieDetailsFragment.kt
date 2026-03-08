@@ -164,25 +164,40 @@ fun PieDetailsScreen(
 
 @Composable
 fun CategoryAmountItem(category: String, amount: Double, currency: String) {
+    val visual = com.rokudo.xpense.utils.CategoryIconMapper.get(category)
     XpenseCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(visual.containerColor, shape = androidx.compose.foundation.shape.CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                androidx.compose.material3.Icon(
+                    imageVector = visual.icon,
+                    contentDescription = category,
+                    tint = visual.color,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
             Text(
                 category,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f)
             )
             Text(
                 String.format("%.2f %s", amount, currency),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = visual.color
             )
         }
     }
