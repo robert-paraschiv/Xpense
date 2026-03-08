@@ -1,8 +1,5 @@
 package com.rokudo.xpense.components
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -24,26 +21,39 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 @Composable
-fun LatestTransactionItem(transaction: Transaction) {
+fun TransactionRow(
+    transaction: Transaction,
+    modifier: Modifier = Modifier
+) {
     val visual = CategoryIconMapper.get(transaction.category)
     val isIncome = transaction.type == Transaction.INCOME_TYPE
+    val isTransfer = transaction.type == Transaction.TRANSFER_TYPE
+
+    val amountColor = when {
+        isIncome -> IncomeGreen
+        isTransfer -> MaterialTheme.colorScheme.onSurfaceVariant
+        else -> ExpenseRed
+    }
+    val prefix = when {
+        isIncome -> "+"
+        isTransfer -> ""
+        else -> "-"
+    }
+    val currency = transaction.currency ?: ""
+    val amountText = if (transaction.amount != null) {
+        "$prefix$currency${String.format("%.2f", transaction.amount)}"
+    } else ""
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .animateContentSize(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessLow
-                )
-            )
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Category icon in a colored circle
+        // Category icon
         Box(
             modifier = Modifier
-                .size(46.dp)
+                .size(40.dp)
                 .clip(CircleShape)
                 .background(visual.containerColor),
             contentAlignment = Alignment.Center
@@ -52,44 +62,43 @@ fun LatestTransactionItem(transaction: Transaction) {
                 imageVector = visual.icon,
                 contentDescription = transaction.category,
                 tint = visual.color,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(20.dp)
             )
         }
 
-        Spacer(modifier = Modifier.width(14.dp))
+        Spacer(modifier = Modifier.width(12.dp))
 
-        // Title + category + date
+        // Title + subtitle
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = transaction.title
                     ?: transaction.userName
                     ?: transaction.category
                     ?: "Transaction",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            Spacer(modifier = Modifier.height(2.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
                     text = transaction.category ?: "",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = visual.color,
-                    fontWeight = FontWeight.Medium
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (transaction.date != null) {
                     Text(
                         text = "·",
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    val dateFormat = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault())
                     Text(
-                        text = dateFormat.format(transaction.date),
+                        text = SimpleDateFormat("MMM dd", Locale.getDefault()).format(transaction.date),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -97,25 +106,18 @@ fun LatestTransactionItem(transaction: Transaction) {
             }
         }
 
-        // Amount
-        Column(horizontalAlignment = Alignment.End) {
-            val amountColor = if (isIncome) IncomeGreen else ExpenseRed
-            val amountPrefix = if (isIncome) "+" else "-"
-            val amountText = if (transaction.amount != null) {
-                "$amountPrefix${String.format("%.2f", transaction.amount)}"
-            } else ""
-
-            Text(
-                text = amountText,
-                style = MaterialTheme.typography.titleSmall,
-                color = amountColor,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = transaction.currency ?: "",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        // Amount — single line with currency baked in
+        Text(
+            text = amountText,
+            style = MaterialTheme.typography.bodyMedium,
+            color = amountColor,
+            fontWeight = FontWeight.SemiBold
+        )
     }
+}
+
+// Keep old name as alias for backward compat with HomeScreen
+@Composable
+fun LatestTransactionItem(transaction: Transaction) {
+    TransactionRow(transaction = transaction)
 }

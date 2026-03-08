@@ -1,7 +1,5 @@
 package com.rokudo.xpense.utils;
 
-import static com.github.mikephil.charting.utils.ColorTemplate.rgb;
-
 import com.rokudo.xpense.R;
 import com.rokudo.xpense.models.ExpenseCategory;
 
@@ -13,52 +11,48 @@ public class CategoriesUtil {
 
     static {
         expenseCategoryList = new ArrayList<>();
+        // Colors aligned with CategoryIconMapper
         expenseCategoryList.add(new ExpenseCategory("Groceries",
                 R.drawable.ic_baseline_local_grocery_store_24,
-                rgb("#B2FF59")));
+                0xFF2E7D32));  // forest green
         expenseCategoryList.add(new ExpenseCategory("Restaurant",
                 R.drawable.ic_baseline_restaurant_24,
-                rgb("#F50057")));
+                0xFFC62828));  // deep red
         expenseCategoryList.add(new ExpenseCategory("Drinks",
                 R.drawable.ic_round_wine_bar_24,
-                rgb("#F06292")));
+                0xFFAD1457));  // dark pink
         expenseCategoryList.add(new ExpenseCategory("Transport",
                 R.drawable.ic_round_directions_car_24,
-                rgb("#18FFFF")));
+                0xFF00838F));  // teal
         expenseCategoryList.add(new ExpenseCategory("Fuel",
                 R.drawable.baseline_local_gas_station_24,
-                rgb("#37474F")));
+                0xFF37474F));  // blue-gray
         expenseCategoryList.add(new ExpenseCategory("Bills",
                 R.drawable.ic_round_receipt_24,
-                rgb("#AD1457")));
+                0xFF6A1B9A));  // deep purple
         expenseCategoryList.add(new ExpenseCategory("Gifts",
                 R.drawable.ic_round_card_giftcard_24,
-                rgb("#FFFF00")));
+                0xFFE65100));  // deep orange
         expenseCategoryList.add(new ExpenseCategory("Medical",
                 R.drawable.ic_baseline_medication_24,
-                rgb("#448AFF")));
+                0xFF1565C0));  // blue
         expenseCategoryList.add(new ExpenseCategory("Others",
                 R.drawable.ic_round_category_24,
-                rgb("#FF6D00")));
-
+                0xFF546E7A));  // gray
         expenseCategoryList.add(new ExpenseCategory("Housing",
                 R.drawable.baseline_house_24,
-                rgb("#4527A0")));
-
+                0xFF4527A0));  // indigo
         expenseCategoryList.add(new ExpenseCategory("Clothing",
                 R.drawable.baseline_shopping_bag_24,
-                rgb("#9575CD")));
-
+                0xFF7B1FA2));  // purple
         expenseCategoryList.add(new ExpenseCategory("Entertainment",
                 R.drawable.baseline_theater_comedy_24,
-                rgb("#69F0AE")));
-
+                0xFF00695C));  // dark teal
         expenseCategoryList.add(new ExpenseCategory("Memeluș",
                 R.drawable.outline_child_care_24,
-                rgb("#e040fb")));
-
+                0xFFD81B60));  // pink
         expenseCategoryList.add(new ExpenseCategory("Income",
                 R.drawable.round_monetization_on_24,
-                rgb("#C0FF8C")));
+                0xFF2E7D32));  // green (same as primary)
     }
 }

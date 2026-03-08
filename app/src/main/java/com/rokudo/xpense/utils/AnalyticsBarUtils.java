@@ -88,6 +88,9 @@ public class AnalyticsBarUtils {
         barDataSet.setDrawValues(true);
         barDataSet.setValueTextSize(10);
         barDataSet.setValueTextColor(textColor);
+        barDataSet.setColor(0xFF1B5E20);  // Primary green
+        barDataSet.setHighLightColor(0xFF2E7D32);
+        barDataSet.setHighLightAlpha(180);
 
         dataSets.add(barDataSet);
         barChart.setData(new BarData(dataSets));

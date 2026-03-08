@@ -3,12 +3,13 @@ package com.rokudo.xpense.fragments
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,10 +18,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rokudo.xpense.components.EmptyState
-import com.rokudo.xpense.components.LatestTransactionItem
+import com.rokudo.xpense.components.TransactionRow
 import com.rokudo.xpense.components.XpenseCard
 import com.rokudo.xpense.components.XpenseTopAppBar
 import com.rokudo.xpense.models.Transaction
+import com.rokudo.xpense.ui.theme.ExpenseRed
+import com.rokudo.xpense.ui.theme.IncomeGreen
 import com.rokudo.xpense.ui.theme.XpenseTheme
 import java.text.SimpleDateFormat
 import java.util.*
@@ -35,9 +38,9 @@ fun ListTransactionsScreen(
     onMonthSelected: (String) -> Unit,
     onTransactionClick: (Transaction) -> Unit
 ) {
-    var showMonthPicker by remember { mutableStateOf(false) }
+    val currentIndex = availableMonths.indexOf(selectedMonth)
 
-    // Group transactions by day with totals
+    // Group transactions by day
     val groupedTransactions = remember(transactions) {
         val dateFormat = SimpleDateFormat("EEEE, MMMM d", Locale.getDefault())
         transactions
@@ -57,10 +60,7 @@ fun ListTransactionsScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            XpenseTopAppBar(
-                title = "Transactions",
-                onBackClick = onBackClick
-            )
+            XpenseTopAppBar(title = "Transactions", onBackClick = onBackClick)
         }
     ) { paddingValues ->
         Column(
@@ -69,130 +69,113 @@ fun ListTransactionsScreen(
                 .background(MaterialTheme.colorScheme.background)
                 .padding(paddingValues)
         ) {
-            // Month Selector
-            AnimatedContent(
-                targetState = showMonthPicker,
-                transitionSpec = {
-                    fadeIn(tween(300)).togetherWith(fadeOut(tween(200)))
-                },
-                label = "month_picker"
-            ) { expanded ->
-                if (expanded) {
-                    XpenseCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                    ) {
-                        LazyRow(
-                            modifier = Modifier.padding(8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(availableMonths) { month ->
-                                FilterChip(
-                                    selected = month == selectedMonth,
-                                    onClick = {
-                                        onMonthSelected(month)
-                                        showMonthPicker = false
-                                    },
-                                    label = { Text(month) },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                    )
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    XpenseCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        onClick = { showMonthPicker = true }
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.DateRange,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = selectedMonth,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
+            // ─── Month Navigator with arrows ───
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    onClick = {
+                        if (currentIndex > 0) onMonthSelected(availableMonths[currentIndex - 1])
+                    },
+                    enabled = currentIndex > 0
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = "Previous month",
+                        tint = if (currentIndex > 0) MaterialTheme.colorScheme.onSurface
+                               else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                    )
+                }
+                Text(
+                    text = selectedMonth,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                IconButton(
+                    onClick = {
+                        if (currentIndex < availableMonths.lastIndex) onMonthSelected(availableMonths[currentIndex + 1])
+                    },
+                    enabled = currentIndex < availableMonths.lastIndex
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = "Next month",
+                        tint = if (currentIndex < availableMonths.lastIndex) MaterialTheme.colorScheme.onSurface
+                               else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                    )
                 }
             }
 
-            // Transactions List grouped by day
+            // ─── Transaction List ───
             AnimatedContent(
                 targetState = transactions.isEmpty(),
-                transitionSpec = {
-                    fadeIn(tween(300)).togetherWith(fadeOut(tween(200)))
-                },
+                transitionSpec = { fadeIn(tween(300)).togetherWith(fadeOut(tween(200))) },
                 label = "transactions_content"
             ) { isEmpty ->
                 if (isEmpty) {
                     EmptyState(
                         visible = true,
-                        title = "No transactions for this month",
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
+                        title = "No transactions",
+                        subtitle = "Nothing recorded for $selectedMonth",
+                        modifier = Modifier.fillMaxSize().padding(16.dp)
                     )
                 } else {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         groupedTransactions.forEach { (dayLabel, dayTransactions) ->
-                            // Day header with total
-                            item(key = "header_$dayLabel") {
+                            item(key = "day_$dayLabel") {
+                                // Day header
+                                val dayTotal = dayTotals[dayLabel] ?: 0.0
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(start = 8.dp, end = 8.dp, top = 12.dp, bottom = 4.dp),
+                                        .padding(horizontal = 4.dp, vertical = 2.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
                                         text = dayLabel,
                                         style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.Bold,
+                                        fontWeight = FontWeight.SemiBold,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
-                                    val dayTotal = dayTotals[dayLabel] ?: 0.0
                                     Text(
                                         text = String.format("%+.2f", dayTotal),
                                         style = MaterialTheme.typography.labelMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = if (dayTotal >= 0) com.rokudo.xpense.ui.theme.IncomeGreen
-                                               else com.rokudo.xpense.ui.theme.ExpenseRed
+                                        color = if (dayTotal >= 0) IncomeGreen else ExpenseRed
                                     )
                                 }
-                            }
-                            // Transactions for this day
-                            items(
-                                dayTransactions,
-                                key = { it.id ?: UUID.randomUUID().toString() }
-                            ) { transaction ->
-                                XpenseCard(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    onClick = { onTransactionClick(transaction) }
-                                ) {
-                                    LatestTransactionItem(transaction = transaction)
+
+                                Spacer(modifier = Modifier.height(6.dp))
+
+                                // All transactions for this day in ONE card
+                                XpenseCard(modifier = Modifier.fillMaxWidth()) {
+                                    Column {
+                                        dayTransactions.forEachIndexed { index, tx ->
+                                            TransactionRow(
+                                                transaction = tx,
+                                                modifier = Modifier.clickable {
+                                                    onTransactionClick(tx)
+                                                }
+                                            )
+                                            if (index < dayTransactions.lastIndex) {
+                                                HorizontalDivider(
+                                                    modifier = Modifier.padding(horizontal = 68.dp),
+                                                    thickness = 0.5.dp,
+                                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -209,24 +192,23 @@ fun ListTransactionsScreen(
 fun ListTransactionsScreenPreview() {
     val mockTransactions = listOf(
         Transaction().apply {
-            id = "1"; userName = "John Doe"; amount = 50.0; currency = "$"
+            id = "1"; title = "Weekly groceries"; amount = 45.20; currency = "$"
             date = Date(); category = "Groceries"; type = Transaction.EXPENSE_TYPE
         },
         Transaction().apply {
-            id = "2"; userName = "Grocery Store"; amount = 120.50; currency = "$"
+            id = "2"; title = "Lunch at café"; amount = 12.0; currency = "$"
             date = Date(); category = "Restaurant"; type = Transaction.EXPENSE_TYPE
         },
         Transaction().apply {
-            id = "3"; userName = "Salary"; amount = 3000.0; currency = "$"
+            id = "3"; title = "Salary"; amount = 3000.0; currency = "$"
             date = Date(); category = "Income"; type = Transaction.INCOME_TYPE
         }
     )
-
-    XpenseTheme {
+    XpenseTheme(dynamicColor = false) {
         ListTransactionsScreen(
             transactions = mockTransactions,
-            selectedMonth = "Mar 2024",
-            availableMonths = listOf("Jan 2024", "Feb 2024", "Mar 2024", "Apr 2024"),
+            selectedMonth = "Mar 2026",
+            availableMonths = listOf("Jan 2026", "Feb 2026", "Mar 2026"),
             onBackClick = {},
             onMonthSelected = {},
             onTransactionClick = {}

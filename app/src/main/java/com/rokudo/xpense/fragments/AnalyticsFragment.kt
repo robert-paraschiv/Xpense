@@ -41,96 +41,87 @@ class AnalyticsFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 XpenseTheme {
-                var isYearMode by remember { mutableStateOf(false) }
-                var showBarChart by remember { mutableStateOf(showBarChartInitially) }
-                var selectedDate by remember { mutableStateOf(Date()) }
-                var categories by remember { mutableStateOf<List<ExpenseCategory>>(emptyList()) }
-                var selectedCategoryTransactions by remember { mutableStateOf<List<Transaction>>(emptyList()) }
+                    var isYearMode by remember { mutableStateOf(false) }
+                    var showBarChart by remember { mutableStateOf(showBarChartInitially) }
+                    var selectedDate by remember { mutableStateOf(Date()) }
+                    var categories by remember { mutableStateOf<List<ExpenseCategory>>(emptyList()) }
 
-                val dateFormat = if (isYearMode) DateUtils.yearFormat else DateUtils.monthYearFormat
-                val selectedDateStr = dateFormat.format(selectedDate)
+                    val dateFormat = if (isYearMode) DateUtils.yearFormat else DateUtils.monthYearFormat
+                    val selectedDateStr = dateFormat.format(selectedDate)
 
-                // Generate available dates
-                val availableDates = remember(isYearMode) {
-                    generateAvailableDates(isYearMode)
-                }
-
-                // Load statistics
-                LaunchedEffect(selectedDate, isYearMode) {
-                    loadStatistics(selectedDate, isYearMode)
-                }
-
-                // Observe statistics changes
-                val statisticsDoc by statisticsViewModel.loadStatisticsDoc(
-                    wallet.id,
-                    selectedDate,
-                    isYearMode
-                ).observeAsState()
-
-                // Update categories when statistics change
-                LaunchedEffect(statisticsDoc) {
-                    statisticsDoc?.let { doc ->
-                        categories = buildCategoryList(
-                            doc.amountByCategory ?: emptyMap(),
-                            doc.categories ?: emptyMap()
-                        )
-                    } ?: run {
-                        categories = emptyList()
+                    val availableDates = remember(isYearMode) {
+                        generateAvailableDates(isYearMode)
                     }
-                }
 
-                val totalSpent = statisticsDoc?.totalAmountSpent ?: 0.0
-                val transEntryList = statisticsDoc?.let { doc ->
-                    val transactions = doc.transactions?.values?.toList()
-                        ?.sortedByDescending { it.dateLong } ?: emptyList()
-                    AnalyticsBarUtils.getTransEntryArrayList(ArrayList(transactions), isYearMode)
-                } ?: emptyList()
+                    LaunchedEffect(selectedDate, isYearMode) {
+                        loadStatistics(selectedDate, isYearMode)
+                    }
 
-                AnalyticsScreen(
-                    currency = wallet.currency ?: "$",
-                    totalSpent = totalSpent,
-                    isYearMode = isYearMode,
-                    selectedDate = selectedDateStr,
-                    availableDates = availableDates,
-                    categories = if (selectedCategoryTransactions.isEmpty()) categories else emptyList(),
-                    transactions = selectedCategoryTransactions,
-                    transEntryList = transEntryList,
-                    categoryAmounts = statisticsDoc?.amountByCategory ?: emptyMap(),
-                    showBarChart = showBarChart,
-                    onBackClick = {
-                        findNavController().popBackStack()
-                    },
-                    onToggleChart = {
-                        showBarChart = !showBarChart
-                    },
-                    onToggleMode = { yearMode ->
-                        isYearMode = yearMode
-                        selectedDate = Date()
-                        selectedCategoryTransactions = emptyList()
-                    },
-                    onDateSelected = { dateStr ->
-                        try {
-                            selectedDate = dateFormat.parse(dateStr) ?: Date()
-                            selectedCategoryTransactions = emptyList()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    },
-                    onCategoryClick = { category ->
-                        selectedCategoryTransactions = category.transactionList ?: emptyList()
-                    },
-                    onTransactionClick = { transaction ->
-                        val action = AnalyticsFragmentDirections
-                            .actionAnalyticsFragmentToAddTransactionFragment(
-                                wallet.id,
-                                wallet.currency,
-                                transaction,
-                                true
+                    val statisticsDoc by statisticsViewModel.loadStatisticsDoc(
+                        wallet.id, selectedDate, isYearMode
+                    ).observeAsState()
+
+                    LaunchedEffect(statisticsDoc) {
+                        statisticsDoc?.let { doc ->
+                            categories = buildCategoryList(
+                                doc.amountByCategory ?: emptyMap(),
+                                doc.categories ?: emptyMap()
                             )
-                        findNavController().navigate(action)
+                        } ?: run {
+                            categories = emptyList()
+                        }
                     }
-                )
-                } // XpenseTheme
+
+                    val totalSpent = statisticsDoc?.totalAmountSpent ?: 0.0
+                    val transEntryList = statisticsDoc?.let { doc ->
+                        val transactions = doc.transactions?.values?.toList()
+                            ?.sortedByDescending { it.dateLong } ?: emptyList()
+                        AnalyticsBarUtils.getTransEntryArrayList(ArrayList(transactions), isYearMode)
+                    } ?: emptyList()
+
+                    AnalyticsScreen(
+                        currency = wallet.currency ?: "$",
+                        totalSpent = totalSpent,
+                        isYearMode = isYearMode,
+                        selectedDate = selectedDateStr,
+                        availableDates = availableDates,
+                        categories = categories,
+                        transEntryList = transEntryList,
+                        categoryAmounts = statisticsDoc?.amountByCategory ?: emptyMap(),
+                        showBarChart = showBarChart,
+                        onBackClick = {
+                            findNavController().popBackStack()
+                        },
+                        onToggleChart = {
+                            showBarChart = !showBarChart
+                        },
+                        onToggleMode = { yearMode ->
+                            isYearMode = yearMode
+                            selectedDate = Date()
+                        },
+                        onDateSelected = { dateStr ->
+                            try {
+                                selectedDate = dateFormat.parse(dateStr) ?: Date()
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+                        },
+                        onBarClick = { barIndex ->
+                            // Bar click is handled — could navigate or expand
+                            // For now the bar chart just highlights; categories handle expand/collapse
+                        },
+                        onTransactionClick = { transaction ->
+                            val action = AnalyticsFragmentDirections
+                                .actionAnalyticsFragmentToAddTransactionFragment(
+                                    wallet.id,
+                                    wallet.currency,
+                                    transaction,
+                                    true
+                                )
+                            findNavController().navigate(action)
+                        }
+                    )
+                }
             }
         }
     }
@@ -174,7 +165,6 @@ class AnalyticsFragment : Fragment() {
         transactionsByCategory: Map<String, Map<String, Transaction>>
     ): List<ExpenseCategory> {
         val categoryList = mutableListOf<ExpenseCategory>()
-
         val sortedCategories = MapUtil.sortByValue(amountByCategory)
 
         sortedCategories.forEach { (categoryName, categoryAmount) ->
@@ -203,4 +193,3 @@ class AnalyticsFragment : Fragment() {
         return categoryList
     }
 }
-

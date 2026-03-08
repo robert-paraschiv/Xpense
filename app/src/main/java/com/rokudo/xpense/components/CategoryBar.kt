@@ -45,7 +45,7 @@ fun CategoryBar(
     ) {
         Box(
             modifier = Modifier
-                .size(32.dp)
+                .size(36.dp)
                 .clip(CircleShape)
                 .background(iconBgColor),
             contentAlignment = Alignment.Center
@@ -54,7 +54,7 @@ fun CategoryBar(
                 imageVector = icon,
                 contentDescription = name,
                 tint = iconColor,
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(18.dp)
             )
         }
         Spacer(modifier = Modifier.width(10.dp))
