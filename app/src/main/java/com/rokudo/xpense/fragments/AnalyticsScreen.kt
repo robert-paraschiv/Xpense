@@ -217,6 +217,10 @@ fun AnalyticsScreen(
                         animationSpec = tween(400),
                         label = "chart_crossfade"
                     ) { isBarChart ->
+                        // Track data identity to only animate on actual data change
+                        var lastAnimatedKey by remember { mutableStateOf("") }
+                        val currentDataKey = "$selectedDate-$isYearMode-${categoryAmounts.hashCode()}"
+
                         if (isBarChart) {
                             AndroidView(
                                 factory = { context ->
@@ -235,7 +239,10 @@ fun AnalyticsScreen(
                                         AnalyticsBarUtils.updateBarchartData(
                                             chart, ArrayList(transEntryList), TextView(chart.context).currentTextColor
                                         )
-                                        chart.animateXY(500, 500)
+                                        if (lastAnimatedKey != currentDataKey) {
+                                            lastAnimatedKey = currentDataKey
+                                            chart.animateXY(500, 500)
+                                        }
                                     }
                                 },
                                 modifier = Modifier
@@ -262,7 +269,10 @@ fun AnalyticsScreen(
                                         PieChartUtils.updatePieChartData(
                                             chart, currency, HashMap(categoryAmounts), totalSpent, false
                                         )
-                                        chart.animateXY(500, 500)
+                                        if (lastAnimatedKey != currentDataKey) {
+                                            lastAnimatedKey = currentDataKey
+                                            chart.animateXY(500, 500)
+                                        }
                                     }
                                 },
                                 modifier = Modifier

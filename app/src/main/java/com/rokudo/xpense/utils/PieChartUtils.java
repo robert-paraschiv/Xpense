@@ -90,9 +90,6 @@ public class PieChartUtils {
         pieChart.setCenterText(getRoundedValue(sum) + " " + currency);
         pieChart.setData(data);
         pieChart.invalidate();
-
-        if (isCalledFromHome)
-            pieChart.animateY(1400);
     }
 
     @NonNull

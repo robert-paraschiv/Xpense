@@ -138,14 +138,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             is HomeEvent.WalletClicked -> emitEffect(HomeEffect.ShowWalletDialog)
             is HomeEvent.AdjustBalanceClicked -> emitEffect(HomeEffect.ShowAdjustBalanceDialog)
             is HomeEvent.AddBankClicked -> emitEffect(HomeEffect.NavigateToAddBank)
-            is HomeEvent.FabClicked -> {
-                val wallet = _state.value.wallet
-                if (wallet != null && wallet.id.isNotEmpty() && wallet.id != "Wallets") {
-                    emitEffect(HomeEffect.NavigateToAddTransaction)
-                } else {
-                    emitEffect(HomeEffect.ShowToast("Please create or select a wallet first"))
-                }
-            }
+            is HomeEvent.FabClicked -> emitEffect(HomeEffect.NavigateToAddTransaction)
             is HomeEvent.BarChartClicked -> emitEffect(HomeEffect.NavigateToBarDetails)
             is HomeEvent.PieChartClicked -> emitEffect(HomeEffect.NavigateToPieDetails)
             is HomeEvent.TransactionsClicked -> emitEffect(HomeEffect.NavigateToTransactions)

@@ -14,6 +14,10 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -254,6 +258,10 @@ fun HomeScreen(
                     ) {
                         // Pie chart
                         if (statisticsDoc != null) {
+                            // Track whether we've already animated this data
+                            var lastAnimatedDocId by remember { mutableStateOf<String?>(null) }
+                            val currentDocId = statisticsDoc.docPath ?: statisticsDoc.hashCode().toString()
+
                             AndroidView(
                                 factory = { context ->
                                     PieChart(context).apply {
@@ -268,6 +276,11 @@ fun HomeScreen(
                                         statisticsDoc.totalAmountSpent,
                                         true
                                     )
+                                    // Only animate once per unique data set
+                                    if (lastAnimatedDocId != currentDocId) {
+                                        lastAnimatedDocId = currentDocId
+                                        chart.animateY(800)
+                                    }
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
