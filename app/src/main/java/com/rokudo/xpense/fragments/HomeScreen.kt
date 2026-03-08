@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import coil.compose.AsyncImage
 import com.github.mikephil.charting.charts.PieChart
 import com.rokudo.xpense.R
 import com.rokudo.xpense.components.*
@@ -36,6 +37,7 @@ import com.rokudo.xpense.models.SpentMostItem
 import com.rokudo.xpense.models.StatisticsDoc
 import com.rokudo.xpense.models.Transaction
 import com.rokudo.xpense.models.Wallet
+import com.rokudo.xpense.models.WalletUser
 import com.rokudo.xpense.ui.theme.*
 import com.rokudo.xpense.utils.CategoryIconMapper
 import com.rokudo.xpense.utils.PieChartUtils
@@ -171,6 +173,33 @@ fun HomeScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 4.dp)
                     )
+                }
+                // Shared wallet indicator
+                val otherUser = remember(wallet) {
+                    WalletUser.getOtherWalletUser(wallet?.walletUsers)
+                }
+                AnimatedVisibility(visible = otherUser != null) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(top = 6.dp)
+                    ) {
+                        AsyncImage(
+                            model = otherUser?.userPic,
+                            contentDescription = "Shared with",
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clip(CircleShape),
+                            placeholder = painterResource(id = R.drawable.ic_baseline_person_24),
+                            error = painterResource(id = R.drawable.ic_baseline_person_24)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Shared with ${otherUser?.userName ?: "someone"}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
 

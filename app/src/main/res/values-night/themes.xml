@@ -16,14 +16,10 @@
         <item name="colorSurface">#374B59</item>
 
         <!-- change navigation bar color -->
-        <item name="android:navigationBarColor">
-            @color/fragments_bg_color
-        </item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
 
         <!-- change status bar color -->
-        <item name="android:statusBarColor">
-            @color/fragments_bg_color
-        </item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
 
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>

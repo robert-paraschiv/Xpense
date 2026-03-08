@@ -5,7 +5,11 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.DisposableEffect
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.rememberNavController
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -62,7 +66,26 @@ class MainActivity : ComponentActivity() {
         loadCurrentUser()
         handleIntent(intent)
 
+        enableEdgeToEdge()
+
         setContent {
+            val darkTheme = isSystemInDarkTheme()
+
+            // Keep system bars in sync with the Compose theme
+            DisposableEffect(darkTheme) {
+                enableEdgeToEdge(
+                    statusBarStyle = SystemBarStyle.auto(
+                        android.graphics.Color.TRANSPARENT,
+                        android.graphics.Color.TRANSPARENT
+                    ) { darkTheme },
+                    navigationBarStyle = SystemBarStyle.auto(
+                        android.graphics.Color.TRANSPARENT,
+                        android.graphics.Color.TRANSPARENT
+                    ) { darkTheme }
+                )
+                onDispose {}
+            }
+
             XpenseTheme {
                 val navController = rememberNavController()
                 XpenseNavGraph(navController = navController)
