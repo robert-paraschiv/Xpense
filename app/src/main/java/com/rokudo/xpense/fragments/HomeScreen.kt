@@ -45,7 +45,10 @@ fun HomeScreen(
     onWalletClick: () -> Unit,
     onAdjustBalanceClick: () -> Unit, // Pass wallet amount
     onAddBankClick: () -> Unit,
-    onFabClick: () -> Unit
+    onFabClick: () -> Unit,
+    onBarChartClick: () -> Unit,
+    onPieChartClick: () -> Unit,
+    onTransactionClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
 
@@ -123,7 +126,9 @@ fun HomeScreen(
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FCFF))
                 ) {
                     Column(
-                        modifier = Modifier.padding(16.dp).fillMaxSize(),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
@@ -156,7 +161,9 @@ fun HomeScreen(
                 ) {
                     if (bankBalance != null) {
                          Column(
-                            modifier = Modifier.padding(16.dp).fillMaxSize(),
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxSize(),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
@@ -200,7 +207,8 @@ fun HomeScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
+                        .padding(8.dp)
+                        .clickable { onTransactionClick() },
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FCFF))
                 ) {
                     LatestTransactionItem(transaction = latestTransaction)
@@ -229,7 +237,8 @@ fun HomeScreen(
                     Card(
                         modifier = Modifier
                             .weight(1f)
-                            .fillMaxWidth(),
+                            .fillMaxWidth()
+                            .clickable { onBarChartClick() },
                         colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FCFF))
                     ) {
                         AndroidView(
@@ -304,7 +313,8 @@ fun HomeScreen(
                     )
                     Card(
                         modifier = Modifier
-                            .fillMaxSize(),
+                            .fillMaxSize()
+                            .clickable { onPieChartClick() },
                         colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FCFF))
                     ) {
                         AndroidView(
@@ -369,6 +379,9 @@ fun HomeScreenPreview() {
         onWalletClick = {},
         onAdjustBalanceClick = {},
         onAddBankClick = {},
-        onFabClick = {}
+        onFabClick = {},
+        onBarChartClick = {},
+        onPieChartClick = {},
+        onTransactionClick = {}
     )
 }

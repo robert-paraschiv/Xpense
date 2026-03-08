@@ -78,7 +78,7 @@ class HomeFragment : Fragment() {
                 // Load Last 7 Days Transactions for Bar Chart (only if wallet exists)
                 val (startDate, endDate) = remember { calculateLast7Days() }
                 val barChartTransactionsLiveData = remember(wallet?.id) {
-                    if (wallet?.id != null && wallet.id.isNotEmpty()) {
+                    if (wallet?.id != null && wallet.id.isNotEmpty() && wallet.id != "Wallets") {
                         transactionViewModel.loadTransactionsDateInterval(wallet.id, startDate, endDate)
                     } else {
                         androidx.lifecycle.MutableLiveData(emptyList())
@@ -88,7 +88,7 @@ class HomeFragment : Fragment() {
 
                 // Load Statistics for Pie Chart (only if wallet exists)
                 val statisticsDocLiveData = remember(wallet?.id) {
-                    if (wallet?.id != null && wallet.id.isNotEmpty()) {
+                    if (wallet?.id != null && wallet.id.isNotEmpty() && wallet.id != "Wallets") {
                         statisticsViewModel.listenForStatisticsDoc(wallet.id, Date())
                     } else {
                         androidx.lifecycle.MutableLiveData(null)
@@ -196,7 +196,7 @@ class HomeFragment : Fragment() {
                         Toast.makeText(context, "Link Bank Account Feature", Toast.LENGTH_SHORT).show()
                     },
                     onFabClick = {
-                        if (wallet != null && wallet.id.isNotEmpty()) {
+                        if (wallet != null && wallet.id.isNotEmpty() && wallet.id != "Wallets") {
                             val action = HomeFragmentDirections.actionHomeFragmentToAddTransactionLayout(
                                 wallet.id,
                                 wallet.currency ?: "$",
@@ -206,6 +206,24 @@ class HomeFragment : Fragment() {
                             findNavController().navigate(action)
                         } else {
                             Toast.makeText(context, "Please create or select a wallet first", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    onBarChartClick = {
+                        if (wallet != null) {
+                            val action = HomeFragmentDirections.actionHomeFragmentToBarDetailsFragment(wallet)
+                            findNavController().navigate(action)
+                        }
+                    },
+                    onPieChartClick = {
+                        if (wallet != null) {
+                            val action = HomeFragmentDirections.actionHomeFragmentToPieDetailsFragment(wallet)
+                            findNavController().navigate(action)
+                        }
+                    },
+                    onTransactionClick = {
+                        if (wallet != null) {
+                            val action = HomeFragmentDirections.actionHomeFragmentToListTransactionsFragment(wallet.id, wallet.currency ?: "$")
+                            findNavController().navigate(action)
                         }
                     }
                 )
