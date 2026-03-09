@@ -180,11 +180,13 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.format_sql=true
 
 # ── JWT ──
+# Generate a secure secret with: openssl rand -base64 32
+# Must be at least 256 bits (32+ characters) for HS256
 app.jwt.secret=your-256-bit-secret-key-change-this-in-production
 app.jwt.expiration-ms=86400000
 ```
 
-> **Tip:** Set `spring.jpa.hibernate.ddl-auto=update` during initial development to auto-create tables, then switch to `validate` + migration scripts for production.
+> **Tip:** Set `spring.jpa.hibernate.ddl-auto=update` during initial development to auto-create tables, then switch to `validate` for production. For a more robust approach, use [Flyway](https://flywaydb.org/) or [Liquibase](https://www.liquibase.com/) for database migrations from the start.
 
 ---
 
@@ -585,6 +587,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 package com.rokudo.xpense.repository;
 
 import com.rokudo.xpense.model.Wallet;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -597,8 +600,8 @@ public interface WalletRepository extends JpaRepository<Wallet, UUID> {
     @Query("SELECT w FROM Wallet w JOIN w.walletUsers wu WHERE wu.user.id = :userId ORDER BY w.creationDate DESC")
     List<Wallet> findAllByUserId(@Param("userId") UUID userId);
 
-    @Query("SELECT w FROM Wallet w JOIN w.walletUsers wu WHERE wu.user.id = :userId ORDER BY w.creationDate DESC LIMIT 1")
-    Wallet findLatestByUserId(@Param("userId") UUID userId);
+    @Query("SELECT w FROM Wallet w JOIN w.walletUsers wu WHERE wu.user.id = :userId ORDER BY w.creationDate DESC")
+    List<Wallet> findTopByUserIdOrderByCreationDateDesc(@Param("userId") UUID userId, Pageable pageable);
 }
 ```
 
@@ -608,6 +611,7 @@ public interface WalletRepository extends JpaRepository<Wallet, UUID> {
 package com.rokudo.xpense.repository;
 
 import com.rokudo.xpense.model.Transaction;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -623,8 +627,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     List<Transaction> findByWalletIdOrderByDateDesc(UUID walletId);
 
-    @Query("SELECT t FROM Transaction t WHERE t.wallet.id = :walletId ORDER BY t.date DESC LIMIT 1")
-    Transaction findLatestByWalletId(@Param("walletId") UUID walletId);
+    @Query("SELECT t FROM Transaction t WHERE t.wallet.id = :walletId ORDER BY t.date DESC")
+    List<Transaction> findLatestByWalletId(@Param("walletId") UUID walletId, Pageable pageable);
 
     @Query("SELECT t FROM Transaction t WHERE t.wallet.id = :walletId AND t.date >= :start AND t.date <= :end AND t.type = :type ORDER BY t.date DESC")
     List<Transaction> findByWalletIdAndDateBetweenAndType(
@@ -800,6 +804,7 @@ import com.rokudo.xpense.exception.ResourceNotFoundException;
 import com.rokudo.xpense.model.Transaction;
 import com.rokudo.xpense.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -828,7 +833,8 @@ public class TransactionService {
     }
 
     public Transaction getLatestTransaction(UUID walletId) {
-        return transactionRepository.findLatestByWalletId(walletId);
+        List<Transaction> results = transactionRepository.findLatestByWalletId(walletId, PageRequest.of(0, 1));
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Transactional
@@ -972,6 +978,7 @@ import com.rokudo.xpense.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.*;
@@ -1034,13 +1041,14 @@ public class StatisticsService {
         List<Transaction> transactions = transactionRepository
                 .findByWalletIdAndDateBetweenOrderByDateDesc(walletId, start, end);
 
-        Map<Integer, List<Transaction>> transactionsByDay = transactions.stream()
-                .collect(Collectors.groupingBy(t -> t.getDate().getDayOfMonth()));
+        // Use LocalDate as key to avoid grouping collisions across months
+        Map<LocalDate, List<Transaction>> transactionsByDate = transactions.stream()
+                .collect(Collectors.groupingBy(t -> t.getDate().toLocalDate()));
 
         return StatisticsResponse.builder()
                 .totalAmountSpent(totalExpense)
                 .amountByCategory(amountByCategory)
-                .transactionsByDay(transactionsByDay)
+                .transactionsByDate(transactionsByDate)
                 .transactions(transactions)
                 .build();
     }
@@ -1118,6 +1126,7 @@ import com.rokudo.xpense.model.Transaction;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -1127,6 +1136,7 @@ public class StatisticsResponse {
     private Double totalAmountSpent;
     private Map<String, Double> amountByCategory;
     private Map<Integer, List<Transaction>> transactionsByDay;
+    private Map<LocalDate, List<Transaction>> transactionsByDate;
     private List<Transaction> transactions;
 }
 ```
