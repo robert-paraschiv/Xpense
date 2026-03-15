@@ -9,8 +9,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Savings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,9 +25,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,6 +60,11 @@ fun HomeScreen(
     monthlySpent: Double,
     monthlyIncome: Double,
     topCategories: List<Pair<String, Double>>,
+    spendingChangePercent: Double? = null,
+    spendingTrendUp: Boolean? = null,
+    biggestTransaction: Transaction? = null,
+    savingsRate: Double? = null,
+    dailyAverage: Double = 0.0,
     onWalletClick: () -> Unit,
     onAdjustBalanceClick: () -> Unit,
     onAddBankClick: () -> Unit,
@@ -209,12 +220,18 @@ fun HomeScreen(
                     .padding(horizontal = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                val spentSubtitle = if (spendingChangePercent != null) {
+                    val arrow = if (spendingTrendUp == true) "↑" else "↓"
+                    "$arrow ${String.format("%.0f", kotlin.math.abs(spendingChangePercent))}% vs last mo"
+                } else null
+
                 SummaryPill(
                     label = "Spent",
                     amount = "-${String.format("%.0f", monthlySpent)}",
                     containerColor = ExpenseRedLight,
                     contentColor = ExpenseRed,
                     modifier = Modifier.weight(1f),
+                    subtitle = spentSubtitle,
                     onClick = onSpentClick
                 )
                 SummaryPill(
@@ -225,6 +242,80 @@ fun HomeScreen(
                     modifier = Modifier.weight(1f),
                     onClick = onEarnedClick
                 )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // ─── Quick Insights (compact inline) ───
+            val hasInsights = (savingsRate != null && monthlyIncome > 0) ||
+                    dailyAverage > 0 ||
+                    spendingChangePercent != null ||
+                    biggestTransaction != null
+            AnimatedVisibility(
+                visible = hasInsights,
+                enter = fadeIn(tween(400)) + expandVertically(tween(400)),
+                exit = fadeOut(tween(300))
+            ) {
+                XpenseCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(0.dp)
+                    ) {
+                        // vs Last Month
+                        if (spendingChangePercent != null) {
+                            val isUp = spendingChangePercent > 0
+                            val changeColor = if (isUp) ExpenseRed else IncomeGreen
+                            val arrow = if (isUp) "↑" else "↓"
+                            val label = if (isUp) "more" else "less"
+                            QuickInsightRow(
+                                icon = if (isUp) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                                iconTint = changeColor,
+                                label = "vs last month",
+                                value = "$arrow ${String.format("%.0f", kotlin.math.abs(spendingChangePercent))}% $label",
+                                valueColor = changeColor
+                            )
+                        }
+
+                        // Savings Rate
+                        if (savingsRate != null && monthlyIncome > 0) {
+                            val savingsColor = if (savingsRate >= 0) IncomeGreen else ExpenseRed
+                            QuickInsightRow(
+                                icon = Icons.Outlined.Savings,
+                                iconTint = savingsColor,
+                                label = "Savings rate",
+                                value = "${String.format("%.0f", savingsRate)}%",
+                                valueColor = savingsColor
+                            )
+                        }
+
+                        // Daily Average
+                        if (dailyAverage > 0) {
+                            QuickInsightRow(
+                                icon = Icons.Outlined.CalendarMonth,
+                                iconTint = MaterialTheme.colorScheme.primary,
+                                label = "Daily average",
+                                value = "${wallet?.currency ?: "$"}${String.format("%.0f", dailyAverage)}",
+                                valueColor = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+
+                        // Biggest Expense
+                        if (biggestTransaction != null) {
+                            val visual = CategoryIconMapper.get(biggestTransaction.category)
+                            QuickInsightRow(
+                                icon = visual.icon,
+                                iconTint = visual.color,
+                                label = "Biggest: ${biggestTransaction.title ?: biggestTransaction.category ?: "Expense"}",
+                                value = "${wallet?.currency ?: "$"}${String.format("%.0f", biggestTransaction.amount ?: 0.0)}",
+                                valueColor = ExpenseRed
+                            )
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(28.dp))
@@ -317,6 +408,48 @@ fun HomeScreen(
     }
 }
 
+/**
+ * A single compact insight row: small icon • label • value aligned to the right.
+ */
+@Composable
+private fun QuickInsightRow(
+    icon: ImageVector,
+    iconTint: Color,
+    label: String,
+    value: String,
+    valueColor: Color
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = iconTint,
+            modifier = Modifier.size(18.dp)
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = valueColor
+        )
+    }
+}
+
 private fun getGreeting(): String {
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     return when {
@@ -361,6 +494,11 @@ fun HomeScreenPreview() {
             monthlySpent = 340.20,
             monthlyIncome = 3000.0,
             topCategories = listOf("Groceries" to 150.0, "Transport" to 80.0, "Bills" to 60.0),
+            spendingChangePercent = 12.5,
+            spendingTrendUp = true,
+            biggestTransaction = mockTransaction,
+            savingsRate = 88.7,
+            dailyAverage = 24.3,
             onWalletClick = {},
             onAdjustBalanceClick = {},
             onAddBankClick = {},

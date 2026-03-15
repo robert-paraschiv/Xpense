@@ -11,27 +11,27 @@ class BankApiViewModel(application: Application) : AndroidViewModel(application)
 
     fun getToken(): MutableLiveData<Token> = repo.getToken()
 
-    fun refreshToken(token: String): MutableLiveData<String> = repo.refreshToken(token)
+    fun refreshToken(token: String): MutableLiveData<String?> = repo.refreshToken(token)
 
-    fun getInstitutionList(): MutableLiveData<List<Institution>> = repo.getInstitutionList()
+    fun getInstitutionList(): MutableLiveData<List<Institution>?> = repo.getInstitutionList()
 
-    fun createEUA(institutionID: String): MutableLiveData<EndUserAgreement> = repo.createEUA(institutionID)
+    fun createEUA(institutionID: String): MutableLiveData<EndUserAgreement?> = repo.createEUA(institutionID)
 
-    fun createRequisition(institutionID: String, euaId: String, accountSelection: Boolean?): MutableLiveData<Requisition> =
+    fun createRequisition(institutionID: String, euaId: String, accountSelection: Boolean?): MutableLiveData<Requisition?> =
         repo.createRequisition(institutionID, euaId, accountSelection)
 
-    fun getRequisitionDetails(requisitionID: String): MutableLiveData<Requisition> =
+    fun getRequisitionDetails(requisitionID: String): MutableLiveData<Requisition?> =
         repo.getRequisitionDetails(requisitionID)
 
-    fun getAccountDetails(accountId: String): MutableLiveData<AccountDetails> =
+    fun getAccountDetails(accountId: String): MutableLiveData<AccountDetails?> =
         repo.getAccountDetails(accountId)
 
-    fun getAccountBalances(accountId: String): MutableLiveData<Balances> =
+    fun getAccountBalances(accountId: String): MutableLiveData<Balances?> =
         repo.getAccountBalances(accountId)
 
     fun setBalances(balances: Balances?) = repo.setBalances(balances)
 
-    fun getAccountTransactions(accountId: String, dateFrom: String): MutableLiveData<TransactionsResponse> =
+    fun getAccountTransactions(accountId: String, dateFrom: String): MutableLiveData<TransactionsResponse?> =
         repo.getAccountTransactions(accountId, dateFrom)
 
     fun getRequisitionError(): String? = repo.getRequisitionError()

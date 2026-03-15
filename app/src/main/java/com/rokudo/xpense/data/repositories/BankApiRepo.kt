@@ -25,8 +25,8 @@ class BankApiRepo {
     private val tokenMutableLiveData = MutableLiveData<Token>()
     private var requisitionError: String? = null
     private var euaExpired = false
-    private val balancesMutableLiveData = MutableLiveData<Balances>()
-    private val accountTransactionsLiveData = MutableLiveData<TransactionsResponse>()
+    private val balancesMutableLiveData = MutableLiveData<Balances?>()
+    private val accountTransactionsLiveData = MutableLiveData<TransactionsResponse?>()
 
     fun getToken(): MutableLiveData<Token> {
         service.getToken(GoCardlessUtils.GOCARDLESS_SECRET_KEY_ID, GoCardlessUtils.GOCARDLESS_SECRET_KEY)
@@ -44,8 +44,8 @@ class BankApiRepo {
         return tokenMutableLiveData
     }
 
-    fun refreshToken(token: String): MutableLiveData<String> {
-        val tokenLiveData = MutableLiveData<String>()
+    fun refreshToken(token: String): MutableLiveData<String?> {
+        val tokenLiveData = MutableLiveData<String?>()
         service.refreshToken(token).enqueue(object : Callback<String> {
             override fun onResponse(call: Call<String>, response: Response<String>) {
                 if (response.isSuccessful) {
@@ -61,8 +61,8 @@ class BankApiRepo {
         return tokenLiveData
     }
 
-    fun getInstitutionList(): MutableLiveData<List<Institution>> {
-        val data = MutableLiveData<List<Institution>>()
+    fun getInstitutionList(): MutableLiveData<List<Institution>?> {
+        val data = MutableLiveData<List<Institution>?>()
         service.getAllInstitutions().enqueue(object : Callback<List<Institution>> {
             override fun onResponse(call: Call<List<Institution>>, response: Response<List<Institution>>) {
                 data.value = if (response.isSuccessful) response.body() else null
@@ -74,8 +74,8 @@ class BankApiRepo {
         return data
     }
 
-    fun createEUA(institutionId: String): MutableLiveData<EndUserAgreement> {
-        val data = MutableLiveData<EndUserAgreement>()
+    fun createEUA(institutionId: String): MutableLiveData<EndUserAgreement?> {
+        val data = MutableLiveData<EndUserAgreement?>()
         service.createEUA(institutionId, listOf("balances", "details", "transactions"))
             .enqueue(object : Callback<EndUserAgreement> {
                 override fun onResponse(call: Call<EndUserAgreement>, response: Response<EndUserAgreement>) {
@@ -88,8 +88,8 @@ class BankApiRepo {
         return data
     }
 
-    fun createRequisition(institutionID: String, euaId: String, accountSelection: Boolean?): MutableLiveData<Requisition> {
-        val data = MutableLiveData<Requisition>()
+    fun createRequisition(institutionID: String, euaId: String, accountSelection: Boolean?): MutableLiveData<Requisition?> {
+        val data = MutableLiveData<Requisition?>()
         service.createRequisition(
             institutionID, "https://xpense/launch", euaId, "EN",
             "${DatabaseUtils.currentUser?.phoneNumber}_$institutionID",
@@ -112,8 +112,8 @@ class BankApiRepo {
         return data
     }
 
-    fun getRequisitionDetails(requisitionID: String): MutableLiveData<Requisition> {
-        val data = MutableLiveData<Requisition>()
+    fun getRequisitionDetails(requisitionID: String): MutableLiveData<Requisition?> {
+        val data = MutableLiveData<Requisition?>()
         service.getRequisitionById(requisitionID).enqueue(object : Callback<Requisition> {
             override fun onResponse(call: Call<Requisition>, response: Response<Requisition>) {
                 data.value = if (response.isSuccessful) response.body() else null
@@ -125,8 +125,8 @@ class BankApiRepo {
         return data
     }
 
-    fun getAccountDetails(accountId: String): MutableLiveData<AccountDetails> {
-        val data = MutableLiveData<AccountDetails>()
+    fun getAccountDetails(accountId: String): MutableLiveData<AccountDetails?> {
+        val data = MutableLiveData<AccountDetails?>()
         service.getAccountDetails(accountId).enqueue(object : Callback<AccountDetails> {
             override fun onResponse(call: Call<AccountDetails>, response: Response<AccountDetails>) {
                 if (response.isSuccessful) {
@@ -144,7 +144,7 @@ class BankApiRepo {
         return data
     }
 
-    fun getAccountBalances(accountId: String): MutableLiveData<Balances> {
+    fun getAccountBalances(accountId: String): MutableLiveData<Balances?> {
         if (GoCardlessUtils.TOKEN_VAL.isEmpty()) {
             service.getToken(GoCardlessUtils.GOCARDLESS_SECRET_KEY_ID, GoCardlessUtils.GOCARDLESS_SECRET_KEY)
                 .enqueue(object : Callback<Token> {
@@ -161,7 +161,7 @@ class BankApiRepo {
                 })
         } else {
             service.getAccountBalances(accountId).enqueue(object : Callback<Balances> {
-                override fun onResponse(call: Call<Balances>, response: Response<Balances>) {
+                override fun onResponse(call: Call<Balances?>, response: Response<Balances?>) {
                     if (response.isSuccessful) {
                         val currentVal = balancesMutableLiveData.value
                         val newBody = response.body()
@@ -197,7 +197,7 @@ class BankApiRepo {
         balancesMutableLiveData.value = balances
     }
 
-    fun getAccountTransactions(accountId: String, dateFrom: String): MutableLiveData<TransactionsResponse> {
+    fun getAccountTransactions(accountId: String, dateFrom: String): MutableLiveData<TransactionsResponse?> {
         service.getAccountTransactions(accountId, dateFrom).enqueue(object : Callback<TransactionsResponse> {
             override fun onResponse(call: Call<TransactionsResponse>, response: Response<TransactionsResponse>) {
                 if (response.isSuccessful) {

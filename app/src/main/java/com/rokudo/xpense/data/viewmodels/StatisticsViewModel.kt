@@ -12,7 +12,7 @@ class StatisticsViewModel(application: Application) : AndroidViewModel(applicati
 
     fun getStoredStatisticsDoc(): StatisticsDoc? = statisticsRepo.storedStatisticsDoc
 
-    fun listenForStatisticsDoc(walletId: String, date: Date): MutableLiveData<StatisticsDoc> =
+    fun listenForStatisticsDoc(walletId: String, date: Date): MutableLiveData<StatisticsDoc?> =
         statisticsRepo.listenForStatisticsDoc(walletId, date)
 
     fun loadStatisticsDoc(walletId: String, date: Date, isYearSelected: Boolean): MutableLiveData<StatisticsDoc> =

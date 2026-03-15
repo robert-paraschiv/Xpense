@@ -5,6 +5,9 @@ import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
@@ -232,6 +235,46 @@ private fun HomeDestination(navController: NavHostController, activityVmOwner: V
             ?: emptyList()
     }
 
+    // ─── Previous month stats for comparison insights ───
+    val previousMonthDate = remember {
+        val cal = Calendar.getInstance()
+        cal.add(Calendar.MONTH, -1)
+        cal.time
+    }
+    val prevStatsLiveData = remember(wallet?.id) {
+        if (wallet?.id != null && wallet!!.id!!.isNotEmpty() && wallet!!.id != "Wallets")
+            statisticsViewModel.loadStatisticsDoc(wallet!!.id!!, previousMonthDate, false)
+        else androidx.lifecycle.MutableLiveData(null)
+    }
+    val prevStats by prevStatsLiveData.observeAsState()
+
+    val previousMonthSpent = prevStats?.totalAmountSpent ?: 0.0
+
+    val spendingChangePercent = remember(monthlySpent, previousMonthSpent) {
+        if (previousMonthSpent > 0) ((monthlySpent - previousMonthSpent) / previousMonthSpent * 100) else null
+    }
+
+    val spendingTrendUp = remember(monthlySpent, previousMonthSpent) {
+        if (previousMonthSpent > 0) monthlySpent > previousMonthSpent else null
+    }
+
+    val biggestTransaction = remember(stats) {
+        stats?.transactions?.values
+            ?.filter { it.type == com.rokudo.xpense.models.Transaction.EXPENSE_TYPE }
+            ?.maxByOrNull { it.amount ?: 0.0 }
+    }
+
+    val savingsRate = remember(monthlyIncome, monthlySpent) {
+        if (monthlyIncome > 0) ((monthlyIncome - monthlySpent) / monthlyIncome * 100) else null
+    }
+
+    val dailyAverage = remember(monthlySpent) {
+        val cal = Calendar.getInstance()
+        val daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+        val dayOfMonth = cal.get(Calendar.DAY_OF_MONTH)
+        if (dayOfMonth > 0) monthlySpent / dayOfMonth else monthlySpent / daysInMonth
+    }
+
     // Keep an always-current reference for the effect collector coroutine
     val currentWallet by rememberUpdatedState(wallet)
 
@@ -283,6 +326,11 @@ private fun HomeDestination(navController: NavHostController, activityVmOwner: V
         monthlySpent = monthlySpent,
         monthlyIncome = monthlyIncome,
         topCategories = topCategories,
+        spendingChangePercent = spendingChangePercent,
+        spendingTrendUp = spendingTrendUp,
+        biggestTransaction = biggestTransaction,
+        savingsRate = savingsRate,
+        dailyAverage = dailyAverage,
         onWalletClick = { homeViewModel.onEvent(HomeEvent.WalletClicked) },
         onAdjustBalanceClick = { homeViewModel.onEvent(HomeEvent.AdjustBalanceClicked) },
         onAddBankClick = { homeViewModel.onEvent(HomeEvent.AddBankClicked) },
@@ -646,6 +694,185 @@ private fun AnalyticsDestination(
         com.rokudo.xpense.utils.AnalyticsBarUtils.getTransEntryArrayList(ArrayList(txs), isYearMode)
     } ?: emptyList()
 
+    // ─── Previous period stats for comparison insights ───
+    val prevPeriodDate = remember(selectedDate, isYearMode) {
+        val cal = Calendar.getInstance()
+        cal.time = selectedDate
+        if (isYearMode) cal.add(Calendar.YEAR, -1) else cal.add(Calendar.MONTH, -1)
+        cal.time
+    }
+    val prevStatsLiveData = remember { androidx.lifecycle.MutableLiveData<com.rokudo.xpense.models.StatisticsDoc?>() }
+    val prevStatisticsDoc by prevStatsLiveData.observeAsState()
+
+    DisposableEffect(prevPeriodDate, isYearMode) {
+        val sourceLiveData = statisticsViewModel.loadStatisticsDoc(walletId, prevPeriodDate, isYearMode)
+        val observer = androidx.lifecycle.Observer<com.rokudo.xpense.models.StatisticsDoc> { doc ->
+            prevStatsLiveData.value = doc
+        }
+        sourceLiveData.observeForever(observer)
+        onDispose { sourceLiveData.removeObserver(observer) }
+    }
+
+    // ─── Compute daily average ───
+    val dailyAverage = remember(totalSpent, selectedDate, isYearMode) {
+        if (totalSpent == 0.0) 0.0
+        else {
+            val cal = Calendar.getInstance()
+            cal.time = selectedDate
+            val days = if (isYearMode) {
+                cal.getActualMaximum(Calendar.DAY_OF_YEAR)
+            } else {
+                cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+            }
+            totalSpent / days.coerceAtLeast(1)
+        }
+    }
+
+    // ─── Compute total income ───
+    val totalIncome = remember(statisticsDoc) {
+        var income = 0.0
+        statisticsDoc?.transactions?.values?.forEach { t ->
+            if (t.type == com.rokudo.xpense.models.Transaction.INCOME_TYPE) {
+                income += (t.amount ?: 0.0)
+            }
+        }
+        income
+    }
+
+    // ─── Build smart insights ───
+    val insights = remember(statisticsDoc, prevStatisticsDoc, totalSpent, totalIncome, dailyAverage) {
+        val list = mutableListOf<com.rokudo.xpense.models.InsightItem>()
+        val currency = wallet?.currency ?: "$"
+        val df = java.text.DecimalFormat("#,##0")
+
+        // 1. Daily average
+        if (dailyAverage > 0) {
+            list.add(com.rokudo.xpense.models.InsightItem(
+                icon = Icons.Filled.DateRange,
+                value = "$currency${df.format(dailyAverage)}",
+                label = "daily average",
+                accentColor = com.rokudo.xpense.ui.theme.Secondary50,
+                type = com.rokudo.xpense.models.InsightType.NEUTRAL
+            ))
+        }
+
+        // 2. Spending change vs previous period
+        val prevSpent = prevStatisticsDoc?.totalAmountSpent ?: 0.0
+        if (prevSpent > 0 && totalSpent > 0) {
+            val change = ((totalSpent - prevSpent) / prevSpent * 100).toInt()
+            val period = if (isYearMode) "year" else "month"
+            if (change > 5) {
+                list.add(com.rokudo.xpense.models.InsightItem(
+                    icon = Icons.Filled.KeyboardArrowUp,
+                    value = "+${change}%",
+                    label = "vs last $period",
+                    accentColor = com.rokudo.xpense.ui.theme.ExpenseRed,
+                    type = com.rokudo.xpense.models.InsightType.NEGATIVE
+                ))
+            } else if (change < -5) {
+                list.add(com.rokudo.xpense.models.InsightItem(
+                    icon = Icons.Filled.KeyboardArrowDown,
+                    value = "${change}%",
+                    label = "vs last $period",
+                    accentColor = com.rokudo.xpense.ui.theme.IncomeGreen,
+                    type = com.rokudo.xpense.models.InsightType.POSITIVE
+                ))
+            }
+        }
+
+        // 3. Category comparisons vs previous period
+        val prevAmounts = prevStatisticsDoc?.amountByCategory
+        val curAmounts = statisticsDoc?.amountByCategory
+        if (prevAmounts != null && curAmounts != null) {
+            curAmounts.entries
+                .filter { it.key != "Income" && it.value > 0 }
+                .sortedByDescending { it.value }
+                .take(2)
+                .forEach { (cat, amount) ->
+                    val prevAmount = prevAmounts[cat] ?: 0.0
+                    if (prevAmount > 0) {
+                        val change = ((amount - prevAmount) / prevAmount * 100).toInt()
+                        if (change > 10) {
+                            list.add(com.rokudo.xpense.models.InsightItem(
+                                icon = Icons.Filled.KeyboardArrowUp,
+                                value = "+${change}%",
+                                label = "$cat spending",
+                                accentColor = com.rokudo.xpense.ui.theme.ExpenseRed,
+                                type = com.rokudo.xpense.models.InsightType.NEGATIVE
+                            ))
+                        } else if (change < -10) {
+                            list.add(com.rokudo.xpense.models.InsightItem(
+                                icon = Icons.Filled.KeyboardArrowDown,
+                                value = "${change}%",
+                                label = "$cat spending",
+                                accentColor = com.rokudo.xpense.ui.theme.IncomeGreen,
+                                type = com.rokudo.xpense.models.InsightType.POSITIVE
+                            ))
+                        }
+                    }
+                }
+        }
+
+        // 4. Savings rate
+        if (totalIncome > 0) {
+            val savingsRate = ((totalIncome - totalSpent) / totalIncome * 100).toInt()
+            if (savingsRate > 0) {
+                list.add(com.rokudo.xpense.models.InsightItem(
+                    icon = Icons.Filled.Star,
+                    value = "${savingsRate}%",
+                    label = "of income saved",
+                    accentColor = com.rokudo.xpense.ui.theme.IncomeGreen,
+                    type = com.rokudo.xpense.models.InsightType.POSITIVE
+                ))
+            } else if (savingsRate < 0) {
+                list.add(com.rokudo.xpense.models.InsightItem(
+                    icon = Icons.Filled.Warning,
+                    value = "${-savingsRate}%",
+                    label = "over budget",
+                    accentColor = com.rokudo.xpense.ui.theme.ExpenseRed,
+                    type = com.rokudo.xpense.models.InsightType.NEGATIVE
+                ))
+            }
+        }
+
+        // 5. Biggest expense day of week
+        val txsByDay = statisticsDoc?.transactions?.values
+            ?.filter { it.type == com.rokudo.xpense.models.Transaction.EXPENSE_TYPE && it.date != null }
+            ?.groupBy {
+                val cal = Calendar.getInstance()
+                cal.time = it.date!!
+                cal.get(Calendar.DAY_OF_WEEK)
+            }
+        if (txsByDay != null && txsByDay.isNotEmpty()) {
+            val biggest = txsByDay.maxByOrNull { entry -> entry.value.sumOf { it.amount ?: 0.0 } }
+            if (biggest != null) {
+                val dayAbbrevs = arrayOf("", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+                val dayAbbrev = dayAbbrevs.getOrElse(biggest.key) { "?" }
+                list.add(com.rokudo.xpense.models.InsightItem(
+                    icon = Icons.Filled.DateRange,
+                    value = dayAbbrev,
+                    label = "peak spend day",
+                    accentColor = com.rokudo.xpense.ui.theme.Secondary50,
+                    type = com.rokudo.xpense.models.InsightType.NEUTRAL
+                ))
+            }
+        }
+
+        // 6. Transaction count
+        val txCount = statisticsDoc?.transactions?.size ?: 0
+        if (txCount > 0) {
+            list.add(com.rokudo.xpense.models.InsightItem(
+                icon = Icons.AutoMirrored.Filled.List,
+                value = "$txCount",
+                label = "transactions",
+                accentColor = com.rokudo.xpense.ui.theme.Secondary50,
+                type = com.rokudo.xpense.models.InsightType.NEUTRAL
+            ))
+        }
+
+        list.take(6)
+    }
+
     AnalyticsScreen(
         currency = wallet?.currency ?: "$",
         totalSpent = totalSpent,
@@ -656,6 +883,9 @@ private fun AnalyticsDestination(
         transEntryList = transEntryList,
         categoryAmounts = statisticsDoc?.amountByCategory ?: emptyMap(),
         showBarChart = showBarChart,
+        dailyAverage = dailyAverage,
+        totalIncome = totalIncome,
+        insights = insights,
         onBackClick = { navController.popBackStack() },
         onToggleChart = { showBarChart = !showBarChart },
         onToggleMode = { yearMode -> isYearMode = yearMode; selectedDate = Date() },

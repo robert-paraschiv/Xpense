@@ -19,7 +19,7 @@ class StatisticsRepo {
     var homeStatisticsDoc: StatisticsDoc? = null
     var analyticsStoredDoc: StatisticsDoc? = null
 
-    private val statisticsLiveData = MutableLiveData<StatisticsDoc>()
+    private val statisticsLiveData = MutableLiveData<StatisticsDoc?>()
     private var walletId: String? = null
     private var storedDate: String? = null
 
@@ -71,7 +71,7 @@ class StatisticsRepo {
         return result
     }
 
-    fun listenForStatisticsDoc(wallet: String, date: Date): MutableLiveData<StatisticsDoc> {
+    fun listenForStatisticsDoc(wallet: String, date: Date): MutableLiveData<StatisticsDoc?> {
         val year = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
         val month = SimpleDateFormat("MMMM", Locale.getDefault()).format(date)
 

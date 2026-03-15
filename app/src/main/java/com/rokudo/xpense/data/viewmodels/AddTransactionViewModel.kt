@@ -209,7 +209,7 @@ class AddTransactionViewModel(application: Application) : AndroidViewModel(appli
              val liveData = repo.addTransaction(transaction)
              var observer: Observer<String>? = null
              observer = Observer { t ->
-                 observer?.let { liveData.removeObserver(it) }
+                 observer?.let { liveData.removeObserver(it as Observer<in String?>) }
                  _state.update { it.copy(isLoading = false) }
                  if (t == "Success") {
                      viewModelScope.launch { _effect.emit(AddTransactionEffect.NavigateBack) }
@@ -217,7 +217,7 @@ class AddTransactionViewModel(application: Application) : AndroidViewModel(appli
                       viewModelScope.launch { _effect.emit(AddTransactionEffect.ShowToast("Error adding transaction")) }
                  }
              }
-             liveData.observeForever(observer)
+             liveData.observeForever(observer as Observer<in String?>)
 
         } else {
             if (TransactionUtils.isTransactionDifferent(original, transaction)) {
@@ -230,7 +230,7 @@ class AddTransactionViewModel(application: Application) : AndroidViewModel(appli
                 val liveData = repo.updateTransaction(transaction)
                 var observer: Observer<String>? = null
                 observer = Observer { t ->
-                    observer?.let { liveData.removeObserver(it) }
+                    observer?.let { liveData.removeObserver(it as Observer<in String?>) }
                     _state.update { it.copy(isLoading = false) }
                     if (t == "Success") {
                         viewModelScope.launch { _effect.emit(AddTransactionEffect.NavigateBack) }
@@ -238,7 +238,7 @@ class AddTransactionViewModel(application: Application) : AndroidViewModel(appli
                         viewModelScope.launch { _effect.emit(AddTransactionEffect.ShowToast("Error updating")) }
                     }
                 }
-                liveData.observeForever(observer)
+                liveData.observeForever(observer as Observer<in String?>)
             } else {
                 _state.update { it.copy(isLoading = false) }
                 viewModelScope.launch { _effect.emit(AddTransactionEffect.NavigateBack) }

@@ -10,23 +10,23 @@ import java.util.Date
 class TransactionViewModel(application: Application) : AndroidViewModel(application) {
     private val repo = TransactionRepo.instance
 
-    fun loadTransactions(walletId: String, date: Date): MutableLiveData<List<Transaction>> =
+    fun loadTransactions(walletId: String, date: Date): MutableLiveData<List<Transaction>?> =
         repo.loadTransactions(walletId, date)
 
-    fun loadTransactions(): MutableLiveData<List<Transaction>> = repo.loadTransactions()
+    fun loadTransactions(): MutableLiveData<List<Transaction>?> = repo.loadTransactions()
 
     fun loadTransactionsDateInterval(walletId: String, start: Date, end: Date): MutableLiveData<List<Transaction>> =
         repo.loadTransactionsDateInterval(walletId, start, end)
 
-    fun addTransaction(transaction: Transaction): MutableLiveData<String> =
+    fun addTransaction(transaction: Transaction): MutableLiveData<String?> =
         repo.addTransaction(transaction)
 
-    fun loadLatestTransaction(walletId: String): MutableLiveData<Transaction> =
+    fun loadLatestTransaction(walletId: String): MutableLiveData<Transaction?> =
         repo.loadLatestTransaction(walletId)
 
     fun getStoredTransactionList(): List<Transaction> = repo.getStoredTransactionList()
 
-    fun updateTransaction(transaction: Transaction): MutableLiveData<String> =
+    fun updateTransaction(transaction: Transaction): MutableLiveData<String?> =
         repo.updateTransaction(transaction)
 
     fun deleteTransaction(transactionId: String, walletId: String): MutableLiveData<Boolean> =

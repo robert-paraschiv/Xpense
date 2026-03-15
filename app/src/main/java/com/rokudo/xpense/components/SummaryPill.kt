@@ -13,6 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun SummaryPill(
@@ -21,6 +22,7 @@ fun SummaryPill(
     containerColor: Color,
     contentColor: Color,
     modifier: Modifier = Modifier,
+    subtitle: String? = null,
     onClick: (() -> Unit)? = null
 ) {
     val shape = RoundedCornerShape(12.dp)
@@ -48,6 +50,16 @@ fun SummaryPill(
                 style = MaterialTheme.typography.labelSmall,
                 color = contentColor.copy(alpha = 0.7f)
             )
+            if (subtitle != null) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Medium,
+                    color = contentColor.copy(alpha = 0.55f),
+                    fontSize = 9.sp
+                )
+            }
         }
     }
 }

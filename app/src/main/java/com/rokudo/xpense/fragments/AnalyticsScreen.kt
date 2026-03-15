@@ -11,7 +11,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +29,8 @@ import com.rokudo.xpense.components.*
 import com.rokudo.xpense.components.charts.XpenseBarChart
 import com.rokudo.xpense.components.charts.XpenseDonutChart
 import com.rokudo.xpense.models.ExpenseCategory
+import com.rokudo.xpense.models.InsightItem
+import com.rokudo.xpense.models.InsightType
 import com.rokudo.xpense.models.TransEntry
 import com.rokudo.xpense.models.Transaction
 import com.rokudo.xpense.ui.theme.*
@@ -46,6 +49,9 @@ fun AnalyticsScreen(
     transEntryList: List<TransEntry>,
     categoryAmounts: Map<String, Double>,
     showBarChart: Boolean,
+    dailyAverage: Double = 0.0,
+    totalIncome: Double = 0.0,
+    insights: List<InsightItem> = emptyList(),
     onBackClick: () -> Unit,
     onToggleChart: () -> Unit,
     onToggleMode: (Boolean) -> Unit,
@@ -194,6 +200,91 @@ fun AnalyticsScreen(
                         ),
                         color = MaterialTheme.colorScheme.onBackground
                     )
+                    if (dailyAverage > 0) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Daily avg: $currency ${DecimalFormat("#,##0.00").format(dailyAverage)}",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
+                    }
+                }
+            }
+
+            // ─── Income / Savings Summary ───
+            if (totalIncome > 0) {
+                item(key = "income_savings") {
+                    val savingsRate = ((totalIncome - totalSpent) / totalIncome * 100)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Income pill
+                        Surface(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(56.dp),
+                            shape = MaterialTheme.shapes.small,
+                            color = IncomeGreenLight
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "$currency ${DecimalFormat("#,##0").format(totalIncome)}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = IncomeGreen
+                                )
+                                Text(
+                                    text = "Income",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = IncomeGreen.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                        // Savings pill
+                        val savedColor = if (savingsRate >= 0) IncomeGreen else ExpenseRed
+                        val savedBg = if (savingsRate >= 0) IncomeGreenLight else ExpenseRedLight
+                        Surface(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(56.dp),
+                            shape = MaterialTheme.shapes.small,
+                            color = savedBg
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "${DecimalFormat("#,##0").format(savingsRate)}%",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = savedColor
+                                )
+                                Text(
+                                    text = "Saved",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = savedColor.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ─── Smart Insights Row ───
+            if (insights.isNotEmpty()) {
+                item(key = "insights_row") {
+                    Column {
+                        SectionHeader(title = "Insights")
+                        Spacer(modifier = Modifier.height(4.dp))
+                        InsightsRow(insights = insights)
+                    }
                 }
             }
 
@@ -252,6 +343,7 @@ fun AnalyticsScreen(
                     }
                 }
             }
+
 
             item(key = "bottom_spacer") { Spacer(modifier = Modifier.height(16.dp)) }
         }
@@ -418,6 +510,45 @@ fun AnalyticsScreenPreview() {
             transEntryList = emptyList(),
             categoryAmounts = mapOf("Groceries" to 450.0, "Transport" to 200.0, "Bills" to 150.0),
             showBarChart = false,
+            dailyAverage = 30.67,
+            totalIncome = 3000.0,
+            insights = listOf(
+                InsightItem(
+                    icon = Icons.Filled.DateRange,
+                    value = "$30",
+                    label = "daily average",
+                    accentColor = Secondary50,
+                    type = InsightType.NEUTRAL
+                ),
+                InsightItem(
+                    icon = Icons.Filled.KeyboardArrowUp,
+                    value = "+25%",
+                    label = "Groceries spending",
+                    accentColor = ExpenseRed,
+                    type = InsightType.NEGATIVE
+                ),
+                InsightItem(
+                    icon = Icons.Filled.Star,
+                    value = "69%",
+                    label = "of income saved",
+                    accentColor = IncomeGreen,
+                    type = InsightType.POSITIVE
+                ),
+                InsightItem(
+                    icon = Icons.Filled.DateRange,
+                    value = "Sat",
+                    label = "peak spend day",
+                    accentColor = Secondary50,
+                    type = InsightType.NEUTRAL
+                ),
+                InsightItem(
+                    icon = Icons.AutoMirrored.Filled.List,
+                    value = "42",
+                    label = "transactions",
+                    accentColor = Secondary50,
+                    type = InsightType.NEUTRAL
+                )
+            ),
             onBackClick = {},
             onToggleChart = {},
             onToggleMode = {},
