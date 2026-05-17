@@ -2,11 +2,11 @@ package com.rokudo.xpense.data.repositories
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.Query
+import com.rokudo.xpense.data.api.ApiServiceProvider
 import com.rokudo.xpense.models.Wallet
-import com.rokudo.xpense.utils.DatabaseUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class WalletsRepo {
     companion object {
@@ -14,14 +14,12 @@ class WalletsRepo {
         val instance by lazy { WalletsRepo() }
     }
 
-    private var walletListener: ListenerRegistration? = null
     private val allWallets = MutableLiveData<ArrayList<Wallet>?>()
     private var walletList = ArrayList<Wallet>()
     private val walletMutableLiveData = MutableLiveData<Wallet?>()
     private var lastLoadedWalletId: String? = null
 
     fun removeAllWalletsData() {
-        walletListener?.remove()
         allWallets.value = null
         walletList = ArrayList()
         walletMutableLiveData.value = null
@@ -29,121 +27,122 @@ class WalletsRepo {
 
     fun addWallet(wallet: Wallet): MutableLiveData<String> {
         val result = MutableLiveData<String>()
-        if (FirebaseAuth.getInstance().currentUser != null) {
-            DatabaseUtils.walletsRef.document(wallet.id ?: "").set(wallet)
-                .addOnSuccessListener {
-                    Log.d(TAG, "onSuccess: added wallet $wallet")
-                    result.value = "Success"
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = ApiServiceProvider.walletService.createWallet(wallet)
+                if (response.isSuccessful) {
+                    Log.d(TAG, "onSuccess: added wallet ${response.body()}")
+                    result.postValue("Success")
+                } else {
+                    val error = response.errorBody()?.string() ?: "Creation failed"
+                    Log.e(TAG, "addWallet: $error")
+                    result.postValue(error)
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "addWallet: ${e.message}", e)
+                result.postValue(e.message)
+            }
         }
         return result
     }
 
     fun loadWallet(walletId: String): MutableLiveData<Wallet?> {
         if (walletId.isEmpty()) {
-            val currentUser = FirebaseAuth.getInstance().currentUser
-            if (currentUser != null) {
-                DatabaseUtils.walletsRef
-                    .whereArrayContains("users", currentUser.uid)
-                    .orderBy("creation_date", Query.Direction.DESCENDING)
-                    .limit(1)
-                    .get()
-                    .addOnSuccessListener { snapshots ->
-                        if (snapshots.documents.isEmpty()) return@addOnSuccessListener
-                        val wallet = snapshots.documents[0].toObject(Wallet::class.java)
-                        if (wallet != null) {
-                            walletMutableLiveData.postValue(wallet)
-                            setListenerForWallet(wallet.id ?: "")
+            // Load the first/latest wallet for the current user
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val response = ApiServiceProvider.walletService.getUserWallets()
+                    if (response.isSuccessful) {
+                        val wallets = response.body() ?: emptyList()
+                        val latest = wallets.maxByOrNull { it.creation_date?.time ?: 0L }
+                        if (latest != null) {
+                            walletMutableLiveData.postValue(latest)
+                            lastLoadedWalletId = latest.id
                         }
                     }
-                    .addOnFailureListener { e -> Log.e(TAG, "onFailure: ", e) }
+                } catch (e: Exception) {
+                    Log.e(TAG, "loadWallet: ${e.message}", e)
+                }
             }
         } else {
-            setListenerForWallet(walletId)
+            if (lastLoadedWalletId == null || lastLoadedWalletId != walletId) {
+                lastLoadedWalletId = walletId
+                walletMutableLiveData.value = null
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        val response = ApiServiceProvider.walletService.getWallet(walletId)
+                        if (response.isSuccessful) {
+                            walletMutableLiveData.postValue(response.body())
+                        } else {
+                            Log.e(TAG, "loadWallet: ${response.errorBody()?.string()}")
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "loadWallet: ${e.message}", e)
+                    }
+                }
+            }
         }
         return walletMutableLiveData
     }
 
-    private fun setListenerForWallet(walletId: String) {
-        if (walletListener == null || lastLoadedWalletId == null || lastLoadedWalletId != walletId) {
-            lastLoadedWalletId = walletId
-            walletListener?.remove()
-            walletMutableLiveData.value = null
-            walletListener = DatabaseUtils.walletsRef.document(walletId)
-                .addSnapshotListener { value, error ->
-                    if (error != null || value == null) {
-                        Log.e(TAG, "getWallet: empty or: ", error)
-                    } else {
-                        val wallet = value.toObject(Wallet::class.java)
-                        if (wallet != null) {
-                            wallet.id = value.id
-                            walletMutableLiveData.postValue(wallet)
-                        }
-                    }
-                }
-        }
-    }
-
     fun getWallets(): MutableLiveData<ArrayList<Wallet>?> {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser != null) {
-            DatabaseUtils.walletsRef
-                .whereArrayContains("users", currentUser.uid)
-                .get()
-                .addOnSuccessListener { snapshots ->
-                    if (snapshots == null || snapshots.isEmpty) {
-                        Log.e(TAG, "getWallets: empty or null")
-                    } else {
-                        for (doc in snapshots) {
-                            val wallet = doc.toObject(Wallet::class.java)
-                            wallet.id = doc.id
-                            handleWalletEvent(wallet)
-                        }
-                        allWallets.value = walletList
-                    }
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = ApiServiceProvider.walletService.getUserWallets()
+                if (response.isSuccessful) {
+                    val wallets = response.body() ?: emptyList()
+                    walletList = ArrayList(wallets)
+                    allWallets.postValue(walletList)
+                } else {
+                    Log.e(TAG, "getWallets: ${response.errorBody()?.string()}")
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "getWallets: ${e.message}", e)
+            }
         }
         return allWallets
     }
 
-    private fun handleWalletEvent(wallet: Wallet) {
-        val index = walletList.indexOf(wallet)
-        if (index >= 0) {
-            walletList[index] = wallet
-        } else {
-            walletList.add(wallet)
-        }
-    }
-
     fun updateWallet(wallet: Wallet): MutableLiveData<Boolean> {
         val result = MutableLiveData<Boolean>()
-        if (FirebaseAuth.getInstance().currentUser != null) {
-            DatabaseUtils.walletsRef.document(wallet.id ?: "").set(wallet)
-                .addOnSuccessListener {
-                    Log.d(TAG, "onSuccess: updated wallet $wallet")
-                    result.value = true
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = ApiServiceProvider.walletService.updateWallet(
+                    wallet.id ?: "", wallet
+                )
+                if (response.isSuccessful) {
+                    Log.d(TAG, "onSuccess: updated wallet ${response.body()}")
+                    result.postValue(true)
+                } else {
+                    Log.e(TAG, "updateWallet: ${response.errorBody()?.string()}")
+                    result.postValue(false)
                 }
-                .addOnFailureListener { e ->
-                    Log.e(TAG, "onFailure: ", e)
-                    result.value = false
-                }
+            } catch (e: Exception) {
+                Log.e(TAG, "updateWallet: ${e.message}", e)
+                result.postValue(false)
+            }
         }
         return result
     }
 
     fun deleteWallet(walletId: String): MutableLiveData<Boolean> {
         val result = MutableLiveData<Boolean>()
-        if (FirebaseAuth.getInstance().currentUser != null) {
-            DatabaseUtils.walletsRef.document(walletId).delete()
-                .addOnSuccessListener {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = ApiServiceProvider.walletService.deleteWallet(walletId)
+                if (response.isSuccessful) {
                     val wallet = Wallet(id = walletId)
                     walletList.remove(wallet)
                     allWallets.postValue(walletList)
-                    result.value = true
+                    result.postValue(true)
+                } else {
+                    result.postValue(false)
                 }
-                .addOnFailureListener { result.value = false }
+            } catch (e: Exception) {
+                Log.e(TAG, "deleteWallet: ${e.message}", e)
+                result.postValue(false)
+            }
         }
         return result
     }
 }
-

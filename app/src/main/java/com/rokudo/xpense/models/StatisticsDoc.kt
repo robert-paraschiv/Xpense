@@ -1,6 +1,5 @@
 package com.rokudo.xpense.models
 
-import com.google.firebase.firestore.ServerTimestamp
 import java.util.Date
 
 data class StatisticsDoc(
@@ -10,7 +9,5 @@ data class StatisticsDoc(
     var transactions: MutableMap<String, Transaction>? = null,
     var transactionsByDay: Map<String, Map<String, Transaction>>? = null,
     var docPath: String? = null,
-    @ServerTimestamp
     var latestUpdateTime: Date? = null
 )
-

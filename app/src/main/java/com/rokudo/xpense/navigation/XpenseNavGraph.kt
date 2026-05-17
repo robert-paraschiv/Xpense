@@ -20,7 +20,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.google.firebase.auth.FirebaseAuth
 import com.rokudo.xpense.components.AdjustBalanceSheet
 import com.rokudo.xpense.components.CategoryPickerSheet
 import com.rokudo.xpense.components.WalletPickerSheet
@@ -203,6 +202,20 @@ private fun HomeDestination(navController: NavHostController, activityVmOwner: V
     val bankCur = balances?.balances?.firstOrNull()?.balanceAmount?.get("currency")
 
     val walletsList by walletsViewModel.loadWallets().observeAsState(arrayListOf())
+
+    // ─── Refresh data when returning from AddTransaction ───
+    val transactionChanged by navController.currentBackStackEntry
+        ?.savedStateHandle
+        ?.getLiveData<Boolean>("transaction_changed")
+        ?.observeAsState(false) ?: remember { mutableStateOf(false) }
+
+    LaunchedEffect(transactionChanged) {
+        if (transactionChanged && wallet?.id != null && wallet!!.id!!.isNotEmpty()) {
+            transactionViewModel.refreshData(wallet!!.id!!)
+            statisticsViewModel.refreshStatistics(wallet!!.id!!, Date())
+            navController.currentBackStackEntry?.savedStateHandle?.set("transaction_changed", false)
+        }
+    }
 
     // ─── Derived values computed once per data change, no extra state updates ───
     val recentTransactions = remember(stats) {
@@ -387,31 +400,10 @@ private fun SettingsDestination(navController: NavHostController, activityVmOwne
     val transactionViewModel: TransactionViewModel = viewModel(viewModelStoreOwner = activityVmOwner)
     val walletsViewModel: WalletsViewModel = viewModel(viewModelStoreOwner = activityVmOwner)
 
-    // Observe the current user reactively from Firestore
+    // Use in-memory current user from DatabaseUtils (populated by AuthRepository)
     var userName by remember { mutableStateOf(DatabaseUtils.currentUser?.name ?: "User") }
     var userPicUrl by remember { mutableStateOf(DatabaseUtils.currentUser?.pictureUrl) }
 
-    DisposableEffect(Unit) {
-        val firebaseUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
-        val phoneNumber = firebaseUser?.phoneNumber
-        val registration = if (phoneNumber != null) {
-            DatabaseUtils.usersRef.document(phoneNumber)
-                .addSnapshotListener { snapshot, _ ->
-                    if (snapshot != null && snapshot.exists()) {
-                        val user = snapshot.toObject(com.rokudo.xpense.models.User::class.java)
-                        if (user != null) {
-                            userName = user.name ?: "User"
-                            userPicUrl = user.pictureUrl
-                            // Keep static reference in sync
-                            user.uid = firebaseUser.uid
-                            user.phoneNumber = phoneNumber
-                            DatabaseUtils.currentUser = user
-                        }
-                    }
-                }
-        } else null
-        onDispose { registration?.remove() }
-    }
 
     // Re-load invitations whenever the user becomes available
     val invitationsLiveData = remember(userName) { invitesViewModel.loadInvitations() }
@@ -424,8 +416,7 @@ private fun SettingsDestination(navController: NavHostController, activityVmOwne
     val walletsList by walletsViewModel.loadWallets().observeAsState(arrayListOf())
     var showWalletManager by remember { mutableStateOf(false) }
 
-    val firebaseUser = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser }
-    val userPhoneNumber = firebaseUser?.phoneNumber
+    val userPhoneNumber = DatabaseUtils.currentUser?.phoneNumber
 
     val galleryLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -447,7 +438,8 @@ private fun SettingsDestination(navController: NavHostController, activityVmOwne
             transactionViewModel.removeAllData()
             walletsViewModel.removeAllData()
             PrefsUtils.setSelectedWalletId(context, "")
-            FirebaseAuth.getInstance().signOut()
+            // Logout via MainActivity which has access to AuthRepository
+            (context as? com.rokudo.xpense.activities.MainActivity)?.logout()
         },
         onProfilePictureClick = {
             val intent = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
@@ -503,7 +495,7 @@ private fun uploadProfilePicture(context: android.content.Context, imageUri: and
         bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 50, baos)
         val data = baos.toByteArray()
 
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val userId = DatabaseUtils.currentUser?.uid ?: return
         val storageRef = DatabaseUtils.userPicturesRef.child("$userId.jpg")
 
         storageRef.putBytes(data)
@@ -561,7 +553,12 @@ private fun AddTransactionDestination(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is AddTransactionEffect.NavigateBack -> navController.popBackStack()
+                is AddTransactionEffect.NavigateBack -> {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("transaction_changed", true)
+                    navController.popBackStack()
+                }
                 is AddTransactionEffect.ShowToast -> Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 is AddTransactionEffect.ShowCategoryDialog -> showCategoryPicker = true
                 is AddTransactionEffect.ShowDeleteConfirmation -> {
@@ -739,8 +736,18 @@ private fun AnalyticsDestination(
         income
     }
 
+    // ─── Prediction API data ───
+    val anomaliesLiveData = remember(walletId) { statisticsViewModel.getAnomalies() }
+    val anomalies by anomaliesLiveData.observeAsState()
+
+    val forecastLiveData = remember(walletId) { statisticsViewModel.getNextMonthForecast(walletId) }
+    val forecast by forecastLiveData.observeAsState()
+
+    val projectionLiveData = remember(walletId) { statisticsViewModel.getEndOfMonthProjection(walletId) }
+    val projection by projectionLiveData.observeAsState()
+
     // ─── Build smart insights ───
-    val insights = remember(statisticsDoc, prevStatisticsDoc, totalSpent, totalIncome, dailyAverage) {
+    val insights = remember(statisticsDoc, prevStatisticsDoc, totalSpent, totalIncome, dailyAverage, anomalies, forecast, projection) {
         val list = mutableListOf<com.rokudo.xpense.models.InsightItem>()
         val currency = wallet?.currency ?: "$"
         val df = java.text.DecimalFormat("#,##0")
@@ -870,7 +877,56 @@ private fun AnalyticsDestination(
             ))
         }
 
-        list.take(6)
+        // 7. Anomaly alerts from backend
+        anomalies?.firstOrNull()?.let { anomaly ->
+            val severity = anomaly.severity ?: "LOW"
+            val color = when (severity) {
+                "HIGH" -> com.rokudo.xpense.ui.theme.ExpenseRed
+                "MEDIUM" -> com.rokudo.xpense.ui.theme.Secondary50
+                else -> com.rokudo.xpense.ui.theme.Secondary50
+            }
+            list.add(com.rokudo.xpense.models.InsightItem(
+                icon = Icons.Filled.Warning,
+                value = "${anomaly.category ?: "Spending"}",
+                label = "unusual spending",
+                accentColor = color,
+                type = if (severity == "HIGH") com.rokudo.xpense.models.InsightType.NEGATIVE
+                       else com.rokudo.xpense.models.InsightType.NEUTRAL
+            ))
+        }
+
+        // 8. Next month forecast from backend
+        forecast?.let { fc ->
+            val estimate = fc.pointEstimate ?: 0.0
+            if (estimate > 0) {
+                list.add(com.rokudo.xpense.models.InsightItem(
+                    icon = Icons.Filled.DateRange,
+                    value = "$currency${df.format(estimate)}",
+                    label = "next month forecast",
+                    accentColor = com.rokudo.xpense.ui.theme.Secondary50,
+                    type = com.rokudo.xpense.models.InsightType.NEUTRAL
+                ))
+            }
+        }
+
+        // 9. End of month projection from backend
+        projection?.let { proj ->
+            val blended = proj.blendedProjection ?: 0.0
+            if (blended > 0 && totalSpent > 0) {
+                val projChange = ((blended - totalSpent) / totalSpent * 100).toInt()
+                list.add(com.rokudo.xpense.models.InsightItem(
+                    icon = Icons.Filled.Info,
+                    value = "$currency${df.format(blended)}",
+                    label = "projected EOM",
+                    accentColor = if (projChange > 20) com.rokudo.xpense.ui.theme.ExpenseRed
+                                  else com.rokudo.xpense.ui.theme.Secondary50,
+                    type = if (projChange > 20) com.rokudo.xpense.models.InsightType.NEGATIVE
+                           else com.rokudo.xpense.models.InsightType.NEUTRAL
+                ))
+            }
+        }
+
+        list.take(8)
     }
 
     AnalyticsScreen(

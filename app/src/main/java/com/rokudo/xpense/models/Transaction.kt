@@ -1,5 +1,6 @@
 package com.rokudo.xpense.models
 
+import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 import java.text.DecimalFormat
 import java.util.Date
@@ -10,11 +11,13 @@ data class Transaction(
     var type: String? = null,
     var category: String? = null,
     var user_id: String? = null,
+    @SerializedName("user_name")
     var userName: String? = null,
     var title: String? = null,
     var amount: Double? = null,
     var currency: String? = null,
     var date: Date? = null,
+    @SerializedName("pic_url")
     var picUrl: String? = null,
     var isCashTransaction: Boolean? = null,
     var alreadyAdded: Boolean? = null

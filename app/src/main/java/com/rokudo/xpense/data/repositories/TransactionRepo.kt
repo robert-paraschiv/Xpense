@@ -2,10 +2,11 @@ package com.rokudo.xpense.data.repositories
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.Query
+import com.rokudo.xpense.data.api.ApiServiceProvider
 import com.rokudo.xpense.models.Transaction
-import com.rokudo.xpense.utils.DatabaseUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
 
 class TransactionRepo {
@@ -14,8 +15,6 @@ class TransactionRepo {
         val instance by lazy { TransactionRepo() }
     }
 
-    private var transactionListener: ListenerRegistration? = null
-    private var latestTransListener: ListenerRegistration? = null
     private val allTransactionList: MutableLiveData<List<Transaction>?> = MutableLiveData<List<Transaction>?>()
     private val storedTransactionList = mutableListOf<Transaction>()
     private val latestTransaction: MutableLiveData<Transaction?> = MutableLiveData<Transaction?>()
@@ -24,8 +23,6 @@ class TransactionRepo {
     private var storedWalletId: String? = null
 
     fun removeAllTransactionsData() {
-        transactionListener?.remove()
-        latestTransListener?.remove()
         allTransactionList.value = null
         storedTransactionList.clear()
         addTransactionStatus.value = null
@@ -41,89 +38,187 @@ class TransactionRepo {
         }
         val end = calendar.time
 
-        transactionListener?.remove()
-        transactionListener = DatabaseUtils.getTransactionsRef(walletId)
-            .whereGreaterThan("date", startDate)
-            .whereLessThan("date", end)
-            .orderBy("date", Query.Direction.DESCENDING)
-            .addSnapshotListener { value, error ->
-                if (error != null || value == null || value.isEmpty) {
-                    Log.e(TAG, "loadTransactions: null or error: ", error)
-                    allTransactionList.value = emptyList()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = ApiServiceProvider.transactionService.getWalletTransactions(walletId)
+                if (response.isSuccessful) {
+                    val transactions = response.body() ?: emptyList()
+                    // Filter by date range client-side
+                    val filtered = transactions.filter { t ->
+                        val date = t.date
+                        date != null && date.after(startDate) && date.before(end)
+                    }.sortedByDescending { it.date }
+
+                    latestTransaction.postValue(if (filtered.isEmpty()) Transaction() else filtered[0])
+                    allTransactionList.postValue(filtered)
                     storedTransactionList.clear()
-                    latestTransaction.value = Transaction()
+                    storedTransactionList.addAll(filtered)
                 } else {
-                    val list = value.documents.mapNotNull { doc ->
-                        doc.toObject(Transaction::class.java)?.also { it.id = doc.id }
-                    }
-                    latestTransaction.value = if (list.isEmpty()) Transaction() else list[0]
-                    allTransactionList.value = list
+                    Log.e(TAG, "loadTransactions: ${response.errorBody()?.string()}")
+                    allTransactionList.postValue(emptyList())
                     storedTransactionList.clear()
-                    storedTransactionList.addAll(list)
+                    latestTransaction.postValue(Transaction())
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "loadTransactions: ${e.message}", e)
+                allTransactionList.postValue(emptyList())
+                storedTransactionList.clear()
+                latestTransaction.postValue(Transaction())
             }
+        }
         return allTransactionList
     }
 
     fun addTransaction(transaction: Transaction): MutableLiveData<String?> {
-        DatabaseUtils.getTransactionsRef(transaction.walletId ?: "").document(transaction.id ?: "")
-            .set(transaction)
-            .addOnSuccessListener { addTransactionStatus.value = "Success" }
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = ApiServiceProvider.transactionService.createTransaction(
+                    transaction.walletId ?: "",
+                    transaction
+                )
+                if (response.isSuccessful) {
+                    addTransactionStatus.postValue("Success")
+                } else {
+                    val error = response.errorBody()?.string() ?: "Creation failed"
+                    Log.e(TAG, "addTransaction: $error")
+                    addTransactionStatus.postValue(error)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "addTransaction: ${e.message}", e)
+                addTransactionStatus.postValue(e.message)
+            }
+        }
         return addTransactionStatus
     }
 
     fun loadLatestTransaction(walletId: String): MutableLiveData<Transaction?> {
-        if (latestTransListener == null || storedWalletId == null || storedWalletId != walletId) {
-            latestTransListener?.remove()
+        if (storedWalletId == null || storedWalletId != walletId) {
             storedWalletId = walletId
-            latestTransListener = DatabaseUtils.getTransactionsRef(walletId)
-                .orderBy("date", Query.Direction.DESCENDING)
-                .limit(1)
-                .addSnapshotListener { value, _ ->
-                    if (value == null || value.isEmpty) return@addSnapshotListener
-                    val transaction = value.documents[0].toObject(Transaction::class.java)
-                        ?: return@addSnapshotListener
-                    latestTransaction.value = transaction
-                }
+            fetchLatestTransaction(walletId)
         }
         return latestTransaction
     }
 
-    fun loadTransactionsDateInterval(walletId: String, start: Date, end: Date): MutableLiveData<List<Transaction>> {
-        val data = MutableLiveData<List<Transaction>>()
-        DatabaseUtils.getTransactionsRef(walletId)
-            .whereGreaterThan("date", start)
-            .whereLessThan("date", end)
-            .orderBy("date", Query.Direction.DESCENDING)
-            .get()
-            .addOnSuccessListener { value ->
-                if (value == null || value.isEmpty) {
-                    data.value = emptyList()
+    /**
+     * Force refresh all transaction data for the current wallet.
+     * Call this after adding/updating/deleting a transaction.
+     */
+    fun refreshData(walletId: String) {
+        storedWalletId = walletId
+        fetchLatestTransaction(walletId)
+    }
+
+    private fun fetchLatestTransaction(walletId: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Try the dedicated /latest endpoint first
+                val response = ApiServiceProvider.statisticsService.getLatestTransaction(walletId)
+                if (response.isSuccessful) {
+                    latestTransaction.postValue(response.body())
                 } else {
-                    data.value = value.documents.mapNotNull { doc ->
-                        doc.toObject(Transaction::class.java)?.also { it.id = doc.id }
+                    // Fallback: fetch all and pick the latest
+                    val fallback = ApiServiceProvider.transactionService.getWalletTransactions(walletId)
+                    if (fallback.isSuccessful) {
+                        val transactions = fallback.body() ?: emptyList()
+                        val latest = transactions.maxByOrNull { it.date ?: Date(0) }
+                        latestTransaction.postValue(latest)
                     }
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "fetchLatestTransaction: ${e.message}", e)
             }
+        }
+    }
+
+    fun loadTransactionsDateInterval(walletId: String, start: Date, end: Date): MutableLiveData<List<Transaction>> {
+        val data = MutableLiveData<List<Transaction>>()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = ApiServiceProvider.transactionService.getWalletTransactions(walletId)
+                if (response.isSuccessful) {
+                    val transactions = response.body() ?: emptyList()
+                    val filtered = transactions.filter { t ->
+                        val date = t.date
+                        date != null && date.after(start) && date.before(end)
+                    }.sortedByDescending { it.date }
+                    data.postValue(filtered)
+                } else {
+                    data.postValue(emptyList())
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "loadTransactionsDateInterval: ${e.message}", e)
+                data.postValue(emptyList())
+            }
+        }
         return data
     }
 
     fun getStoredTransactionList(): List<Transaction> = storedTransactionList
 
+    /**
+     * Load the N most recent transactions using the dedicated /recent endpoint.
+     */
+    fun loadRecentTransactions(walletId: String, limit: Int = 5): MutableLiveData<List<Transaction>> {
+        val data = MutableLiveData<List<Transaction>>()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = ApiServiceProvider.statisticsService.getRecentTransactions(walletId, limit)
+                if (response.isSuccessful) {
+                    data.postValue(response.body() ?: emptyList())
+                } else {
+                    // Fallback: fetch all and take the most recent
+                    val fallback = ApiServiceProvider.transactionService.getWalletTransactions(walletId)
+                    if (fallback.isSuccessful) {
+                        val recent = (fallback.body() ?: emptyList())
+                            .sortedByDescending { it.date }
+                            .take(limit)
+                        data.postValue(recent)
+                    } else {
+                        data.postValue(emptyList())
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "loadRecentTransactions: ${e.message}", e)
+                data.postValue(emptyList())
+            }
+        }
+        return data
+    }
+
     fun updateTransaction(transaction: Transaction): MutableLiveData<String?> {
-        DatabaseUtils.getTransactionsRef(transaction.walletId ?: "").document(transaction.id ?: "")
-            .set(transaction)
-            .addOnSuccessListener { updateTransactionStatus.value = "Success" }
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = ApiServiceProvider.transactionService.updateTransaction(
+                    transaction.walletId ?: "",
+                    transaction.id ?: "",
+                    transaction
+                )
+                if (response.isSuccessful) {
+                    updateTransactionStatus.postValue("Success")
+                } else {
+                    val error = response.errorBody()?.string() ?: "Update failed"
+                    Log.e(TAG, "updateTransaction: $error")
+                    updateTransactionStatus.postValue(error)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "updateTransaction: ${e.message}", e)
+                updateTransactionStatus.postValue(e.message)
+            }
+        }
         return updateTransactionStatus
     }
 
     fun deleteTransaction(transactionId: String, walletId: String): MutableLiveData<Boolean> {
         val result = MutableLiveData<Boolean>()
-        DatabaseUtils.getTransactionsRef(walletId)
-            .document(transactionId)
-            .delete()
-            .addOnCompleteListener { task -> result.value = task.isSuccessful }
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = ApiServiceProvider.transactionService.deleteTransaction(walletId, transactionId)
+                result.postValue(response.isSuccessful)
+            } catch (e: Exception) {
+                Log.e(TAG, "deleteTransaction: ${e.message}", e)
+                result.postValue(false)
+            }
+        }
         return result
     }
 }
-

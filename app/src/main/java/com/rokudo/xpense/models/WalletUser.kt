@@ -1,6 +1,6 @@
 package com.rokudo.xpense.models
 
-import com.google.firebase.auth.FirebaseAuth
+import com.rokudo.xpense.utils.DatabaseUtils
 import java.io.Serializable
 
 data class WalletUser(
@@ -20,13 +20,13 @@ data class WalletUser(
     companion object {
         fun getOtherUserProfilePic(walletUsers: List<WalletUser>?): String? {
             if (walletUsers == null) return null
-            val currentUid = FirebaseAuth.getInstance().currentUser?.uid ?: return null
+            val currentUid = DatabaseUtils.currentUser?.uid ?: return null
             return walletUsers.firstOrNull { it.userId != currentUid }?.userPic
         }
 
         fun getOtherWalletUser(walletUsers: List<WalletUser>?): WalletUser? {
             if (walletUsers == null) return null
-            val currentUid = FirebaseAuth.getInstance().currentUser?.uid ?: return null
+            val currentUid = DatabaseUtils.currentUser?.uid ?: return null
             return walletUsers.firstOrNull { it.userId != currentUid }
         }
     }

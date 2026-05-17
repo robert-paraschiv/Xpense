@@ -8,7 +8,6 @@ import com.rokudo.xpense.data.repositories.TransactionRepo
 import com.rokudo.xpense.models.ExpenseCategory
 import com.rokudo.xpense.models.Transaction
 import com.rokudo.xpense.utils.CategoriesUtil
-import com.rokudo.xpense.utils.DatabaseUtils
 import com.rokudo.xpense.utils.TransactionUtils
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -180,14 +179,15 @@ class AddTransactionViewModel(application: Application) : AndroidViewModel(appli
 
         _state.update { it.copy(isLoading = true) }
 
+        val currentUser = com.rokudo.xpense.utils.DatabaseUtils.currentUser
         val transaction = Transaction().apply {
             walletId = currentState.walletId
             this.amount = currentState.amount.toDouble()
             currency = currentState.currency
             this.date = currentState.date
-            picUrl = DatabaseUtils.currentUser?.pictureUrl
-            user_id = DatabaseUtils.currentUser?.uid ?: ""
-            userName = DatabaseUtils.currentUser?.name ?: ""
+            picUrl = currentUser?.pictureUrl
+            user_id = currentUser?.uid ?: ""
+            userName = currentUser?.name ?: ""
 
             this.category = when(type) {
                  Transaction.INCOME_TYPE -> "Income"
@@ -203,8 +203,8 @@ class AddTransactionViewModel(application: Application) : AndroidViewModel(appli
         val original = currentState.originalTransaction
 
         if (original == null) {
-             val documentReference = DatabaseUtils.getTransactionsRef(currentState.walletId).document()
-             transaction.id = documentReference.id
+             // Server will generate the ID
+             transaction.id = UUID.randomUUID().toString()
 
              val liveData = repo.addTransaction(transaction)
              var observer: Observer<String>? = null
@@ -222,7 +222,7 @@ class AddTransactionViewModel(application: Application) : AndroidViewModel(appli
         } else {
             if (TransactionUtils.isTransactionDifferent(original, transaction)) {
                 transaction.id = if (original.id == null || original.id == "NOTPROVIDED") {
-                    DatabaseUtils.getTransactionsRef(currentState.walletId).document().id
+                    UUID.randomUUID().toString()
                 } else {
                     original.id
                 }

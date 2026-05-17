@@ -26,11 +26,16 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
 
     fun getStoredTransactionList(): List<Transaction> = repo.getStoredTransactionList()
 
+    fun loadRecentTransactions(walletId: String, limit: Int = 5): MutableLiveData<List<Transaction>> =
+        repo.loadRecentTransactions(walletId, limit)
+
     fun updateTransaction(transaction: Transaction): MutableLiveData<String?> =
         repo.updateTransaction(transaction)
 
     fun deleteTransaction(transactionId: String, walletId: String): MutableLiveData<Boolean> =
         repo.deleteTransaction(transactionId, walletId)
+
+    fun refreshData(walletId: String) = repo.refreshData(walletId)
 
     fun removeAllData() = repo.removeAllTransactionsData()
 }

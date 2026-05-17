@@ -6,6 +6,40 @@ import com.rokudo.xpense.models.BAccount
 
 object PrefsUtils {
     private const val PREFS_NAME = "PREFS_NAME"
+    private const val KEY_JWT_TOKEN = "jwt_token"
+    private const val KEY_REFRESH_TOKEN = "refresh_token"
+
+    // ── JWT Auth Token Management ──
+
+    fun saveJwtToken(context: Context, token: String) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().putString(KEY_JWT_TOKEN, token).apply()
+    }
+
+    fun getJwtToken(context: Context): String? {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(KEY_JWT_TOKEN, null)
+    }
+
+    fun saveRefreshToken(context: Context, token: String) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit().putString(KEY_REFRESH_TOKEN, token).apply()
+    }
+
+    fun getRefreshToken(context: Context): String? {
+        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getString(KEY_REFRESH_TOKEN, null)
+    }
+
+    fun clearAuthTokens(context: Context) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .remove(KEY_JWT_TOKEN)
+            .remove(KEY_REFRESH_TOKEN)
+            .apply()
+    }
+
+    // ── Existing methods ──
 
     fun saveBAccountToPrefs(context: Context, bAccount: BAccount) {
         val settings = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -40,4 +74,3 @@ object PrefsUtils {
             .edit().putInt(id, value).apply()
     }
 }
-

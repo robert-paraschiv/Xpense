@@ -3,7 +3,6 @@ package com.rokudo.xpense.activities
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -16,16 +15,18 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.google.firebase.FirebaseApp
-import com.google.firebase.auth.FirebaseAuth
+import com.rokudo.xpense.data.repositories.AuthRepository
 import com.rokudo.xpense.data.viewmodels.BankApiViewModel
 import com.rokudo.xpense.models.BAccount
-import com.rokudo.xpense.models.User
 import com.rokudo.xpense.navigation.XpenseNavGraph
 import com.rokudo.xpense.ui.theme.XpenseTheme
 import com.rokudo.xpense.utils.DatabaseUtils
 import com.rokudo.xpense.utils.GsonHelper
 import com.rokudo.xpense.utils.PrefsUtils
 import com.rokudo.xpense.workmanager.ApiSyncWorker
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
@@ -34,13 +35,24 @@ class MainActivity : ComponentActivity() {
         private const val TAG = "MainActivity"
     }
 
-    private lateinit var authListener: FirebaseAuth.AuthStateListener
     private lateinit var bankApiViewModel: BankApiViewModel
+    private lateinit var authRepository: AuthRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         FirebaseApp.initializeApp(this)
+
+        authRepository = AuthRepository(applicationContext)
+
+        // Check if user is authenticated (JWT token exists)
+        if (!authRepository.restoreSession()) {
+            navigateToLogin()
+            return
+        }
+
+        // Load user profile from backend
+        loadCurrentUser()
 
         val periodicWorkRequest = PeriodicWorkRequest.Builder(
             ApiSyncWorker::class.java, 15, TimeUnit.MINUTES
@@ -62,8 +74,6 @@ class MainActivity : ComponentActivity() {
 
         bankApiViewModel = ViewModelProvider(this)[BankApiViewModel::class.java]
 
-        setupFirebaseAuth()
-        loadCurrentUser()
         handleIntent(intent)
 
         enableEdgeToEdge()
@@ -94,21 +104,40 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun loadCurrentUser() {
-        val firebaseUser = FirebaseAuth.getInstance().currentUser ?: return
-        val phoneNumber = firebaseUser.phoneNumber ?: return
-        DatabaseUtils.usersRef.document(phoneNumber)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null || snapshot == null || !snapshot.exists()) {
-                    Log.d(TAG, "loadCurrentUser: user doc not found or error")
-                    return@addSnapshotListener
-                }
-                val user = snapshot.toObject(User::class.java)
-                if (user != null) {
-                    user.uid = firebaseUser.uid
-                    user.phoneNumber = phoneNumber
-                    DatabaseUtils.currentUser = user
+        CoroutineScope(Dispatchers.Main).launch {
+            val result = authRepository.loadCurrentUser()
+            result.onFailure { e ->
+                Log.e(TAG, "loadCurrentUser failed: ${e.message}")
+                // Token may be expired — try refresh
+                val refreshResult = authRepository.refreshToken()
+                refreshResult.onSuccess {
+                    // Retry loading user with new token
+                    val retryResult = authRepository.loadCurrentUser()
+                    retryResult.onFailure {
+                        Log.e(TAG, "loadCurrentUser retry failed, logging out")
+                        authRepository.logout()
+                        navigateToLogin()
+                    }
+                }.onFailure {
+                    Log.e(TAG, "Token refresh failed, logging out")
+                    authRepository.logout()
+                    navigateToLogin()
                 }
             }
+        }
+    }
+
+    private fun navigateToLogin() {
+        val loginIntent = Intent(this, LoginActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        startActivity(loginIntent)
+        finish()
+    }
+
+    fun logout() {
+        authRepository.logout()
+        navigateToLogin()
     }
 
     private fun handleIntent(intent: Intent?) {
@@ -167,31 +196,6 @@ class MainActivity : ComponentActivity() {
             DatabaseUtils.walletsRef.document(walletId)
                 .update("bAccount", bAccount)
                 .addOnSuccessListener { Log.d(TAG, "Updated wallet with bank account") }
-        }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        FirebaseAuth.getInstance().addAuthStateListener(authListener)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        FirebaseAuth.getInstance().removeAuthStateListener(authListener)
-    }
-
-    private fun setupFirebaseAuth() {
-        authListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-            val user = firebaseAuth.currentUser
-            if (user == null) {
-                Log.d(TAG, "onAuthStateChanged: signed_out")
-                Toast.makeText(this, "Not logged in", Toast.LENGTH_SHORT).show()
-                val loginIntent = Intent(this, LoginActivity::class.java).apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                }
-                startActivity(loginIntent)
-                finish()
-            }
         }
     }
 }
